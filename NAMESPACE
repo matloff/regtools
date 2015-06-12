@@ -1,0 +1,3 @@
+
+export(knnest, meany, vary, loclin) 
+

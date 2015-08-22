@@ -5,23 +5,23 @@
 #
 #  xydata: matrix or data frame of (X,Y) data, 
 #          Y in last column
-#  predpts:  matrix or data frame of X values at
-#              which to estimate the regression ftn
 #   k:  number of nearest neighbors
+#  predpts:  matrix or data frame of X values at
+#            which to estimate the regression ftn
 #   scalefirst: call scale() on the data first
 #   nearf: function to apply to the nearest neighbors 
 #          of a point
 #
 # value: estimated reg. ftn. at the given X values predpts
 
-knnest <- function(xydata,predpts=xydata[,-ncol(xydata)],
-   k,scalefirst=FALSE,nearf=meany)
+knnest <- function(xydata,k,predpts=xydata[,-ncol(xydata)],
+   scalefirst=FALSE,nearf=meany)
 {  require(FNN)
+   ycol <- ncol(xydata)  # where is Y?
    if (is.null(predpts))
-      predpts <- xydata[,-ncol(xydata),drop=FALSE]
+      predpts <- xydata[,-ycol,drop=FALSE]
    if (is.vector(predpts))
       predpts <- matrix(predpts,ncol=1)
-   ycol <- ncol(xydata)  # where is Y?
    # extract the X and Y data
    x <- xydata[,-ycol,drop = F]
    y <- xydata[,ycol]

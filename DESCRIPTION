@@ -7,4 +7,4 @@ Depends: FNN
 Description: Tools for linear, nonlinear and nonparametric regression
              and classification. Nonlinear regression with Eickert-White
              method for dealing with heteroscedasticity; k-NN for
-             general dimension and general descriptive function.
+             general dimension and general descriptive functions.

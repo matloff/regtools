@@ -16,6 +16,7 @@
 #               center and scale values
 #   nearf: function to apply to the nearest neighbors 
 #          of a point
+#   outfile: if non-NULL, save knnout, including attributes, to this file
 #
 # value: cbind() of X values in xydata and estimated reg. ftn. at those
 #        values, contains 'center' and 'scale' attributes if scalefirst
@@ -46,12 +47,27 @@ knnest <- function(xydata,k,predpts=xydata[,-ncol(xydata),drop=FALSE],
    knnout <- cbind(x,regest)
    attr(knnout,'center') <- attr(x,'scaled:center')
    attr(knnout,'scale') <- attr(x,'scaled:scale')
+   if (!is.null(outfile)) save(knnout,file=outfile)
    knnout
 }
 
-# prediction
+# prediction:
 
-# knnpred
+# arguments:
+
+# knnout:  output from knnest(); if string, a file name, else matrix
+# predpts:  matrix/data frame of X values at which to predict Y
+
+knnpred <- function(knnout,predpts) {
+   if (is.character(knnout)) load(knnout)
+   p1 <- ncol(knnout)
+   p <- p1 - 1
+   knnoutx <- knnout[,-p1]
+   knnouty <- knnout[,p1]
+   tmp <- get.knnx(knnoutx,predpts,1)
+   idx <- tmp$nn.index
+   knnouty[idx]
+}
 
 # find mean of Y on the data z, Y in last column, and predict at xnew
 meany <- function(predpt,nearxy) {

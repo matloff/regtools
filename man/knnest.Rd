@@ -50,8 +50,18 @@ knnpred(knnout,predpts)
 function values.
 }
 
-% \examples{
-% }
+\examples{
+data(prgeng)
+pe <- prgeng
+# dummies for MS, PhD
+pe$ms <- as.integer(pe$educ == 14)
+pe$phd <- as.integer(pe$educ == 16)
+# computer occupations only
+pecs <- pe[pe$occ >= 100 & pe$occ <= 109,]
+pecs1 <- pecs[,c(1,7,9,12,13,8)]
+# predict wage income
+zout <- knnest(pecs1,50,scalefirst='default'))
+}
 
 \author{
 Norm Matloff

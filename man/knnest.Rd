@@ -1,22 +1,22 @@
-\name{knnest,meany,vary,loclin}
+\name{knnest,meany,vary,loclin,knnpred}
 \alias{knnest}
+\alias{knnpred}
 \alias{meany}
 \alias{vary}
 \alias{loclin}
 
-\title{Regression and Classification Tools}
+\title{Nonparametric Regression and Classification}
 
 \description{
-Tools for linear, nonlinear and nonparametric regression/
-classification modeling and prediction.
+Full set of tools for k-NN regression and classification.
 }
 
 \usage{
-knnest(xydata,k,predpts=xydata[,-ncol(xydata)],
-   scalefirst=FALSE,nearf=meany)
+knnest(xydata,k,scalefirst=NULL,nearf=meany,outfile=NULL)
 meany(predpt,nearxy) 
 vary(predpt,nearxy) 
 loclin(predpt,nearxy) 
+knnpred(knnout,predpts) 
 }
 
 \arguments{
@@ -27,10 +27,16 @@ loclin(predpt,nearxy)
      predicted.}
   \item{predpt}{One point on which to predict, e.g. a row in
      \code{predpts}.}
-  \item{scalefirst}{If TRUE, run \code{scale} on the data first.} 
+  \item{scalefirst}{If non-NULL, scale the X data first, using
+     \code{scale}. If \code{scalefirst} is 'default', use the
+     default for \code{scale}; otherwise, \code{scalefirst} is a
+     2-element R list, consisting of a centers vector and a scales
+     vector.}
   \item{nearf}{Function to apply to the nearest neighbors of a point..}
      e.g. R formula, \code{data} specification.}
      \code{prcomp}.}
+  \item{outfile}{File to save the output of \code{knnest} to, including
+     attributes if any.
 }
 
 \details{

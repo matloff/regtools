@@ -22,8 +22,7 @@
 #        values, contains 'center' and 'scale' attributes if scalefirst
 #        is non-NULL
 
-knnest <- function(xydata,k,predpts=xydata[,-ncol(xydata),drop=FALSE],
-   scalefirst=NULL,nearf=meany,outfile=NULL)
+knnest <- function(xydata,k,scalefirst=NULL,nearf=meany,outfile=NULL)
 {  require(FNN)
    ycol <- ncol(xydata)  # where is Y?
    # extract the X and Y data

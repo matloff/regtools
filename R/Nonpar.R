@@ -71,7 +71,7 @@ knnpred <- function(knnout,predpts) {
    if (!is.null(attr(knnout,'center'))) {
       ctr <- attr(knnout,'center')
       scl <- attr(knnout,'scale')
-      knnoutx <- scale(predpts,center=ctr,scale=scl)
+      predpts <- scale(predpts,center=ctr,scale=scl)
    }
    tmp <- get.knnx(knnoutx,predpts,1)
    idx <- tmp$nn.index

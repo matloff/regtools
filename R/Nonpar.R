@@ -1,4 +1,7 @@
 
+# use knnest() to estimate the regression function values; send output
+# to knnpred() to predict
+
 ###########################  k-NN  ###############################
 
 # k-NN estimation and prediction
@@ -33,7 +36,7 @@ knnest <- function(xydata,k,scalefirst=NULL,nearf=meany,outfile=NULL)
       if (is.character(sf)) {
          x <- scale(x) 
       } else
-         x <- scale(x,center=sf[1],scale=sf[2])
+         x <- scale(x,center=sf[[1]],scale=sf[[2]])
       xydata <- cbind(x,y)
    }
    tmp <- get.knnx(data=x, query=x, k=k)
@@ -63,6 +66,13 @@ knnpred <- function(knnout,predpts) {
    p <- p1 - 1
    knnoutx <- knnout[,-p1]
    knnouty <- knnout[,p1]
+   if (is.vector(predpts)) 
+      predpts <- matrix(predpts,nrow=1)
+   if (!is.null(attr(knnout,'center'))) {
+      ctr <- attr(knnout,'center')
+      scl <- attr(knnout,'scale')
+      knnoutx <- scale(predpts,center=ctr,scale=scl)
+   }
    tmp <- get.knnx(knnoutx,predpts,1)
    idx <- tmp$nn.index
    knnouty[idx]
@@ -94,16 +104,4 @@ matrixtolist <- function (rc, m)
     }
     else Map(function(colnum) m[, colnum], 1:ncol(m))
 }
-
-# sgm <- 1
-# a <- 5
-# b <- 8
-# ones <- matrix(rep(1,p),ncol=1)
-# z <- matrix(nrow = n, ncol = p1)
-# z[,1:p] <- runif(n*p,min=a,max=b)
-# z[,p1] <- z[,1:p] %*% ones + sgm * runif(n,min = -0.5,max = 0.5)
-# zout <- knnest(z,50,scalefirst='default')
-# plot(z[,3],zout[,3]) # incorrect flattening at the 2 ends
-# zout <- knnest(z,50,scalefirst='default',nearf=loclin)
-# plot(z[,3],zout[,3]) # 
 

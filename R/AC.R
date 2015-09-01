@@ -61,6 +61,7 @@ vcov.lmac <- function(lmacout) {
 # for testing purposes; randomly replacing each element of matrix m by 
 
 makeNA <- function(m,probna) {
+   if (!is.matrix(m)) stop('m must be a matrix')
    n <- length(m)
    nmiss <- rbinom(1,n,probna)
    naidxs <- sample(1:n,nmiss,replace=FALSE)

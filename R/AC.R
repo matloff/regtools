@@ -12,8 +12,13 @@
 #         estimated covariance matrix of the estimated vector of
 #         regression coefficiengts
 
-# value:  an object of class 'lmac', with components 'coefficients' and
-# 'cov', i.e. beta-hat and its estimated covariance matrix
+# value:  an object of class 'lmac', with components 
+#
+#         coefficients:  estimated regression coefficients
+#         fitted.values:  est. regression ftn. values at 
+#                         complete cases (but with full coefs.)
+#         residuals:  residuals at complete cases (but with full coefs.)
+#         cov:  optional est. covariance matrix of the coefs.
 
 lmac <- function(xy,nboot=0) {
    p1 <- ncol(xy)
@@ -25,9 +30,14 @@ lmac <- function(xy,nboot=0) {
    lmacout <- list()
    class(lmacout) <- 'lmac'
    # bhat0 <- mean(y) - colMeans(x) %*% bhat
-   bhat0 <- colMeans(xy,na.rm=TRUE) %*% c(bhat,-1)
+   bhat0 <- colMeans(xy,na.rm=TRUE) %*% c(-bhat,1)
    bhat <- c(bhat0,bhat)
    lmacout$coefficients <- bhat
+   xycc <- na.omit(xy)
+   yhat <- cbind(1,xycc[,-p1]) %*% bhat
+   lmacout$fitted.values <- yhat
+   lmacout$residuals <- xycc[,p1] - yhat
+   lmacout$r2 <- (cor(yhat,xycc[,p1]))^2
    if (nboot > 0)  {
       n <- nrow(xy)
       bootonce <- function() {
@@ -41,9 +51,21 @@ lmac <- function(xy,nboot=0) {
 }
 
 coef.lmac <- function(lmacout) {
-   lmacout$coefficients
+   lmacout$ind(1,xycc[,-p1])
 }
 
 vcov.lmac <- function(lmacout) {
    lmacout$cov
 }
+
+# for testing purposes; randomly replacing each element of matrix m by 
+
+makeNA <- function(m,probna) {
+   n <- length(m)
+   nmiss <- rbinom(1,n,probna)
+   naidxs <- sample(1:n,nmiss,replace=FALSE)
+   m[naidxs] <- NA
+   m
+}
+
+

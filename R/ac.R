@@ -12,8 +12,8 @@
 #         estimated covariance matrix of the estimated vector of
 #         regression coefficiengts
 
-# value:  beta-hat vector; if boot nonzero, the cov. matrix is
-#         included as the attribute 'cov'
+# value:  an object of class 'lmac', with components 'coefficients' and
+# 'cov', i.e. beta-hat and its estimated covariance matrix
 
 lmac <- function(xy,nboot=0) {
    p1 <- ncol(xy)
@@ -22,21 +22,28 @@ lmac <- function(xy,nboot=0) {
    upu <- tmp[1:p,1:p]
    upv <- tmp[1:p,p+1]
    bhat <- solve(upu,upv)
+   lmacout <- list()
+   class(lmacout) <- 'lmac'
    # bhat0 <- mean(y) - colMeans(x) %*% bhat
    bhat0 <- colMeans(xy,na.rm=TRUE) %*% c(bhat,-1)
    bhat <- c(bhat0,bhat)
-   if (nboot)  {
+   lmacout$coefficients <- bhat
+   if (nboot > 0)  {
       n <- nrow(xy)
       bootonce <- function() {
          idxs <- sample(1:n,n,replace=TRUE)
-         lmac(xy[idxs,],nboot=0)
+         lmac(xy[idxs,],nboot=0)$coefficients
       }
       bootout <- replicate(nboot,bootonce())
-      attr(bhat,'cov') <- cov(t(bootout))
+      lmacout$cov<- cov(t(bootout))
    }
-   bhat
+   lmacout
 }
 
-vcov <- function() {
+coef.lmac <- function(lmacout) {
+   lmacout$coefficients
+}
 
+vcov.lmac <- function(lmacout) {
+   lmacout$cov
 }

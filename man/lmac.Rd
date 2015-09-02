@@ -58,6 +58,8 @@ For \code{lmac}, an object of class \code{'lmac'}, with components
 
    \item \code{residuals}, as with \code{lm}
 
+   \item \code{r2}, (unadjusted) R-squared
+
    \item \code{cov}, for \code{nboot >0} the estimated covariance matrix
    of the vector of estimated regression coefficients; accessible
    directly or by calling \code{coef}, as with \code{lm} }

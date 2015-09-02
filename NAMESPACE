@@ -1,4 +1,4 @@
 
 export(knnest, meany, vary, loclin,knnpred,nlshc,
-   coef.lmac,vcov.lmac,makeNA) 
+   lmac,coef.lmac,vcov.lmac,makeNA) 
 

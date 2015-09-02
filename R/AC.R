@@ -51,7 +51,7 @@ lmac <- function(xy,nboot=0) {
 }
 
 coef.lmac <- function(lmacout) {
-   lmacout$ind(1,xycc[,-p1])
+   lmacout$coefficients
 }
 
 vcov.lmac <- function(lmacout) {

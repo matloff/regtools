@@ -18,6 +18,7 @@
 #         fitted.values:  est. regression ftn. values at 
 #                         complete cases (but with full coefs.)
 #         residuals:  residuals at complete cases (but with full coefs.)
+#         r2:  R-squared
 #         cov:  optional est. covariance matrix of the coefs.
 
 lmac <- function(xy,nboot=0) {
@@ -56,6 +57,26 @@ coef.lmac <- function(lmacout) {
 
 vcov.lmac <- function(lmacout) {
    lmacout$cov
+}
+
+#############################  PCA  ###############################
+
+#  arguments:
+#
+#     indata: data frame or matrix
+#
+#  value: list with components 'values' and 'vectors', as with eigen()
+
+pcac <- function(indata,scale=FALSE) {
+   covcor <- if(scale) cor else cov
+   cvr <- covcor(indata,use='pairwise.complete.obs')
+   tmp <- eigen(cvr)
+   res <- list()
+   if (any(tmp$values < 0)) 
+      stop('at least one negative eigenvalue')
+   res$sdev <- sqrt(tmp$values)
+   res$rotation <- tmp$vectors
+   res
 }
 
 # for testing purposes; randomly replacing each element of matrix m by 

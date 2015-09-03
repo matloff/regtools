@@ -1,5 +1,6 @@
-\name{lmac,makeNA,coef.lmac,vcov.lmac}
+\name{lmac,makeNA,coef.lmac,vcov.lmac,pcac}
 \alias{lmac}
+\alias{pcac}
 \alias{coef.lmac}
 \alias{vcov.lmac}
 \alias{makeNA}
@@ -15,14 +16,18 @@ lmac(xy,nboot=0)
 makeNA(m,probna)
 coef.lmac(lmacout)
 vcov(lmacout)
+pcac(indata,scale=FALSE) 
 }
 
 \arguments{
   \item{xy}{Matrix or data frame, X values in the first columns, Y
      in the last.}
+  \item{indata}{Matrix or data frame. 
   \item{nboot}{If positive, number of bootstrap samples to take.}
   \item{probna}{Probability that an element will be NA.}
   \item{lmacout}{An object of class \code{'lmac'}.}
+  \item{scale}{If TRUE, call \code{cor} instead of \code{cov},
+  }
 }
 
 \details{
@@ -39,6 +44,13 @@ vcov(lmacout)
 
    The \code{lmac} function forms OLS estimates as with \code{lm}, but
    applying AC, in contrast to \code{lm}, which uses the CC method.
+
+   The \code{pcac} function is an AC substitute for \code{prcomp}. The
+   data is centered, corresponding to a fixed value of TRUE in
+   \code{prcomp}.  It is also scaled if \code{scale} is TRUE,
+   corresponding \code{scale. = TRUE} in \code{prcomp;.} Due to AC,
+   there is a small chance of negative eigenvalues, in which case
+   \code{stop} will be called.
 
    The \code{makeNA} function is used to insert random NA values into
    data, for testing purposes.
@@ -63,20 +75,17 @@ For \code{lmac}, an object of class \code{'lmac'}, with components
    \item \code{cov}, for \code{nboot >0} the estimated covariance matrix
    of the vector of estimated regression coefficients; accessible
    directly or by calling \code{coef}, as with \code{lm} }
+
 }
 
-\examples{
-data(prgeng)
-pe <- prgeng
-# dummies for MS, PhD
-pe$ms <- as.integer(pe$educ == 14)
-pe$phd <- as.integer(pe$educ == 16)
-# computer occupations only
-pecs <- pe[pe$occ >= 100 & pe$occ <= 109,]
-pecs1 <- pecs[,c(1,7,9,12,13,8)]
-pecs1 <- as.matrix(pecs1)
-pecs2 <- makeNA(pecs1,0.10)
-coef(lmac(pecs2))
+For \code{pcac}, an R list, with components
+
+\itemize{
+
+   \item \code{sdev}, as with \code{prcomp}
+
+   \item \code{rotation}, as with \code{prcomp}
+
 }
 
 \author{

@@ -22,12 +22,11 @@ pcac(indata,scale=FALSE)
 \arguments{
   \item{xy}{Matrix or data frame, X values in the first columns, Y
      in the last.}
-  \item{indata}{Matrix or data frame. 
+  \item{indata}{Matrix or data frame.}
   \item{nboot}{If positive, number of bootstrap samples to take.}
   \item{probna}{Probability that an element will be NA.}
   \item{lmacout}{An object of class \code{'lmac'}.}
-  \item{scale}{If TRUE, call \code{cor} instead of \code{cov},
-  }
+  \item{scale}{If TRUE, call \code{cor} instead of \code{cov}.}
 }
 
 \details{
@@ -63,18 +62,18 @@ For \code{lmac}, an object of class \code{'lmac'}, with components
 
 \itemize{
 
-   \item \code{coefficients}, as with \code{lm}; 
+   \item{coefficients}, as with \code{lm}; 
    accessible directly or by calling \code{coef}, as with \code{lm}
 
-   \item \code{fitted.values}, as with \code{lm}
+   \item{fitted.values}, as with \code{lm}
 
-   \item \code{residuals}, as with \code{lm}
+   \item{residuals}, as with \code{lm}
 
-   \item \code{r2}, (unadjusted) R-squared
+   \item{r2}, (unadjusted) R-squared
 
-   \item \code{cov}, for \code{nboot >0} the estimated covariance matrix
+   \item{cov}, for \code{nboot >0} the estimated covariance matrix
    of the vector of estimated regression coefficients; accessible
-   directly or by calling \code{coef}, as with \code{lm} }
+   directly or by calling \code{coef}, as with \code{lm} 
 
 }
 
@@ -82,9 +81,11 @@ For \code{pcac}, an R list, with components
 
 \itemize{
 
-   \item \code{sdev}, as with \code{prcomp}
+   \item{sdev}, as with \code{prcomp}
 
-   \item \code{rotation}, as with \code{prcomp}
+   \item{rotation}, as with \code{prcomp}
+
+}
 
 }
 

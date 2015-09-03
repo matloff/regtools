@@ -1,8 +1,10 @@
-\name{lmac,makeNA,coef.lmac,vcov.lmac,pcac}
+\name{lmac,makeNA,coef.lmac,vcov.lmac,pcac,loglinac,tbltofakedf}
 \alias{lmac}
 \alias{pcac}
 \alias{coef.lmac}
 \alias{vcov.lmac}
+\alias{loglinac}
+\alias{tbltofakedf}
 \alias{makeNA}
 
 \title{Available Cases Method for Missing Data}
@@ -17,16 +19,21 @@ makeNA(m,probna)
 coef.lmac(lmacout)
 vcov(lmacout)
 pcac(indata,scale=FALSE) 
+loglinac(x,margin) 
+tbltofakedf(tbl)
 }
 
 \arguments{
   \item{xy}{Matrix or data frame, X values in the first columns, Y
      in the last.}
   \item{indata}{Matrix or data frame.}
+  \item{x}{Matrix or data frame, one column per variable.}
   \item{nboot}{If positive, number of bootstrap samples to take.}
   \item{probna}{Probability that an element will be NA.}
   \item{lmacout}{An object of class \code{'lmac'}.}
   \item{scale}{If TRUE, call \code{cor} instead of \code{cov}.}
+  \item{}{Matrix or data frame, one column per variable.}
+  \item{tbl}{An R table.}
 }
 
 \details{
@@ -50,6 +57,11 @@ pcac(indata,scale=FALSE)
    corresponding \code{scale. = TRUE} in \code{prcomp;.} Due to AC,
    there is a small chance of negative eigenvalues, in which case
    \code{stop} will be called.
+
+   The \code{loglinac} function is an AC substitute for \code{loglin}.
+   The latter takes tables as input, but \code{loglinac} takes the raw
+   data. If you have just the table, use \code{tbltofakedf} to
+   regenerate a usable data frame.
 
    The \code{makeNA} function is used to insert random NA values into
    data, for testing purposes.
@@ -84,6 +96,16 @@ For \code{pcac}, an R list, with components
    \item{sdev}, as with \code{prcomp}
 
    \item{rotation}, as with \code{prcomp}
+
+}
+
+For \code{pcac}, an R list, with components
+
+\itemize{
+
+   \item{param}, estimated coefficients, as in \code{loglin}
+
+   \item{fit}, estimated expected call counts, as in \code{loglin}
 
 }
 

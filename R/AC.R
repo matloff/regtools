@@ -79,6 +79,155 @@ pcac <- function(indata,scale=FALSE) {
    res
 }
 
+######################  log-linear model`  ##########################
+
+# log-linear model; at present, handles only the 3-factor casea
+#
+# arguments:
+#
+#    x: data frame/matrix, one row per observation; use tbltofakedf()
+#       if data is in table form
+#    margin: a list of vectors specifying the model, 
+#            as in loglin()
+#
+# value:  $para component in the value emitted from R's loglin()
+
+loglinac <- function(x,margin) {
+   # find lengths of the elements in the model, to determine what
+   # situtation we are in
+   termlengths <- Map(length,margin)
+   n1 <- sum(termlengths == 1)  # singletons
+   n2 <- sum(termlengths == 2)  # 2-way interactions
+   # mdlf() ("model function") will find the right cell means 
+   # for the specified 'margin'
+   # fully independent?
+   if (n1 == 3) mdlf <- mindep else
+      # one var. independent of the other 2?
+      if (n2 == 1) mdlf <- mxindyz else
+      # 2 vars. conditionally independent, given the 3rd?
+      if (n2 == 2) mdlf <-myzcondindx else
+      # case of all possible 2-way interactions not implemented, for
+      # lack of a closed-form solution
+      stop('case of all 2-way terms not implemented')
+   # need an appropriate shell, with the right dimensions, labels etc.;
+   # the contents here are irrelevant and will be overwritten
+   x <- as.data.frame(na.omit(x))
+   tbl <- table(x)
+   tbl <- mdlf(x,margin,tbl,termlengths)
+   loglin(tbl,margin,param=TRUE)$param
+}
+
+# fully independent case
+mindep <- function(x,margin,tbl,termlengths) {
+   nc <- ncol(x)  # currently must be 3
+   probs <- list()
+   # find number of distinct values found in each variable, and the
+   # estimated marginal probabilities of each value
+   nvals <- vector(length=nc)
+   for (i in 1:nc) {
+      tmp <- table(x[,i])
+      probs[[i]] <- tmp / sum(tmp)
+      nvals[i] <- length(tmp)
+   }
+   # now find estimated cell probabilities
+   for (i in 1:nvals[1]) 
+      for (j in 1:nvals[2]) 
+         for (k in 1:nvals[3]) {
+            tbl[i,j,k] <- 
+               probs[[1]][i] *
+               probs[[2]][j] *
+               probs[[3]][k] 
+         }
+    # convert to estimated expected cell counts
+    tbl <- nrow(x) * tbl
+}
+
+# case of 1 variable, X, being independent of the other 2, Y and Z
+mxindyz <- function(x,margin,tbl,termlengths) {
+   # which ones are Y and Z?
+   iyz <- margin[[1]]
+   nc <- ncol(x)  # 3
+   # which variable is X?
+   ix <- setdiff((1:nc),iyz)
+   # find number of distinct values found in each variable, and the
+   # estimated marginal probabilities of each value
+   probs <- list()
+   nvals <- vector(length=nc)
+   nvals[1] <- length(table(x[,ix]))
+   nvals[2] <- length(table(x[,iyz[1]]))
+   nvals[3] <- length(table(x[,iyz[2]]))
+   tmp <- table(x[,ix])
+   probs[[1]] <- tmp / sum(tmp)
+   tmp <- table(x[,iyz])
+   probs[[2]] <- tmp / sum(tmp)
+   for (i in 1:nvals[1]) 
+      for (j in 1:nvals[2]) 
+         for (k in 1:nvals[3]) {
+            if (ix == 1) {
+            tbl[i,j,k] <- 
+               probs[[1]][i] *
+               probs[[2]][j,k] 
+            } else if (ix == 2) {
+               tbl[i,j,k] <- 
+                  probs[[1]][j] *
+                  probs[[2]][i,k] 
+            } else {  # ix = 3
+               tbl[i,j,k] <- 
+                  probs[[1]][k] *
+                  probs[[2]][i,j] 
+            }
+         }
+    tbl <- nrow(x) * tbl
+}
+
+# case of 2 variables being conditionally independent, given the 3rd
+myzcondindx <- function(x,margin,tbl,termlengths) {
+   nc <- ncol(x)  # 3
+   # which variable is X?
+   ix <- which(termlengths == 1)
+   # and which are Y and Z?
+   iyz <- setdiff((1:nc),ix)
+   iy <- iyz[1]
+   iz <- iyz[2]
+   probs <- list()
+   nvals <- vector(length=nc)
+   nvals[1] <- length(table(x[,ix]))
+   nvals[2] <- length(table(x[,iy]))
+   nvals[3] <- length(table(x[,iz]))
+   tmp <- table(x[,ix])
+   probs[[1]] <- tmp / sum(tmp)
+   tmp <- table(x[,c(ix,iy)])
+   probs[[2]] <- tmp / sum(tmp)
+   tmp <- table(x[,c(ix,iz)])
+   probs[[3]] <- tmp / sum(tmp)
+   for (i in 1:nvals[1]) 
+      for (j in 1:nvals[2]) 
+         for (k in 1:nvals[3]) {
+            tbl[i,j,k] <- 
+               probs[[2]][i,k] *
+               probs[[2]][i,j] /
+               probs[[1]][i] 
+         }
+    tbl <- nrow(x) * tbl
+}
+
+# converts an R table to a fake data frame; if a cell has frequency k,
+# it will appear k times in the output
+tbltofakedf <- function(tbl) {
+   adf <- as.data.frame(tbl)
+   nc <- ncol(adf)
+   onecell <- function(adfrow) {
+      freq <- as.numeric(adfrow[nc])
+      if (freq == 0) return(NULL)
+      remainingrow <- adfrow[-nc]
+      matrix(rep(remainingrow,freq),byrow=TRUE,nrow=freq)
+
+   }
+   Reduce(rbind,apply(adf,1,onecell))
+}
+
+#############################  misc.  ###############################
+
 # for testing purposes; randomly replacing each element of matrix m by 
 
 makeNA <- function(m,probna) {
@@ -89,5 +238,3 @@ makeNA <- function(m,probna) {
    m[naidxs] <- NA
    m
 }
-
-

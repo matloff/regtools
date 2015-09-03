@@ -109,6 +109,25 @@ For \code{pcac}, an R list, with components
 
 }
 
+\examples{
+   n <- 25000
+   z1 <- sample(1:2,n,replace=T)  
+   z2 <- sample(1:2,n,replace=T)  
+   z3 <- sample(1:2,n,replace=T)  
+   idxs <- which(z1 == 1)
+   lidxs <- length(idxs)
+   z2[idxs] <- sample(1:2,lidxs,replace=T,prob=c(0.2,0.8))
+   z3[idxs] <- sample(1:2,lidxs,replace=T,prob=c(0.2,0.8))
+   idxs <- which(z1 == 2)
+   lidxs <- length(idxs)
+   z2[idxs] <- sample(1:2,lidxs,replace=T,prob=c(0.8,0.2))  
+   z3[idxs] <- sample(1:2,lidxs,replace=T,prob=c(0.8,0.2))  
+   x <- cbind(z1,z2,z3)
+   lmout <- loglin(table(z1,z2,z3),list(c(1,2),c(1,3)),param=T,fit=T)
+   lmac <- loglinac(x,list(c(1,2),c(1,3)))
+   lmout$param; lmac$param
+}
+
 }
 
 \author{

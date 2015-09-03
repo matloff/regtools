@@ -90,7 +90,7 @@ pcac <- function(indata,scale=FALSE) {
 #    margin: a list of vectors specifying the model, 
 #            as in loglin()
 #
-# value:  $para component in the value emitted from R's loglin()
+# value:  $param and $fit components in the value emitted from R's loglin()
 
 loglinac <- function(x,margin) {
    # find lengths of the elements in the model, to determine what
@@ -114,7 +114,7 @@ loglinac <- function(x,margin) {
    x <- as.data.frame(na.omit(x))
    tbl <- table(x)
    tbl <- mdlf(x,margin,tbl,termlengths)
-   loglin(tbl,margin,param=TRUE)$param
+   loglin(tbl,margin,param=TRUE,fit=TRUE)
 }
 
 # fully independent case
@@ -182,13 +182,18 @@ mxindyz <- function(x,margin,tbl,termlengths) {
 
 # case of 2 variables being conditionally independent, given the 3rd
 myzcondindx <- function(x,margin,tbl,termlengths) {
-   nc <- ncol(x)  # 3
    # which variable is X?
-   ix <- which(termlengths == 1)
-   # and which are Y and Z?
-   iyz <- setdiff((1:nc),ix)
+   ix <- intersect(margin[[1]],margin[[2]])
+   # which ones are Y and Z?
+   iyz <- setdiff(union(margin[[1]],margin[[2]]),ix)
    iy <- iyz[1]
    iz <- iyz[2]
+   nc <- ncol(x)  # 3
+
+
+   ix <- setdiff((1:nc),iyz)
+   # find number of distinct values found in each variable, and the
+   # estimated marginal probabilities of each value
    probs <- list()
    nvals <- vector(length=nc)
    nvals[1] <- length(table(x[,ix]))

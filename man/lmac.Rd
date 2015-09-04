@@ -70,42 +70,44 @@ tbltofakedf(tbl)
 
 \value{
 
-For \code{lmac}, an object of class \code{'lmac'}, with components
-
-\itemize{
-
-   \item{coefficients}, as with \code{lm}; 
-   accessible directly or by calling \code{coef}, as with \code{lm}
-
-   \item{fitted.values}, as with \code{lm}
-
-   \item{residuals}, as with \code{lm}
-
-   \item{r2}, (unadjusted) R-squared
-
-   \item{cov}, for \code{nboot >0} the estimated covariance matrix
-   of the vector of estimated regression coefficients; accessible
-   directly or by calling \code{coef}, as with \code{lm} 
-
-}
-
-For \code{pcac}, an R list, with components
-
-\itemize{
-
-   \item{sdev}, as with \code{prcomp}
-
-   \item{rotation}, as with \code{prcomp}
-
-}
-
-For \code{pcac}, an R list, with components
-
-\itemize{
-
-   \item{param}, estimated coefficients, as in \code{loglin}
-
-   \item{fit}, estimated expected call counts, as in \code{loglin}
+   For \code{lmac}, an object of class \code{'lmac'}, with components
+   
+   \itemize{
+   
+      \item{coefficients}, as with \code{lm}; 
+      accessible directly or by calling \code{coef}, as with \code{lm}
+   
+      \item{fitted.values}, as with \code{lm}
+   
+      \item{residuals}, as with \code{lm}
+   
+      \item{r2}, (unadjusted) R-squared
+   
+      \item{cov}, for \code{nboot >0} the estimated covariance matrix
+      of the vector of estimated regression coefficients; accessible
+      directly or by calling \code{coef}, as with \code{lm} 
+   
+   }
+   
+   For \code{pcac}, an R list, with components
+   
+   \itemize{
+   
+      \item{sdev}, as with \code{prcomp}
+   
+      \item{rotation}, as with \code{prcomp}
+   
+   }
+   
+   For \code{pcac}, an R list, with components
+   
+   \itemize{
+   
+      \item{param}, estimated coefficients, as in \code{loglin}
+   
+      \item{fit}, estimated expected call counts, as in \code{loglin}
+   
+   }
 
 }
 
@@ -126,8 +128,6 @@ For \code{pcac}, an R list, with components
    lmout <- loglin(table(z1,z2,z3),list(c(1,2),c(1,3)),param=T,fit=T)
    lmac <- loglinac(x,list(c(1,2),c(1,3)))
    lmout$param; lmac$param
-}
-
 }
 
 \author{

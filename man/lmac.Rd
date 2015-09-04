@@ -125,9 +125,9 @@ tbltofakedf(tbl)
    z2[idxs] <- sample(1:2,lidxs,replace=T,prob=c(0.8,0.2))  
    z3[idxs] <- sample(1:2,lidxs,replace=T,prob=c(0.8,0.2))  
    x <- cbind(z1,z2,z3)
-   lmout <- loglin(table(z1,z2,z3),list(c(1,2),c(1,3)),param=T,fit=T)
-   lmac <- loglinac(x,list(c(1,2),c(1,3)))
-   lmout$param; lmac$param
+   llout <- loglin(table(z1,z2,z3),list(c(1,2),c(1,3)),param=T,fit=T)
+   llac <- loglinac(x,list(c(1,2),c(1,3)))
+   llout$param; llac$param
 }
 
 \author{

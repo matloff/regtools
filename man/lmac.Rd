@@ -113,9 +113,9 @@ tbltofakedf(tbl)
 
 \examples{
    n <- 25000
-   z1 <- sample(1:2,n,replace=T)  
-   z2 <- sample(1:2,n,replace=T)  
-   z3 <- sample(1:2,n,replace=T)  
+   z1 <- sample(1:2,lidxs,replace=T)
+   z2 <- vector(length=n)
+   z3 <- vector(length=n)
    idxs <- which(z1 == 1)
    lidxs <- length(idxs)
    z2[idxs] <- sample(1:2,lidxs,replace=T,prob=c(0.2,0.8))

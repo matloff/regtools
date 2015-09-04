@@ -188,10 +188,7 @@ myzcondindx <- function(x,margin,tbl,termlengths) {
    iyz <- setdiff(union(margin[[1]],margin[[2]]),ix)
    iy <- iyz[1]
    iz <- iyz[2]
-   nc <- ncol(x)  # 3
-
-
-   ix <- setdiff((1:nc),iyz)
+   nc <- ncol(x)  # currently 3
    # find number of distinct values found in each variable, and the
    # estimated marginal probabilities of each value
    probs <- list()
@@ -208,10 +205,23 @@ myzcondindx <- function(x,margin,tbl,termlengths) {
    for (i in 1:nvals[1]) 
       for (j in 1:nvals[2]) 
          for (k in 1:nvals[3]) {
-            tbl[i,j,k] <- 
-               probs[[2]][i,k] *
-               probs[[2]][i,j] /
-               probs[[1]][i] 
+            if (ix == 1) {
+               tbl[i,j,k] <- 
+                  probs[[2]][i,k] *
+                  probs[[2]][i,j] /
+                  probs[[1]][i] 
+            } else if (ix == 2) {
+               tbl[i,j,k] <- 
+                  probs[[2]][j,k] *
+                  probs[[2]][j,i] /
+                  probs[[1]][j] 
+               
+            } else {  # ix == 3
+               tbl[i,j,k] <- 
+                  probs[[2]][k,j] *
+                  probs[[2]][k,i] /
+                  probs[[1]][k] 
+            }
          }
     tbl <- nrow(x) * tbl
 }

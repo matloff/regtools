@@ -188,14 +188,23 @@ myzcondindx <- function(x,margin,tbl,termlengths) {
    iyz <- setdiff(union(margin[[1]],margin[[2]]),ix)
    iy <- iyz[1]
    iz <- iyz[2]
+   # easier to keep track of all if iy < iz
+   if (iy > iz) {
+      tmp <- iz
+      iz <- iy
+      iy <- tmp
+   }
    nc <- ncol(x)  # currently 3
    # find number of distinct values found in each variable, and the
    # estimated marginal probabilities of each value
    probs <- list()
    nvals <- vector(length=nc)
-   nvals[1] <- length(table(x[,ix]))
-   nvals[2] <- length(table(x[,iy]))
-   nvals[3] <- length(table(x[,iz]))
+   # nvals[1] <- length(table(x[,ix]))
+   # nvals[2] <- length(table(x[,iy]))
+   # nvals[3] <- length(table(x[,iz]))
+   nvals[ix] <- length(table(x[,ix]))
+   nvals[iy] <- length(table(x[,iy]))
+   nvals[iz] <- length(table(x[,iz]))
    tmp <- table(x[,ix])
    probs[[1]] <- tmp / sum(tmp)
    tmp <- table(x[,c(ix,iy)])
@@ -207,18 +216,18 @@ myzcondindx <- function(x,margin,tbl,termlengths) {
          for (k in 1:nvals[3]) {
             if (ix == 1) {
                tbl[i,j,k] <- 
-                  probs[[2]][i,k] *
+                  probs[[3]][i,k] *
                   probs[[2]][i,j] /
                   probs[[1]][i] 
             } else if (ix == 2) {
                tbl[i,j,k] <- 
-                  probs[[2]][j,k] *
+                  probs[[3]][j,k] *
                   probs[[2]][j,i] /
                   probs[[1]][j] 
                
             } else {  # ix == 3
                tbl[i,j,k] <- 
-                  probs[[2]][k,j] *
+                  probs[[3]][k,j] *
                   probs[[2]][k,i] /
                   probs[[1]][k] 
             }

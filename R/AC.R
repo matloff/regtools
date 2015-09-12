@@ -111,7 +111,7 @@ loglinac <- function(x,margin) {
       stop('case of all 2-way terms not implemented')
    # need an appropriate shell, with the right dimensions, labels etc.;
    # the contents here are irrelevant and will be overwritten
-   x <- as.data.frame(na.omit(x))
+   x <- as.data.frame(x)
    tbl <- table(x)
    tbl <- mdlf(x,margin,tbl,termlengths)
    loglin(tbl,margin,param=TRUE,fit=TRUE)

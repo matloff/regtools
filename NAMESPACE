@@ -1,4 +1,4 @@
 
-export(knnest, meany, vary, loclin,knnpred,nlshc,
+export(knnest,meany, vary,loclin,knnpred,nlshc,parget.knnx,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf) 
 

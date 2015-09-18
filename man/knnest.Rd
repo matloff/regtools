@@ -1,6 +1,7 @@
-\name{knnest,meany,vary,loclin,knnpred}
+\name{knnest,meany,vary,loclin,knnpred,parget.knnx}
 \alias{knnest}
 \alias{knnpred}
+\alias{parget.knnx}
 \alias{meany}
 \alias{vary}
 \alias{loclin}
@@ -17,6 +18,7 @@ meany(predpt,nearxy)
 vary(predpt,nearxy) 
 loclin(predpt,nearxy) 
 knnpred(knnout,predpts) 
+parget.knnx(data,query,k=10,algorithm="kd_tree",cls=NULL) 
 }
 
 \arguments{
@@ -27,6 +29,9 @@ knnpred(knnout,predpts)
      predicted.}
   \item{predpt}{One point on which to predict, e.g. a row in
      \code{predpts}.}
+  \item{data}{A data matrix.}
+  \item{query}{A data matrix.}
+  \item{algorithm}{As in \code{FNN::get.knnx}.}
   \item{scalefirst}{If non-NULL, scale the X data first, using
      \code{scale}. If \code{scalefirst} is 'default', use the
      default for \code{scale}; otherwise, \code{scalefirst} is a
@@ -49,6 +54,9 @@ knnpred(knnout,predpts)
    The function \code{knnpred} uses the output of \code{knnest} to do
    estimation or prediction on new points.  If scaling had been used in
    the latter, it is picked up here and applied to \code{predpts}.  
+
+   The \code{parget.knnx} function is a wrapper for use of 'parallel'
+   package with \code{get.knnx} of the 'FNN' package.
    
 }
 
@@ -60,6 +68,11 @@ output by \code{knnest}.
 
 The function \code{knnpred} returns the predicted Y values at
 \code{predpts}.
+
+The \code{parget.knnx} function returns the matrix of indices of nearest
+neighbors, as with the \code{nn.index} component of the return value of
+\code{get.knnx}.
+
 }
 
 \examples{

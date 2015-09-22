@@ -8,20 +8,23 @@ Extension of \code{nls} to the heteroscedastic case.
 }
 
 \usage{
-nlshc(nlsout)
+nlshc(nlsout,type='hc3')
 }
 
 \arguments{
   \item{nlsout}{Object of type 'nls'.}
+  \item{type}{Eickert-White algorithm to use.}
 }
 
 \details{
-   Applies Eickert-White technique to handle heteroscedasticity,
-   so that one gets valid statistical inference in that setting.
+   Calls \code{nls} but then forms a different estimated covariance 
+   matrix for the estimated regression coefficients, applying the
+   Eickert-White technique to handle heteroscedasticity.  This then
+   gives valid statistical inference in that setting.
 }
 
 \value{
-Estimated covariance matrix for the given nonlinear regression problem.
+Estimated covariance matrix
 }
 
 \examples{
@@ -36,14 +39,13 @@ xy <- cbind(x,y)
 xy <- data.frame(xy)
 nlout <- nls(X3 ~ 1 / (b1*X1+b2*X2),
    data=xy,start=list(b1 = 1,b2=1))
-# row 1 should be 0.01208942,-0.01226646
 nlshc(nlout)
 }
 
 \references{
   Zeileis A (2006), Object-Oriented Computation of Sandwich Estimators.
-    \emph{Journal of Statistical Software}, \bold{16}(9), 1--16.
-      URL \url{http://www.jstatsoft.org/v16/i09/}.
+    \emph{Journal of Statistical Software}, \bold{16}(9), 1--16,
+      \url{http://www.jstatsoft.org/v16/i09/}.
 }
 
 

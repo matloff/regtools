@@ -9,7 +9,7 @@
 # value: approximate covariance matrix for the 
 #        estimated parameter vector
 
-nlshc <- function(nlsout) {
+nlshc <- function(nlsout,type='hc3') {
    # require(sandwich)
    require(car)
    # notation: g(t,b) is the regression model, 
@@ -30,5 +30,5 @@ nlshc <- function(nlsout) {
    # -1 means no constant term in the model
    lmout <- lm(yresidhm ~ xhm - 1)
    # vcovHC(lmout); was getting NAs for some data sets
-   hccm(lmout)
+   hccm(lmout,type)
 }

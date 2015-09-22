@@ -4,21 +4,20 @@
 
 # arguments:
 # 
-#    nlslmout: object of type 'nls'
+#    nlsout: object of type 'nls'
 # 
 # value: approximate covariance matrix for the 
 #        estimated parameter vector
 
-vcovHC.nls <- function(nlslmout) {
-   # require(minpack.lm)
+nlshc <- function(nlsout) {
    # require(sandwich)
    require(car)
    # notation: g(t,b) is the regression model, 
    # where t is the vector of variables for a 
    # given observation; b is the estimated parameter
    # vector; x is the matrix of predictor values
-   b <- coef(nlslmout)
-   m <- nlslmout$m
+   b <- coef(nlsout)
+   m <- nlsout$m
    # y - g:
    resid <- m$resid()
    # row i of hmat will be deriv of g(x[i,],b) 
@@ -30,6 +29,6 @@ vcovHC.nls <- function(nlslmout) {
    yresidhm <- resid + hmat %*% b
    # -1 means no constant term in the model
    lmout <- lm(yresidhm ~ xhm - 1)
-   # vcovHC(lmout)
+   # vcovHC(lmout); was getting NAs for some data sets
    hccm(lmout)
 }

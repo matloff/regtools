@@ -8,19 +8,19 @@ Extension of \code{nls} to the heteroscedastic case.
 }
 
 \usage{
-nlshc(nlslmout)
+nlshc(nlsout)
 }
 
 \arguments{
-  \item{nlslmout}{Returned object from \code{nlsLM}.}
+  \item{nlsout}{Object of type 'nls'.}
 }
 
 \details{
-   Like \code{nls}, but handling heteroscedasticity.
+   Applies Eickert-White technique to handle heteroscedasticity,
+   so that one gets valid statistical inference in that setting.
 }
 
 \value{
-
 Estimated covariance matrix for the given nonlinear regression problem.
 }
 
@@ -30,7 +30,7 @@ Estimated covariance matrix for the given nonlinear regression problem.
 n <- 250
 b <- 1:2
 x <- matrix(rexp(2*n),ncol=2)
-meany <- 1 / (x %*% b)
+meany <- 1 / (x \%*\% b)
 y <- meany + (runif(n) - 0.5) * meany
 xy <- cbind(x,y)
 xy <- data.frame(xy)

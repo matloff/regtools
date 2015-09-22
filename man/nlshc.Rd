@@ -40,6 +40,13 @@ nlout <- nls(X3 ~ 1 / (b1*X1+b2*X2),
 nlshc(nlout)
 }
 
+\references{
+  Zeileis A (2006), Object-Oriented Computation of Sandwich Estimators.
+    \emph{Journal of Statistical Software}, \bold{16}(9), 1--16.
+      URL \url{http://www.jstatsoft.org/v16/i09/}.
+}
+
+
 \author{
 Norm Matloff
 }

@@ -1,21 +1,18 @@
 
-# nonlinear regression like nls(), but without 
-# assuming homoscedasticity
-
-# uses output of nlsLM() of the minpack.lm package 
-# to get an asymptotic covariance matrix in general
-# heteroscedastic case
+# uses output of nls() to get an asymptotic covariance 
+# matrix in general heteroscedastic case
 
 # arguments:
 # 
-#    nlslmout: return value from nlsLM()
+#    nlslmout: object of type 'nls'
 # 
 # value: approximate covariance matrix for the 
 #        estimated parameter vector
 
-nlshc <- function(nlslmout) {
-   require(minpack.lm)
-   require(sandwich)
+vcovHC.nls <- function(nlslmout) {
+   # require(minpack.lm)
+   # require(sandwich)
+   require(car)
    # notation: g(t,b) is the regression model, 
    # where t is the vector of variables for a 
    # given observation; b is the estimated parameter
@@ -33,5 +30,6 @@ nlshc <- function(nlslmout) {
    yresidhm <- resid + hmat %*% b
    # -1 means no constant term in the model
    lmout <- lm(yresidhm ~ xhm - 1)
-   vcovHC(lmout)
+   # vcovHC(lmout)
+   hccm(lmout)
 }

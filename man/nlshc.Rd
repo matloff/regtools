@@ -21,6 +21,10 @@ nlshc(nlsout,type='hc3')
    matrix for the estimated regression coefficients, applying the
    Eickert-White technique to handle heteroscedasticity.  This then
    gives valid statistical inference in that setting.
+
+   Some users may prefer to use \code{nlsLM} of the package
+   \pkg{minpack.lm} instead of \code{nls}. This is fine, as both
+   functions return objects of class 'nls'.
 }
 
 \value{

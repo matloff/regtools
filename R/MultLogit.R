@@ -2,7 +2,7 @@
 #################### work in progress #############################
 
 
-# OVA and AVA, logit models
+# One-vs.-All (OVA) and All-vs.All (AVA), logit models
 
 # arguments:
 
@@ -30,11 +30,10 @@ ovalogtrn <- function(m,trnxy) {
    x <- trnxy[1:(p-1)]
    y <- trnxy[,p]
    outmat <- NULL
-   y <- 
    for (i in 0:(m-1)) {
       ym <- as.integer(y == i)
       betahat <- coef(glm(ym ~ x,family=binomial))
-      outmat <- rbind(outmat,betahat)
+      outmat <- cbind(outmat,betahat)
    }
    outmat
 }
@@ -46,16 +45,18 @@ ovalogtrn <- function(m,trnxy) {
 # arguments:  
 # 
 #    coefmat:  coefficient matrix, output from ovalogtrn()
-#    predx:  as above
+#    predxy:  X,Y prediction set, Y in last column
 # 
 # value:
 # 
 #    vector of predicted Y values, in {0,1,...,m-1}
 
-ovalogpred <- function(coefmat,predx) {
+ovalogpred <- function(coefmat,predxy) {
+   predx <- predxy[,-1]
+   # get est reg ftn values for each row of predx and each col of
+   # coefmat; vals for coefmat[,] in col i of tmp
    tmp <- cbind(1,predx) %*% coefmat
-   # since the logit function is monotone increeasing and we are just
-   # taking argmax, we need not plug into logit
-   predy <- apply(tmp,1,which.max)
+   tmp <- logit(tmp)
+   predy <- apply(estlogodds,1,which.max)
 }
 

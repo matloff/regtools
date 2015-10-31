@@ -80,7 +80,7 @@ avalogtrn <- function(m,trnxy) {
    x <- as.matrix(trnxy[,1:(p-1)])
    y <- trnxy[,p]
    outmat <- NULL
-   ijs <- combn(p-1,2)
+   ijs <- combn(m,2) - 1
    doreg <- function(ij) {
       i <- ij[1]
       j <- ij[2]
@@ -88,10 +88,10 @@ avalogtrn <- function(m,trnxy) {
       tmp[y == i] <- 1
       tmp[y == j] <- 0
       yij <- tmp[tmp != -1]
-      xij <- x[tmp != -1,c(i,j)]
+# if (length(yij) == 0) browser()
+      xij <- x[tmp != -1,]
       coef(glm(yij ~ xij,family=binomial))
    }
-   # sapply(matrixtolist(2,ijs),doreg)
    coefmat <- NULL
    for (k in 1:ncol(ijs)) 
       coefmat <- rbind(coefmat,doreg(ijs[,k]))
@@ -160,7 +160,7 @@ z <- z - 1
 forest[,1] <- z
 f1 <- cbind(forest[,-1],forest[,1]) 
 f2 <- f1[,-(1:20)]
-ovout <- ovalogtrn(4,f2)
-ypred <- ovalogpred(ovout,f2[,-8])
-sum(ypred == f2[,8])
-avout <- avalogtrn(6,newucb)
+# ovout <- ovalogtrn(4,f2)
+# ypred <- ovalogpred(ovout,f2[,-8])
+# sum(ypred == f2[,8])
+# avout <- avalogtrn(6,newucb)

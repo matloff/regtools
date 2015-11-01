@@ -61,6 +61,29 @@ ovalogpred <- function(coefmat,predx) {
 }
 
 ##################################################################
+# ovalogloom: LOOM predict Ys from Xs
+##################################################################
+
+# arguments: as with ovalogtrn()
+
+# value: LOOM-estimated probability of correct classification\
+
+ovalogloom <- function(m,trnxy) {
+   n <- nrow(trnxy)
+   p <- ncol(trnxy) 
+   i <- 0
+   correctprobs <- replicate(n,
+      {
+         i <- i + 1
+         ovout <- ovalogtrn(m,trnxy[-i,])
+         predy <- ovalogpred(ovout,trnxy[-i,-p])
+         mean(predy == trnxy[-i,p])
+      })
+   mean(correctprobs)
+}
+
+
+##################################################################
 # avalogtrn: generate estimated regression functions
 ##################################################################
 
@@ -92,13 +115,12 @@ avalogtrn <- function(m,trnxy) {
       coef(glm(yij ~ xij,family=binomial))
    }
    coefmat <- NULL
-   for (k in 1:ncol(ijs)) 
+   for (k in 1:ncol(ijs)) {
       coefmat <- cbind(coefmat,doreg(ijs[,k]))
+   }
    coefmat
 }
-
-##################################################################
-# avalogpred: predict Ys from new Xs
+################################################################## # avalogpred: predict Ys from new Xs
 ##################################################################
 
 # arguments:  
@@ -132,6 +154,28 @@ avalogpred <- function(m,coefmat,predx) {
       ypred[r] <- which.max(wins) - 1
    }
    ypred
+}
+
+##################################################################
+# avalogloom: LOOM predict Ys from Xs
+##################################################################
+
+# arguments: as with avalogtrn()
+
+# value: LOOM-estimated probability of correct classification\
+
+avalogloom <- function(m,trnxy) {
+   n <- nrow(trnxy)
+   p <- ncol(trnxy) 
+   i <- 0
+   correctprobs <- replicate(n,
+      {
+         i <- i + 1
+         avout <- avalogtrn(m,trnxy[-i,])
+         predy <- avalogpred(m,avout,trnxy[-i,-p])
+         mean(predy == trnxy[-i,p])
+      })
+   mean(correctprobs)
 }
 
 logit <- function(t) 1 / (1+exp(-t))
@@ -172,5 +216,37 @@ matrixtolist <- function (rc,m)
 # avout <- avalogtrn(4,f2)
 # predy <- avalogpred(4,avout,f2[,-8])
 # mean(predy == f2[,8])
+f3 <- f1[,c(1:9,28)]
+
+
+# vert <- read.table('~/Research/Data/Vertebrae/vertebral_column_data/column_3C.dat',header=F)
+# vert$V7 <- as.numeric(vert$V7) - 1
+# ovout <- ovalogtrn(3,vert)
+# predy <- ovalogpred(ovout,vert[,-7])
+# mean(predy == vert$V7)
+
+# trnidxs <- sample(1:4526,2263)
+# predidxs <- setdiff(1:4526,trnidxs)
+# ovout <- ovalogtrn(6,newucb[trnidxs,])
+# predy <- ovalogpred(ovout,newucb[predidxs,1:2])
+# mean(predy == newucb[predidxs,3])
+# avout <- avalogtrn(6,newucb[trnidxs,])
+# predy <- avalogpred(6,avout,newucb[predidxs,1:2])
+# mean(predy == newucb[predidxs,3])
+
+
+
+# glass <- read.csv('~/Research/Data/Glass/glass.data.txt',header=F)
+# glass[,11] <- glass[,11] - 1
+
+
+# trnidxs <- sample(1:4526,2263)
+# predidxs <- setdiff(1:4526,trnidxs)
+# ovout <- ovalogtrn(6,newucb[trnidxs,])
+# predy <- ovalogpred(ovout,newucb[predidxs,1:2])
+# mean(predy == newucb[predidxs,3])
+# avout <- avalogtrn(6,newucb[trnidxs,])
+# predy <- avalogpred(6,avout,newucb[predidxs,1:2])
+# mean(predy == newucb[predidxs,3])
 
 

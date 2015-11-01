@@ -82,8 +82,8 @@ avalogtrn <- function(m,trnxy) {
    outmat <- NULL
    ijs <- combn(m,2) 
    doreg <- function(ij) {
-      i <- ij[1]
-      j <- ij[2]
+      i <- ij[1] - 1
+      j <- ij[2] - 1
       tmp <- rep(-1,n)
       tmp[y == i] <- 1
       tmp[y == j] <- 0
@@ -144,26 +144,33 @@ matrixtolist <- function (rc,m)
    else Map(function(colnum) m[, colnum], 1:ncol(m))
 }
 
-ucbdf <- tbltofakedf(UCBAdmissions)
-newucb <- matrix(nrow=nrow(ucbdf),ncol=ncol(ucbdf))
-for (i in 1:3) {
-   z <- ucbdf[,i] 
-   z <- as.numeric(as.factor(z))
-   newucb[,i] <- z
-}
-newucb[,3] <- newucb[,3] - 1
-ovout <- ovalogtrn(6,newucb)
-ypred <- ovalogpred(ovout,newucb[,1:2])
-sum(ypred == newucb[,3])
-
-forest <- read.csv("~/Research/Data/ForestTypes/training.csv")
-z <- forest[,1]
-z <- as.numeric(z)
-z <- z - 1
-forest[,1] <- z
-f1 <- cbind(forest[,-1],forest[,1]) 
-f2 <- f1[,-(1:20)]
-# ovout <- ovalogtrn(4,f2)
-# ypred <- ovalogpred(ovout,f2[,-8])
-# sum(ypred == f2[,8])
+# ucbdf <- tbltofakedf(UCBAdmissions)
+# newucb <- matrix(nrow=nrow(ucbdf),ncol=ncol(ucbdf))
+# for (i in 1:3) {
+#    z <- ucbdf[,i] 
+#    z <- as.numeric(as.factor(z))
+#    newucb[,i] <- z
+# }
+# newucb[,3] <- newucb[,3] - 1
+# ovout <- ovalogtrn(6,newucb)
+# predy <- ovalogpred(ovout,newucb[,1:2])
+# mean(predy == newucb[,3])
 # avout <- avalogtrn(6,newucb)
+# predy <- avalogpred(6,avout,newucb[,1:2])
+# mean(predy == newucb[,3])
+
+# forest <- read.csv("~/Research/Data/ForestTypes/training.csv")
+# z <- forest[,1]
+# z <- as.numeric(z)
+# z <- z - 1
+# forest[,1] <- z
+# f1 <- cbind(forest[,-1],forest[,1]) 
+# f2 <- f1[,-(1:20)]
+# ovout <- ovalogtrn(4,f2)
+# predy <- ovalogpred(ovout,f2[,-8])
+# mean(predy == f2[,8])
+# avout <- avalogtrn(4,f2)
+# predy <- avalogpred(4,avout,f2[,-8])
+# mean(predy == f2[,8])
+
+

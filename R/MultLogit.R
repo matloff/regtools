@@ -80,7 +80,7 @@ avalogtrn <- function(m,trnxy) {
    x <- as.matrix(trnxy[,1:(p-1)])
    y <- trnxy[,p]
    outmat <- NULL
-   ijs <- combn(m,2) - 1
+   ijs <- combn(m,2) 
    doreg <- function(ij) {
       i <- ij[1]
       j <- ij[2]
@@ -88,13 +88,12 @@ avalogtrn <- function(m,trnxy) {
       tmp[y == i] <- 1
       tmp[y == j] <- 0
       yij <- tmp[tmp != -1]
-# if (length(yij) == 0) browser()
       xij <- x[tmp != -1,]
       coef(glm(yij ~ xij,family=binomial))
    }
    coefmat <- NULL
    for (k in 1:ncol(ijs)) 
-      coefmat <- rbind(coefmat,doreg(ijs[,k]))
+      coefmat <- cbind(coefmat,doreg(ijs[,k]))
    coefmat
 }
 
@@ -104,6 +103,7 @@ avalogtrn <- function(m,trnxy) {
 
 # arguments:  
 # 
+#    m: as above
 #    coefmat:  coefficient matrix, output from avalogtrn()
 #    predx:  as above
 # 
@@ -112,23 +112,26 @@ avalogtrn <- function(m,trnxy) {
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predx
 
-avalogpred <- function(coefmat,predx) {
-   ijs <- combn(p-1,2)
-   for (r in 1:nrow(predx)) {
+avalogpred <- function(m,coefmat,predx) {
+   ijs <- combn(m,2)  # as in avalogtrn()
+   n <- nrow(predx)
+   ypred <- vector(length = n)
+   for (r in 1:n) {
       # predict the rth new observation
-      xrow <- c(1,predx[r,])
+      xrow <- c(1,unlist(predx[r,]))
       # wins[i] tells how many times class i-1 has won
-      wins <- rep(0,p-1)  
+      wins <- rep(0,m)  
       for (k in 1:ncol(ijs)) {
-         i <- ijs[1,k]
-         j <- ijs[2,k]
-         bhat <- coefmat[k,]
+         i <- ijs[1,k]  # class i-1
+         j <- ijs[2,k]  # class j-1
+         bhat <- coefmat[,k]
          mhat <- logit(bhat %*% xrow)
          if (mhat >= 0.5) wins[i] <- wins[i] + 1 else
          wins[j] <- wins[j] + 1
       }
-      ypred <- which.max(wins) - 1
+      ypred[r] <- which.max(wins) - 1
    }
+   ypred
 }
 
 logit <- function(t) 1 / (1+exp(-t))
@@ -141,17 +144,17 @@ matrixtolist <- function (rc,m)
    else Map(function(colnum) m[, colnum], 1:ncol(m))
 }
 
-# ucbdf <- tbltofakedf(UCBAdmissions)
-# newucb <- matrix(nrow=nrow(ucbdf),ncol=ncol(ucbdf))
-# for (i in 1:3) {
-#    z <- ucbdf[,i] 
-#    z <- as.numeric(as.factor(z))
-#    newucb[,i] <- z
-# }
-# newucb[,3] <- newucb[,3] - 1
-# ovout <- ovalogtrn(6,newucb)
-# ypred <- ovalogpred(ovout,newucb[,1:2])
-# sum(ypred == newucb[,3])
+ucbdf <- tbltofakedf(UCBAdmissions)
+newucb <- matrix(nrow=nrow(ucbdf),ncol=ncol(ucbdf))
+for (i in 1:3) {
+   z <- ucbdf[,i] 
+   z <- as.numeric(as.factor(z))
+   newucb[,i] <- z
+}
+newucb[,3] <- newucb[,3] - 1
+ovout <- ovalogtrn(6,newucb)
+ypred <- ovalogpred(ovout,newucb[,1:2])
+sum(ypred == newucb[,3])
 
 forest <- read.csv("~/Research/Data/ForestTypes/training.csv")
 z <- forest[,1]

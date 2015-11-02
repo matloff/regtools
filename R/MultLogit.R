@@ -216,7 +216,7 @@ matrixtolist <- function (rc,m)
 # avout <- avalogtrn(4,f2)
 # predy <- avalogpred(4,avout,f2[,-8])
 # mean(predy == f2[,8])
-f3 <- f1[,c(1:9,28)]
+# f3 <- f1[,c(1:9,28)]
 
 
 # vert <- read.table('~/Research/Data/Vertebrae/vertebral_column_data/column_3C.dat',header=F)
@@ -259,16 +259,16 @@ mean(predy == vert[predidxs,7])
 # predy <- avalogpred(6,avout,newucb[predidxs,1:2])
 # mean(predy == newucb[predidxs,3])
 
-yeast <- read.table('~/Research/Data/Yeast/yeast.data.txt',header=F)
-y1 <- yeast[,-1]  # delete name
-y1[,9] <- as.numeric(y1[,9]) - 1
-trnidxs <- sample(1:1484,742)
-predidxs <- setdiff(1:1484,trnidxs)
-ovout <- ovalogtrn(10,y1[trnidxs,])
-predy <- ovalogpred(ovout,y1[predidxs,1:8])
-mean(predy == y1[predidxs,9])
-avout <- avalogtrn(10,y1[trnidxs,])
-predy <- avalogpred(10,avout,y1[predidxs,1:8])
-mean(predy == y1[predidxs,9])
+# yeast <- read.table('~/Research/Data/Yeast/yeast.data.txt',header=F)
+# y1 <- yeast[,-1]  # delete name
+# y1[,9] <- as.numeric(y1[,9]) - 1
+# trnidxs <- sample(1:1484,742)
+# predidxs <- setdiff(1:1484,trnidxs)
+# ovout <- ovalogtrn(10,y1[trnidxs,])
+# predy <- ovalogpred(ovout,y1[predidxs,1:8])
+# mean(predy == y1[predidxs,9])
+# avout <- avalogtrn(10,y1[trnidxs,])
+# predy <- avalogpred(10,avout,y1[predidxs,1:8])
+# mean(predy == y1[predidxs,9])
 
 

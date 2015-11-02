@@ -224,6 +224,16 @@ f3 <- f1[,c(1:9,28)]
 # ovout <- ovalogtrn(3,vert)
 # predy <- ovalogpred(ovout,vert[,-7])
 # mean(predy == vert$V7)
+trnidxs <- sample(1:310,155)
+predidxs <- setdiff(1:310,trnidxs)
+trnidxs <- sample(1:310,225)
+predidxs <- setdiff(1:310,trnidxs)
+ovout <- ovalogtrn(3,vert[trnidxs,])
+predy <- ovalogpred(ovout,vert[predidxs,1:6])
+mean(predy == vert[predidxs,7])
+avout <- avalogtrn(3,vert[trnidxs,])
+predy <- avalogpred(3,avout,vert[predidxs,1:6])
+mean(predy == vert[predidxs,7])
 
 # trnidxs <- sample(1:4526,2263)
 # predidxs <- setdiff(1:4526,trnidxs)
@@ -248,5 +258,17 @@ f3 <- f1[,c(1:9,28)]
 # avout <- avalogtrn(6,newucb[trnidxs,])
 # predy <- avalogpred(6,avout,newucb[predidxs,1:2])
 # mean(predy == newucb[predidxs,3])
+
+yeast <- read.table('~/Research/Data/Yeast/yeast.data.txt',header=F)
+y1 <- yeast[,-1]  # delete name
+y1[,9] <- as.numeric(y1[,9]) - 1
+trnidxs <- sample(1:1484,742)
+predidxs <- setdiff(1:1484,trnidxs)
+ovout <- ovalogtrn(10,y1[trnidxs,])
+predy <- ovalogpred(ovout,y1[predidxs,1:8])
+mean(predy == y1[predidxs,9])
+avout <- avalogtrn(10,y1[trnidxs,])
+predy <- avalogpred(10,avout,y1[predidxs,1:8])
+mean(predy == y1[predidxs,9])
 
 

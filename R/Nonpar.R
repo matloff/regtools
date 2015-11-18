@@ -1,8 +1,8 @@
 
+###########################  k-NN  ###############################
+
 # use knnest() to estimate the regression function values; send output
 # to knnpred() to predict
-
-###########################  k-NN  ###############################
 
 # k-NN estimation and prediction
 
@@ -130,3 +130,23 @@ parget.knnx <- function(data, query, k=10,
    tmp <- lapply(tmp,function(tmpelt) tmpelt$nn.index)
    Reduce(rbind,tmp)
 }
+
+###########################  misc.  ###############################
+
+# compute true conditional class probabilities, adjusting from
+# nonparametric analysis using data which, due to sampling design,
+# cannot estimate the unconditional class probabilities correctly
+
+# arguments:
+
+#    econdprobs: estimated conditional probabilities for Y = 1, give X
+#    wrongratio:  incorrect value for estimated P(Y = 0) / P(Y = 1)
+#    trueratio:  correct value for estimated P(Y = 0) / P(Y = 1)
+
+# value:  corrected version of econdprobs
+
+classadjust <- function(econdprobs,wrongratio,trueratio) {
+   fratios <- (1 / econdprobs - 1) * (1 / wrongratio)
+   1 / (1 + trueratio * fratios)
+}
+

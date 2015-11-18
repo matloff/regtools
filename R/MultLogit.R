@@ -1,7 +1,4 @@
 
-#################### work in progress #############################
-
-
 # One-vs.-All (OVA) and All-vs.All (AVA), logit models
 
 # arguments:

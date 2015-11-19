@@ -8,6 +8,10 @@
 
 # estimation:`
 
+# use kNN to estimate the regression function at each data point; the
+# determination of the neighbors nearest to each data point can be saved
+# for input to another call on this data set
+
 # arguments:
 #
 #   xydata: matrix or data frame of (X,Y) data, 
@@ -18,14 +22,17 @@
 #               a length-2 numeric vector means call scale() with these
 #               center and scale values
 #   nearf: function to apply to the nearest neighbors 
-#          of a point
-#   outfile: if non-NULL, save knnout, including attributes, to this file
+#          of a point; default is mean(), as in standard kNN
+#   outfile: if non-NULL, save knnout (see 'value' below) to this file
+#   inknn: if non-NULL, kNN info file (output of get.knnx()$index)
+#   outknn: if non-NULL, save kNN info file (output of get.knnx()$index)
 #
 # value: cbind() of X values in xydata and estimated reg. ftn. at those
 #        values, contains 'center' and 'scale' attributes if scalefirst
 #        is non-NULL
 
-knnest <- function(xydata,k,scalefirst=NULL,nearf=meany,outfile=NULL)
+knnest <- function(xydata,k,scalefirst=NULL,nearf=meany,
+             outfile=NULL,inknn=NULL,outknn=NULL)
 {  require(FNN)
    ycol <- ncol(xydata)  # where is Y?
    # extract the X and Y data
@@ -39,8 +46,13 @@ knnest <- function(xydata,k,scalefirst=NULL,nearf=meany,outfile=NULL)
          x <- scale(x,center=sf[[1]],scale=sf[[2]])
       xydata <- cbind(x,y)
    }
-   tmp <- get.knnx(data=x, query=x, k=k)
-   idx <- tmp$nn.index
+   if (!is.null(inknn) {
+      idx <- as.matrix(read.table(inknn,header=FALSE))
+   } else {
+      tmp <- get.knnx(data=x, query=x, k=k)
+      idx <- tmp$nn.index
+   }
+   if (!is.null(outknn) write.table)idx,file=outknn)
    # set idxrows[[i]] to row i of idx
    idxrows <- matrixtolist(1,idx)
    nearxy <- lapply(idxrows,function(idxrow) xydata[idxrow,])

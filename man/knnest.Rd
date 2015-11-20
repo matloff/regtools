@@ -1,10 +1,11 @@
-\name{knnest,meany,vary,loclin,knnpred,parget.knnx}
+\name{knnest,meany,vary,loclin,knnpred,parget.knnx,makeknnidxs}
 \alias{knnest}
 \alias{knnpred}
 \alias{parget.knnx}
 \alias{meany}
 \alias{vary}
 \alias{loclin}
+\alias{makeknnidxs}
 
 \title{Nonparametric Regression and Classification}
 
@@ -13,7 +14,7 @@ Full set of tools for k-NN regression and classification.
 }
 
 \usage{
-knnest(xydata,k,scalefirst=NULL,nearf=meany,outfile=NULL)
+knnest(xydata,k,knnidxs,scalefirst='default',nearf=meany)
 meany(predpt,nearxy) 
 vary(predpt,nearxy) 
 loclin(predpt,nearxy) 
@@ -25,6 +26,8 @@ parget.knnx(data,query,k=10,algorithm="kd_tree",cls=NULL)
   \item{xydata}{Matrix or data frame, X values in the first columns, Y
      in the last.}
   \item{k}{Number of nearest neighbors} 
+  \item{knnidxs}{Output of \code{makeknnidxs}.  Row i contains the
+     indices of the nearest points to point i.}
   \item{predpts}{A matrix or data frame of X values, at which Y is to be
      predicted.}
   \item{predpt}{One point on which to predict, e.g. a row in
@@ -38,13 +41,18 @@ parget.knnx(data,query,k=10,algorithm="kd_tree",cls=NULL)
      2-element R list, consisting of a centers vector and a scales
      vector.}
   \item{nearf}{Function to apply to the nearest neighbors of a point.}
-  \item{outfile}{File to save the output of \code{knnest} to, including
-     attributes if any.}
+  \item{x}{Like \code{xydata}, but with "X" data only.}
+  \item{m}{Maximal number of nearest neighbors to find.}
 }
 
 \details{
+
+   The \code{makeknnidxs} function does the prep work.  For each row in
+   \code{x}, the code finds the \code{m} closest rows to that row. 
+
    The \code{knnest} function does k-nearest neighbor regression
-   function estimation, in any dimension.  In addition to averaging the
+   function estimation, in any dimension.  
+   In addition to averaging the
    nearby Y values, one can choose local linear smoothing, conditional
    variance estimation or whatever the user desires.
 
@@ -85,7 +93,8 @@ pe$phd <- as.integer(pe$educ == 16)
 pecs <- pe[pe$occ >= 100 & pe$occ <= 109,]
 pecs1 <- pecs[,c(1,7,9,12,13,8)]
 # predict wage income from age, gender etc.
-zout <- knnest(pecs1,50,scalefirst='default'))
+knnidxs <- makeknnidxs(pecs1[,-6],50)
+zout <- knnest(pecs1,50,knnidxs)
 # find the est. mean income for 42-year-old women, 52 weeks worked, with
 # a Master's
 knnpred(zout,c(42,2,52,0,0))  # 62106

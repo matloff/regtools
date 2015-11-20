@@ -27,7 +27,7 @@
 #        and estimated reg. ftn. at those values; also contains 
 #        'center' and 'scale' attributes if scalefirst non-NULL
 
-knnest <- function(xydata,k,knnidxs,scalefirst=default,nearf=meany)
+knnest <- function(xydata,k,knnidxs,scalefirst='default',nearf=meany)
 {  require(FNN)
    ycol <- ncol(xydata)  # where is Y?
    # extract the X and Y data
@@ -52,7 +52,6 @@ knnest <- function(xydata,k,knnidxs,scalefirst=default,nearf=meany)
    knnout <- cbind(x,regest)
    attr(knnout,'center') <- attr(x,'scaled:center')
    attr(knnout,'scale') <- attr(x,'scaled:scale')
-   if (!is.null(outfile)) save(knnout,file=outfile)
    knnout
 }
 

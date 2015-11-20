@@ -1,5 +1,5 @@
 
-export(knnest,meany, vary,loclin,knnpred,nlshc,parget.knnx,
+export(knnest,makeknnidxs,meany, vary,loclin,knnpred,nlshc,parget.knnx,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
    ovalogtrn,ovalogpred,avalogtrn,avalogpred,logit) 
 

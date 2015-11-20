@@ -8,31 +8,26 @@
 
 # estimation:`
 
-# use kNN to estimate the regression function at each data point; the
-# determination of the neighbors nearest to each data point can be saved
-# for input to another call on this data set
+# use kNN to estimate the regression function at each data point
 
 # arguments:
 #
 #   xydata: matrix or data frame of (X,Y) data, 
 #           Y in last column
 #   k:  number of nearest neighbors
+#   knnidxs: neighbor indices; output of makeknnidxs()
 #   scalefirst: call scale() on the data first; NULL means no scaling,
 #               'default' means call scale() with defaults, and
 #               a length-2 numeric vector means call scale() with these
 #               center and scale values
 #   nearf: function to apply to the nearest neighbors 
 #          of a point; default is mean(), as in standard kNN
-#   outfile: if non-NULL, save knnout (see 'value' below) to this file
-#   inknn: if non-NULL, kNN info file (output of get.knnx()$index)
-#   outknn: if non-NULL, save kNN info file (output of get.knnx()$index)
 #
-# value: cbind() of X values in xydata and estimated reg. ftn. at those
-#        values, contains 'center' and 'scale' attributes if scalefirst
-#        is non-NULL
+# value: cbind() of X values in xydata (scaled, if scaling done) 
+#        and estimated reg. ftn. at those values; also contains 
+#        'center' and 'scale' attributes if scalefirst non-NULL
 
-knnest <- function(xydata,k,scalefirst=NULL,nearf=meany,
-             outfile=NULL,inknn=NULL,outknn=NULL)
+knnest <- function(xydata,k,knnidxs,scalefirst=default,nearf=meany)
 {  require(FNN)
    ycol <- ncol(xydata)  # where is Y?
    # extract the X and Y data
@@ -46,16 +41,12 @@ knnest <- function(xydata,k,scalefirst=NULL,nearf=meany,
          x <- scale(x,center=sf[[1]],scale=sf[[2]])
       xydata <- cbind(x,y)
    }
-   if (!is.null(inknn) {
-      idx <- as.matrix(read.table(inknn,header=FALSE))
-   } else {
-      tmp <- get.knnx(data=x, query=x, k=k)
-      idx <- tmp$nn.index
-   }
-   if (!is.null(outknn) write.table)idx,file=outknn)
+   idx <- knnidxs
    # set idxrows[[i]] to row i of idx
    idxrows <- matrixtolist(1,idx)
    nearxy <- lapply(idxrows,function(idxrow) xydata[idxrow,])
+   # now nearxy[[i]] is the portion of x corresponding to 
+   # neighbors of x[i,]
    regest <- sapply(1:nrow(x),
       function(i) nearf(x[i,],nearxy[[i]]))
    knnout <- cbind(x,regest)
@@ -63,6 +54,21 @@ knnest <- function(xydata,k,scalefirst=NULL,nearf=meany,
    attr(knnout,'scale') <- attr(x,'scaled:scale')
    if (!is.null(outfile)) save(knnout,file=outfile)
    knnout
+}
+
+# form indices of neighbors
+
+# arguments:
+
+#    x: "X variables" matrix, cases in rows, predictors in columns
+#    m: maximal number of nearest neighbors sought
+
+# value: matrix; row i, column j shows the index of the jth-closest 
+# data point to data point i, j = 1,...,m
+
+makeknnidxs <- function(x,m) {
+   tmp <- get.knnx(data=x, query=x, k=m)
+   tmp$nn.index
 }
 
 # prediction:
@@ -92,12 +98,14 @@ knnpred <- function(knnout,predpts) {
 
 # find mean of Y on the data z, Y in last column, and predict at xnew
 meany <- function(predpt,nearxy) {
+   # predpt not used (but see loclin() below)
    ycol <- ncol(nearxy)
    mean(nearxy[,ycol])
 }
 
 # find variance of Y in the neighborhood of predpt
 vary <- function(predpt,nearxy) {
+   # predpt not used (but see loclin() below)
    ycol <- ncol(nearxy)
    var(nearxy[,ycol])
 }

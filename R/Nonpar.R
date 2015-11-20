@@ -41,7 +41,7 @@ knnest <- function(xydata,k,knnidxs,scalefirst=default,nearf=meany)
          x <- scale(x,center=sf[[1]],scale=sf[[2]])
       xydata <- cbind(x,y)
    }
-   idx <- knnidxs
+   idx <- knnidxs[,1:k]
    # set idxrows[[i]] to row i of idx
    idxrows <- matrixtolist(1,idx)
    nearxy <- lapply(idxrows,function(idxrow) xydata[idxrow,])

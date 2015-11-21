@@ -48,20 +48,27 @@ parget.knnx(data,query,k=10,algorithm="kd_tree",cls=NULL)
 \details{
 
    The \code{makeknnidxs} function does the prep work.  For each row in
-   \code{x}, the code finds the \code{m} closest rows to that row. 
+   \code{x}, the code finds the \code{m} closest rows to that row.  By
+   separating this computation from \code{knnest}, one can save a lot of
+   overall computing time.  If for instance one wants to try \code{k} at
+   25, 50 and 100, one can call \code{makeknnidxs} with \code{m} equal
+   to 100, then reuse the results.
 
    The \code{knnest} function does k-nearest neighbor regression
-   function estimation, in any dimension.  
-   In addition to averaging the
-   nearby Y values, one can choose local linear smoothing, conditional
-   variance estimation or whatever the user desires.
+   function estimation, in any dimension.  In addition to averaging the
+   nearby Y values, one can instead choose local linear smoothing,
+   conditional variance estimation or whatever the user desires.
 
    Scaling is useful if the predictor variables are of different orders
    of magnitude, or for effecting a weighted Euclidean distance.
 
    The function \code{knnpred} uses the output of \code{knnest} to do
    estimation or prediction on new points.  If scaling had been used in
-   the latter, it is picked up here and applied to \code{predpts}.  
+   the latter, it is picked up here and applied to \code{predpts}.  A
+   "1-NN" method is used here:  Given a new point u whose "Y" value we
+   wish to predict, the code finds the single closest row in the
+   training set, and returns the previouslyu-estimated regression
+   function value.
 
    The \code{parget.knnx} function is a wrapper for use of 'parallel'
    package with \code{get.knnx} of the 'FNN' package.
@@ -69,6 +76,11 @@ parget.knnx(data,query,k=10,algorithm="kd_tree",cls=NULL)
 }
 
 \value{
+
+The return value of \code{makeknnidxs} is a matrix, with \code{nrow(x)}
+rows and \code{m} columns.  Row i contains the indices of the nearest
+rows in \code{x} to row i of \code{x}.  The first of these indices is
+for the closest point, then for the second-closest, and so on.
 
 The \code{knnest} function the vector of estimated regression
 function values, based on the estimated regression function values
@@ -99,6 +111,10 @@ zout <- knnest(pecs1,50,knnidxs)
 # a Master's
 knnpred(zout,c(42,2,52,0,0))  # 62106
 # what about a man, all else =?
+knnpred(zout,c(42,1,52,0,0))  # 78588
+# change to k = 25, RE-USING knnidx; latter done for 50, so and k <= 50
+# would be fine
+zout <- knnest(pecs1,25,knnidxs)
 knnpred(zout,c(42,1,52,0,0))  # 78588
 # form training and test sets, fit on the former and predict on the
 # latter

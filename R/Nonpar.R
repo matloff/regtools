@@ -136,6 +136,71 @@ matrixtolist <- function (rc, m)
     else Map(function(colnum) m[, colnum], 1:ncol(m))
 }
 
+# kNN for classification, more than 2 classes
+
+# uses One-vs.-All approach
+
+# ovalogtrn: generate estimated regression function values
+
+# arguments$
+
+#    y:  class data in training set, coded 0,1,...,m-1
+#    xdata:  output of preprocessx() applied to the training set
+#    m:  number of classes
+#    k:  number of nearest neighborhs
+
+# value:
+
+#    xdata, plus a new list component regest, the matrix of estimated 
+#    regression function values; the element in row #    i, column j, 
+#    is the estimated probability that Y = j given that X = the X 
+#    portion of row i in trnxy 
+
+ovaknntrn <- function(y,xdata,m,k) {
+   if (m < 3) stop('m must be at least 3; use knnest()3')  
+   x <- xdata$x
+   outmat <- NULL
+   for (i in 0:(m-2)) {
+      yi <- as.integer(y == i)
+      knnout <- knnest(yi,xdata,k)
+      outmat <- cbind(outmat,knnout$regest)
+   }
+   outmat <- cbind(outmat,1-apply(outmat,1,sum))
+   xdata$regest <- outmat
+   xdata
+}
+
+# ovaknnpred: predict multiclass Ys from new Xs
+
+# arguments:  
+# 
+#    xdata:  see knnpred()
+#    predpts:  see knnpred()
+# 
+# value:
+# 
+#    vector of predicted Y values, in {0,1,...,m-1}, one element for
+#    each row of predpts
+
+ovaknnpred <- function(xdata,predpts) {
+   x <- xdata$x
+   if (is.vector(predpts)) 
+      predpts <- matrix(predpts,nrow=1)
+   # need to scale predpts with the same values that had been used in
+   # the training set
+   ctr <- xdata$scaling[,1]
+   scl <- xdata$scaling[,2]
+   predpts <- scale(predpts,center=ctr,scale=scl)
+   tmp <- get.knnx(x,predpts,1)
+   idx <- tmp$nn.index
+   regest <- xdata$regest[idx,]
+   # get est reg ftn values for each row of predx and each col of
+   # coefmat; vals from coefmat[,] in tmp[,i]
+   apply(regest,1,which.max) - 1
+}
+
+# parget.knnx():
+
 # wrapper for use of 'parallel' package with get.knnx() of FNN package
 
 # arguments are same is for get.knnx(), except that 'algorithm' is set
@@ -179,74 +244,6 @@ parget.knnx <- function(data, query, k=10,
 classadjust <- function(econdprobs,wrongratio,trueratio) {
    fratios <- (1 / econdprobs - 1) * (1 / wrongratio)
    1 / (1 + trueratio * fratios)
-}
-
-# One-vs.-All (OVA), kNN
-
-# arguments:
-
-#    m:  number of classes
-#    trnxy:  X, Y training set; Y in last column; Y coded 0,1,...,m-1
-#            for the m classes
-#    k:  number of nearast neighbors 
-#    predx:  X values from which to predict Y values
-#    tstxy:  X, Y test set, same format as trnxy
-
-##################################################################
-# ovalogtrn: generate estimated regression function values
-##################################################################
-
-# arguments:
-
-#    m:  as above
-#    trnxy:  as above
-
-# value:
-
-#    matrix of estimated regression function values; the element in row
-#    i, column j, is the estimated probability that Y = j given that X =
-#    the X portion of row i in trnxy
-
-# note: X portion of trnxy will be scaled
-
-# under construction
-# ovaknntrn <- function(m,trnxy,k,knnidxs=NULL) {
-#    if (m < 3) stop('m must be at least ; use knnest()3')  
-#    p <- ncol(trnxy) 
-#    x <- as.matrix(trnxy[,1:(p-1)])
-#    x <- scale(x)
-#    y <- trnxy[,p]
-#    if (is.null(knnidxs)) knnidxs <- preprocessx(x,k)
-#    outmat <- NULL
-#    for (i in 0:(m-2)) {
-#       yi <- as.integer(y == i)
-#       knnout <- knnest(cbind(x,yi),knnidxs,scalefirst=NULL)
-#       betahat <- coef(glm(ym ~ x,family=binomial))
-#       outmat <- cbind(outmat,betahat)
-#    }
-#    outmat
-# }
-
-##################################################################
-# ovalogpred: predict Ys from new Xs
-##################################################################
-
-# arguments:  
-# 
-#    coefmat:  coefficient matrix, output from ovalogtrn()
-#    predx:  as above
-# 
-# value:
-# 
-#    vector of predicted Y values, in {0,1,...,m-1}, one element for
-#    each row of predx
-
-ovalogpred <- function(coefmat,predx) {
-   # get est reg ftn values for each row of predx and each col of
-   # coefmat; vals from coefmat[,] in tmp[,i]
-   tmp <- as.matrix(cbind(1,predx)) %*% coefmat
-   tmp <- logit(tmp)
-   apply(tmp,1,which.max) - 1
 }
 
 
@@ -296,6 +293,13 @@ ovalogpred <- function(coefmat,predx) {
 # avout <- avalogtrn(3,vert[trnidxs,])
 # predy <- avalogpred(3,avout,vert[predidxs,1:6])
 # mean(predy == vert[predidxs,7])
+# vert <- read.table('~/Research/Data/Vertebrae/column_3C.dat',header=F)
+# vert$V7 <- as.numeric(vert$V7) - 1
+# xdata <- preprocessx(vert[,-7],25)
+# zout <- ovaknntrn(vert$V7,xdata,3,25)
+# predout <- ovaknnpred(zout,vert[,-7])
+# mean(predout == vert[,7])
+
 
 # trnidxs <- sample(1:4526,2263)
 # predidxs <- setdiff(1:4526,trnidxs)
@@ -333,4 +337,9 @@ ovalogpred <- function(coefmat,predx) {
 # predy <- avalogpred(10,avout,y1[predidxs,1:8])
 # mean(predy == y1[predidxs,9])
 
+# pecs1$edulvl <- pecs1$ms + 2 * pecs1$phd
+# xdata <- preprocessx(pecs1[train,c(1:3,6)],50)
+# zout <- ovaknntrn(pecs1$edulvl[train],xdata,3,50)
+# predout <- ovaknnpred(zout,pecs1[test,c(1:3,6)])
+# always predicts 0!
 

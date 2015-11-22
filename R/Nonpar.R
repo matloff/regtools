@@ -13,34 +13,22 @@
 # arguments:
 #
 #   xydata: matrix or data frame of (X,Y) data, 
-#           Y in last column
+#           Y in last column; X portion assumed already 
+#           scaled, via scale()
 #   k:  number of nearest neighbors
 #   knnidxs: neighbor indices; output of makeknnidxs()
-#   scalefirst: call scale() on the data first; NULL means no scaling,
-#               'default' means call scale() with defaults, and
-#               a length-2 numeric vector means call scale() with these
-#               center and scale values
 #   nearf: function to apply to the nearest neighbors 
 #          of a point; default is mean(), as in standard kNN
 #
-# value: cbind() of X values in xydata (scaled, if scaling done) 
-#        and estimated reg. ftn. at those values; also contains 
-#        'center' and 'scale' attributes if scalefirst non-NULL
+# value: cbind() of scaled X values in xydata and estimated 
+#        reg. ftn. at those values; also contains 
+#        'center' and 'scale' attributes for the scaling
 
-knnest <- function(xydata,k,knnidxs,scalefirst='default',nearf=meany)
+knnest <- function(xydata,k,knnidxs,nearf=meany)
 {  require(FNN)
    ycol <- ncol(xydata)  # where is Y?
    # extract the X and Y data
    x <- xydata[,-ycol,drop = F]
-   y <- xydata[,ycol]
-   sf <- scalefirst
-   if (!is.null(sf)) {
-      if (is.character(sf)) {
-         x <- scale(x) 
-      } else
-         x <- scale(x,center=sf[[1]],scale=sf[[2]])
-      xydata <- cbind(x,y)
-   }
    idx <- knnidxs[,1:k]
    # set idxrows[[i]] to row i of idx
    idxrows <- matrixtolist(1,idx)
@@ -59,15 +47,26 @@ knnest <- function(xydata,k,knnidxs,scalefirst='default',nearf=meany)
 
 # arguments:
 
-#    x: "X variables" matrix, cases in rows, predictors in columns
-#    m: maximal number of nearest neighbors sought
+#    x: "X variables" matrix, cases in rows, predictors in columns; will
+#       be scaled by this function
+#    kmax: maximal number of nearest neighbors sought
 
-# value: matrix; row i, column j shows the index of the jth-closest 
-# data point to data point i, j = 1,...,m
+# value: R list; component 'x' is the result of scale(x); 'idxs' is a
+#        matrix -- row i, column j shows the index of the jth-closest 
+#        data point to data point i, j = 1,...,kmax; 'scaling' is a
+#        2-column matrix consisting of the attributes scaled:center and
+#        scaled:scale from scale()
 
-makeknnidxs <- function(x,m) {
-   tmp <- get.knnx(data=x, query=x, k=m)
-   tmp$nn.index
+makeknnidxs <- function(x,kmax) {
+   x <- scale(x)
+   tmp <- c(attr(x,'scaled:center','scaled:scale'))
+   result <- list(scaling = tmp)
+   result$scaling <- tmp
+   attr(x,'scaled:center') <- NULL
+   attr(x,'scaled:scale') <- NULL
+   result$x <- x
+   tmp <- get.knnx(data=x, query=x, k=kmax)
+   result$idxs <- tmp$nn.index
 }
 
 # prediction:
@@ -168,4 +167,158 @@ classadjust <- function(econdprobs,wrongratio,trueratio) {
    fratios <- (1 / econdprobs - 1) * (1 / wrongratio)
    1 / (1 + trueratio * fratios)
 }
+
+# One-vs.-All (OVA), kNN
+
+# arguments:
+
+#    m:  number of classes
+#    trnxy:  X, Y training set; Y in last column; Y coded 0,1,...,m-1
+#            for the m classes
+#    k:  number of nearast neighbors 
+#    predx:  X values from which to predict Y values
+#    tstxy:  X, Y test set, same format as trnxy
+
+##################################################################
+# ovalogtrn: generate estimated regression function values
+##################################################################
+
+# arguments:
+
+#    m:  as above
+#    trnxy:  as above
+
+# value:
+
+#    matrix of estimated regression function values; the element in row
+#    i, column j, is the estimated probability that Y = j given that X =
+#    the X portion of row i in trnxy
+
+# note: X portion of trnxy will be scaled
+
+ovaknntrn <- function(m,trnxy,k,knnidxs=NULL) {
+   if (m < 3) stop('m must be at least ; use knnest()3')  
+   p <- ncol(trnxy) 
+   x <- as.matrix(trnxy[,1:(p-1)])
+   x <- scale(x)
+   y <- trnxy[,p]
+   if (is.null(knnidxs)) knnidxs <- makeknnidxs(x,k)
+   outmat <- NULL
+   for (i in 0:(m-2)) {
+      yi <- as.integer(y == i)
+      knnout <- knnest(cbind(x,yi),knnidxs,scalefirst=NULL)
+
+
+      betahat <- coef(glm(ym ~ x,family=binomial))
+      outmat <- cbind(outmat,betahat)
+   }
+   outmat
+}
+
+##################################################################
+# ovalogpred: predict Ys from new Xs
+##################################################################
+
+# arguments:  
+# 
+#    coefmat:  coefficient matrix, output from ovalogtrn()
+#    predx:  as above
+# 
+# value:
+# 
+#    vector of predicted Y values, in {0,1,...,m-1}, one element for
+#    each row of predx
+
+ovalogpred <- function(coefmat,predx) {
+   # get est reg ftn values for each row of predx and each col of
+   # coefmat; vals from coefmat[,] in tmp[,i]
+   tmp <- as.matrix(cbind(1,predx)) %*% coefmat
+   tmp <- logit(tmp)
+   apply(tmp,1,which.max) - 1
+}
+
+
+# ucbdf <- tbltofakedf(UCBAdmissions)
+# newucb <- matrix(nrow=nrow(ucbdf),ncol=ncol(ucbdf))
+# for (i in 1:3) {
+#    z <- ucbdf[,i] 
+#    z <- as.numeric(as.factor(z))
+#    newucb[,i] <- z
+# }
+# newucb[,3] <- newucb[,3] - 1
+# ovout <- ovalogtrn(6,newucb)
+# predy <- ovalogpred(ovout,newucb[,1:2])
+# mean(predy == newucb[,3])
+# avout <- avalogtrn(6,newucb)
+# predy <- avalogpred(6,avout,newucb[,1:2])
+# mean(predy == newucb[,3])
+
+# forest <- read.csv("~/Research/Data/ForestTypes/training.csv")
+# z <- forest[,1]
+# z <- as.numeric(z)
+# z <- z - 1
+# forest[,1] <- z
+# f1 <- cbind(forest[,-1],forest[,1]) 
+# f2 <- f1[,-(1:20)]
+# ovout <- ovalogtrn(4,f2)
+# predy <- ovalogpred(ovout,f2[,-8])
+# mean(predy == f2[,8])
+# avout <- avalogtrn(4,f2)
+# predy <- avalogpred(4,avout,f2[,-8])
+# mean(predy == f2[,8])
+# f3 <- f1[,c(1:9,28)]
+
+
+# vert <- read.table('~/Research/Data/Vertebrae/vertebral_column_data/column_3C.dat',header=F)
+# vert$V7 <- as.numeric(vert$V7) - 1
+# ovout <- ovalogtrn(3,vert)
+# predy <- ovalogpred(ovout,vert[,-7])
+# mean(predy == vert$V7)
+# trnidxs <- sample(1:310,155)
+# predidxs <- setdiff(1:310,trnidxs)
+# trnidxs <- sample(1:310,225)
+# predidxs <- setdiff(1:310,trnidxs)
+# ovout <- ovalogtrn(3,vert[trnidxs,])
+# predy <- ovalogpred(ovout,vert[predidxs,1:6])
+# mean(predy == vert[predidxs,7])
+# avout <- avalogtrn(3,vert[trnidxs,])
+# predy <- avalogpred(3,avout,vert[predidxs,1:6])
+# mean(predy == vert[predidxs,7])
+
+# trnidxs <- sample(1:4526,2263)
+# predidxs <- setdiff(1:4526,trnidxs)
+# ovout <- ovalogtrn(6,newucb[trnidxs,])
+# predy <- ovalogpred(ovout,newucb[predidxs,1:2])
+# mean(predy == newucb[predidxs,3])
+# avout <- avalogtrn(6,newucb[trnidxs,])
+# predy <- avalogpred(6,avout,newucb[predidxs,1:2])
+# mean(predy == newucb[predidxs,3])
+
+
+
+# glass <- read.csv('~/Research/Data/Glass/glass.data.txt',header=F)
+# glass[,11] <- glass[,11] - 1
+
+
+# trnidxs <- sample(1:4526,2263)
+# predidxs <- setdiff(1:4526,trnidxs)
+# ovout <- ovalogtrn(6,newucb[trnidxs,])
+# predy <- ovalogpred(ovout,newucb[predidxs,1:2])
+# mean(predy == newucb[predidxs,3])
+# avout <- avalogtrn(6,newucb[trnidxs,])
+# predy <- avalogpred(6,avout,newucb[predidxs,1:2])
+# mean(predy == newucb[predidxs,3])
+
+# yeast <- read.table('~/Research/Data/Yeast/yeast.data.txt',header=F)
+# y1 <- yeast[,-1]  # delete name
+# y1[,9] <- as.numeric(y1[,9]) - 1
+# trnidxs <- sample(1:1484,742)
+# predidxs <- setdiff(1:1484,trnidxs)
+# ovout <- ovalogtrn(10,y1[trnidxs,])
+# predy <- ovalogpred(ovout,y1[predidxs,1:8])
+# mean(predy == y1[predidxs,9])
+# avout <- avalogtrn(10,y1[trnidxs,])
+# predy <- avalogpred(10,avout,y1[predidxs,1:8])
+# mean(predy == y1[predidxs,9])
+
 

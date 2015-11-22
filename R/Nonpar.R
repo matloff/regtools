@@ -1,97 +1,110 @@
 
-###########################  k-NN  ###############################
+######################  k-NN  ###############################
 
 # use knnest() to estimate the regression function values; send output
 # to knnpred() to predict
 
-# k-NN estimation and prediction
+# knnest(): 
 
-# estimation:`
+# use kNN to estimate the regression function at each data point in the
+# training set
 
-# use kNN to estimate the regression function at each data point
+# will refer to predictor and response variable data as X and Y;
+# together they form the training set
+
+# X must undergo preprocessing -- centering/scaling, and determination
+# of nearest neighbors -- which is done by calling preprocessx() before
+# calling knnest()
 
 # arguments:
 #
-#   xydata: matrix or data frame of (X,Y) data, 
-#           Y in last column; X portion assumed already 
-#           scaled, via scale()
+#   y: Y values in training set
+#   xdata: X and associated neighbor indices; output of preprocessx()
 #   k:  number of nearest neighbors
-#   knnidxs: neighbor indices; output of makeknnidxs()
 #   nearf: function to apply to the nearest neighbors 
 #          of a point; default is mean(), as in standard kNN
 #
-# value: cbind() of scaled X values in xydata and estimated 
-#        reg. ftn. at those values; also contains 
-#        'center' and 'scale' attributes for the scaling
+# value: R list, consisting of xdata and the estimated 
+#        reg. ftn. at those values
 
-knnest <- function(xydata,k,knnidxs,nearf=meany)
+knnest <- function(y,xdata,k,nearf=meany)
 {  require(FNN)
-   ycol <- ncol(xydata)  # where is Y?
-   # extract the X and Y data
-   x <- xydata[,-ycol,drop = F]
-   idx <- knnidxs[,1:k]
+   # take only the idxs for our value of k
+   idxs <- xdata$idxs 
+   if (ncol(idxs) < k) stop('k must be <= kmax')
+   idx <- idxs [,1:k]
    # set idxrows[[i]] to row i of idx
    idxrows <- matrixtolist(1,idx)
-   nearxy <- lapply(idxrows,function(idxrow) xydata[idxrow,])
+   # now do the kNN smoothing
+   x <- xdata$x
+   xy <- cbind(x,y)
+   nearxy <- lapply(idxrows,function(idxrow) xy[idxrow,])
    # now nearxy[[i]] is the portion of x corresponding to 
-   # neighbors of x[i,]
+   # neighbors of x[i,], together with the associated Y values
+
+   # now find the estimated regression function values at each point in
+   # the training set
    regest <- sapply(1:nrow(x),
       function(i) nearf(x[i,],nearxy[[i]]))
-   knnout <- cbind(x,regest)
-   attr(knnout,'center') <- attr(x,'scaled:center')
-   attr(knnout,'scale') <- attr(x,'scaled:scale')
-   knnout
+   xdata$regest <- regest
+   xdata
 }
 
-# form indices of neighbors
+# preprocessx():
+
+# scale the X matrix, and form indices of neighbors
 
 # arguments:
 
 #    x: "X variables" matrix, cases in rows, predictors in columns; will
-#       be scaled by this function
+#       be scaled by this function and returned in scaled form
 #    kmax: maximal number of nearest neighbors sought
 
 # value: R list; component 'x' is the result of scale(x); 'idxs' is a
 #        matrix -- row i, column j shows the index of the jth-closest 
 #        data point to data point i, j = 1,...,kmax; 'scaling' is a
 #        2-column matrix consisting of the attributes scaled:center and
-#        scaled:scale from scale()
+#        scaled:scale from scale(x)
 
-makeknnidxs <- function(x,kmax) {
+preprocessx <- function(x,kmax) {
    x <- scale(x)
-   tmp <- c(attr(x,'scaled:center','scaled:scale'))
+   tmp <- cbind(attr(x,'scaled:center'),attr(x,'scaled:scale'))
    result <- list(scaling = tmp)
-   result$scaling <- tmp
    attr(x,'scaled:center') <- NULL
    attr(x,'scaled:scale') <- NULL
    result$x <- x
    tmp <- get.knnx(data=x, query=x, k=kmax)
    result$idxs <- tmp$nn.index
+   result
 }
 
-# prediction:
+# knnpred():
 
 # arguments:
 
-# knnout:  output from knnest(); if string, a file name, else matrix
-# predpts:  matrix/data frame of X values at which to predict Y
+#    xdata:  output from knnest()
+#    predpts:  matrix/data frame of X values at which to predict Y
 
-knnpred <- function(knnout,predpts) {
-   if (is.character(knnout)) load(knnout)
-   p1 <- ncol(knnout)
-   p <- p1 - 1
-   knnoutx <- knnout[,-p1]
-   knnouty <- knnout[,p1]
+# value:
+
+#    the predicted Y values for predpts
+
+# note:  "1-nearest neighbor" is used here; for each row of predpts, the
+# estimated regression function value for the closest point in the
+# training data is used as our est. reg. ftn. value at tht predpts row
+
+knnpred <- function(xdata,predpts) {
+   x <- xdata$x
    if (is.vector(predpts)) 
       predpts <- matrix(predpts,nrow=1)
-   if (!is.null(attr(knnout,'center'))) {
-      ctr <- attr(knnout,'center')
-      scl <- attr(knnout,'scale')
-      predpts <- scale(predpts,center=ctr,scale=scl)
-   }
-   tmp <- get.knnx(knnoutx,predpts,1)
+   # need to scale predpts with the same values that had been used in
+   # the training set
+   ctr <- xdata$scaling[,1]
+   scl <- xdata$scaling[,2]
+   predpts <- scale(predpts,center=ctr,scale=scl)
+   tmp <- get.knnx(x,predpts,1)
    idx <- tmp$nn.index
-   knnouty[idx]
+   xdata$regest[idx]
 }
 
 # find mean of Y on the data z, Y in last column, and predict at xnew
@@ -196,24 +209,23 @@ classadjust <- function(econdprobs,wrongratio,trueratio) {
 
 # note: X portion of trnxy will be scaled
 
-ovaknntrn <- function(m,trnxy,k,knnidxs=NULL) {
-   if (m < 3) stop('m must be at least ; use knnest()3')  
-   p <- ncol(trnxy) 
-   x <- as.matrix(trnxy[,1:(p-1)])
-   x <- scale(x)
-   y <- trnxy[,p]
-   if (is.null(knnidxs)) knnidxs <- makeknnidxs(x,k)
-   outmat <- NULL
-   for (i in 0:(m-2)) {
-      yi <- as.integer(y == i)
-      knnout <- knnest(cbind(x,yi),knnidxs,scalefirst=NULL)
-
-
-      betahat <- coef(glm(ym ~ x,family=binomial))
-      outmat <- cbind(outmat,betahat)
-   }
-   outmat
-}
+# under construction
+# ovaknntrn <- function(m,trnxy,k,knnidxs=NULL) {
+#    if (m < 3) stop('m must be at least ; use knnest()3')  
+#    p <- ncol(trnxy) 
+#    x <- as.matrix(trnxy[,1:(p-1)])
+#    x <- scale(x)
+#    y <- trnxy[,p]
+#    if (is.null(knnidxs)) knnidxs <- preprocessx(x,k)
+#    outmat <- NULL
+#    for (i in 0:(m-2)) {
+#       yi <- as.integer(y == i)
+#       knnout <- knnest(cbind(x,yi),knnidxs,scalefirst=NULL)
+#       betahat <- coef(glm(ym ~ x,family=binomial))
+#       outmat <- cbind(outmat,betahat)
+#    }
+#    outmat
+# }
 
 ##################################################################
 # ovalogpred: predict Ys from new Xs

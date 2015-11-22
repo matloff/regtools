@@ -14,7 +14,7 @@ Full set of tools for k-NN regression and classification.
 }
 
 \usage{
-knnest(xydata,xdata,k,nearf=meany)
+knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax)
 meany(predpt,nearxy) 
 vary(predpt,nearxy) 
@@ -52,9 +52,14 @@ parget.knnx(data,query,k=10,algorithm="kd_tree",cls=NULL)
    values of \code{k}, we do not need to call \code{preprocessx} again.
 
    The \code{knnest} function does k-nearest neighbor regression
-   function estimation, in any dimension.  In addition to averaging the
-   nearby Y values, one can instead choose local linear smoothing,
-   conditional variance estimation or whatever the user desires.
+   function estimation, in any dimension.  This of course includes the
+   2-class classification case, where with Y = 0, 1 representing the two
+   classes, the regression function reduces to the conditional
+   probability of class 1, given the predictors.
+
+   In addition to averaging the nearby Y values, one can instead choose
+   local linear smoothing, conditional variance estimation or whatever
+   the user desires.
 
    The X, i.e. predictor, data will be scaled by the code, so as to put
    all predictor variables on an equal footing.
@@ -63,7 +68,7 @@ parget.knnx(data,query,k=10,algorithm="kd_tree",cls=NULL)
    estimation or prediction on new points.  A "1-NN" method is used
    here:  Given a new point u whose "Y" value we wish to predict, the
    code finds the single closest row in the training set, and returns
-   the previouslyu-estimated regression function value.
+   the previously-estimated regression function value at that row.
 
    The \code{parget.knnx} function is a wrapper for use of 'parallel'
    package with \code{get.knnx} of the 'FNN' package.
@@ -72,14 +77,17 @@ parget.knnx(data,query,k=10,algorithm="kd_tree",cls=NULL)
 
 \value{
 
-The return value of \code{preprocessx} is a matrix, with \code{nrow(x)}
-rows and \code{m} columns.  Row i contains the indices of the nearest
-rows in \code{x} to row i of \code{x}.  The first of these indices is
-for the closest point, then for the second-closest, and so on.
+The return value of \code{preprocessx} is an R list. Its \code{x}
+component is the scaled \code{x} matrix, with the scaling factors being
+recorded in the \code{scaling} component. The \code{idxs} component. is
+a matrix, with \code{nrow(x)} rows and \code{m} columns.  Row i contains
+the indices of the nearest rows in \code{x} to row i of \code{x}.  The
+first of these indices is for the closest point, then for the
+second-closest, and so on.
 
-The \code{knnest} function the vector of estimated regression
-function values, based on the estimated regression function values
-output by \code{knnest}.  
+The \code{knnest} function returns an expanded version of \code{xdata},
+with the expansion consisting of a new component \code{regest}, the
+estimated regression function values at the training set points.
 
 The function \code{knnpred} returns the predicted Y values at
 \code{predpts}.
@@ -91,6 +99,12 @@ neighbors, as with the \code{nn.index} component of the return value of
 }
 
 \examples{
+xe <- matrix(rnorm(30000),ncol=3)
+y <- xe %*% c(1,0.5,0.2)
+x <- xe[,-3]
+xdata <- preprocessx(x,50)
+zout <- knnest(y,xdata,50)
+knnpred(zout,c(1,1))  # about 1.5
 data(prgeng)
 pe <- prgeng
 # dummies for MS, PhD
@@ -113,15 +127,14 @@ knnpred(zout,c(42,2,52,0,0))  # 69104
 knnpred(zout,c(42,1,52,0,0))  # 89200
 # form training and test sets, fit on the former and predict on the
 # latter
-### fullidxs <- 1:nrow(pecs1)
-### train <- sample(fullidxs,1000)
-### test <- setdiff(fullidxs,train)
-### trainout <- knnest(pesc1[train,],50,scalefirst='default')
-### trainout <- knnest(pecs1[train,],50,scalefirst='default')
-### testout <- knnpred(trainout,pecs1[test,-6])
-### # find mean abs. prediction error
-### mean(abs(pecs1[test,6] - testout))
-
+fullidxs <- 1:nrow(pecs1)
+train <- sample(fullidxs,10000)
+test <- setdiff(fullidxs,train)
+xdata <- preprocessx(pecs1[train,1:5],50)
+trainout <- knnest(pecs1[train,6],xdata,50)
+testout <- knnpred(trainout,pecs1[test,-6])
+# find mean abs. prediction error (about $25K)
+mean(abs(pecs1[test,6] - testout))
 }
 
 \author{

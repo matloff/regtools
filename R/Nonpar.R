@@ -194,8 +194,6 @@ ovaknnpred <- function(xdata,predpts) {
    tmp <- get.knnx(x,predpts,1)
    idx <- tmp$nn.index
    regest <- xdata$regest[idx,]
-   # get est reg ftn values for each row of predx and each col of
-   # coefmat; vals from coefmat[,] in tmp[,i]
    apply(regest,1,which.max) - 1
 }
 

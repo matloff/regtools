@@ -1,11 +1,13 @@
-\name{knnest,meany,vary,loclin,knnpred,parget.knnx,preprocessx}
+\name{knnest,meany,vary,loclin,knnpred,preprocessx,ovaknntrn,ovaknnpred}
 \alias{knnest}
 \alias{knnpred}
-\alias{parget.knnx}
+% \alias{parget.knnx}
 \alias{meany}
 \alias{vary}
 \alias{loclin}
 \alias{preprocessx}
+\alias{ovaknntrn}
+\alias{ovaknnpred}
 
 \title{Nonparametric Regression and Classification}
 
@@ -20,13 +22,16 @@ meany(predpt,nearxy)
 vary(predpt,nearxy) 
 loclin(predpt,nearxy) 
 knnpred(knnout,predpts) 
-parget.knnx(data,query,k=10,algorithm="kd_tree",cls=NULL) 
+ovaknntrn(y,xdata,m,k) 
+ovaknnpred(xdatarf,predpts) 
 }
 
 \arguments{
   \item{y}{Vector of response variable data in the training set.}
   \item{xdata}{X and associated neighbor indices. Output of
      \code{preprocessx}.} 
+  \item{xdatarf}{The augmented \code{xdata}, output of \code{knnest} or 
+     \code{ovaknntrn}.} 
   \item{k}{Number of nearest neighbors} 
   \item{predpts}{A matrix or data frame of X values, at which Y is to be
      predicted.}
@@ -39,6 +44,7 @@ parget.knnx(data,query,k=10,algorithm="kd_tree",cls=NULL)
   \item{x}{"X" data, predictors, one row per data point, in the training
      set.}
   \item{kmax}{Maximal number of nearest neighbors to find.}
+  \item{m}{Number of classes in multiclass setting.}
 }
 
 \details{
@@ -70,8 +76,12 @@ parget.knnx(data,query,k=10,algorithm="kd_tree",cls=NULL)
    code finds the single closest row in the training set, and returns
    the previously-estimated regression function value at that row.
 
-   The \code{parget.knnx} function is a wrapper for use of 'parallel'
-   package with \code{get.knnx} of the 'FNN' package.
+   The functions \code{ovaknntrn} and \code{ovaknnpred} are multiclass
+   wrappers for \code{knnest} and \code{knnpred}. Here \code{y} is coded
+   0,1,...,\code{m}-1 for the \code{m} classes.
+
+   % The \code{parget.knnx} function is a wrapper for use of 'parallel'
+   % package with \code{get.knnx} of the 'FNN' package.
    
 }
 
@@ -92,9 +102,9 @@ estimated regression function values at the training set points.
 The function \code{knnpred} returns the predicted Y values at
 \code{predpts}.
 
-The \code{parget.knnx} function returns the matrix of indices of nearest
-neighbors, as with the \code{nn.index} component of the return value of
-\code{get.knnx}.
+% The \code{parget.knnx} function returns the matrix of indices of nearest
+% neighbors, as with the \code{nn.index} component of the return value of
+% \code{get.knnx}.
 
 }
 
@@ -105,6 +115,7 @@ x <- xe[,-3]
 xdata <- preprocessx(x,50)
 zout <- knnest(y,xdata,50)
 knnpred(zout,c(1,1))  # about 1.5
+
 data(prgeng)
 pe <- prgeng
 # dummies for MS, PhD
@@ -135,6 +146,20 @@ trainout <- knnest(pecs1[train,6],xdata,50)
 testout <- knnpred(trainout,pecs1[test,-6])
 # find mean abs. prediction error (about $25K)
 mean(abs(pecs1[test,6] - testout))
+
+\dontrun{
+# assumes UCI Vertebral Column data already downloaded from
+# https://archive.ics.uci.edu/ml/machine-learning-databases/00212/vertebral_column_data.zip
+# and unzipped
+vert <- read.table('column_3C.dat',header=F)
+# change to 0,1,2 class codes
+vert$V7 <- as.numeric(vert$V7) - 1
+ovout <- ovalogtrn(3,vert)
+predy <- ovalogpred(ovout,vert[,-7])
+# proportion correctly classified
+mean(predy == vert$V7)
+}
+
 }
 
 \author{

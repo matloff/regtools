@@ -166,23 +166,6 @@ parget.knnx <- function(data, query, k=10,
 
 ###########################  misc.  ###############################
 
-# compute true conditional class probabilities, adjusting from
-# nonparametric analysis using data which, due to sampling design,
-# cannot estimate the unconditional class probabilities correctly
-
-# arguments:
-
-#    econdprobs: estimated conditional probabilities for Y = 1, give X
-#    wrongratio:  incorrect value for estimated P(Y = 0) / P(Y = 1)
-#    trueratio:  correct value for estimated P(Y = 0) / P(Y = 1)
-
-# value:  corrected version of econdprobs
-
-classadjust <- function(econdprobs,wrongratio,trueratio) {
-   fratios <- (1 / econdprobs - 1) * (1 / wrongratio)
-   1 / (1 + trueratio * fratios)
-}
-
 
 # ucbdf <- tbltofakedf(UCBAdmissions)
 # newucb <- matrix(nrow=nrow(ucbdf),ncol=ncol(ucbdf))

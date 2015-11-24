@@ -185,6 +185,116 @@ matrixtolist <- function (rc,m)
    else Map(function(colnum) m[, colnum], 1:ncol(m))
 }
 
+# kNN for classification, more than 2 classes
+
+# uses One-vs.-All approach
+
+# ovalogtrn: generate estimated regression function values
+
+# arguments$
+
+#    y:  class data in training set, coded 0,1,...,m-1
+#    xdata:  output of preprocessx() applied to the training set
+#    m:  number of classes
+#    k:  number of nearest neighborhs
+
+# value:
+
+#    xdata, plus a new list component regest, the matrix of estimated 
+#    regression function values; the element in row #    i, column j, 
+#    is the estimated probability that Y = j given that X = the X 
+#    portion of row i in trnxy 
+
+ovaknntrn <- function(y,xdata,m,k) {
+   if (m < 3) stop('m must be at least 3; use knnest()3')  
+   x <- xdata$x
+   outmat <- NULL
+   for (i in 0:(m-2)) {
+      yi <- as.integer(y == i)
+      knnout <- knnest(yi,xdata,k)
+      outmat <- cbind(outmat,knnout$regest)
+   }
+   outmat <- cbind(outmat,1-apply(outmat,1,sum))
+   xdata$regest <- outmat
+   xdata
+}
+
+# ovaknnpred: predict multiclass Ys from new Xs
+
+# arguments:  
+# 
+#    xdata:  see knnpred()
+#    predpts:  see knnpred()
+# 
+# value:
+# 
+#    vector of predicted Y values, in {0,1,...,m-1}, one element for
+#    each row of predpts
+
+ovaknnpred <- function(xdata,predpts) {
+   x <- xdata$x
+   if (is.vector(predpts)) 
+      predpts <- matrix(predpts,nrow=1)
+   # need to scale predpts with the same values that had been used in
+   # the training set
+   ctr <- xdata$scaling[,1]
+   scl <- xdata$scaling[,2]
+   predpts <- scale(predpts,center=ctr,scale=scl)
+   tmp <- get.knnx(x,predpts,1)
+   idx <- tmp$nn.index
+   regest <- xdata$regest[idx,]
+   apply(regest,1,which.max) - 1
+}
+
+# parget.knnx():
+
+# wrapper for use of 'parallel' package with get.knnx() of FNN package
+
+# arguments are same is for get.knnx(), except that 'algorithm' is set
+# and except for cls, a 'parallel' cluster; 'query' is distributed to
+# chunks at the cluster nodes, and 'data' is copied to all cluster
+# nodes; gen.knnx() is called at each node, then the results are
+# combined
+
+# value is the nn.index component of the list returned by get.knnx()
+
+parget.knnx <- function(data, query, k=10, 
+      algorithm="kd_tree",cls=NULL) {
+   if (is.null(cls))  {
+      tmp <- get.knnx(data,query,k,algorithm)
+      return(tmp$nn.index)
+   }
+   require(partools)
+   setclsinfo(cls)
+   clusterExport(cls,c('data','k','algorithm'),envir=environment())
+   distribsplit(cls,'query')
+   clusterEvalQ(cls,library(FNN))
+   tmp <- clusterEvalQ(cls,get.knnx(data,query,k,algorithm))
+   tmp <- lapply(tmp,function(tmpelt) tmpelt$nn.index)
+   Reduce(rbind,tmp)
+}
+
+###########################  misc.  ###############################
+
+# compute true conditional class probabilities, adjusting from
+# nonparametric analysis using data which, due to sampling design,
+# cannot estimate the unconditional class probabilities correctly
+
+# arguments:
+
+#    econdprobs: estimated conditional probabilities for Y = 1, give X
+#    wrongratio:  incorrect value for estimated P(Y = 0) / P(Y = 1)
+#    trueratio:  correct value for estimated P(Y = 0) / P(Y = 1)
+
+# value:  corrected version of econdprobs
+
+classadjust <- function(econdprobs,wrongratio,trueratio) {
+   fratios <- (1 / econdprobs - 1) * (1 / wrongratio)
+   1 / (1 + trueratio * fratios)
+}
+
+
+
 # ucbdf <- tbltofakedf(UCBAdmissions)
 # newucb <- matrix(nrow=nrow(ucbdf),ncol=ncol(ucbdf))
 # for (i in 1:3) {

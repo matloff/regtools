@@ -136,67 +136,6 @@ matrixtolist <- function (rc, m)
     else Map(function(colnum) m[, colnum], 1:ncol(m))
 }
 
-# kNN for classification, more than 2 classes
-
-# uses One-vs.-All approach
-
-# ovalogtrn: generate estimated regression function values
-
-# arguments$
-
-#    y:  class data in training set, coded 0,1,...,m-1
-#    xdata:  output of preprocessx() applied to the training set
-#    m:  number of classes
-#    k:  number of nearest neighborhs
-
-# value:
-
-#    xdata, plus a new list component regest, the matrix of estimated 
-#    regression function values; the element in row #    i, column j, 
-#    is the estimated probability that Y = j given that X = the X 
-#    portion of row i in trnxy 
-
-ovaknntrn <- function(y,xdata,m,k) {
-   if (m < 3) stop('m must be at least 3; use knnest()3')  
-   x <- xdata$x
-   outmat <- NULL
-   for (i in 0:(m-2)) {
-      yi <- as.integer(y == i)
-      knnout <- knnest(yi,xdata,k)
-      outmat <- cbind(outmat,knnout$regest)
-   }
-   outmat <- cbind(outmat,1-apply(outmat,1,sum))
-   xdata$regest <- outmat
-   xdata
-}
-
-# ovaknnpred: predict multiclass Ys from new Xs
-
-# arguments:  
-# 
-#    xdata:  see knnpred()
-#    predpts:  see knnpred()
-# 
-# value:
-# 
-#    vector of predicted Y values, in {0,1,...,m-1}, one element for
-#    each row of predpts
-
-ovaknnpred <- function(xdata,predpts) {
-   x <- xdata$x
-   if (is.vector(predpts)) 
-      predpts <- matrix(predpts,nrow=1)
-   # need to scale predpts with the same values that had been used in
-   # the training set
-   ctr <- xdata$scaling[,1]
-   scl <- xdata$scaling[,2]
-   predpts <- scale(predpts,center=ctr,scale=scl)
-   tmp <- get.knnx(x,predpts,1)
-   idx <- tmp$nn.index
-   regest <- xdata$regest[idx,]
-   apply(regest,1,which.max) - 1
-}
-
 # parget.knnx():
 
 # wrapper for use of 'parallel' package with get.knnx() of FNN package

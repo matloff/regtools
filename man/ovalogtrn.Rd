@@ -19,7 +19,7 @@ ovalogpred(coefmat,predx)
 avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx)
 ovaknntrn(y,xdata,m,k) 
-ovaknnpred(xdatarf,predpts) 
+ovaknnpred(xdatarf,predpts,truepriors=NULL) 
 classadjust(econdprobs,wrongratio,trueratio) 
 
 }
@@ -44,6 +44,8 @@ classadjust(econdprobs,wrongratio,trueratio)
   \item{wrongratio}{Incorrect, data-provenanced, p/(1-p), with p being
   the unconditional probability of a certain class.}
   \item{trueratio}{Same as \code{wrongratio}, but with the correct
+  \item{truepriors}{True unconditional class probabilities, typically
+  obtained externally.}
   values.}
 }
 
@@ -113,7 +115,17 @@ trnout <- ovaknntrn(lrtrn[,1],xdata,26,50)
 ypred <- ovaknnpred(trnout,lrtest[,-1])
 # how well did we do?
 mean(ypred == lrtest[,1])
-
+# now with real priors
+### truepriors <- 
+###    c(0.0812,0.0149,0.0271,0.0432,0.1202,0.0230,0.0203,0.0592,0.0731,
+###    0.0010,0.0069,0.0398,0.0261,0.0695,0.0768,0.0182,0.0011,0.0602,
+###    0.0628,0.0910,0.0288,0.0111,0.0209,0.0017,0.0211,0.0007)
+### trnout <- ovaknntrn(lrtrn[,1],xdata,26,50,truepriors)
+### ypred <- ovaknnpred(trnout,lrtest[,-1])
+### wts <- sapply(ypred,function(i) truepriors[i+1])
+### wts %*% (ypred == lrtest[,1])
+### bytrueltr <- split(ypred,lrtest[,1])
+### f <- function
 }
 
 \author{

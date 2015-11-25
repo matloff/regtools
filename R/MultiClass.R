@@ -193,34 +193,38 @@ matrixtolist <- function (rc,m)
 
 # arguments$
 
-#    y:  class data in training set, coded 0,1,...,m-1
+#    y:  training set class data in training set, coded 0,1,...,m-1
 #    xdata:  output of preprocessx() applied to the training set
+#            predictor data
 #    m:  number of classes
 #    k:  number of nearest neighborhs
-#    truepriors:  true class probabilities
+#    truepriors:  true class probabilities, typically from external source
 
 # value:
 
-#    xdata, plus a new list component regest, the matrix of estimated 
-#    regression function values; the element in row i, column j, 
-#    is the estimated probability that Y = j given that X = 
-#    row i in the X data 
+#    xdata from input, plus a new list component regest, the matrix 
+#    of estimated regression function values; the element in row 
+#    i, column j, is the probability that Y = j given that 
+#    X = row i in the X data, estimated from the training set
 
 ovaknntrn <- function(y,xdata,m,k,truepriors=NULL) {
-   if (m < 3) stop('m must be at least 3; use knnest()3')  
+   if (m < 3) stop('m must be at least 3; use knnest()')  
    x <- xdata$x
-   outmat <- NULL
+   outmat <- NULL  # will eventually be regest
    for (i in 0:(m-2)) {
       yi <- as.integer(y == i)
       knnout <- knnest(yi,xdata,k)
       outmat <- cbind(outmat,knnout$regest)
    }
+   # get final column from the others
    outmat <- cbind(outmat,1-apply(outmat,1,sum))
    if (!is.null(truepriors)) {
       tmp <- table(y)
       if (length(tmp) != m) 
          stop('some classes missing in Y data')
       tmp <- tmp / sum(tmp)
+      # tmp now contains the estimated unconditional 
+      # class probabilities
       for (i in 0:(m-1)) {
          wrongp <- tmp[i]
          wrongratio <- (1-wrongp) / wrongp
@@ -259,6 +263,12 @@ ovaknnpred <- function(xdata,predpts) {
    regest <- xdata$regest[idx,]
    apply(regest,1,which.max) - 1
 }
+
+classadjust <- function(econdprobs,wrongratio,trueratio) {
+   fratios <- (1 / econdprobs - 1) * (1 / wrongratio)
+   1 / (1 + trueratio * fratios)
+}
+
 
 # parget.knnx():
 

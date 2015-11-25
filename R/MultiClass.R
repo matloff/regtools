@@ -197,15 +197,16 @@ matrixtolist <- function (rc,m)
 #    xdata:  output of preprocessx() applied to the training set
 #    m:  number of classes
 #    k:  number of nearest neighborhs
+#    truepriors:  true class probabilities
 
 # value:
 
 #    xdata, plus a new list component regest, the matrix of estimated 
-#    regression function values; the element in row #    i, column j, 
-#    is the estimated probability that Y = j given that X = the X 
-#    portion of row i in trnxy 
+#    regression function values; the element in row i, column j, 
+#    is the estimated probability that Y = j given that X = 
+#    row i in the X data 
 
-ovaknntrn <- function(y,xdata,m,k) {
+ovaknntrn <- function(y,xdata,m,k,truepriors=NULL) {
    if (m < 3) stop('m must be at least 3; use knnest()3')  
    x <- xdata$x
    outmat <- NULL
@@ -215,6 +216,19 @@ ovaknntrn <- function(y,xdata,m,k) {
       outmat <- cbind(outmat,knnout$regest)
    }
    outmat <- cbind(outmat,1-apply(outmat,1,sum))
+   if (!is.null(truepriors)) {
+      tmp <- table(y)
+      if (length(tmp) != m) 
+         stop('some classes missing in Y data')
+      tmp <- tmp / sum(tmp)
+      for (i in 0:(m-1)) {
+         wrongp <- tmp[i]
+         wrongratio <- (1-wrongp) / wrongp
+         truep <- truepriors[i]
+         trueratio <- (1-truep) / truep
+         outmat[,i] <- classadjust(outmat[,i],wrongratio,trueratio)
+      }
+   }
    xdata$regest <- outmat
    xdata
 }
@@ -272,25 +286,6 @@ parget.knnx <- function(data, query, k=10,
    tmp <- clusterEvalQ(cls,get.knnx(data,query,k,algorithm))
    tmp <- lapply(tmp,function(tmpelt) tmpelt$nn.index)
    Reduce(rbind,tmp)
-}
-
-###########################  misc.  ###############################
-
-# compute true conditional class probabilities, adjusting from
-# nonparametric analysis using data which, due to sampling design,
-# cannot estimate the unconditional class probabilities correctly
-
-# arguments:
-
-#    econdprobs: estimated conditional probabilities for Y = 1, give X
-#    wrongratio:  incorrect value for estimated P(Y = 0) / P(Y = 1)
-#    trueratio:  correct value for estimated P(Y = 0) / P(Y = 1)
-
-# value:  corrected version of econdprobs
-
-classadjust <- function(econdprobs,wrongratio,trueratio) {
-   fratios <- (1 / econdprobs - 1) * (1 / wrongratio)
-   1 / (1 + trueratio * fratios)
 }
 
 

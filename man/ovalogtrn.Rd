@@ -98,7 +98,21 @@ predy <- ovaknnpred(ovout,vert[,-7])
 mean(predy == vert$V7)
 }
 
-
+library(mlbench)
+data(LetterRecognition)
+lr <- LetterRecognition
+# code Y values
+lr[,1] <- as.numeric(lr[,1]) - 1
+# training and test sets
+lrtrn <- lr[1:14000,]
+lrtest <- lr[14001:20000,]
+# apply kNN to training set
+xdata <- preprocessx(lrtrn[,-1],50)
+trnout <- ovaknntrn(lrtrn[,1],xdata,26,50)
+# then to test set
+ypred <- ovaknnpred(trnout,lrtest[,-1])
+# how well did we do?
+mean(ypred == lrtest[,1])
 
 }
 

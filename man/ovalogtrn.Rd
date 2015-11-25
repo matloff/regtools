@@ -1,10 +1,11 @@
-\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,ovaknntrn,ovaknnpred}
+\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,ovaknntrn,ovaknnpred,classadjust}
 \alias{ovalogtrn}
 \alias{ovalogpred}
 \alias{avalogtrn}
 \alias{avalogpred}
 \alias{ovaknntrn}
 \alias{ovaknnpred}
+\alias{classadjust}
 
 \title{Classification with More Than 2 Classes}
 
@@ -19,6 +20,8 @@ avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx)
 ovaknntrn(y,xdata,m,k) 
 ovaknnpred(xdatarf,predpts) 
+classadjust(econdprobs,wrongratio,trueratio) 
+
 }
 
 \arguments{
@@ -36,6 +39,12 @@ ovaknnpred(xdatarf,predpts)
   \item{x}{X data, i.e. predictors, one row per data point, in the training
      set.}
   \item{m}{Number of classes in multiclass setting.}
+  \item{econdprobs}{Estimated conditional class probabilities, given the
+  predictors.}
+  \item{wrongratio}{Incorrect, data-provenanced, p/(1-p), with p being
+  the unconditional probability of a certain class.}
+  \item{trueratio}{Same as \code{wrongratio}, but with the correct
+  values.}
 }
 
 \details{
@@ -70,8 +79,8 @@ ovaknnpred(xdatarf,predpts)
 \dontrun{
 # assumes UCI Vertebral Column data already downloaded from
 # https://archive.ics.uci.edu/ml/machine-learning-databases/00212/vertebral_column_data.zip
-# and unzipped
-vert <- read.table('column_3C.dat',header=F)
+# and unzipped; example read:
+vert <- read.table('~/Research/Data/Vertebrae/column_3C.dat',header=F)
 # change to 0,1,2 class codes
 vert$V7 <- as.numeric(vert$V7) - 1
 
@@ -80,17 +89,16 @@ ovout <- ovalogtrn(3,vert)
 predy <- ovalogpred(ovout,vert[,-7])
 # proportion correctly classified
 mean(predy == vert$V7)
-avout <- avalogtrn(3,vert[trnidxs,])
-predy <- avalogpred(3,avout,vert[predidxs,1:6])
-mean(predy == vert[predidxs,7])
 
 # kNN
-ovout <- ovalogtrn(3,vert)
-predy <- ovalogpred(ovout,vert[,-7])
+xdata <- preprocessx(vert[,-7],50)
+ovout <- ovaknntrn(vert[,7],xdata,3,50)
+predy <- ovaknnpred(ovout,vert[,-7])
 # proportion correctly classified
 mean(predy == vert$V7)
-
 }
+
+
 
 }
 

@@ -1,4 +1,4 @@
-\name{knnest,meany,vary,loclin,knnpred,preprocessx,ovaknntrn,ovaknnpred}
+\name{knnest,meany,vary,loclin,knnpred,preprocessx}
 \alias{knnest}
 \alias{knnpred}
 % \alias{parget.knnx}
@@ -6,8 +6,6 @@
 \alias{vary}
 \alias{loclin}
 \alias{preprocessx}
-\alias{ovaknntrn}
-\alias{ovaknnpred}
 
 \title{Nonparametric Regression and Classification}
 
@@ -22,8 +20,6 @@ meany(predpt,nearxy)
 vary(predpt,nearxy) 
 loclin(predpt,nearxy) 
 knnpred(knnout,predpts) 
-ovaknntrn(y,xdata,m,k) 
-ovaknnpred(xdatarf,predpts) 
 }
 
 \arguments{
@@ -146,19 +142,6 @@ trainout <- knnest(pecs1[train,6],xdata,50)
 testout <- knnpred(trainout,pecs1[test,-6])
 # find mean abs. prediction error (about $25K)
 mean(abs(pecs1[test,6] - testout))
-
-\dontrun{
-# assumes UCI Vertebral Column data already downloaded from
-# https://archive.ics.uci.edu/ml/machine-learning-databases/00212/vertebral_column_data.zip
-# and unzipped
-vert <- read.table('column_3C.dat',header=F)
-# change to 0,1,2 class codes
-vert$V7 <- as.numeric(vert$V7) - 1
-ovout <- ovalogtrn(3,vert)
-predy <- ovalogpred(ovout,vert[,-7])
-# proportion correctly classified
-mean(predy == vert$V7)
-}
 
 }
 

@@ -21,7 +21,6 @@ avalogpred(m,coefmat,predx)
 ovaknntrn(y,xdata,m,k) 
 ovaknnpred(xdatarf,predpts,truepriors=NULL) 
 classadjust(econdprobs,wrongratio,trueratio) 
-
 }
 
 \arguments{
@@ -44,9 +43,9 @@ classadjust(econdprobs,wrongratio,trueratio)
   \item{wrongratio}{Incorrect, data-provenanced, p/(1-p), with p being
   the unconditional probability of a certain class.}
   \item{trueratio}{Same as \code{wrongratio}, but with the correct
+  value.}
   \item{truepriors}{True unconditional class probabilities, typically
   obtained externally.}
-  values.}
 }
 
 \details{
@@ -97,7 +96,7 @@ xdata <- preprocessx(vert[,-7],50)
 ovout <- ovaknntrn(vert[,7],xdata,3,50)
 predy <- ovaknnpred(ovout,vert[,-7])
 # proportion correctly classified
-mean(predy == vert$V7)
+mean(predy == vert$V7) 
 
 library(mlbench)
 data(LetterRecognition)
@@ -127,6 +126,8 @@ sout <- sapply(1:26,
 sout[1,] %*% sout[2,]
 # correct rate vs. ltr freq
 plot(sout[1,],sout[2,])
+
+}
 
 }
 

@@ -98,7 +98,6 @@ ovout <- ovaknntrn(vert[,7],xdata,3,50)
 predy <- ovaknnpred(ovout,vert[,-7])
 # proportion correctly classified
 mean(predy == vert$V7)
-}
 
 library(mlbench)
 data(LetterRecognition)

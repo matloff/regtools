@@ -18,60 +18,62 @@ ovalogtrn(m,trnxy)
 ovalogpred(coefmat,predx)
 avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx)
-ovaknntrn(y,xdata,m,k) 
-ovaknnpred(xdatarf,predpts,truepriors=NULL) 
+preprocessx(x, kmax) 
+ovaknntrn(y,xdata,m,k,truepriors=NULL) 
+ovaknnpred(xdatarf,predpts) 
 classadjust(econdprobs,wrongratio,trueratio) 
 }
 
 \arguments{
-  \item{trnxy}{Data matrix, one data point per row, Y in the last
-     column.}
-  \item{y}{Vector of response variable data in the training set.}
-  \item{xdata}{X and associated neighbor indices. Output of
-     \code{preprocessx}.} 
-  \item{xdatarf}{The augmented \code{xdata}, output of \code{knnest} or 
-     \code{ovaknntrn}.} 
-  \item{k}{Number of nearest neighbors} 
-  \item{predpts}{A matrix or data frame of X values, at which Y is to be
-     predicted.}
-  \item{predx}{As with \code{predpts}} 
-  \item{x}{X data, i.e. predictors, one row per data point, in the training
-     set.}
-  \item{m}{Number of classes in multiclass setting.}
-  \item{econdprobs}{Estimated conditional class probabilities, given the
-  predictors.}
-  \item{wrongratio}{Incorrect, data-provenanced, p/(1-p), with p being
-  the unconditional probability of a certain class.}
-  \item{trueratio}{Same as \code{wrongratio}, but with the correct
-  value.}
-  \item{truepriors}{True unconditional class probabilities, typically
-  obtained externally.}
+\item{trnxy}{Data matrix, one data point per row, Y in the last
+  column.}
+\item{y}{Vector of response variable data in the training set.}
+\item{xdata}{X and associated neighbor indices. Output of
+  \code{preprocessx}.} 
+\item{xdatarf}{See \code{xdata}.}
+\item{coefmat}{Output from \code{ovalogtrn}.}
+\item{k}{Number of nearest neighbors.} 
+\item{kmx}{Maximal number of nearest neighbors.} 
+\item{predpts}{A matrix or data frame of X values, at which Y is to be
+  predicted.}
+\item{predx}{As with \code{predpts}} 
+\item{x}{X data, i.e. predictors, one row per data point, in the training
+  set.}
+\item{m}{Number of classes in multiclass setting.}
+\item{econdprobs}{Estimated conditional class probabilities, given the
+predictors.}
+\item{wrongratio}{Incorrect, data-provenanced, p/(1-p), with p being
+the unconditional probability of a certain class.}
+\item{trueratio}{Same as \code{wrongratio}, but with the correct
+value.}
+\item{truepriors}{True unconditional class probabilities, typically
+obtained externally.}
 }
 
 \details{
 
-   These functions do classification in the multiclass setting, using
-   the One vs.\ All method.  In the logit case, All vs.\ All is also
-   offered.  In addition to logit, the k-Nearest Neighbor method is
-   available.  For this, \code{preprocessx} must first be called.
-   
-   The functions \code{ovalogtrn} and \code{avalogtrn} are used on the
-   training set, and then feed into the prediction functions,
-   \code{ovalogpred}, \code{avalogpred} and \code{ovaknnpred}. 
-   
+These functions do classification in the multiclass setting, using
+the One vs.\ All method.  In the logit case, All vs.\ All is also
+offered.  In addition to logit, the k-Nearest Neighbor method is
+available.  For this, \code{preprocessx} must first be called.
+
+The functions \code{ovalogtrn} and \code{avalogtrn} are used on the
+training set, and then feed into the prediction functions,
+\code{ovalogpred}, \code{avalogpred} and \code{ovaknnpred}. 
+
 }
 
 \value{
 
-   The prediction functions, \code{ovalogpred}, \code{avalogpred} and
-   \code{ovaknnpred}, return the predicted classes for the points in
-   \code{predx} or \code{predpts}.
+The prediction functions, \code{ovalogpred}, \code{avalogpred} and
+\code{ovaknnpred}, return the predicted classes for the points in
+\code{predx} or \code{predpts}.
 
-   The functions \code{ovalogtrn} and \code{avalogtrn} return the
-   estimated logit coefficent vectors, one per column. There are
-   \code{m} of them in the former case, \code{m}\code{m-1}/2 in the
-   latter, in which case the order of the R function \code{combin} is
-   used.
+The functions \code{ovalogtrn} and \code{avalogtrn} return the
+estimated logit coefficent vectors, one per column. There are
+\code{m} of them in the former case, \code{m}\code{m-1}/2 in the
+latter, in which case the order of the R function \code{combin} is
+used.
 
 }
 
@@ -98,6 +100,8 @@ predy <- ovaknnpred(ovout,vert[,-7])
 # proportion correctly classified
 mean(predy == vert$V7) 
 
+# prep data
+
 library(mlbench)
 data(LetterRecognition)
 lr <- LetterRecognition
@@ -106,19 +110,37 @@ lr[,1] <- as.numeric(lr[,1]) - 1
 # training and test sets
 lrtrn <- lr[1:14000,]
 lrtest <- lr[14001:20000,]
-# apply kNN to training set
-xdata <- preprocessx(lrtrn[,-1],50)
-trnout <- ovaknntrn(lrtrn[,1],xdata,26,50)
-# then to test set
-ypred <- ovaknnpred(trnout,lrtest[,-1])
-# how well did we do?
-mean(ypred == lrtest[,1])
-# now with real priors
+
+# priors
+
+tmp <- table(lrtrn[,1])
+wrongpriors <- tmp / sum(tmp)
 data(ltrfreqs)
 ltrfreqs <- ltrfreqs[order(ltrfreqs[,1]),]
 truepriors <- ltrfreqs[,2] / 100
-trnout <- ovaknntrn(lrtrn[,1],xdata,26,50,truepriors)
+
+# wtd sample
+newidxs <- sample(0:25,6000,replace=T,prob=truepriors)
+lrtest1 <- lrtest[newidxs,]
+
+# kNN
+
+xdata <- preprocessx(lrtrn[,-1],50)
+# straightforward
+trnout <- ovaknntrn(lrtrn[,1],xdata,26,50)
 ypred <- ovaknnpred(trnout,lrtest[,-1])
+mean(ypred == lrtest[,1])  # 0.86
+# wtd sample, straightforward method
+ypred <- ovaknnpred(trnout,lrtest1[,-1])
+ypred <- ovaknnpred(trnout,lrtest1[,-1])
+mean(ypred == lrtest1[,1])  # only about 0.75
+# refit with true priors
+trnout1 <- ovaknntrn(lrtrn[,1],xdata,26,50,truepriors)
+ypred <- ovaknnpred(trnout1,lrtest1[,-1])
+mean(ypred == lrtest1[,1])  # about 0.89
+                                                     22,1
+
+
 bytrueltr <- split(ypred,lrtest[,1])
 sout <- sapply(1:26,
    function(i) c(truepriors[i],mean(bytrueltr[[i]] == i-1)))
@@ -126,6 +148,13 @@ sout <- sapply(1:26,
 sout[1,] %*% sout[2,]
 # correct rate vs. ltr freq
 plot(sout[1,],sout[2,])
+
+# logit
+
+ologout <- ovalogtrn(26,lrtrn[,c(2:17,1)])
+ypred <- ovalogpred(ologout,lrtest[,-1])
+mean(ypred == lrtest[,1])  # only 0.72; add quadratic terms?
+
 
 }
 

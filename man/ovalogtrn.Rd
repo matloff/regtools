@@ -14,7 +14,7 @@ OVA, AVA tools for multiclass classification.
 }
 
 \usage{
-ovalogtrn(m,trnxy)
+ovalogtrn(m,trnxy,truepriors=NULL)
 ovalogpred(coefmat,predx)
 avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx)
@@ -57,9 +57,9 @@ the One vs.\ All method.  In the logit case, All vs.\ All is also
 offered.  In addition to logit, the k-Nearest Neighbor method is
 available.  For this, \code{preprocessx} must first be called.
 
-The functions \code{ovalogtrn} and \code{avalogtrn} are used on the
-training set, and then feed into the prediction functions,
-\code{ovalogpred}, \code{avalogpred} and \code{ovaknnpred}. 
+The functions \code{ovalogtrn}, \code{avalogtrn} and \code{ovaknntrn}
+are used on the training set, and then feed into the prediction
+functions, \code{ovalogpred}, \code{avalogpred} and \code{ovaknnpred}. 
 
 }
 
@@ -75,14 +75,18 @@ estimated logit coefficent vectors, one per column. There are
 latter, in which case the order of the R function \code{combin} is
 used.
 
+The function \code{ovaknntrn} returns a copy of the \code{xdata} input,
+but with an extra component added.  The latter is the matrix of
+estimated regression function values; the element in row i, column j, is
+the probability that Y = j given that X = row i in the X data. 
+
 }
 
 \examples{
 
 \dontrun{
-# assumes UCI Vertebral Column data already downloaded from
-# https://archive.ics.uci.edu/ml/machine-learning-databases/00212/vertebral_column_data.zip
-# and unzipped; example read:
+# UCI Vertebral Column data
+# sample read:
 vert <- read.table('~/Research/Data/Vertebrae/column_3C.dat',header=F)
 # change to 0,1,2 class codes
 vert$V7 <- as.numeric(vert$V7) - 1
@@ -100,61 +104,49 @@ predy <- ovaknnpred(ovout,vert[,-7])
 # proportion correctly classified
 mean(predy == vert$V7) 
 
-# prep data
-
+# UCI Letter Recognition data
 library(mlbench)
-data(LetterRecognition)
+data(LetterRecognition)#
+# prep data
 lr <- LetterRecognition
 # code Y values
 lr[,1] <- as.numeric(lr[,1]) - 1
 # training and test sets
 lrtrn <- lr[1:14000,]
 lrtest <- lr[14001:20000,]
-
 # priors
-
 tmp <- table(lrtrn[,1])
 wrongpriors <- tmp / sum(tmp)
 data(ltrfreqs)
 ltrfreqs <- ltrfreqs[order(ltrfreqs[,1]),]
 truepriors <- ltrfreqs[,2] / 100
-
-# wtd sample
+# wtd test data
 newidxs <- sample(0:25,6000,replace=T,prob=truepriors)
 lrtest1 <- lrtest[newidxs,]
-
 # kNN
-
 xdata <- preprocessx(lrtrn[,-1],50)
-# straightforward
+# without setting priors
 trnout <- ovaknntrn(lrtrn[,1],xdata,26,50)
 ypred <- ovaknnpred(trnout,lrtest[,-1])
+# how well did it work?
 mean(ypred == lrtest[,1])  # 0.86
-# wtd sample, straightforward method
-ypred <- ovaknnpred(trnout,lrtest1[,-1])
+# wtd test set, but still not setting priors
 ypred <- ovaknnpred(trnout,lrtest1[,-1])
 mean(ypred == lrtest1[,1])  # only about 0.75
 # refit with true priors
 trnout1 <- ovaknntrn(lrtrn[,1],xdata,26,50,truepriors)
 ypred <- ovaknnpred(trnout1,lrtest1[,-1])
 mean(ypred == lrtest1[,1])  # about 0.89
-                                                     22,1
-
-
-bytrueltr <- split(ypred,lrtest[,1])
-sout <- sapply(1:26,
-   function(i) c(truepriors[i],mean(bytrueltr[[i]] == i-1)))
-# overall correct classification rate
-sout[1,] %*% sout[2,]
-# correct rate vs. ltr freq
-plot(sout[1,],sout[2,])
-
 # logit
-
-ologout <- ovalogtrn(26,lrtrn[,c(2:17,1)])
-ypred <- ovalogpred(ologout,lrtest[,-1])
-mean(ypred == lrtest[,1])  # only 0.72; add quadratic terms?
-
+ologout <- ovalogtrn(26,lr[,c(2:17,1)])
+ypred <- ovalogpred(ologout,lr[,-1])
+mean(ypred == lr[,1])  # only 0.73
+# try quadratic terms
+for (i in 2:17)
+   lr <- cbind(lr,lr[,i]^2)
+ologout1 <- ovalogtrn(26,lr[,c(2:33,1)])
+ypred <- ovalogpred(ologout1,lr[,-1])
+mean(ypred == lr[,1])  # up to 0.82
 
 }
 

@@ -8,6 +8,7 @@
 #            for the m classes
 #    predx:  X values from which to predict Y values
 #    tstxy:  X, Y test set, same format
+#    truepriors:  true class probabilities, typically from external source
 
 ##################################################################
 # ovalogtrn: generate estimated regression functions
@@ -17,12 +18,13 @@
 
 #    m:  as above
 #    trnxy:  as above
+#    truepriors:  as above
 
 # value:
 
 #    matrix of the betahat vectors, one per column
 
-ovalogtrn <- function(m,trnxy) {
+ovalogtrn <- function(m,trnxy,truepriors=NULL) {
    p <- ncol(trnxy) 
    x <- as.matrix(trnxy[,1:(p-1)])
    y <- trnxy[,p]
@@ -31,6 +33,12 @@ ovalogtrn <- function(m,trnxy) {
       ym <- as.integer(y == i)
       betahat <- coef(glm(ym ~ x,family=binomial))
       outmat <- cbind(outmat,betahat)
+   }
+   if (!is.null(truepriors)) {
+      tmp <- table(y)
+      wrongpriors <- tmp / sum(tmp)
+      outmat[1,] <- outmat[1,] 
+         - log((1-truepriors)/truepriors) + log((1-wrongpriors)/wrongpriors)
    }
    outmat
 }

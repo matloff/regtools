@@ -15,7 +15,7 @@ Full set of tools for k-NN regression and classification.
 
 \usage{
 knnest(y,xdata,k,nearf=meany)
-preprocessx(x,kmax)
+preprocessx(x,kmax,xval=TRUE)
 meany(predpt,nearxy) 
 vary(predpt,nearxy) 
 loclin(predpt,nearxy) 
@@ -40,6 +40,8 @@ knnpred(knnout,predpts)
   \item{x}{"X" data, predictors, one row per data point, in the training
      set.}
   \item{kmax}{Maximal number of nearest neighbors to find.}
+  \item{xval}{If TRUE, then the set of nearest neighbors of a point will
+     not include the point itself.}
   \item{m}{Number of classes in multiclass setting.}
 }
 
@@ -89,7 +91,9 @@ recorded in the \code{scaling} component. The \code{idxs} component. is
 a matrix, with \code{nrow(x)} rows and \code{m} columns.  Row i contains
 the indices of the nearest rows in \code{x} to row i of \code{x}.  The
 first of these indices is for the closest point, then for the
-second-closest, and so on.
+second-closest, and so on.  If cross-validation is requrested
+(\cdoe{xval = TRUE}, then any point will not be considered a neighbor of
+itself.
 
 The \code{knnest} function returns an expanded version of \code{xdata},
 with the expansion consisting of a new component \code{regest}, the

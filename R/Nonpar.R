@@ -59,6 +59,8 @@ knnest <- function(y,xdata,k,nearf=meany)
 #    x: "X variables" matrix, cases in rows, predictors in columns; will
 #       be scaled by this function and returned in scaled form
 #    kmax: maximal number of nearest neighbors sought
+#    xval: if TRUE, the neighbors of a point will not include 
+#          the point itself
 
 # value: R list; component 'x' is the result of scale(x); 'idxs' is a
 #        matrix -- row i, column j shows the index of the jth-closest 
@@ -66,15 +68,17 @@ knnest <- function(y,xdata,k,nearf=meany)
 #        2-column matrix consisting of the attributes scaled:center and
 #        scaled:scale from scale(x)
 
-preprocessx <- function(x,kmax) {
+preprocessx <- function(x,kmax,xval=FALSE) {
+   xval <- as.numeric(xval)
    x <- scale(x)
    tmp <- cbind(attr(x,'scaled:center'),attr(x,'scaled:scale'))
    result <- list(scaling = tmp)
    attr(x,'scaled:center') <- NULL
    attr(x,'scaled:scale') <- NULL
    result$x <- x
-   tmp <- get.knnx(data=x, query=x, k=kmax)
-   result$idxs <- tmp$nn.index
+   tmp <- get.knnx(data=x, query=x, k=kmax+xval)
+   nni <- tmp$nn.index
+   result$idxs <- nni[,(1+xval):ncol(nni)]
    result
 }
 

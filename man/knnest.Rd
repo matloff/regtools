@@ -92,7 +92,7 @@ a matrix, with \code{nrow(x)} rows and \code{m} columns.  Row i contains
 the indices of the nearest rows in \code{x} to row i of \code{x}.  The
 first of these indices is for the closest point, then for the
 second-closest, and so on.  If cross-validation is requrested
-(\cdoe{xval = TRUE}, then any point will not be considered a neighbor of
+(\code{xval = TRUE}, then any point will not be considered a neighbor of
 itself.
 
 The \code{knnest} function returns an expanded version of \code{xdata},

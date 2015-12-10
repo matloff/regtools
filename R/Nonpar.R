@@ -132,6 +132,34 @@ loclin <- function(predpt,nearxy) {
    c(1,predpt) %*% bhat
 }
 
+# plot fitted values of parameteric model vs. kNN fitted
+#
+# arguments:
+#    lmout: object of class 'lm' or 'glm' 
+#    knnout: knnest()
+parvsnonparplot <- function(lmout,knnout) {
+   parfitted <- lmout$fitted.values
+   nonparfitted <- knnout$regest
+   plot(nonparfitted,parfitted,pch=20)
+}
+
+# plot difference in fitted values (par - nonpar) against each predictor
+#
+# arguments:
+#    lmout: object of class 'lm' or 'glm' 
+#    knnout: knnest()
+parnonparvsx <- function(lmout,knnout) {
+   parfitted <- lmout$fitted.values
+   nonparfitted <- knnout$regest
+   ypdff <- parfitted - nonparfitted
+   x <- knnout$x
+   for (i in 1:ncol(x)) {
+      xlab <- colnames(x)[i]
+      plot(x[,i],ypdff,xlab=xlab,pch=20)
+      readline('next plot')
+   }
+}
+
 matrixtolist <- function (rc, m) 
 {
     if (rc == 1) {

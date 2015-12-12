@@ -157,6 +157,7 @@ parnonparvsxplot <- function(lmout,knnout) {
    for (i in 1:ncol(x)) {
       xlab <- colnames(x)[i]
       plot(x[,i],ypdff,xlab=xlab,pch=20)
+      abline(0,0)
       readline('next plot')
    }
 }

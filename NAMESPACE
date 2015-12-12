@@ -3,5 +3,5 @@ export(knnest,preprocessx,meany, vary,loclin,knnpred,nlshc,parget.knnx,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
    ovalogtrn,ovalogpred,avalogtrn,avalogpred,logit, 
    ovaknntrn,ovaknnpred,classadjust,
-   parvsnonparplot,parnonparvsxplot) 
+   parvsnonparplot,nonparvsxplot) 
 

@@ -144,20 +144,23 @@ parvsnonparplot <- function(lmout,knnout) {
    abline(0,1)
 }
 
-# plot difference in fitted values (par - nonpar) against each predictor
+# plot, against each predictor, either nonpar or par - nonpar
 #
 # arguments:
 #    lmout: object of class 'lm' or 'glm' 
-#    knnout: knnest()
-parnonparvsxplot <- function(lmout,knnout) {
-   parfitted <- lmout$fitted.values
+#    knnout: return value of knnest()
+nonparvsxplot <- function(knnout,lmout=NULL) {
    nonparfitted <- knnout$regest
-   ypdff <- parfitted - nonparfitted
+   havelmout <- !is.null(lmout) 
+   if (havelmout) {
+      parfitted <- lmout$fitted.values
+      vertval <- parfitted - nonparfitted
+   } else vertval <- nonparfitted
    x <- knnout$x
    for (i in 1:ncol(x)) {
       xlab <- colnames(x)[i]
-      plot(x[,i],ypdff,xlab=xlab,pch=20)
-      abline(0,0)
+      plot(x[,i],vertval,xlab=xlab,pch=20)
+      if (havelmout) abline(0,0)
       readline('next plot')
    }
 }

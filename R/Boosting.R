@@ -5,8 +5,9 @@
 # 
 #    x: predictor matrix
 #    y: response vector
-#    wtftn: function to weight each observation
-#    lossftn: loss function for observation
+#    mdl: 'lm' or 'glm'
+#    wtftn(y,muhat): function to weight each observation
+#    lossftn(y,muhat): loss function for observation
 #    niters: number of iterations
 #    maxwt: lm() weights will be truncated to this
 # 
@@ -14,16 +15,20 @@
 # 
 #    boosted beta-hat vector
 
-bboostlm <- function(x,y,wtftn=l2inv,lossftn=l1,niters=1000,maxwt=100) {
+bboostlm <- function(x,y,
+      mdl='lm',wtftn=l2inv,lossftn=l1,niters=1000,maxwt=100) {
    x <- as.matrix(x)
-   tmp <- lm(y ~ x)
+   linmod <- mdl == 'lm'
+   if (linmod) tmp <- lm(y ~ x) else 
+      tmp <- glm(y ~ x,family=binomial)
    fit <- tmp$fitted.values
    sumloss <- sum(lossftn(y,fit))
    bhmat <- c(coef(tmp),sumloss)
    for (i in 1:niters) {
       w <- wtftn(y,fit)
       w <- pmin(w,maxwt)
-      tmp <- lm(y ~ x, weights=w)
+      if (linmod) tmp <- lm(y ~ x) else 
+         tmp <- glm(y ~ x,family=binomial,weights=w)
       fit <- tmp$fitted.values
       sumloss <- sum(lossftn(y,fit))
       newbhmat <- c(coef(tmp),sumloss)
@@ -36,6 +41,7 @@ bboostlm <- function(x,y,wtftn=l2inv,lossftn=l1,niters=1000,maxwt=100) {
    w <- w / sum(w)
    rslt <- list()
    rslt$bhat = w %*% bhmat[,1:p] 
+   rslt$mdl <- mdl
    class(rslt) <- "bboost"
    rslt
 }
@@ -47,18 +53,25 @@ bboostlm <- function(x,y,wtftn=l2inv,lossftn=l1,niters=1000,maxwt=100) {
 #    predx: X vectors to predict at, one row per case
 #
 # value:
-#    predicted Y values
+#    estimated regression values at the points predx
 predict.bboost <- function(bbout,predx) {
    bhat <- as.vector(bbout$bhat)
    predx1 <- as.matrix(cbind(1,predx))
-   predx1 %*% bhat
+   regvals <- predx1 %*% bhat
+   if (bbout$mdl == 'glm') 
+      regvals  <- 1 / (1 + exp(-regvals))
+   regvals
 }
 
 l2 <- function(y,muhat) (y - muhat)^2
-
 l1 <- function(y,muhat) abs(y - muhat)
-
 l2inv <- function(y,muhat) 1 / (y - muhat)^2
-
 l1inv <- function(y,muhat) 1 / abs(y - muhat)
+
+l1inv05 <- function(y,muhat) 1 / abs(muhat - 0.5)
+
+predright <- function(y,muhat) {
+   predy <- round(muhat)
+   as.numeric(y == predy)
+}
 

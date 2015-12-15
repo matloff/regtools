@@ -27,7 +27,7 @@ bboostlm <- function(x,y,
    for (i in 1:niters) {
       w <- wtftn(y,fit)
       w <- pmin(w,maxwt)
-      if (linmod) tmp <- lm(y ~ x) else 
+      if (linmod) tmp <- lm(y ~ x,weights=w) else 
          tmp <- glm(y ~ x,family=binomial,weights=w)
       fit <- tmp$fitted.values
       sumloss <- sum(lossftn(y,fit))

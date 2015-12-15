@@ -71,7 +71,8 @@ knnest <- function(y,xdata,k,nearf=meany)
 
 # value: R list; component 'x' is the result of scale(x); 'idxs' is a
 #        matrix -- row i, column j shows the index of the jth-closest 
-#        data point to data point i, j = 1,...,kmax; 'scaling' is a
+#        data point to data point i, j = 1,...,kmax (actually j =
+#        2,...,kmax if xval component is TRUE; 'scaling' is a
 #        2-column matrix consisting of the attributes scaled:center and
 #        scaled:scale from scale(x)
 
@@ -86,6 +87,7 @@ preprocessx <- function(x,kmax,xval=FALSE) {
    tmp <- get.knnx(data=x, query=x, k=kmax+xval)
    nni <- tmp$nn.index
    result$idxs <- nni[,(1+xval):ncol(nni)]
+   result$xval <- xval
    result
 }
 
@@ -120,6 +122,40 @@ predict.knn <- function(xdata,predpts) {
    tmp <- get.knnx(x,predpts,1)
    idx <- tmp$nn.index
    xdata$regest[idx]
+}
+
+# goodk():
+
+# finds a "good" value of k by cross-validation and bisection; not
+# guaranteed to be the "best" k for this data, let alone prediction
+# future data
+
+# range of values considered for k are 1,2,...,xdata$kmax
+
+# arguments:
+
+#   y: Y values in the data set
+#   xdata: result of calling preprocessx() on the X portion of the data;
+#          best to set xval = TRUE in that call
+#   lossftn: loss function; for classification case, predwrong() is
+#            suggested
+
+#   value: the value of k found to be "good"
+
+goodk <- function(y,xdat,lossftn=l2a) {
+   n <- nrow(xdata$x)
+   lo <- 1 + xdata$xval
+   hi <- xdata$kmax
+   errrate <- function(k) {
+      kout <- knnest(y,xdata,k)
+
+
+   }
+   repeat {
+   
+      lowmisclass <- 
+      mid <- round((lo+hi)/2)
+   }
 }
 
 # find mean of Y on the data z, Y in last column, and predict at xnew

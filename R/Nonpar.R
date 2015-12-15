@@ -137,24 +137,32 @@ predict.knn <- function(xdata,predpts) {
 #   y: Y values in the data set
 #   xdata: result of calling preprocessx() on the X portion of the data;
 #          best to set xval = TRUE in that call
-#   lossftn: loss function; for classification case, predwrong() is
-#            suggested
+#   lossftn(y,munat): loss function; for classification case, predwrong() 
+#                     is suggested
 
 #   value: the value of k found to be "good"
 
-goodk <- function(y,xdat,lossftn=l2a) {
+goodk <- function(y,xdat,lossftn=l2) {
    n <- nrow(xdata$x)
-   lo <- 1 + xdata$xval
-   hi <- xdata$kmax
+   x <- xval$x
+   xval <- xdata$xval
+   lok <- 1 + xval
+   hik <- xdata$kmax
    errrate <- function(k) {
-      kout <- knnest(y,xdata,k)
-
-
+      kout <- knnest(y,xdata,k+xval)
+      kpred <- predict(xdata,x)
+      if (lossftn == predwrong) 
+         kpred <- round(kpred)
+      mean(lossftn(y,kout$regest))
    }
+   minerr <- 1.09e+38
    repeat {
-   
-      lowmisclass <- 
-      mid <- round((lo+hi)/2)
+      mid <- round((lok+hik)/2)
+      loerr <- errrate(lok)
+      hierr <- errrate(hik)
+      if (loerr >= minerr && hierr >= minerr) return(mid)
+      if (loerr <- hierr) hik <- mid else
+         lok <- mid
    }
 }
 
@@ -247,103 +255,4 @@ parget.knnx <- function(data, query, k=10,
    tmp <- lapply(tmp,function(tmpelt) tmpelt$nn.index)
    Reduce(rbind,tmp)
 }
-
-###########################  misc.  ###############################
-
-
-# ucbdf <- tbltofakedf(UCBAdmissions)
-# newucb <- matrix(nrow=nrow(ucbdf),ncol=ncol(ucbdf))
-# for (i in 1:3) {
-#    z <- ucbdf[,i] 
-#    z <- as.numeric(as.factor(z))
-#    newucb[,i] <- z
-# }
-# newucb[,3] <- newucb[,3] - 1
-# ovout <- ovalogtrn(6,newucb)
-# predy <- ovalogpred(ovout,newucb[,1:2])
-# mean(predy == newucb[,3])
-# avout <- avalogtrn(6,newucb)
-# predy <- avalogpred(6,avout,newucb[,1:2])
-# mean(predy == newucb[,3])
-
-# forest <- read.csv("~/Research/Data/ForestTypes/training.csv")
-# z <- forest[,1]
-# z <- as.numeric(z)
-# z <- z - 1
-# forest[,1] <- z
-# f1 <- cbind(forest[,-1],forest[,1]) 
-# f2 <- f1[,-(1:20)]
-# ovout <- ovalogtrn(4,f2)
-# predy <- ovalogpred(ovout,f2[,-8])
-# mean(predy == f2[,8])
-# avout <- avalogtrn(4,f2)
-# predy <- avalogpred(4,avout,f2[,-8])
-# mean(predy == f2[,8])
-# f3 <- f1[,c(1:9,28)]
-
-
-# vert <- read.table('~/Research/Data/Vertebrae/vertebral_column_data/column_3C.dat',header=F)
-# vert$V7 <- as.numeric(vert$V7) - 1
-# ovout <- ovalogtrn(3,vert)
-# predy <- ovalogpred(ovout,vert[,-7])
-# mean(predy == vert$V7)
-# trnidxs <- sample(1:310,155)
-# predidxs <- setdiff(1:310,trnidxs)
-# trnidxs <- sample(1:310,225)
-# predidxs <- setdiff(1:310,trnidxs)
-# ovout <- ovalogtrn(3,vert[trnidxs,])
-# predy <- ovalogpred(ovout,vert[predidxs,1:6])
-# mean(predy == vert[predidxs,7])
-# avout <- avalogtrn(3,vert[trnidxs,])
-# predy <- avalogpred(3,avout,vert[predidxs,1:6])
-# mean(predy == vert[predidxs,7])
-# vert <- read.table('~/Research/Data/Vertebrae/column_3C.dat',header=F)
-# vert$V7 <- as.numeric(vert$V7) - 1
-# xdata <- preprocessx(vert[,-7],25)
-# zout <- ovaknntrn(vert$V7,xdata,3,25)
-# predout <- ovaknnpred(zout,vert[,-7])
-# mean(predout == vert[,7])
-
-
-# trnidxs <- sample(1:4526,2263)
-# predidxs <- setdiff(1:4526,trnidxs)
-# ovout <- ovalogtrn(6,newucb[trnidxs,])
-# predy <- ovalogpred(ovout,newucb[predidxs,1:2])
-# mean(predy == newucb[predidxs,3])
-# avout <- avalogtrn(6,newucb[trnidxs,])
-# predy <- avalogpred(6,avout,newucb[predidxs,1:2])
-# mean(predy == newucb[predidxs,3])
-
-
-
-# glass <- read.csv('~/Research/Data/Glass/glass.data.txt',header=F)
-# glass[,11] <- glass[,11] - 1
-
-
-# trnidxs <- sample(1:4526,2263)
-# predidxs <- setdiff(1:4526,trnidxs)
-# ovout <- ovalogtrn(6,newucb[trnidxs,])
-# predy <- ovalogpred(ovout,newucb[predidxs,1:2])
-# mean(predy == newucb[predidxs,3])
-# avout <- avalogtrn(6,newucb[trnidxs,])
-# predy <- avalogpred(6,avout,newucb[predidxs,1:2])
-# mean(predy == newucb[predidxs,3])
-
-# yeast <- read.table('~/Research/Data/Yeast/yeast.data.txt',header=F)
-# y1 <- yeast[,-1]  # delete name
-# y1[,9] <- as.numeric(y1[,9]) - 1
-# trnidxs <- sample(1:1484,742)
-# predidxs <- setdiff(1:1484,trnidxs)
-# ovout <- ovalogtrn(10,y1[trnidxs,])
-# predy <- ovalogpred(ovout,y1[predidxs,1:8])
-# mean(predy == y1[predidxs,9])
-# avout <- avalogtrn(10,y1[trnidxs,])
-# predy <- avalogpred(10,avout,y1[predidxs,1:8])
-# mean(predy == y1[predidxs,9])
-
-# pecs1$edulvl <- pecs1$ms + 2 * pecs1$phd
-# xdata <- preprocessx(pecs1[train,c(1:3,6)],50)
-# zout <- ovaknntrn(pecs1$edulvl[train],xdata,3,50)
-# predout <- ovaknnpred(zout,pecs1[test,c(1:3,6)])
-# always predicts 0!
 

@@ -70,8 +70,8 @@ l1inv <- function(y,muhat) 1 / abs(y - muhat)
 
 l1inv05 <- function(y,muhat) 1 / abs(muhat - 0.5)
 
-predright <- function(y,muhat) {
+predwrong <- function(y,muhat) {
    predy <- round(muhat)
-   as.numeric(y == predy)
+   as.numeric(y != predy)
 }
 

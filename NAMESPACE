@@ -1,7 +1,7 @@
 
-export(knnest,preprocessx,meany, vary,loclin,knnpred,nlshc,parget.knnx,
+export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,parget.knnx,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
    ovalogtrn,ovalogpred,avalogtrn,avalogpred,logit, 
    ovaknntrn,ovaknnpred,classadjust,
    parvsnonparplot,nonparvsxplot, 
-   bboostlm,predict.bboost,l2,l1,l2inv,l1inv)
+   bboostlm,predict.bboost,l2,l1,l2inv,l1inv,predwrong)

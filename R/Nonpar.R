@@ -2,19 +2,25 @@
 ######################  k-NN  ###############################
 
 # use knnest() to estimate the regression function values; send output
-# to knnpred() to predict
+# to predict(), i.e. predict.knn() to predict; before calling knnest(),
+# run preprocessx(), to determine nearest neighbors, thus allowing for
+# trying several different values of k without recomputing nearest
+# neighbors
 
 # knnest(): 
 
 # use kNN to estimate the regression function at each data point in the
 # training set
 
-# will refer to predictor and response variable data as X and Y;
+# will refer here to predictor and response variable data as X and Y;
 # together they form the training set
 
 # X must undergo preprocessing -- centering/scaling, and determination
 # of nearest neighbors -- which is done by calling preprocessx() before
-# calling knnest()
+# calling knnest() (even if some components of X are indicator
+# variables)
+
+# the Fast Nearest Neighbor (FNN) package is used
 
 # arguments:
 #
@@ -24,8 +30,8 @@
 #   nearf: function to apply to the nearest neighbors 
 #          of a point; default is mean(), as in standard kNN
 #
-# value: R list, consisting of xdata and the estimated 
-#        reg. ftn. at those values
+# value: class of type 'knn', consisting of input xdata and 
+#        the estimated reg. ftn. at those values
 
 knnest <- function(y,xdata,k,nearf=meany)
 {  require(FNN)
@@ -47,6 +53,7 @@ knnest <- function(y,xdata,k,nearf=meany)
    regest <- sapply(1:nrow(x),
       function(i) nearf(x[i,],nearxy[[i]]))
    xdata$regest <- regest
+   class(xdata) <- 'knn'
    xdata
 }
 
@@ -59,8 +66,8 @@ knnest <- function(y,xdata,k,nearf=meany)
 #    x: "X variables" matrix, cases in rows, predictors in columns; will
 #       be scaled by this function and returned in scaled form
 #    kmax: maximal number of nearest neighbors sought
-#    xval: if TRUE, the neighbors of a point will not include 
-#          the point itself
+#    xval: cross-validation; if TRUE, the neighbors of a point 
+#          will not include the point itself
 
 # value: R list; component 'x' is the result of scale(x); 'idxs' is a
 #        matrix -- row i, column j shows the index of the jth-closest 
@@ -82,11 +89,14 @@ preprocessx <- function(x,kmax,xval=FALSE) {
    result
 }
 
-# knnpred():
+# predict.knn():
+
+# do prediction on new data (or on the training set, if predpts is set
+# that way); call via the predict() generic function
 
 # arguments:
 
-#    xdata:  output from knnest()
+#    xdata:  output from knnest(), object of class 'knn'
 #    predpts:  matrix/data frame of X values at which to predict Y
 
 # value:
@@ -97,7 +107,8 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 # estimated regression function value for the closest point in the
 # training data is used as our est. reg. ftn. value at tht predpts row
 
-knnpred <- function(xdata,predpts) {
+# knnpred <- function(xdata,predpts) {
+predict.knn <- function(xdata,predpts) {
    x <- xdata$x
    if (is.vector(predpts)) 
       predpts <- matrix(predpts,nrow=1)

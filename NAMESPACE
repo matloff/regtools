@@ -1,5 +1,6 @@
 
 export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,parget.knnx,
+   kmin,plot.kmin,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
    ovalogtrn,ovalogpred,avalogtrn,avalogpred,logit, 
    ovaknntrn,ovaknnpred,classadjust,

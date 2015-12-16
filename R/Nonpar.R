@@ -88,6 +88,7 @@ preprocessx <- function(x,kmax,xval=FALSE) {
    nni <- tmp$nn.index
    result$idxs <- nni[,(1+xval):ncol(nni)]
    result$xval <- xval
+   result$kmax <- kmax
    result
 }
 
@@ -124,46 +125,47 @@ predict.knn <- function(xdata,predpts) {
    xdata$regest[idx]
 }
 
-# goodk():
+# kmin():
 
-# finds a "good" value of k by cross-validation and bisection; not
-# guaranteed to be the "best" k for this data, let alone prediction
-# future data
-
-# range of values considered for k are 1,2,...,xdata$kmax
+# finds "best" value of k by cross-validation, over a set of
+# evenly-spaced values of k; "best" means minimum cross-validated loss
 
 # arguments:
 
 #   y: Y values in the data set
 #   xdata: result of calling preprocessx() on the X portion of the data;
-#          best to set xval = TRUE in that call
-#   lossftn(y,munat): loss function; for classification case, predwrong() 
-#                     is suggested
+#          xval=True is suggested for that call
+#   lossftn(y,muhat): measure of loss if muhat used to predict y
+#   nk: number of values to try for k, evenly spaced
 
-#   value: the value of k found to be "good"
+#   value: the value of k found to be "best"
 
-goodk <- function(y,xdat,lossftn=l2) {
+kmin <- function(y,xdata,lossftn=l2,nk=5) {
    n <- nrow(xdata$x)
-   x <- xval$x
+   x <- xdata$x
    xval <- xdata$xval
-   lok <- 1 + xval
-   hik <- xdata$kmax
-   errrate <- function(k) {
-      kout <- knnest(y,xdata,k+xval)
-      kpred <- predict(xdata,x)
-      if (lossftn == predwrong) 
+   kmax <- xdata$kmax
+   meanerr <- function(k) {
+      kout <- knnest(y,xdata,k)
+      kpred <- predict(kout,x)
+      if (identical(lossftn,predwrong))
          kpred <- round(kpred)
       mean(lossftn(y,kout$regest))
    }
-   minerr <- 1.09e+38
-   repeat {
-      mid <- round((lok+hik)/2)
-      loerr <- errrate(lok)
-      hierr <- errrate(hik)
-      if (loerr >= minerr && hierr >= minerr) return(mid)
-      if (loerr <- hierr) hik <- mid else
-         lok <- mid
-   }
+   # evaluate at these values of k
+   ks <- floor(kmax/nk) * (1:nk)
+   merrs <- ks
+   for (i in 1:nk) merrs[i] <- meanerr(ks[i])
+   names(merrs) <- ks
+   result <- list(meanerrs = merrs)
+   result$kmin <- ks[which.min(merrs)]
+   class(result) <- 'kmin'
+   result
+}
+
+plot.kmin <- function(kminout) {
+   plot(names(kminout$meanerrs),kminout$meanerrs,
+      xlab='k',ylab='mean error',pch=20)
 }
 
 # find mean of Y on the data z, Y in last column, and predict at xnew

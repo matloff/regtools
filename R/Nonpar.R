@@ -137,16 +137,17 @@ predict.knn <- function(xdata,predpts) {
 #          xval=True is suggested for that call
 #   lossftn(y,muhat): measure of loss if muhat used to predict y
 #   nk: number of values to try for k, evenly spaced
+#   nearf: see knnest()
 
 #   value: the value of k found to be "best"
 
-kmin <- function(y,xdata,lossftn=l2,nk=5) {
+kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
    n <- nrow(xdata$x)
    x <- xdata$x
    xval <- xdata$xval
    kmax <- xdata$kmax
    meanerr <- function(k) {
-      kout <- knnest(y,xdata,k)
+      kout <- knnest(y,xdata,k,nearf)
       kpred <- predict(kout,x)
       if (identical(lossftn,predwrong))
          kpred <- round(kpred)

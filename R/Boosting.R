@@ -15,6 +15,8 @@
 # 
 #    boosted beta-hat vector
 
+#############  EXPERIMENTAL  ##############
+
 bboostlm <- function(x,y,
       mdl='lm',wtftn=l2inv,lossftn=l1,niters=1000,maxwt=100) {
    x <- as.matrix(x)
@@ -54,6 +56,8 @@ bboostlm <- function(x,y,
 #
 # value:
 #    estimated regression values at the points predx
+
+#############  EXPERIMENTAL  ##############
 predict.bboost <- function(bbout,predx) {
    bhat <- as.vector(bbout$bhat)
    predx1 <- as.matrix(cbind(1,predx))

@@ -235,8 +235,10 @@ myzcondindx <- function(x,margin,tbl,termlengths) {
     tbl <- nrow(x) * tbl
 }
 
-# converts an R table to a fake data frame; if a cell has frequency k,
-# it will appear k times in the output
+# converts an R table to a fake data frame; the number of rows will be
+# the number of cases in the table, i.e. sum(tbl), and the number of
+# columns will be the dimension of the table, i.e. length(dim(tbl));
+# if a cell has frequency k, it will appear k times in the output
 tbltofakedf <- function(tbl) {
    adf <- as.data.frame(tbl)
    nc <- ncol(adf)
@@ -245,9 +247,9 @@ tbltofakedf <- function(tbl) {
       if (freq == 0) return(NULL)
       remainingrow <- adfrow[-nc]
       matrix(rep(remainingrow,freq),byrow=TRUE,nrow=freq)
-
    }
-   Reduce(rbind,apply(adf,1,onecell))
+   m <- Reduce(rbind,apply(adf,1,onecell))
+   as.data.frame(m)
 }
 
 #############################  misc.  ###############################

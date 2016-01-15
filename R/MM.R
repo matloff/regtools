@@ -3,57 +3,57 @@
 
 # arguments:
 # 
-#    g(x,theta): 
-#       a vector-valued function, specifying the "left-hand
-#       sides" of the MM eqns (the right-hand sides will be 0s);
-#       x is the data, one observation per row, and theta is the
-#       vector of parameters to be estimated; it is required that the
-#       arguments of g() are 'x' and 'theta
-#    data: our data, x in g()
-#    lg: length(g), i.e. number of equations
-#    eps: convergence criterion; iterations stop at 1000, or whe
-#         sum(abs(g)) < eps
+#    m(x): vector of sample moments ("left-hand sides" of MM eqns); 
+#          x is the data, one observation per row
+#    g(theta): 
+#       a vector-valued function, specifying the "right-hand sides" 
+#       of the MM eqns; theta is the vector of parameters to be estimated; 
+#       it is required that the argument of g() be named 'theta'
+#    data: our x in m() and g()
+#    lg: length(m), i.e. number of equations
 #    init: initial guess for theta; R list with names corresponding
 #          to the parameters in g
+#    eps: convergence criterion; iterations stop at 1000, or whe
+#         sum(abs(g)) < eps
 #    maxiters: max number of iterations
 
-mm <- function(g,data,lg,init,eps=0.0001,maxiters=1000) {
+mm <- function(m,g,data,lg,init=rep(0.5,lg),eps=0.0001,maxiters=1000) {
    tht <- unlist(init)
+   mvec <- m(data)
    for (i in 1:maxiters) {
       # current g values
-      gvec <- getgvec(g,data,tht)
-      if (max(abs(gvec)) < eps) {
-         if (!is.null(names(init)) 
+      gvec <- getgvec(g,tht)
+      if (max(abs(mvec - gvec)) < eps) {
+         if (!is.null(names(init))) 
             names(tht) <- names(init)
+
+         result <- list(tht=tht,numiters=i)
          return(tht)
       }
       # Jacobian
-      jcb <- getjcb(g,data,lg,tht)
-      tht <- tht - solve(t(jcb),gvec)
+      jcb <- getjcb(g,tht)
+      tht <- tht + solve(jcb,mvec-gvec)
    }
    print('max iterations exceeded')
 }
 
-getgvec <- function(g,data,tht) {
-   x <- data
+getgvec <- function(g,tht) {
    theta <- tht
-   g(x,theta)
+   g(theta)
 }
 
-getjcb <- function(g,data,lg,tht) {
-   x <- data
+getjcb <- function(g,tht) {
    theta <- tht
-   attr(numericDeriv(quote(g(x,theta)),'theta'),'gradient')
+   attr(numericDeriv(quote(g(theta)),'theta'),'gradient')
 }
 
-
-# > x <- rgamma(1000,2)
-# > g
-# function(x,theta) {
-#    m1 <- mean(x) - theta[1] / theta[2]
-#    m2 <- var(x) - theta[1] / theta[2]^2
-#    c(m1,m2)
+# test case; should output about 2 and 1
+# x <- rgamma(1000,2)
+# m <- function(x) c(mean(x),var(x))
+# g <- function(theta) {
+#    g1 <-  theta[1] / theta[2]
+#    g2 <-  theta[1] / theta[2]^2
+#    c(g1,g2)
 # }
-# > mm(g,x,2,c(0.5,0.5))
-# [1] 1.948537 1.006271
+# mm(m,g,x,2)
 

@@ -1,6 +1,21 @@
 
 # Method of Moments
 
+# approach:
+
+we set
+
+   g(X,thetahat) = m
+
+where m is a vector of sample moments, provided by the user
+user supplies information to compute the matrix A, where 
+
+   A (thetehat - theta0) approx= m
+
+where thetahat is our estimated theta vector, theta0 is the true
+population value, and 
+
+
 # arguments:
 # 
 #    m(x): vector of sample moments ("left-hand sides" of MM eqns); 

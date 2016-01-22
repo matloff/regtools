@@ -1,29 +1,26 @@
 
-# Method of Moments
+# Augmented Method of Moments
 
-# approach:
+# overview:
 
-we set
+   motivated by linear mixed effects models, but more general
 
-   g(X,thetahat) = m
+   say the parameter vector theta has length k, so we need k equations
 
-where m is a vector of sample moments, provided by the user
-user supplies information to compute the matrix A, where 
-
-   A (thetehat - theta0) approx= m
-
-where thetahat is our estimated theta vector, theta0 is the true
-population value, and 
-
+   r of the equations will be classical Method of Moments, and k-r will
+   be regression type, i.e. the (X'X)^{-1} betahat = X'Y type; these
+   could also be linear approximations, as in glm()
 
 # arguments:
 # 
-#    m(x): vector of sample moments ("left-hand sides" of MM eqns); 
-#          x is the data, one observation per row
-#    g(theta): 
+#    mm(x): vector of sample moments ("left-hand sides" of MM eqns); 
+#           x is the data, one observation per row; might be more
+#           general than moments
+#    g(x,theta): 
 #       a vector-valued function, specifying the "right-hand sides" 
-#       of the MM eqns; theta is the vector of parameters to be estimated; 
-#       it is required that the argument of g() be named 'theta'
+#       of the MM eqns; x as above, and theta is the vector of 
+#       parameters to be estimated; it is required that the second 
+#       argument of g() be named 'theta'
 #    data: our x in m() and g()
 #    lg: length(m), i.e. number of equations
 #    init: initial guess for theta; R list with names corresponding
@@ -32,7 +29,7 @@ population value, and
 #         sum(abs(g)) < eps
 #    maxiters: max number of iterations
 
-mm <- function(m,g,data,lg,init=rep(0.5,lg),eps=0.0001,maxiters=1000) {
+amm <- function(m,g,x,lg,init=rep(0.5,lg),eps=0.0001,maxiters=1000) {
    tht <- unlist(init)
    mvec <- m(data)
    for (i in 1:maxiters) {

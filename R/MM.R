@@ -3,13 +3,13 @@
 
 # overview:
 
-   motivated by linear mixed effects models, but more general
-
-   say the parameter vector theta has length k, so we need k equations
-
-   r of the equations will be classical Method of Moments, and k-r will
-   be regression type, i.e. the (X'X)^{-1} betahat = X'Y type; these
-   could also be linear approximations, as in glm()
+#    motivated by linear mixed effects models, but more general
+# 
+#    say the parameter vector theta has length k, so we need k equations
+# 
+#    r of the equations will be classical Method of Moments, and k-r will
+#    be regression type, i.e. the (X'X)^{-1} betahat = X'Y type; these
+#    could also be linear approximations, as in glm()
 
 # arguments:
 # 

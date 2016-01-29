@@ -110,7 +110,6 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 # estimated regression function value for the closest point in the
 # training data is used as our est. reg. ftn. value at tht predpts row
 
-# knnpred <- function(xdata,predpts) {
 predict.knn <- function(xdata,predpts) {
    x <- xdata$x
    if (is.vector(predpts)) 

@@ -15,7 +15,7 @@ Full set of tools for k-NN regression and classification.
 
 \usage{
 knnest(y,xdata,k,nearf=meany)
-preprocessx(x,kmax,xval=TRUE)
+preprocessx(x,kmax,xval=FALSE)
 meany(predpt,nearxy) 
 vary(predpt,nearxy) 
 loclin(predpt,nearxy) 
@@ -40,8 +40,8 @@ knnpred(knnout,predpts)
   \item{x}{"X" data, predictors, one row per data point, in the training
      set.}
   \item{kmax}{Maximal number of nearest neighbors to find.}
-  \item{xval}{If TRUE, then the set of nearest neighbors of a point will
-     not include the point itself.}
+  \item{xval}{Cross-validation flag. If TRUE, then the set of nearest 
+     neighbors of a point will not include the point itself.}
   \item{m}{Number of classes in multiclass setting.}
 }
 

@@ -1,16 +1,22 @@
-\name{knnest,meany,vary,loclin,knnpred,preprocessx}
+\name{knnest,meany,vary,loclin,predict.knn,preprocessx,kmin,plot.kmin,parvsnonparplot,nonparvsxplot}
 \alias{knnest}
-\alias{knnpred}
+\alias{predict.knn}
 % \alias{parget.knnx}
 \alias{meany}
 \alias{vary}
 \alias{loclin}
 \alias{preprocessx}
+\alias{kmin}
+\alias{plot.kmin}
+\alias{parvsnonparplot}
+\alias{nonparvsxplot}
 
 \title{Nonparametric Regression and Classification}
 
 \description{
-Full set of tools for k-NN regression and classification.
+Full set of tools for k-NN regression and classification, including both
+for direct usage and as tools for assessing the fit of parametric
+models.
 }
 
 \usage{
@@ -20,14 +26,17 @@ meany(predpt,nearxy)
 vary(predpt,nearxy) 
 loclin(predpt,nearxy) 
 predict.knn(xdata,predpts)
+kmin(y,xdata,lossftn=l2,nk=5,nearf=meany) 
+plot.kmin(kminout)
+parvsnonparplot(lmout,knnout) 
+nonparvsxplot(knnout,lmout=NULL) 
 }
 
 \arguments{
   \item{y}{Vector of response variable data in the training set.}
+  \item{x}{Predictor data.}
   \item{xdata}{X and associated neighbor indices. Output of
      \code{preprocessx}.} 
-  \item{xdatarf}{The augmented \code{xdata}, output of \code{knnest} or 
-     \code{ovaknntrn}.} 
   \item{k}{Number of nearest neighbors} 
   \item{predpts}{A matrix or data frame of X values, at which Y is to be
      predicted.}
@@ -43,6 +52,12 @@ predict.knn(xdata,predpts)
   \item{xval}{Cross-validation flag. If TRUE, then the set of nearest 
      neighbors of a point will not include the point itself.}
   \item{m}{Number of classes in multiclass setting.}
+  \item{lossftn}{Loss function to be used in cross-validation
+     determination of "best" \code{k}.}
+  \item{nk}{Number of values of \code{k} to try in cross-validation.}
+  \item{kminout}{Output of \code{kmin}.}
+  \item{lmout}{Output of \code{lm}.}
+  \item{knnout}{Output of \code{knnest}.}
 }
 
 \details{

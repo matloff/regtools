@@ -19,7 +19,7 @@ preprocessx(x,kmax,xval=FALSE)
 meany(predpt,nearxy) 
 vary(predpt,nearxy) 
 loclin(predpt,nearxy) 
-knnpred(knnout,predpts) 
+predict.knn(xdata,predpts)
 }
 
 \arguments{
@@ -48,22 +48,26 @@ knnpred(knnout,predpts)
 \details{
 
    The \code{preprocessx} function does the prep work.  For each row in
-   \code{x}, the code finds the \code{kmax} closest rows to that row.  By
-   separating this computation from \code{knnest}, one can save a lot of
-   overall computing time.  If for instance one wants to try \code{k} at
-   25, 50 and 100, one can call \code{preprocessx} with \code{kmax} equal
-   to 100, then reuse the results; in calling \code{knnest} for several
-   values of \code{k}, we do not need to call \code{preprocessx} again.
-
+   \code{x}, the code finds the \code{kmax} closest rows to that row.
+   By separating this computation from \code{knnest}, one can save a lot
+   of overall computing time.  If for instance one wants to try the
+   number of nearest neighbors \code{k} at 25, 50 and 100, one can call
+   \code{preprocessx} with \code{kmax} equal to 100, then reuse the
+   results; in calling \code{knnest} for several values of \code{k}, we
+   do not need to call \code{preprocessx} again.  
+   
    The \code{knnest} function does k-nearest neighbor regression
-   function estimation, in any dimension.  This of course includes the
-   2-class classification case, where with Y = 0, 1 representing the two
-   classes, the regression function reduces to the conditional
-   probability of class 1, given the predictors.
-
-   In addition to averaging the nearby Y values, one can instead choose
-   local linear smoothing, conditional variance estimation or whatever
-   the user desires.
+   function estimation, in any dimension, i.e. any number of predictor
+   variables.  This of course includes the 2-class classification case,
+   where with Y = 0, 1 representing the two classes, the regression
+   function reduces to the conditional probability of class 1, given the
+   predictors.  
+   
+   In addition to averaging the neighbor Y values, one can
+   instead choose local linear smoothing, or whatever the user desires,
+   by proper specification of the \code{nearf} function. For instance,
+   one could check heteroscedasticity in linear regression models by 
+   setting \code{nearf} to estimate conditional variance.
 
    The X, i.e. predictor, data will be scaled by the code, so as to put
    all predictor variables on an equal footing.

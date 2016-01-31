@@ -148,8 +148,6 @@ kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
    meanerr <- function(k) {
       kout <- knnest(y,xdata,k,nearf)
       kpred <- predict(kout,x)
-      if (identical(lossftn,predwrong))
-         kpred <- round(kpred)
       mean(lossftn(y,kpred))
    }
    # evaluate at these values of k

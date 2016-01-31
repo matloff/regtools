@@ -147,7 +147,7 @@ and \code{ks} containing the corresponding values of \code{k};
 
 \examples{
 xe <- matrix(rnorm(30000),ncol=3)
-y <- xe %*% c(1,0.5,0.2)  # 2 predictors + epsilon
+y <- xe \%*\% c(1,0.5,0.2)  # 2 predictors + epsilon
 x <- xe[,-3]  # exclude epsilon term
 xdata <- preprocessx(x,50)
 zout <- knnest(y,xdata,50)

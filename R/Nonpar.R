@@ -230,6 +230,8 @@ matrixtolist <- function (rc, m)
     else Map(function(colnum) m[, colnum], 1:ncol(m))
 }
 
+######### experimental ###########
+
 # parget.knnx():
 
 # wrapper for use of 'parallel' package with get.knnx() of FNN package
@@ -242,19 +244,19 @@ matrixtolist <- function (rc, m)
 
 # value is the nn.index component of the list returned by get.knnx()
 
-parget.knnx <- function(data, query, k=10, 
-      algorithm="kd_tree",cls=NULL) {
-   if (is.null(cls))  {
-      tmp <- get.knnx(data,query,k,algorithm)
-      return(tmp$nn.index)
-   }
-   require(partools)
-   setclsinfo(cls)
-   clusterExport(cls,c('data','k','algorithm'),envir=environment())
-   distribsplit(cls,'query')
-   clusterEvalQ(cls,library(FNN))
-   tmp <- clusterEvalQ(cls,get.knnx(data,query,k,algorithm))
-   tmp <- lapply(tmp,function(tmpelt) tmpelt$nn.index)
-   Reduce(rbind,tmp)
-}
+#####  parget.knnx <- function(data, query, k=10, 
+#####        algorithm="kd_tree",cls=NULL) {
+#####     if (is.null(cls))  {
+#####        tmp <- get.knnx(data,query,k,algorithm)
+#####        return(tmp$nn.index)
+#####     }
+#####     require(partools)
+#####     setclsinfo(cls)
+#####     clusterExport(cls,c('data','k','algorithm'),envir=environment())
+#####     distribsplit(cls,'query')
+#####     clusterEvalQ(cls,library(FNN))
+#####     tmp <- clusterEvalQ(cls,get.knnx(data,query,k,algorithm))
+#####     tmp <- lapply(tmp,function(tmpelt) tmpelt$nn.index)
+#####     Reduce(rbind,tmp)
+#####  }
 

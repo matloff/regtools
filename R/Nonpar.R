@@ -150,7 +150,7 @@ kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
       kpred <- predict(kout,x)
       if (identical(lossftn,predwrong))
          kpred <- round(kpred)
-      mean(lossftn(y,kout$regest))
+      mean(lossftn(y,kpred))
    }
    # evaluate at these values of k
    ks <- floor(kmax/nk) * (1:nk)

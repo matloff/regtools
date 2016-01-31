@@ -78,11 +78,12 @@ nonparvsxplot(knnout,lmout=NULL)
    results; in calling \code{knnest} for several values of \code{k}, we
    do not need to call \code{preprocessx} again.  
    
-   In addition to averaging the neighbor Y values, one can
-   instead choose local linear smoothing, or whatever the user desires,
-   by proper specification of the \code{nearf} function. For instance,
-   one could check heteroscedasticity in linear regression models by 
-   setting \code{nearf} to estimate conditional variance.
+   In addition to averaging the neighbor Y values, one can specify other
+   types of smoothing by proper specification of the \code{nearf}
+   function. For instance, one specifies local linear smoothing by
+   setting \code{nearf} to \code{loclin}, one could check
+   heteroscedasticity in linear regression models by setting
+   \code{nearf} to \code{vary} to estimate conditional variance.
 
    The X, i.e. predictor, data will be scaled by the code, so as to put
    all predictor variables on an equal footing.
@@ -132,7 +133,7 @@ with the expansion consisting of a new component \code{regest}, the
 estimated regression function values at the training set points.
 
 The function \code{predict.knn} returns the predicted Y values at
-\code{predpts}.
+\code{predpts}.  It is called simply via \code{predict}.
 
 The function \code{kmin} returns an R list, with the component
 \code{meanerrs} containing the cross-validated mean loss function values
@@ -146,12 +147,14 @@ and \code{ks} containing the corresponding values of \code{k};
 }
 
 \examples{
-xe <- matrix(rnorm(30000),ncol=3)
-y <- xe \%*\% c(1,0.5,0.2)  # 2 predictors + epsilon
-x <- xe[,-3]  # exclude epsilon term
-xdata <- preprocessx(x,50)
-zout <- knnest(y,xdata,50)
-predict(zout,c(1,1))  # about 1.5
+xe <- matrix(rnorm(30000),ncol=3) 
+xe[,-3] <- xe[,-3] + 2 
+y <- xe %*% c(1,0.5,0.2)  # 2 predictors + epsilon 
+x <- xe[,-3]  # exclude epsilon term 
+xdata <- preprocessx(x,2500) 
+zout <- knnest(y,xdata,200) 
+predict(zout,c(1,1))  # about 1.5 
+kmin(y,xdata,nk=10)
 
 data(prgeng)
 pe <- prgeng

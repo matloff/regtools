@@ -63,11 +63,11 @@ getjcb <- function(g,x,tht) {
 
 # test case; should output about 2 and 1
 # x <- rgamma(1000,2)
-# m <- function(x) c(mean(x),var(x))
+# m <- c(mean(x),var(x)
 # g <- function(theta) {
 #    g1 <-  theta[1] / theta[2]
 #    g2 <-  theta[1] / theta[2]^2
 #    c(g1,g2)
 # }
-# mm(m,g,x,2)
+# mm(m,g,x)
 

@@ -12,7 +12,7 @@
 
 # arguments:
 # 
-#   mm: a vector of sample moments ("left-hand sides" of MM eqns); 
+#    m: a vector of sample moments ("left-hand sides" of MM eqns); 
 #       x is the data, one observation per row; might be more
 #       general than moments
 #    g(x,theta): 
@@ -21,15 +21,13 @@
 #       parameters to be estimated; it is required that the second 
 #       argument of g() be named 'theta'
 #    x: our x in m and g()
-#    lth: length of theta
 #    init: initial guess for theta; R list with names corresponding
 #          to the parameters in g
 #    eps: convergence criterion; iterations stop at 1000, or whe
 #         sum(abs(g)) < eps
 #    maxiters: max number of iterations
 
-mm <- function(m,g,x,lth=length(m),
-      init=rep(0.5,lth),eps=0.0001,maxiters=1000) {
+mm <- function(m,g,x,init=rep(0.5,length(m)),eps=0.0001,maxiters=1000) {
    tht <- init
    # mvec <- m(data)
    mvec <- m

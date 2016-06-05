@@ -1,0 +1,47 @@
+\name{ridgelm,plot.rlm}
+\alias{ridgelm}
+\alias{plot.rlm}
+
+\title{Ridge Regression}
+
+\description{Similar to \code{lm.ridge} in \code{MASS} packaged incldued
+with R, but with a different kind of scaling and a little nicer
+plotting.
+}
+
+\usage{
+ridgelm(xy,lambda = seq(0.01,1,0.01)) 
+plot.rlm(ridgelm.out)
+}
+
+\arguments{
+  \item{xy}{Data, response variable in the last column.}
+  \item{lambda}{Vector of desired values for the ridge parameter.}
+  \item{ridgelm.out}{Object of type 'rlm', output of \code{ridgelm}.}
+}
+
+\details{
+   
+   Centers and scales the predictors X, and centers the response
+   variable Y.  Computes X'X and then solves (X'X)/n + lambda I = X'Y/n.
+   The 1/n factors are important, making the diagonal elements of
+   (X'X)/n all 1s and thus facilitating choices for the lambdas in a
+   manner independent of the data.
+
+   Calling \code{plot} on the output of \code{ridgelm} dispatches to
+   \code{plot.rlm}, thus diplaying the ridge traces.
+   
+}
+
+\value{
+
+   The function \code{ridgelm} returns an object of class 'rlm', with
+   components \code{bhats}, the estimated beta vectors, one column per
+   lambda value, and \code{lambda}, a copy of the input.
+
+}
+
+\author{
+Norm Matloff
+}
+

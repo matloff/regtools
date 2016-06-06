@@ -16,10 +16,12 @@
 
 # value: object of class 'rlm', with components
 
-#     bhats: matrix of est reg coefs, one col for each lambda value
+#     bhats: matrix of est reg coefs, one col for each lambda value; if
+#        mapback is TRUE, these coefs will be mapped back to the
+#        original predictors' scale
 #     lambda: copy of the input lambda
 
-ridgelm <- function(xy,lambda=seq(0.01,1.00,0.01)) {
+ridgelm <- function(xy,lambda=seq(0.01,1.00,0.01),mapback=TRUE) {
    p <- ncol(xy) - 1; n <- nrow(xy)
    x <- xy[,1:p]
    y <- xy[,p+1]
@@ -31,6 +33,10 @@ ridgelm <- function(xy,lambda=seq(0.01,1.00,0.01)) {
       qr.solve(xpx + lambval*diag(p),xpy)
    tmp <- Map(mapftn,lambda)
    tmp <- Reduce(cbind,tmp)
+   if (mapback) {
+      sds <- attr(x,'scaled:scale')
+      for (i in 1:p) tmp[i,] <- tmp[i,] / sds[i]
+   }
    result <- list(bhats=tmp,lambda=lambda)
    class(result) <- 'rlm'
    result

@@ -1,5 +1,5 @@
 
-######################  k-NN  ###############################
+######################  k-NN routines  #############################
 
 # use knnest() to estimate the regression function values; send output
 # to predict(), i.e. predict.knn() to predict; before calling knnest(),
@@ -7,13 +7,13 @@
 # trying several different values of k without recomputing nearest
 # neighbors
 
-# knnest(): 
+######################  knnest()  ###############################
 
 # use kNN to estimate the regression function at each data point in the
 # training set
 
-# will refer here to predictor and response variable data as X and Y;
-# together they form the training set
+# will refer here to predictor and response variable data as matrix X
+# and vector Y; together they form the training set
 
 # X must undergo preprocessing -- centering/scaling, and determination
 # of nearest neighbors -- which is done by calling preprocessx() before
@@ -32,6 +32,10 @@
 #
 # value: class of type 'knn', consisting of input xdata and 
 #        the estimated reg. ftn. at those values
+
+# NOTE: knnest() does NOT have an argument corresponding to xval in
+# preprocessx(); if it is desired that xval = TRUE, the user must call
+# preprocessx() with that value before calling knnest()
 
 knnest <- function(y,xdata,k,nearf=meany)
 {  require(FNN)
@@ -57,7 +61,7 @@ knnest <- function(y,xdata,k,nearf=meany)
    xdata
 }
 
-# preprocessx():
+######################  preprocessx()  ###############################
 
 # scale the X matrix, and form indices of neighbors
 
@@ -92,7 +96,7 @@ preprocessx <- function(x,kmax,xval=FALSE) {
    result
 }
 
-# predict.knn():
+######################  predict.knn()  ###############################
 
 # do prediction on new data (or on the training set, if predpts is set
 # that way); call via the predict() generic function
@@ -124,7 +128,7 @@ predict.knn <- function(xdata,predpts) {
    xdata$regest[idx]
 }
 
-# kmin():
+######################  kmin()  ###############################
 
 # finds "best" value of k by cross-validation, over a set of
 # evenly-spaced values of k; "best" means minimum cross-validated loss
@@ -161,10 +165,18 @@ kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
    result
 }
 
+######################  plot.kmin()  ###############################
+
 plot.kmin <- function(kminout) {
    plot(names(kminout$meanerrs),kminout$meanerrs,
       xlab='k',ylab='mean error',pch=20)
 }
+
+######################  meany(), etc. ###############################
+
+# these are the functions specifying the operation to be applied to the
+# nearest-neighbor Y values; standard kNN uses the mean, implemented
+# here as mean()
 
 # find mean of Y on the data z, Y in last column, and predict at xnew
 meany <- function(predpt,nearxy) {
@@ -187,6 +199,8 @@ loclin <- function(predpt,nearxy) {
    c(1,predpt) %*% bhat
 }
 
+######################  parvsnonparplot(), etc. ###############################
+
 # plot fitted values of parameteric model vs. kNN fitted
 #
 # arguments:
@@ -198,6 +212,8 @@ parvsnonparplot <- function(lmout,knnout) {
    plot(nonparfitted,parfitted,pch=20)
    abline(0,1)
 }
+
+######################  nonparvsxplot(), etc. ###############################
 
 # plot, against each predictor, either nonpar or par - nonpar
 #
@@ -220,6 +236,8 @@ nonparvsxplot <- function(knnout,lmout=NULL) {
    }
 }
 
+######################  matrixtolist(), etc. ###############################
+
 matrixtolist <- function (rc, m) 
 {
     if (rc == 1) {
@@ -227,6 +245,11 @@ matrixtolist <- function (rc, m)
     }
     else Map(function(colnum) m[, colnum], 1:ncol(m))
 }
+
+######################  knnstep() ###############################
+
+# stepwise variable selection, for classification problems; add/delete
+# predictor based on change in overall prediction error
 
 ######### experimental ###########
 

@@ -138,8 +138,7 @@ predict.knn <- function(xdata,predpts) {
    predpts <- scale(predpts,center=ctr,scale=scl)
    tmp <- get.knnx(x,predpts,1)
    idx <- tmp$nn.index
-   nycol <- 
-   xdata$regest[idx]
+   xdata$regest[idx,]
 }
 
 ######################  kmin()  ###############################

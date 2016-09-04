@@ -22,9 +22,9 @@ models.
 \usage{
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
-meany(predpt,nearxy) 
-vary(predpt,nearxy) 
-loclin(predpt,nearxy) 
+meany(predpt,nearxy,nycol) 
+vary(predpt,nearxy,nycol) 
+loclin(predpt,nearxy,nycol) 
 predict.knn(xdata,predpts)
 kmin(y,xdata,lossftn=l2,nk=5,nearf=meany) 
 plot.kmin(kminout)
@@ -33,7 +33,9 @@ nonparvsxplot(knnout,lmout=NULL)
 }
 
 \arguments{
-  \item{y}{Vector of response variable data in the training set.}
+  \item{y}{Response variable data in the training set. Vector or matrix,
+     the latter case for vector-valued response, e.g. multiclass
+     classification.}
   \item{x}{Predictor data.}
   \item{xdata}{X and associated neighbor indices. Output of
      \code{preprocessx}.} 
@@ -58,16 +60,17 @@ nonparvsxplot(knnout,lmout=NULL)
   \item{kminout}{Output of \code{kmin}.}
   \item{lmout}{Output of \code{lm}.}
   \item{knnout}{Output of \code{knnest}.}
+  \item{nycol}{Number of columns in the input data for "Y" data.}
 }
 
 \details{
    
    The \code{knnest} function does k-nearest neighbor regression
    function estimation, in any dimension, i.e. any number of predictor
-   variables.  This of course includes the 2-class classification case,
-   where with Y = 0, 1 representing the two classes, the regression
-   function reduces to the conditional probability of class 1, given the
-   predictors.  
+   variables, and any number of response variables.  This of course 
+   includes classification problems case; a scalar Y = 0,1 would
+   represent two classes, with the regression function reducing to 
+   the conditional probability of class 1, given the predictors.  
 
    The \code{preprocessx} function does the prep work.  For each row in
    \code{x}, the code finds the \code{kmax} closest rows to that row.
@@ -109,7 +112,6 @@ nonparvsxplot(knnout,lmout=NULL)
    parameteric model vs. kNN fitted, \code{nonparvsxplot} k-NN fitted
    values against each predictor, one by one.
 
-
    % The \code{parget.knnx} function is a wrapper for use of 'parallel'
    % package with \code{get.knnx} of the 'FNN' package.
    
@@ -147,6 +149,12 @@ and \code{ks} containing the corresponding values of \code{k};
 }
 
 \examples{
+set.seed(9999)
+x <- matrix(sample(1:100,30),ncol=3)
+xd <- preprocessx(x[,1],2,TRUE)
+ko <- knnest(x[,-1],xd,2)
+ko$regest # 1st row = (74.5,31.5)
+
 xe <- matrix(rnorm(30000),ncol=3) 
 xe[,-3] <- xe[,-3] + 2 
 y <- xe %*% c(1,0.5,0.2)  # 2 predictors + epsilon 

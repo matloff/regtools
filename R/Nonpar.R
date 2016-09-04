@@ -158,6 +158,7 @@ predict.knn <- function(xdata,predpts) {
 #   value: the value of k found to be "best"
 
 kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
+   if (is.matrix(y)) stop('not capable of vector y yet')
    n <- nrow(xdata$x)
    x <- xdata$x
    xval <- xdata$xval

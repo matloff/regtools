@@ -68,7 +68,7 @@ knnest <- function(y,xdata,k,nearf=meany)
    # the training set
    regest <- sapply(1:nrow(x),
       function(i) nearf(x[i,],nearxy[[i]],nycol))
-   if (nycol > 1) regest <- t(regest)
+   regest <- if (nycol > 1) t(regest) else as.matrix(regest)
    xdata$regest <- regest
    class(xdata) <- 'knn'
    xdata

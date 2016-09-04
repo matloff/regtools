@@ -152,8 +152,12 @@ and \code{ks} containing the corresponding values of \code{k};
 set.seed(9999)
 x <- matrix(sample(1:100,30),ncol=3)
 xd <- preprocessx(x[,1],2,TRUE)
+ko <- knnest(x[,2],xd,2)
+ko$regest # 1st element = 74.5
+predict(ko,76)
 ko <- knnest(x[,-1],xd,2)
 ko$regest # 1st row = (74.5,31.5)
+predict(ko,76)
 
 xe <- matrix(rnorm(30000),ncol=3) 
 xe[,-3] <- xe[,-3] + 2 

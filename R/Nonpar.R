@@ -13,7 +13,11 @@
 # training set
 
 # will refer here to predictor and response variable data as matrix X
-# and vector Y; together they form the training set
+# and vector/matrix Y (see below); together they form the training set
+
+# to accommodate vector-valued Y, including multiclass classification
+# problems, Y is allowed to be a matrix; it is a vector in the
+# "ordinary" case
 
 # X must undergo preprocessing -- centering/scaling, and determination
 # of nearest neighbors -- which is done by calling preprocessx() before
@@ -24,14 +28,15 @@
 
 # arguments:
 #
-#   y: Y values in training set
+#   y: Y values in training set, vector or matrix
 #   xdata: X and associated neighbor indices; output of preprocessx()
 #   k:  number of nearest neighbors
 #   nearf: function to apply to the nearest neighbors 
 #          of a point; default is mean(), as in standard kNN
 #
-# value: class of type 'knn', consisting of input xdata and 
-#        the estimated reg. ftn. at those values
+# value: class of type 'knn', consisting of the components of the
+#        the input xdata and a component regest, consisting of
+#        the estimated reg. ftn. at the X values in xdata; regest
 
 # NOTE: knnest() does NOT have an argument corresponding to xval in
 # preprocessx(); if it is desired that xval = TRUE, the user must call
@@ -43,19 +48,26 @@ knnest <- function(y,xdata,k,nearf=meany)
    idxs <- xdata$idxs 
    if (ncol(idxs) < k) stop('k must be <= kmax')
    idx <- idxs [,1:k]
-   # set idxrows[[i]] to row i of idx
+   # set idxrows[[i]] to row i of idx, the indices of
+   # the neighbors of the i-th observation
    idxrows <- matrixtolist(1,idx)
    # now do the kNN smoothing
+   # first, form the neighborhoods
    x <- xdata$x
    xy <- cbind(x,y)
+   nycol <- ncol(y)  # how many cols in xy are y?
+   # ftn to form one neighborhood (x and y vals)
+   form1nbhd <-  function(idxrow) xy[idxrow,]
+   # now form all the neighborhoods
    nearxy <- lapply(idxrows,function(idxrow) xy[idxrow,])
-   # now nearxy[[i]] is the portion of x corresponding to 
+   # now nearxy[[i]] is the rows of x corresponding to 
    # neighbors of x[i,], together with the associated Y values
 
    # now find the estimated regression function values at each point in
    # the training set
    regest <- sapply(1:nrow(x),
-      function(i) nearf(x[i,],nearxy[[i]]))
+      function(i) nearf(x[i,],nearxy[[i]],nycol))
+   if (nycol > 1) regest <- t(regest)
    xdata$regest <- regest
    class(xdata) <- 'knn'
    xdata
@@ -112,7 +124,7 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 
 # note:  "1-nearest neighbor" is used here; for each row of predpts, the
 # estimated regression function value for the closest point in the
-# training data is used as our est. reg. ftn. value at tht predpts row
+# training data is used as our est. reg. ftn. value at that predpts row
 
 predict.knn <- function(xdata,predpts) {
    x <- xdata$x
@@ -179,21 +191,25 @@ plot.kmin <- function(kminout) {
 # here as mean()
 
 # find mean of Y on the data z, Y in last column, and predict at xnew
-meany <- function(predpt,nearxy) {
+meany <- function(predpt,nearxy,nycol) {
    # predpt not used (but see loclin() below)
-   ycol <- ncol(nearxy)
-   mean(nearxy[,ycol])
+   if (nycol == 1) return(mean(nearxy[,ycols]))
+   nxycols <- ncol(nearxy)
+   ycols <- (nxycols-nycol+1):nxycols
+   colMeans(nearxy[,ycols])
 }
 
 # find variance of Y in the neighborhood of predpt
-vary <- function(predpt,nearxy) {
+vary <- function(predpt,nearxy,nycol) {
+   if (nycol > 1) stop('not capable of vector y yet')
    # predpt not used (but see loclin() below)
    ycol <- ncol(nearxy)
    var(nearxy[,ycol])
 }
 
 # fit linear model to the data z, Y in last column, and predict at xnew
-loclin <- function(predpt,nearxy) {
+loclin <- function(predpt,nearxy,nycol) {
+   if (nycol > 1) stop('not capable of vector y yet')
    ycol <- ncol(nearxy)
    bhat <- coef(lm(nearxy[,ycol] ~ nearxy[,-ycol]))
    c(1,predpt) %*% bhat

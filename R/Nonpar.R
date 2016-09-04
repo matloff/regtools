@@ -47,6 +47,7 @@ knnest <- function(y,xdata,k,nearf=meany)
    # take only the idxs for our value of k
    idxs <- xdata$idxs 
    if (ncol(idxs) < k) stop('k must be <= kmax')
+   if (is.vector(y)) y <- as.matrix(y)
    idx <- idxs [,1:k]
    # set idxrows[[i]] to row i of idx, the indices of
    # the neighbors of the i-th observation
@@ -137,6 +138,7 @@ predict.knn <- function(xdata,predpts) {
    predpts <- scale(predpts,center=ctr,scale=scl)
    tmp <- get.knnx(x,predpts,1)
    idx <- tmp$nn.index
+   nycol <- 
    xdata$regest[idx]
 }
 
@@ -193,10 +195,10 @@ plot.kmin <- function(kminout) {
 # find mean of Y on the data z, Y in last column, and predict at xnew
 meany <- function(predpt,nearxy,nycol) {
    # predpt not used (but see loclin() below)
-   if (nycol == 1) return(mean(nearxy[,ycols]))
+   # if (nycol == 1) return(mean(nearxy[,ycols]))
    nxycols <- ncol(nearxy)
    ycols <- (nxycols-nycol+1):nxycols
-   colMeans(nearxy[,ycols])
+   colMeans(nearxy[,ycols,drop=FALSE])
 }
 
 # find variance of Y in the neighborhood of predpt

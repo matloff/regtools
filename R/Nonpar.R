@@ -67,9 +67,10 @@ knnest <- function(y,xdata,k,nearf=meany)
    # now find the estimated regression function values at each point in
    # the training set
    regest <- sapply(1:nrow(x),
-      function(i) nearf(x[i,],nearxy[[i]],nycol))
+      function(i) nearf(x[i,],nearxy[[i]]))
    regest <- if (nycol > 1) t(regest) else as.matrix(regest)
    xdata$regest <- regest
+   xdata$nycol <- nycol
    class(xdata) <- 'knn'
    xdata
 }
@@ -158,7 +159,8 @@ predict.knn <- function(xdata,predpts) {
 #   value: the value of k found to be "best"
 
 kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
-   if (is.matrix(y)) stop('not capable of vector y yet')
+   if (is.vector(y) || ncol(y) > 1)
+      stop('not capable of vector y yet')
    n <- nrow(xdata$x)
    x <- xdata$x
    xval <- xdata$xval
@@ -193,11 +195,12 @@ plot.kmin <- function(kminout) {
 # here as mean()
 
 # find mean of Y on the data z, Y in last column, and predict at xnew
-meany <- function(predpt,nearxy,nycol) {
-   # predpt not used (but see loclin() below)
-   # if (nycol == 1) return(mean(nearxy[,ycols]))
-   nxycols <- ncol(nearxy)
-   ycols <- (nxycols-nycol+1):nxycols
+meany <- function(predpt,nearxy) {
+   # predpt not directly used (but see loclin() below)
+   nxcol <- 
+      if(is.vector(predpt)) length(predpt) else ncol(predpt)
+   nxycol <- ncol(nearxy)
+   ycols <- (nxcol+1):nxycol
    colMeans(nearxy[,ycols,drop=FALSE])
 }
 

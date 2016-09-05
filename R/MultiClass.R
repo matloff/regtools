@@ -199,13 +199,14 @@ matrixtolist <- function (rc,m)
 
 # ovalogtrn: generate estimated regression function values
 
-# arguments$
+# arguments
 
-#    y:  training set class data in training set, coded 0,1,...,m-1
+#    y:  training set class data; either an R factor, or numeric
+#        coded 0,1,...,m-1
 #    xdata:  output of preprocessx() applied to the training set
 #            predictor data
 #    m:  number of classes
-#    k:  number of nearest neighborhs
+#    k:  number of nearest neighbors
 #    truepriors:  true class probabilities, typically from external source
 
 # value:
@@ -215,17 +216,26 @@ matrixtolist <- function (rc,m)
 #    i, column j, is the probability that Y = j given that 
 #    X = row i in the X data, estimated from the training set
 
-ovaknntrn <- function(y,xdata,m,k,truepriors=NULL) {
-   if (m < 3) stop('m must be at least 3; use knnest()')  
-   x <- xdata$x
-   outmat <- NULL  # will eventually be regest
-   for (i in 0:(m-2)) {
-      yi <- as.integer(y == i)
-      knnout <- knnest(yi,xdata,k)
-      outmat <- cbind(outmat,knnout$regest)
+ovaknntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
+stop('under revision')
+   require(dummies)
+   if (m < 3) stop('m must be at least 3; use knnest() instead')  
+   if (class(y) == 'factor') {
+      y <- as.numeric(y)
    }
-   # get final column from the others
-   outmat <- cbind(outmat,1-apply(outmat,1,sum))
+   x <- xdata$x
+   # replace y with m-1 dummies
+   ds <- dummy(y)[,-m]
+   for (i in 1:(m-1)) colnames(ds)[i] <- sprintf('y%d',i-1)
+   knnout <- knnest(ds,xdata,k)
+##    outmat <- NULL  # will eventually be regest
+##    for (i in 0:(m-2)) {
+##       yi <- as.integer(y == i)
+##       knnout <- knnest(yi,xdata,k)
+##       outmat <- cbind(outmat,knnout$regest)
+##    }
+##    # get final column from the others
+##    outmat <- cbind(outmat,1-apply(outmat,1,sum))
    if (!is.null(truepriors)) {
       tmp <- table(y)
       if (length(tmp) != m) 

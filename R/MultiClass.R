@@ -197,7 +197,7 @@ matrixtolist <- function (rc,m)
 
 # uses One-vs.-All approach
 
-# ovalogtrn: generate estimated regression function values
+# ovaknntrn: generate estimated regression function values
 
 # arguments
 
@@ -217,25 +217,18 @@ matrixtolist <- function (rc,m)
 #    X = row i in the X data, estimated from the training set
 
 ovaknntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
-stop('under revision')
    require(dummies)
    if (m < 3) stop('m must be at least 3; use knnest() instead')  
    if (class(y) == 'factor') {
-      y <- as.numeric(y)
+      y <- as.numeric(y) - 1
    }
    x <- xdata$x
    # replace y with m-1 dummies
    ds <- dummy(y)[,-m]
    for (i in 1:(m-1)) colnames(ds)[i] <- sprintf('y%d',i-1)
    knnout <- knnest(ds,xdata,k)
-##    outmat <- NULL  # will eventually be regest
-##    for (i in 0:(m-2)) {
-##       yi <- as.integer(y == i)
-##       knnout <- knnest(yi,xdata,k)
-##       outmat <- cbind(outmat,knnout$regest)
-##    }
-##    # get final column from the others
-##    outmat <- cbind(outmat,1-apply(outmat,1,sum))
+   outmat <- knnout$regest
+   outmat <- cbind(outmat,1-apply(outmat,1,sum))
    if (!is.null(truepriors)) {
       tmp <- table(y)
       if (length(tmp) != m) 
@@ -252,6 +245,7 @@ stop('under revision')
       }
    }
    xdata$regest <- outmat
+   class(xdata) <- c('ovaknn',class(xdata))
    xdata
 }
 
@@ -267,7 +261,8 @@ stop('under revision')
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predpts
 
-ovaknnpred <- function(xdata,predpts) {
+#ovaknnpred <- function(xdata,predpts) {
+predict.ovaknn <- function(xdata,predpts) {
    x <- xdata$x
    if (is.vector(predpts)) 
       predpts <- matrix(predpts,nrow=1)

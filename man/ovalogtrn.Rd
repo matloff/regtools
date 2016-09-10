@@ -104,6 +104,22 @@ predy <- ovaknnpred(ovout,vert[,-7])
 # proportion correctly classified
 mean(predy == vert$V7) 
 
+# sim data
+n <- 1500  
+# within-grp cov matrix 
+cv <- rbind(c(1,0.2),c(0.2,1))  
+xy <- NULL  
+library(mvtnorm)  
+for (i in 1:3)  
+   xy <- rbind(xy,rmvnorm(n,mean=rep(i*2.0,2),sigma=cv))  
+library(dummies) 
+y <- rep(0:2,each=n) 
+xy <- cbind(xy,y) 
+xdata <- preprocessx(xy[,-3],20) 
+oo <- ovaknntrn(y,xdata,m=3,k=20) 
+predout <- predict(oo,xy[,-3])
+mean(preds == y)
+
 # UCI Letter Recognition data
 library(mlbench)
 data(LetterRecognition)#

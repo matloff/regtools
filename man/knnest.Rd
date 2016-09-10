@@ -165,7 +165,7 @@ y <- xe %*% c(1,0.5,0.2)  # 2 predictors + epsilon
 x <- xe[,-3]  # exclude epsilon term 
 xdata <- preprocessx(x,2500) 
 zout <- knnest(y,xdata,200) 
-predict(zout,c(1,1))  # about 1.5 
+predict(zout,c(1,1))  # about 1.55
 kmin(y,xdata,nk=10)
 
 data(prgeng)

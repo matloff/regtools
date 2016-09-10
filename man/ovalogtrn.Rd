@@ -1,10 +1,10 @@
-\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,ovaknntrn,ovaknnpred,classadjust}
+\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,ovaknntrn,predict.ovaknn,classadjust}
 \alias{ovalogtrn}
 \alias{ovalogpred}
 \alias{avalogtrn}
 \alias{avalogpred}
 \alias{ovaknntrn}
-\alias{ovaknnpred}
+\alias{predict.ovaknn}
 \alias{classadjust}
 
 \title{Classification with More Than 2 Classes}
@@ -20,7 +20,7 @@ avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx)
 preprocessx(x, kmax) 
 ovaknntrn(y,xdata,m,k,truepriors=NULL) 
-ovaknnpred(xdatarf,predpts) 
+predict.ovaknn(xdatarf,predpts) 
 classadjust(econdprobs,wrongratio,trueratio) 
 }
 
@@ -66,7 +66,7 @@ functions, \code{ovalogpred}, \code{avalogpred} and \code{ovaknnpred}.
 \value{
 
 The prediction functions, \code{ovalogpred}, \code{avalogpred} and
-\code{ovaknnpred}, return the predicted classes for the points in
+\code{predict.ovaknn}, return the predicted classes for the points in
 \code{predx} or \code{predpts}.
 
 The functions \code{ovalogtrn} and \code{avalogtrn} return the
@@ -100,7 +100,7 @@ mean(predy == vert$V7)
 # kNN
 xdata <- preprocessx(vert[,-7],50)
 ovout <- ovaknntrn(vert[,7],xdata,3,50)
-predy <- ovaknnpred(ovout,vert[,-7])
+predy <- predict(ovout,vert[,-7])
 # proportion correctly classified
 mean(predy == vert$V7) 
 
@@ -143,15 +143,15 @@ lrtest1 <- lrtest[newidxs,]
 xdata <- preprocessx(lrtrn[,-1],50)
 # without setting priors
 trnout <- ovaknntrn(lrtrn[,1],xdata,26,50)
-ypred <- ovaknnpred(trnout,lrtest[,-1])
+ypred <- predict(trnout,lrtest[,-1])
 # how well did it work?
 mean(ypred == lrtest[,1])  # 0.86
 # wtd test set, but still not setting priors
-ypred <- ovaknnpred(trnout,lrtest1[,-1])
+ypred <- predict(trnout,lrtest1[,-1])
 mean(ypred == lrtest1[,1])  # only about 0.75
 # refit with true priors
 trnout1 <- ovaknntrn(lrtrn[,1],xdata,26,50,truepriors)
-ypred <- ovaknnpred(trnout1,lrtest1[,-1])
+ypred <- predict(trnout1,lrtest1[,-1])
 mean(ypred == lrtest1[,1])  # about 0.89
 # logit
 ologout <- ovalogtrn(26,lr[,c(2:17,1)])

@@ -200,6 +200,23 @@ testout <- predict(trainout,pecs1[test,-6])
 mean(abs(pecs1[test,6] - testout))
 # find best cross-validated k, 10
 
+# Y vector-valued
+# 3 clusters, equal wts, coded 0,1,2
+n <- 1500 
+# within-grp cov matrix
+cv <- rbind(c(1,0.2),c(0.2,1)) 
+xy <- NULL 
+library(mvtnorm) 
+for (i in 1:3) 
+   xy <- rbind(xy,rmvnorm(n,mean=rep(i*2.0,2),sigma=cv)) 
+library(dummies)
+y <- rep(0:2,each=n)
+xy <- cbind(xy,dummy(y))
+xdata <- preprocessx(xy[,-(3:5)],20) 
+ko <- knnest(xy[,3:5],xdata,20) 
+mx <- apply(as.matrix(ko$regest),1,which.max) - 1
+mean(mx == y)  # should be about 0.87
+
 }
 
 \author{

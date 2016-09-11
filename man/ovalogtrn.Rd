@@ -111,8 +111,13 @@ oo <- knntrn(y,xdata,m=3,k=20)
 predout <- predict(oo,xy[,-3])
 mean(predout$predy == y)  # about 0.87
 
-# UCI Letter Recognition data
 library(mlbench)
+data(Vehicle)
+xdata <- preprocessx(Vehicle[,-19],25)
+kout <- knntrn(Vehicle$Class,xdata,k=25)
+prout <- predict(kout,as.matrix(Vehicle[1,-19])) # 3
+
+# UCI Letter Recognition data
 data(LetterRecognition)
 # prep data
 lr <- LetterRecognition

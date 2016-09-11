@@ -272,7 +272,7 @@ predict.ovaknn <- function(xdata,predpts) {
    predpts <- scale(predpts,center=ctr,scale=scl)
    tmp <- get.knnx(x,predpts,1)
    idx <- tmp$nn.index
-   regest <- xdata$regest[idx,]
+   regest <- xdata$regest[idx,,drop=FALSE]
    predy <- apply(regest,1,which.max) - 1
    list(regest=regest,predy=predy)
 }

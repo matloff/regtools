@@ -1,10 +1,10 @@
-\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,ovaknntrn,predict.ovaknn,classadjust}
+\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,knntrn,predict.knn,classadjust}
 \alias{ovalogtrn}
 \alias{ovalogpred}
 \alias{avalogtrn}
 \alias{avalogpred}
-\alias{ovaknntrn}
-\alias{predict.ovaknn}
+\alias{knntrn}
+\alias{predict.knn}
 \alias{classadjust}
 
 \title{Classification with More Than 2 Classes}
@@ -19,8 +19,8 @@ ovalogpred(coefmat,predx)
 avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx)
 preprocessx(x, kmax) 
-ovaknntrn(y,xdata,m,k,truepriors=NULL) 
-predict.ovaknn(xdatarf,predpts) 
+knntrn(y,xdata,m,k,truepriors=NULL) 
+predict.knn(xdatarf,predpts) 
 classadjust(econdprobs,wrongratio,trueratio) 
 }
 
@@ -57,16 +57,16 @@ the One vs.\ All method.  In the logit case, All vs.\ All is also
 offered.  In addition to logit, the k-Nearest Neighbor method is
 available.  For this, \code{preprocessx} must first be called.
 
-The functions \code{ovalogtrn}, \code{avalogtrn} and \code{ovaknntrn}
+The functions \code{ovalogtrn}, \code{avalogtrn} and \code{knntrn}
 are used on the training set, and then feed into the prediction
-functions, \code{ovalogpred}, \code{avalogpred} and \code{ovaknnpred}. 
+functions, \code{ovalogpred}, \code{avalogpred} and \code{predict.knn}. 
 
 }
 
 \value{
 
 The prediction functions, \code{ovalogpred}, \code{avalogpred} and
-\code{predict.ovaknn}, return the predicted classes for the points in
+\code{predict.knn}, return the predicted classes for the points in
 \code{predx} or \code{predpts}.
 
 The functions \code{ovalogtrn} and \code{avalogtrn} return the
@@ -75,7 +75,7 @@ estimated logit coefficent vectors, one per column. There are
 latter, in which case the order of the R function \code{combin} is
 used.
 
-The function \code{ovaknntrn} returns a copy of the \code{xdata} input,
+The function \code{knntrn} returns a copy of the \code{xdata} input,
 but with an extra component added.  The latter is the matrix of
 estimated regression function values; the element in row i, column j, is
 the probability that Y = j given that X = row i in the X data. 
@@ -99,7 +99,7 @@ mean(predy == vert$V7)
 
 # kNN
 xdata <- preprocessx(vert[,-7],50)
-ovout <- ovaknntrn(vert[,7],xdata,3,50)
+ovout <- knntrn(vert[,7],xdata,3,50)
 predy <- predict(ovout,vert[,-7])
 # proportion correctly classified
 mean(predy == vert$V7) 
@@ -116,7 +116,7 @@ library(dummies)
 y <- rep(0:2,each=n) 
 xy <- cbind(xy,y) 
 xdata <- preprocessx(xy[,-3],20) 
-oo <- ovaknntrn(y,xdata,m=3,k=20) 
+oo <- knntrn(y,xdata,m=3,k=20) 
 predout <- predict(oo,xy[,-3])
 mean(preds == y)
 
@@ -142,7 +142,7 @@ lrtest1 <- lrtest[newidxs,]
 # kNN
 xdata <- preprocessx(lrtrn[,-1],50)
 # without setting priors
-trnout <- ovaknntrn(lrtrn[,1],xdata,26,50)
+trnout <- knntrn(lrtrn[,1],xdata,26,50)
 ypred <- predict(trnout,lrtest[,-1])
 # how well did it work?
 mean(ypred == lrtest[,1])  # 0.86
@@ -150,7 +150,7 @@ mean(ypred == lrtest[,1])  # 0.86
 ypred <- predict(trnout,lrtest1[,-1])
 mean(ypred == lrtest1[,1])  # only about 0.75
 # refit with true priors
-trnout1 <- ovaknntrn(lrtrn[,1],xdata,26,50,truepriors)
+trnout1 <- knntrn(lrtrn[,1],xdata,26,50,truepriors)
 ypred <- predict(trnout1,lrtest1[,-1])
 mean(ypred == lrtest1[,1])  # about 0.89
 # logit

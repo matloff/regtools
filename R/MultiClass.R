@@ -197,7 +197,7 @@ matrixtolist <- function (rc,m)
 
 # uses One-vs.-All approach
 
-# ovaknntrn: generate estimated regression function values
+# knntrn: generate estimated regression function values
 
 # arguments
 
@@ -216,7 +216,7 @@ matrixtolist <- function (rc,m)
 #    i, column j, is the probability that Y = j given that 
 #    X = row i in the X data, estimated from the training set
 
-ovaknntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
+knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
    require(dummies)
    if (m < 3) stop('m must be at least 3; use knnest() instead')  
    if (class(y) == 'factor') {
@@ -245,11 +245,11 @@ ovaknntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
       }
    }
    xdata$regest <- outmat
-   class(xdata) <- c('ovaknn',class(xdata))
+   class(xdata) <- c('knn',class(xdata))
    xdata
 }
 
-# ovaknnpred: predict multiclass Ys from new Xs
+# knnpred: predict multiclass Ys from new Xs
 
 # arguments:  
 # 
@@ -261,8 +261,7 @@ ovaknntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predpts
 
-#ovaknnpred <- function(xdata,predpts) {
-predict.ovaknn <- function(xdata,predpts) {
+predict.knn <- function(xdata,predpts) {
    x <- xdata$x
    if (is.vector(predpts)) 
       predpts <- matrix(predpts,nrow=1)

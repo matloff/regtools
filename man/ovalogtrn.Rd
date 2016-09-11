@@ -85,26 +85,17 @@ the probability that Y = j given that X = row i in the X data.
 \examples{
 
 \dontrun{
-# UCI Vertebral Column data
-# sample read:
-vert <- read.table('~/Research/Data/Vertebrae/column_3C.dat',header=F)
-# change to 0,1,2 class codes
-vert$V7 <- as.numeric(vert$V7) - 1
 
-# logit
-ovout <- ovalogtrn(3,vert)
-predy <- ovalogpred(ovout,vert[,-7])
-# proportion correctly classified
-mean(predy == vert$V7)
+# toy example, kNN
+set.seed <- 9999
+x <- runif(10)
+y <- sample(0:2,10,replace=TRUE)
+xd <- preprocessx(x,2)
+kout <- knntrn(y,xd,3,2)
+kout$regest  # row 1 0,1,0
+predict(kout,c(0.25,0.55,0.88))  # 1,0,1
 
-# kNN
-xdata <- preprocessx(vert[,-7],50)
-ovout <- knntrn(vert[,7],xdata,3,50)
-predy <- predict(ovout,vert[,-7])
-# proportion correctly classified
-mean(predy == vert$V7) 
-
-# sim data
+# sim data, kNN
 n <- 1500  
 # within-grp cov matrix 
 cv <- rbind(c(1,0.2),c(0.2,1))  
@@ -118,11 +109,11 @@ xy <- cbind(xy,y)
 xdata <- preprocessx(xy[,-3],20) 
 oo <- knntrn(y,xdata,m=3,k=20) 
 predout <- predict(oo,xy[,-3])
-mean(preds == y)
+mean(predout$predy == y)  # about 0.87
 
 # UCI Letter Recognition data
 library(mlbench)
-data(LetterRecognition)#
+data(LetterRecognition)
 # prep data
 lr <- LetterRecognition
 # code Y values
@@ -145,14 +136,14 @@ xdata <- preprocessx(lrtrn[,-1],50)
 trnout <- knntrn(lrtrn[,1],xdata,26,50)
 ypred <- predict(trnout,lrtest[,-1])
 # how well did it work?
-mean(ypred == lrtest[,1])  # 0.86
+mean(ypred$predy == lrtest[,1])  # 0.86
 # wtd test set, but still not setting priors
 ypred <- predict(trnout,lrtest1[,-1])
-mean(ypred == lrtest1[,1])  # only about 0.75
+mean(ypred$predy == lrtest1[,1])  # only about 0.75
 # refit with true priors
 trnout1 <- knntrn(lrtrn[,1],xdata,26,50,truepriors)
 ypred <- predict(trnout1,lrtest1[,-1])
-mean(ypred == lrtest1[,1])  # about 0.89
+mean(ypred$predy == lrtest1[,1])  # about 0.89
 # logit
 ologout <- ovalogtrn(26,lr[,c(2:17,1)])
 ypred <- ovalogpred(ologout,lr[,-1])

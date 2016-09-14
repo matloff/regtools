@@ -1,10 +1,10 @@
-\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,knntrn,predict.knn,classadjust}
+\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,knntrn,predict.ovaknn}
 \alias{ovalogtrn}
 \alias{ovalogpred}
 \alias{avalogtrn}
 \alias{avalogpred}
 \alias{knntrn}
-\alias{predict.knn}
+\alias{predict.ovaknn}
 \alias{classadjust}
 
 \title{Classification with More Than 2 Classes}
@@ -20,7 +20,7 @@ avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx)
 preprocessx(x, kmax) 
 knntrn(y,xdata,m,k,truepriors=NULL) 
-predict.knn(xdatarf,predpts) 
+predict.ovaknn(ktout,predpts) 
 classadjust(econdprobs,wrongratio,trueratio) 
 }
 
@@ -30,7 +30,7 @@ classadjust(econdprobs,wrongratio,trueratio)
 \item{y}{Vector of response variable data in the training set.}
 \item{xdata}{X and associated neighbor indices. Output of
   \code{preprocessx}.} 
-\item{xdatarf}{See \code{xdata}.}
+\item{ktout}{Output of \code{knntrn}.}
 \item{coefmat}{Output from \code{ovalogtrn}.}
 \item{k}{Number of nearest neighbors.} 
 \item{kmx}{Maximal number of nearest neighbors.} 
@@ -52,21 +52,21 @@ obtained externally.}
 
 \details{
 
-These functions do classification in the multiclass setting, using
-the One vs.\ All method.  In the logit case, All vs.\ All is also
-offered.  In addition to logit, the k-Nearest Neighbor method is
-available.  For this, \code{preprocessx} must first be called.
+These functions do classification in the multiclass setting, using the
+One vs. All method.  In addition to logit, the k-Nearest Neighbor method
+is available.  For this, \code{preprocessx} must first be called.  In
+the logit case, All vs. All is also offered.  
 
 The functions \code{ovalogtrn}, \code{avalogtrn} and \code{knntrn}
 are used on the training set, and then feed into the prediction
-functions, \code{ovalogpred}, \code{avalogpred} and \code{predict.knn}. 
+functions, \code{ovalogpred}, \code{avalogpred} and \code{predict.ovaknn}. 
 
 }
 
 \value{
 
 The prediction functions, \code{ovalogpred}, \code{avalogpred} and
-\code{predict.knn}, return the predicted classes for the points in
+\code{predict.ovaknn}, return the predicted classes for the points in
 \code{predx} or \code{predpts}.
 
 The functions \code{ovalogtrn} and \code{avalogtrn} return the
@@ -92,7 +92,7 @@ x <- runif(10)
 y <- sample(0:2,10,replace=TRUE)
 xd <- preprocessx(x,2)
 kout <- knntrn(y,xd,3,2)
-kout$regest  # row 1 0,1,0
+kout$regest  # row 1 0,0.5,0.5
 predict(kout,c(0.25,0.55,0.88))  # 1,0,1
 
 # sim data, kNN
@@ -126,15 +126,6 @@ lr[,1] <- as.numeric(lr[,1]) - 1
 # training and test sets
 lrtrn <- lr[1:14000,]
 lrtest <- lr[14001:20000,]
-# priors
-tmp <- table(lrtrn[,1])
-wrongpriors <- tmp / sum(tmp)
-data(ltrfreqs)
-ltrfreqs <- ltrfreqs[order(ltrfreqs[,1]),]
-truepriors <- ltrfreqs[,2] / 100
-# wtd test data
-newidxs <- sample(0:25,6000,replace=T,prob=truepriors)
-lrtest1 <- lrtest[newidxs,]
 # kNN
 xdata <- preprocessx(lrtrn[,-1],50)
 # without setting priors
@@ -142,13 +133,6 @@ trnout <- knntrn(lrtrn[,1],xdata,26,50)
 ypred <- predict(trnout,lrtest[,-1])
 # how well did it work?
 mean(ypred$predy == lrtest[,1])  # 0.86
-# wtd test set, but still not setting priors
-ypred <- predict(trnout,lrtest1[,-1])
-mean(ypred$predy == lrtest1[,1])  # only about 0.75
-# refit with true priors
-trnout1 <- knntrn(lrtrn[,1],xdata,26,50,truepriors)
-ypred <- predict(trnout1,lrtest1[,-1])
-mean(ypred$predy == lrtest1[,1])  # about 0.89
 # logit
 ologout <- ovalogtrn(26,lr[,c(2:17,1)])
 ypred <- ovalogpred(ologout,lr[,-1])
@@ -158,7 +142,7 @@ for (i in 2:17)
    lr <- cbind(lr,lr[,i]^2)
 ologout1 <- ovalogtrn(26,lr[,c(2:33,1)])
 ypred <- ovalogpred(ologout1,lr[,-1])
-mean(ypred == lr[,1])  # up to 0.82
+mean(ypred == lr[,1])  # increased to 0.82
 
 }
 

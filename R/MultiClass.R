@@ -211,10 +211,12 @@ matrixtolist <- function (rc,m)
 
 # value:
 
-#    xdata from input, plus a new list component regest, the matrix 
-#    of estimated regression function values; the element in row 
-#    i, column j, is the probability that Y = j given that 
-#    X = row i in the X data, estimated from the training set
+#    xdata from input, plus a new list componens regest: 
+#
+#       regest: the matrix of estimated regression function values; 
+#               the element in row i, column j, is the probability 
+#               that Y = j given that X = row i in the X data, 
+#               estimated from the training set
 
 knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
    require(dummies)
@@ -249,30 +251,32 @@ knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
    xdata
 }
 
-# knnpred: predict multiclass Ys from new Xs
+# predict.ovaknn: predict multiclass Ys from new Xs
 
 # arguments:  
 # 
-#    xdata:  see knnpred()
-#    predpts:  see knnpred()
+#    ktout:  output of knntrn()
+#    predpts:  matrix of X values at which prediction is to be done
 # 
 # value:
 # 
-#    vector of predicted Y values, in {0,1,...,m-1}, one element for
-#    each row of predpts
+#    object of class 'ovaknn', with components:
+#
+#       regest: estimated class probabilities at predpts
+#       predy: predicted class labels for predpts    
 
-predict.ovaknn <- function(xdata,predpts) {
-   x <- xdata$x
+predict.ovaknn <- function(ktout,predpts) {
+   x <- ktout$x
    if (is.vector(predpts)) 
       predpts <- matrix(predpts,ncol=1)
    # need to scale predpts with the same values that had been used in
    # the training set
-   ctr <- xdata$scaling[,1]
-   scl <- xdata$scaling[,2]
+   ctr <- ktout$scaling[,1]
+   scl <- ktout$scaling[,2]
    predpts <- scale(predpts,center=ctr,scale=scl)
    tmp <- get.knnx(x,predpts,1)
    idx <- tmp$nn.index
-   regest <- xdata$regest[idx,,drop=FALSE]
+   regest <- ktout$regest[idx,,drop=FALSE]
    predy <- apply(regest,1,which.max) - 1
    list(regest=regest,predy=predy)
 }

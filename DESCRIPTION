@@ -4,6 +4,7 @@ Title: Regression Tools
 Author: Norm Matloff
 Maintainer: Norm Matloff <matloff@cs.ucdavis.edu>
 Depends: FNN
+License: GPL (>= 2)
 Description: Tools for linear, nonlinear and nonparametric regression
              and classification. Nonlinear regression with Eickert-White
              method for dealing with heteroscedasticity; k-NN for

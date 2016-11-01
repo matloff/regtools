@@ -102,7 +102,7 @@ preprocessx <- function(x,kmax,xval=FALSE) {
    attr(x,'scaled:center') <- NULL
    attr(x,'scaled:scale') <- NULL
    result$x <- x
-   tmp <- get.knnx(data=x, query=x, k=kmax+xval)
+   tmp <- FNN::get.knnx(data=x, query=x, k=kmax+xval)
    nni <- tmp$nn.index
    result$idxs <- nni[,(1+xval):ncol(nni)]
    result$xval <- xval
@@ -137,7 +137,7 @@ predict.knn <- function(xdata,predpts) {
    ctr <- xdata$scaling[,1]
    scl <- xdata$scaling[,2]
    predpts <- scale(predpts,center=ctr,scale=scl)
-   tmp <- get.knnx(x,predpts,1)
+   tmp <- FNN::get.knnx(x,predpts,1)
    idx <- tmp$nn.index
    xdata$regest[idx,]
 }

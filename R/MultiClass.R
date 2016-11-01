@@ -219,7 +219,6 @@ matrixtolist <- function (rc,m)
 #               estimated from the training set
 
 knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
-   require(dummies)
    if (m < 3) stop('m must be at least 3; use knnest() instead')  
    if (class(y) == 'factor') {
       y <- as.numeric(y) - 1
@@ -305,7 +304,6 @@ parget.knnx <- function(data, query, k=10,
       tmp <- get.knnx(data,query,k,algorithm)
       return(tmp$nn.index)
    }
-   require(partools)
    setclsinfo(cls)
    clusterExport(cls,c('data','k','algorithm'),envir=environment())
    distribsplit(cls,'query')

@@ -3,7 +3,7 @@ Version: 1.0.0
 Title: Regression Tools
 Author: Norm Matloff
 Maintainer: Norm Matloff <matloff@cs.ucdavis.edu>
-Depends: FNN,mvtnorm,dummies
+Depends: FNN,mvtnorm,dummies,partools,car
 License: GPL (>= 2)
 Description: Tools for linear, nonlinear and nonparametric regression
              and classification. Nonlinear regression with Eickert-White

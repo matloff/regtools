@@ -27,7 +27,7 @@ vary(predpt,nearxy,nycol)
 loclin(predpt,nearxy,nycol) 
 \method{predict}{knn}(knnout,predpts)
 kmin(y,xdata,lossftn=l2,nk=5,nearf=meany) 
-plot.kmin(kminout)
+\method{plot}{kmin}(kminout)
 parvsnonparplot(lmout,knnout) 
 nonparvsxplot(knnout,lmout=NULL) 
 }

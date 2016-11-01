@@ -11,7 +11,7 @@ plotting.
 
 \usage{
 ridgelm(xy,lambda = seq(0.01,1,0.01)) 
-plot.rlm(ridgelm.out)
+\method{plot}{rlm}(ridgelm.out)
 }
 
 \arguments{

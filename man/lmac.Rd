@@ -16,8 +16,8 @@ Various estimators that handle data via the Available Cases Method
 \usage{
 lmac(xy,nboot=0) 
 makeNA(m,probna)
-coef.lmac(lmacout)
-vcov(lmacout)
+\method{coef}{lmac}(lmacout)
+\method{vcov}{lmac}(lmacout)
 pcac(indata,scale=FALSE) 
 loglinac(x,margin) 
 tbltofakedf(tbl)

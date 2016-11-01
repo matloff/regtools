@@ -22,7 +22,7 @@ models.
 \usage{
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
-meany(predpt,nearxy,nycol) 
+meany(predpt,nearxy) 
 vary(predpt,nearxy,nycol) 
 loclin(predpt,nearxy,nycol) 
 \method{predict}{knn}(knnout,predpts)
@@ -151,19 +151,19 @@ and \code{ks} containing the corresponding values of \code{k};
 \examples{
 set.seed(9999)
 x <- matrix(sample(1:100,30),ncol=3)
-xd <- preprocessx(x[,1],2,TRUE)
-ko <- knnest(x[,2],xd,2)
+xd <- preprocessx(x[,1],2,TRUE)  # just 1 predictor
+ko <- knnest(x[,2],xd,2)  # Y is x[,2]
 ko$regest # 1st element = 74.5
-predict(ko,76)
-ko <- knnest(x[,-1],xd,2)
+predict(ko,76)  # 47.5
+ko <- knnest(x[,-1],xd,2)  # Y bivar
 ko$regest # 1st row = (74.5,31.5)
-predict(ko,76)
+predict(ko,76)  # 47.5, 65.0
 
 xe <- matrix(rnorm(30000),ncol=3) 
 xe[,-3] <- xe[,-3] + 2 
-y <- xe %*% c(1,0.5,0.2)  # 2 predictors + epsilon 
-x <- xe[,-3]  # exclude epsilon term 
-xdata <- preprocessx(x,2500) 
+y <- xe %*% c(1,0.5,0.2)  # xe is 2 predictors and epsilon 
+x <- xe[,-3]  # X
+xdata <- preprocessx(x,2500)  # k as high as 2500
 zout <- knnest(y,xdata,200) 
 predict(zout,c(1,1))  # about 1.55
 
@@ -176,28 +176,26 @@ pe$phd <- as.integer(pe$educ == 16)
 pecs <- pe[pe$occ >= 100 & pe$occ <= 109,]
 pecs1 <- pecs[,c(1,7,9,12,13,8)]
 # wll predict wage income from age, gender etc.
-# prepare nearest-neighbor data
+# prepare nearest-neighbor data, k up to 50
 xdata <- preprocessx(pecs1[,1:5],50)
-zout <- knnest(pecs1[,6],xdata,50)
+zout <- knnest(pecs1[,6],xdata,50)  # k = 50
 # find the est. mean income for 42-year-old women, 52 weeks worked, with
 # a Master's
 predict(zout,c(42,2,52,0,0))  # 62106
-# try k = 25; don't call preprocessx() again
+# try k = 25; don't need to call preprocessx() again
 zout <- knnest(pecs1[,6],xdata,25)
 predict(zout,c(42,2,52,0,0))  # 69104
-# what about a man?; don't call preprocessx(, knnest()) again
+# what about a man?
 predict(zout,c(42,1,52,0,0))  # 89200
 # form training and test sets, fit on the former and predict on the
 # latter
 fullidxs <- 1:nrow(pecs1)
 train <- sample(fullidxs,10000)
-test <- setdiff(fullidxs,train)
 xdata <- preprocessx(pecs1[train,1:5],50)
 trainout <- knnest(pecs1[train,6],xdata,50)
-testout <- predict(trainout,pecs1[test,-6])
+testout <- predict(trainout,pecs1[-train,-6])
 # find mean abs. prediction error (about $25K)
-mean(abs(pecs1[test,6] - testout))
-# find best cross-validated k, 10
+mean(abs(pecs1[-train,6] - testout))
 
 # Y vector-valued
 # 3 clusters, equal wts, coded 0,1,2

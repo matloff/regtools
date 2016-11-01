@@ -304,11 +304,11 @@ parget.knnx <- function(data, query, k=10,
       tmp <- get.knnx(data,query,k,algorithm)
       return(tmp$nn.index)
    }
-   setclsinfo(cls)
-   clusterExport(cls,c('data','k','algorithm'),envir=environment())
-   distribsplit(cls,'query')
-   clusterEvalQ(cls,library(FNN))
-   tmp <- clusterEvalQ(cls,get.knnx(data,query,k,algorithm))
+   partools::setclsinfo(cls)
+   partools::clusterExport(cls,c('data','k','algorithm'),envir=environment())
+   partools::distribsplit(cls,'query')
+   partools::clusterEvalQ(cls,library(FNN))
+   tmp <- partools::clusterEvalQ(cls,get.knnx(data,query,k,algorithm))
    tmp <- lapply(tmp,function(tmpelt) tmpelt$nn.index)
    Reduce(rbind,tmp)
 }

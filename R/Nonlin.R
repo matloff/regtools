@@ -28,5 +28,5 @@ nlshc <- function(nlsout,type='hc3') {
    # -1 means no constant term in the model
    lmout <- lm(yresidhm ~ xhm - 1)
    # vcovHC(lmout); was getting NAs for some data sets
-   hccm(lmout,type)
+   car::hccm(lmout,type)
 }

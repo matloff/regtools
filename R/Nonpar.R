@@ -159,8 +159,8 @@ predict.knn <- function(xdata,predpts) {
 #   value: the value of k found to be "best"
 
 kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
-   if (is.vector(y) || ncol(y) > 1)
-      stop('not capable of vector y yet')
+   if (is.matrix(y) && ncol(y) > 1)
+      stop('not capable of multiclass Y yet')
    n <- nrow(xdata$x)
    x <- xdata$x
    xval <- xdata$xval

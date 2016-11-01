@@ -166,7 +166,6 @@ x <- xe[,-3]  # exclude epsilon term
 xdata <- preprocessx(x,2500) 
 zout <- knnest(y,xdata,200) 
 predict(zout,c(1,1))  # about 1.55
-kmin(y,xdata,nk=10)
 
 data(prgeng)
 pe <- prgeng

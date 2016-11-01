@@ -113,19 +113,19 @@ tbltofakedf(tbl)
 
 \examples{
    n <- 25000
-   z1 <- sample(1:2,lidxs,replace=T)
+   z1 <- sample(1:2,lidxs,replace=TRUE)
    z2 <- vector(length=n)
    z3 <- vector(length=n)
    idxs <- which(z1 == 1)
    lidxs <- length(idxs)
-   z2[idxs] <- sample(1:2,lidxs,replace=T,prob=c(0.2,0.8))
-   z3[idxs] <- sample(1:2,lidxs,replace=T,prob=c(0.2,0.8))
+   z2[idxs] <- sample(1:2,lidxs,replace=TRUE,prob=c(0.2,0.8))
+   z3[idxs] <- sample(1:2,lidxs,replace=TRUE,prob=c(0.2,0.8))
    idxs <- which(z1 == 2)
    lidxs <- length(idxs)
-   z2[idxs] <- sample(1:2,lidxs,replace=T,prob=c(0.8,0.2))  
-   z3[idxs] <- sample(1:2,lidxs,replace=T,prob=c(0.8,0.2))  
+   z2[idxs] <- sample(1:2,lidxs,replace=TRUE,prob=c(0.8,0.2))  
+   z3[idxs] <- sample(1:2,lidxs,replace=TRUE,prob=c(0.8,0.2))  
    x <- cbind(z1,z2,z3)
-   llout <- loglin(table(z1,z2,z3),list(c(1,2),c(1,3)),param=T,fit=T)
+   llout <- loglin(table(z1,z2,z3),list(c(1,2),c(1,3)),param=TRUE,fit=TRUE)
    llac <- loglinac(x,list(c(1,2),c(1,3)))
    llout$param; llac$param
 }

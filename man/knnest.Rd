@@ -197,21 +197,21 @@ testout <- predict(trainout,pecs1[-train,-6])
 # find mean abs. prediction error (about $25K)
 mean(abs(pecs1[-train,6] - testout))
 
-# Y vector-valued
+# Y vector-valued (3 classes)
 # 3 clusters, equal wts, coded 0,1,2
 n <- 1500 
 # within-grp cov matrix
 cv <- rbind(c(1,0.2),c(0.2,1)) 
 xy <- NULL 
-library(mvtnorm) 
 for (i in 1:3) 
    xy <- rbind(xy,rmvnorm(n,mean=rep(i*2.0,2),sigma=cv)) 
-library(dummies)
 y <- rep(0:2,each=n)
 xy <- cbind(xy,dummy(y))
-xdata <- preprocessx(xy[,-(3:5)],20) 
+xdata <- preprocessx(xy[,-(3:5)],20) # X is xy[,1:2], k <= 20
 ko <- knnest(xy[,3:5],xdata,20) 
+# find predicted Y for each data pt 
 mx <- apply(as.matrix(ko$regest),1,which.max) - 1
+# overall correct classification rate
 mean(mx == y)  # should be about 0.87
 
 }

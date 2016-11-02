@@ -43,6 +43,7 @@
 # preprocessx() with that value before calling knnest()
 
 knnest <- function(y,xdata,k,nearf=meany)
+{
    # take only the idxs for our value of k
    idxs <- xdata$idxs 
    if (ncol(idxs) < k) stop('k must be <= kmax')

@@ -4,7 +4,7 @@
 
 \title{Ridge Regression}
 
-\description{Similar to \code{lm.ridge} in \code{MASS} packaged incldued
+\description{Similar to \code{lm.ridge} in \code{MASS} packaged included
 with R, but with a different kind of scaling and a little nicer
 plotting.
 }
@@ -23,10 +23,10 @@ ridgelm(xy,lambda = seq(0.01,1,0.01))
 \details{
    
    Centers and scales the predictors X, and centers the response
-   variable Y.  Computes X'X and then solves (X'X)/n + lambda I = X'Y/n.
-   The 1/n factors are important, making the diagonal elements of
-   (X'X)/n all 1s and thus facilitating choices for the lambdas in a
-   manner independent of the data.
+   variable Y.  Computes X'X and then solves [(X'X)/n + lambda I]b =
+   X'Y/n for b.  The 1/n factors are important, making the diagonal
+   elements of (X'X)/n all 1s and thus facilitating choices for the
+   lambdas in a manner independent of the data.
 
    Calling \code{plot} on the output of \code{ridgelm} dispatches to
    \code{plot.rlm}, thus diplaying the ridge traces.

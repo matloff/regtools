@@ -20,7 +20,7 @@ avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx)
 preprocessx(x, kmax) 
 knntrn(y,xdata,m,k,truepriors=NULL) 
-\emthod{predict}{ovaknn}(ktout,predpts) 
+\method{predict}{ovaknn}(ktout,predpts) 
 classadjust(econdprobs,wrongratio,trueratio) 
 }
 

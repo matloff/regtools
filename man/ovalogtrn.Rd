@@ -10,7 +10,8 @@
 \title{Classification with More Than 2 Classes}
 
 \description{
-OVA, AVA tools for multiclass classification.
+One vs. All, All vs. All tools for multiclass classification, parametric
+and nonparametric.
 }
 
 \usage{
@@ -18,7 +19,6 @@ ovalogtrn(m,trnxy,truepriors=NULL)
 ovalogpred(coefmat,predx)
 avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx)
-preprocessx(x, kmax) 
 knntrn(y,xdata,m,k,truepriors=NULL) 
 \method{predict}{ovaknn}(ktout,predpts) 
 classadjust(econdprobs,wrongratio,trueratio) 
@@ -27,7 +27,8 @@ classadjust(econdprobs,wrongratio,trueratio)
 \arguments{
 \item{trnxy}{Data matrix, one data point per row, Y in the last
   column.}
-\item{y}{Vector of response variable data in the training set.}
+\item{y}{Vector of response variable data in the training set, with
+codes 0,1,...\code{m}-1.}
 \item{xdata}{X and associated neighbor indices. Output of
   \code{preprocessx}.} 
 \item{ktout}{Output of \code{knntrn}.}
@@ -58,7 +59,7 @@ is available.  For this, \code{preprocessx} must first be called.  In
 the logit case, All vs. All is also offered.  
 
 The functions \code{ovalogtrn}, \code{avalogtrn} and \code{knntrn}
-are used on the training set, and then feed into the prediction
+are used on the training set, and then fed into the prediction
 functions, \code{ovalogpred}, \code{avalogpred} and \code{predict.ovaknn}. 
 
 }
@@ -85,25 +86,23 @@ the probability that Y = j given that X = row i in the X data.
 \examples{
 
 \dontrun{
-
 # toy example, kNN
 set.seed <- 9999
 x <- runif(10)
 y <- sample(0:2,10,replace=TRUE)
 xd <- preprocessx(x,2)
 kout <- knntrn(y,xd,3,2)
-kout$regest  # row 1 0,0.5,0.5
-predict(kout,c(0.25,0.55,0.88))  # 1,0,1
+kout$regest  # row 1:  0.5,0.5,0.0
+predict(kout,c(0.25,0.55,0.88))  # 0,0,1
 
 # sim data, kNN
+set.seed <- 9999
 n <- 1500  
 # within-grp cov matrix 
 cv <- rbind(c(1,0.2),c(0.2,1))  
 xy <- NULL  
-library(mvtnorm)  
 for (i in 1:3)  
    xy <- rbind(xy,rmvnorm(n,mean=rep(i*2.0,2),sigma=cv))  
-library(dummies) 
 y <- rep(0:2,each=n) 
 xy <- cbind(xy,y) 
 xdata <- preprocessx(xy[,-3],20) 
@@ -115,7 +114,7 @@ library(mlbench)
 data(Vehicle)
 xdata <- preprocessx(Vehicle[,-19],25)
 kout <- knntrn(Vehicle$Class,xdata,k=25)
-prout <- predict(kout,as.matrix(Vehicle[1,-19])) # 3
+predict(kout,as.matrix(Vehicle[1,-19])) # predicted Y is 3
 
 # UCI Letter Recognition data
 data(LetterRecognition)
@@ -137,12 +136,12 @@ mean(ypred$predy == lrtest[,1])  # 0.86
 ologout <- ovalogtrn(26,lr[,c(2:17,1)])
 ypred <- ovalogpred(ologout,lr[,-1])
 mean(ypred == lr[,1])  # only 0.73
-# try quadratic terms
-for (i in 2:17)
-   lr <- cbind(lr,lr[,i]^2)
-ologout1 <- ovalogtrn(26,lr[,c(2:33,1)])
-ypred <- ovalogpred(ologout1,lr[,-1])
-mean(ypred == lr[,1])  # increased to 0.82
+% # try quadratic terms
+% for (i in 2:17)
+%    lr <- cbind(lr,lr[,i]^2)
+% ologout1 <- ovalogtrn(26,lr[,c(2:33,1)])
+% ypred <- ovalogpred(ologout1,lr[,-1])
+% mean(ypred == lr[,1])  # increased to 0.82
 
 }
 

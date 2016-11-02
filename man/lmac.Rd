@@ -10,7 +10,7 @@
 \title{Available Cases Method for Missing Data}
 
 \description{
-Various estimators that handle data via the Available Cases Method
+Various estimators that handle missing data via the Available Cases Method
 }
 
 \usage{
@@ -25,7 +25,7 @@ tbltofakedf(tbl)
 
 \arguments{
   \item{xy}{Matrix or data frame, X values in the first columns, Y
-     in the last.}
+     in the last column.}
   \item{indata}{Matrix or data frame.}
   \item{x}{Matrix or data frame, one column per variable.}
   \item{nboot}{If positive, number of bootstrap samples to take.}
@@ -52,8 +52,8 @@ tbltofakedf(tbl)
    applying AC, in contrast to \code{lm}, which uses the CC method.
 
    The \code{pcac} function is an AC substitute for \code{prcomp}. The
-   data is centered, corresponding to a fixed value of TRUE in
-   \code{prcomp}.  It is also scaled if \code{scale} is TRUE,
+   data is centered, corresponding to a fixed value of \code{center =
+   TRUE} in \code{prcomp}.  It is also scaled if \code{scale} is TRUE,
    corresponding \code{scale. = TRUE} in \code{prcomp;.} Due to AC,
    there is a small chance of negative eigenvalues, in which case
    \code{stop} will be called.
@@ -85,7 +85,7 @@ tbltofakedf(tbl)
    
       \item{cov}, for \code{nboot >0} the estimated covariance matrix
       of the vector of estimated regression coefficients; accessible
-      directly or by calling \code{coef}, as with \code{lm} 
+      directly or by calling \code{vcov}, as with \code{lm} 
    
    }
    
@@ -99,7 +99,7 @@ tbltofakedf(tbl)
    
    }
    
-   For \code{pcac}, an R list, with components
+   For \code{loglinac}, an R list, with components
    
    \itemize{
    
@@ -111,24 +111,19 @@ tbltofakedf(tbl)
 
 }
 
-% \examples{
-%    n <- 25000
-%    z1 <- sample(1:2,lidxs,replace=TRUE)
-%    z2 <- vector(length=n)
-%    z3 <- vector(length=n)
-%    idxs <- which(z1 == 1)
-%    lidxs <- length(idxs)
-%    z2[idxs] <- sample(1:2,lidxs,replace=TRUE,prob=c(0.2,0.8))
-%    z3[idxs] <- sample(1:2,lidxs,replace=TRUE,prob=c(0.2,0.8))
-%    idxs <- which(z1 == 2)
-%    lidxs <- length(idxs)
-%    z2[idxs] <- sample(1:2,lidxs,replace=TRUE,prob=c(0.8,0.2))  
-%    z3[idxs] <- sample(1:2,lidxs,replace=TRUE,prob=c(0.8,0.2))  
-%    x <- cbind(z1,z2,z3)
-%    llout <- loglin(table(z1,z2,z3),list(c(1,2),c(1,3)),param=TRUE,fit=TRUE)
-%    llac <- loglinac(x,list(c(1,2),c(1,3)))
-%    llout$param; llac$param
-% }
+\examples{
+n <- 25000
+w <- matrix(rnorm(2*n),ncol=2)  # x and epsilon
+x <- w[,1]
+y <- x + w[,2]
+# insert some missing values
+nmiss <- round(0.1*n)
+x[sample(1:n,nmiss)] <- NA
+nmiss <- round(0.2*n)
+y[sample(1:n,nmiss)] <- NA
+acout <- lmac(cbind(x,y))
+coef(acout)  # should be near pop. values 0 and 1
+}
 
 \author{
 Norm Matloff

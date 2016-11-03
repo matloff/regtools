@@ -214,6 +214,30 @@ mx <- apply(as.matrix(ko$regest),1,which.max) - 1
 # overall correct classification rate
 mean(mx == y)  # should be about 0.87
 
+data(prgeng) 
+pe <- prgeng  # see ?knnest 
+# dummies for MS, PhD 
+pe$ms <- as.integer(pe$educ == 14) 
+pe$phd <- as.integer(pe$educ == 16) 
+# computer occupations only 
+pecs <- pe[pe$occ >= 100 & pe$occ <= 109,] 
+pecs1 <- pecs[,c(1,7,9,12,13,8)] 
+# kNN
+xdata <- preprocessx(pecs1[,1:5],25) 
+kminout <- kmin(pecs1[,6],xdata,nk=25) 
+zout <- knnest(pecs1[,6],xdata,25) 
+# look for nonlinear relations between Y and each X
+nonparvsxplot(zout)  # keep hitting Enter for next plot
+# there seem to be quadratic relations with age and wkswrkd, so add quad
+# terms and run lm()
+pecs2 <- pecs1 
+pecs2$age2 <- pecs1$age^2 
+pecs2$wks2 <- pecs1$wkswrkd^2 
+lmout2 <- lm(wageinc ~ .,data=pecs2) 
+# check parametric fit by comparing to kNN
+parvsnonparplot(lmout2,zout) 
+# linear model line somewhat faint, due to large n
+# parametric model seems to overpredict at high end
 }
 
 \author{

@@ -225,7 +225,7 @@ knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
    }
    x <- xdata$x
    # replace y with m-1 dummies
-   ds <- dummy(y)[,-m]
+   ds <- dummies::dummy(y)[,-m]
    for (i in 1:(m-1)) colnames(ds)[i] <- sprintf('y%d',i-1)
    knnout <- knnest(ds,xdata,k)
    outmat <- knnout$regest
@@ -273,7 +273,7 @@ predict.ovaknn <- function(ktout,predpts) {
    ctr <- ktout$scaling[,1]
    scl <- ktout$scaling[,2]
    predpts <- scale(predpts,center=ctr,scale=scl)
-   tmp <- get.knnx(x,predpts,1)
+   tmp <- FNN::get.knnx(x,predpts,1)
    idx <- tmp$nn.index
    regest <- ktout$regest[idx,,drop=FALSE]
    predy <- apply(regest,1,which.max) - 1

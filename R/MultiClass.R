@@ -265,6 +265,7 @@ knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
 #       predy: predicted class labels for predpts    
 
 predict.ovaknn <- function(object,...) {
+   predpts <- unlist(...)
    x <- object$x
    if (is.vector(predpts)) 
       predpts <- matrix(predpts,ncol=1)

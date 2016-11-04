@@ -129,6 +129,7 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 # training data is used as our est. reg. ftn. value at that predpts row
 
 predict.knn <- function(object,...) {
+   predpts <- unlist(...)
    x <- object$x
    if (is.vector(predpts)) 
       predpts <- matrix(predpts,nrow=1)

@@ -150,18 +150,18 @@ x <- matrix(sample(1:100,30),ncol=3)
 xd <- preprocessx(x[,1],2,TRUE)  # just 1 predictor
 ko <- knnest(x[,2],xd,2)  # Y is x[,2]
 ko$regest # 1st element = 74.5
-predict(ko,76)  # 47.5
+predict(ko,matrix(76))  # 47.5
 ko <- knnest(x[,-1],xd,2)  # Y bivar
 ko$regest # 1st row = (74.5,31.5)
-predict(ko,76)  # 47.5, 65.0
+predict(ko,matrix(76))  # 47.5, 65.0
 
 xe <- matrix(rnorm(30000),ncol=3) 
 xe[,-3] <- xe[,-3] + 2 
 y <- xe %*% c(1,0.5,0.2)  # xe is 2 predictors and epsilon 
 x <- xe[,-3]  # X
-xdata <- preprocessx(x,2500)  # k as high as 2500
+xdata <- preprocessx(x,500)  # k as high as2500
 zout <- knnest(y,xdata,200) 
-predict(zout,c(1,1))  # about 1.55
+predict(zout,matrix(c(1,1),nrow=1))  # about 1.55
 
 data(prgeng)
 pe <- prgeng

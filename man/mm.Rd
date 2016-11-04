@@ -27,6 +27,7 @@ mm(m,g,x,init=rep(0.5,length(m)),eps=0.0001,maxiters=1000)
      components are named, these will be used as labels in the output.}
   \item{eps}{Convergence criterion.} 
   \item{maxiters}{Maximum number of iterations.}
+  \item{x}{Input data.}
 }
 
 \details{

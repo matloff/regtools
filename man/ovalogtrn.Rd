@@ -26,18 +26,16 @@ classadjust(econdprobs,wrongratio,trueratio)
 
 \arguments{
 \item{trnxy}{Data matrix, one data point per row, Y in the last
-  column.}
+   column.}
+\item{object}{Needed for consistency with generic.}
+\item{...}{Needed for consistency with generic.}
 \item{y}{Vector of response variable data in the training set, with
-codes 0,1,...\code{m}-1.}
+   codes 0,1,...\code{m}-1.}
 \item{xdata}{X and associated neighbor indices. Output of
   \code{preprocessx}.} 
-\item{ktout}{Output of \code{knntrn}.}
 \item{coefmat}{Output from \code{ovalogtrn}.}
 \item{k}{Number of nearest neighbors.} 
-\item{kmx}{Maximal number of nearest neighbors.} 
-\item{predpts}{A matrix or data frame of X values, at which Y is to be
-  predicted.}
-\item{predx}{As with \code{predpts}} 
+\item{predx}{One data point to be predicted.} 
 \item{x}{X data, i.e. predictors, one row per data point, in the training
   set.}
 \item{m}{Number of classes in multiclass setting.}
@@ -58,9 +56,12 @@ One vs. All method.  In addition to logit, the k-Nearest Neighbor method
 is available.  For this, \code{preprocessx} must first be called.  In
 the logit case, All vs. All is also offered.  
 
-The functions \code{ovalogtrn}, \code{avalogtrn} and \code{knntrn}
-are used on the training set, and then fed into the prediction
-functions, \code{ovalogpred}, \code{avalogpred} and \code{predict.ovaknn}. 
+The functions \code{ovalogtrn}, \code{avalogtrn} and \code{knntrn} are
+used on the training set, and then fed into the prediction functions,
+\code{ovalogpred}, \code{avalogpred} and \code{predict.ovaknn}.  The
+arguments for the latter are the output of \code{knntrn} and a matrix of
+prediction points (internally referred to as \code{predpts} in the
+code), one per row.
 
 }
 

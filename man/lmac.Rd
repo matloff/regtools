@@ -30,11 +30,15 @@ tbltofakedf(tbl)
   \item{x}{Matrix or data frame, one column per variable.}
   \item{nboot}{If positive, number of bootstrap samples to take.}
   \item{probna}{Probability that an element will be NA.}
-  \item{lmacout}{An object of class \code{'lmac'}.}
   \item{scale}{If TRUE, call \code{cor} instead of \code{cov}.}
   \item{}{Matrix or data frame, one column per variable.}
   \item{tbl}{An R table.}
   \item{m}{Number of synthetic NAs to insert.}
+  \item{object}{Output from \code{lmac}.}
+  \item{...}{Needed for consistency with generic function.  Not used.}
+  \item{margin}{A list of vectors specifying the model, as in
+  \code{loglin}.}
+
 }
 
 \details{

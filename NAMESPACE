@@ -1,11 +1,11 @@
 
-import(FNN,car,dummies,mvtnorm,partools)
+import(FNN,car,dummies,mvtnorm)
 
-export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,parget.knnx,
-   kmin,plot.kmin,
+export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
+   kmin,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
    ovalogtrn,ovalogpred,avalogtrn,avalogpred,
    knntrn,predict.ovaknn,classadjust,
    parvsnonparplot,nonparvsxplot, 
-   ridgelm,plot.rlm,print.rlm,
+   ridgelm,plot.rlm,
    mm)

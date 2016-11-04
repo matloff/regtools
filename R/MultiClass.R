@@ -266,9 +266,9 @@ knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
 
 predict.ovaknn <- function(object,...) {
    predpts <- unlist(...)
+   if (!is.matrix(predpts))
+      stop('prediction points must be a matrix')
    x <- object$x
-   if (is.vector(predpts)) 
-      predpts <- matrix(predpts,ncol=1)
    # need to scale predpts with the same values that had been used in
    # the training set
    ctr <- object$scaling[,1]

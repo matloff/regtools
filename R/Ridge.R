@@ -48,5 +48,5 @@ plot.rlm <- function(x,y,...) {
    matplot(lamb,bhs,type='l',pch='.',xlab='lambda',ylab='beta-hat')
 }
 
-print.rlm <- function(x,...) print(t(x$bhats)) 
+# print.rlm <- function(x,...) print(t(x$bhats)) 
 

@@ -43,7 +43,7 @@ ridgelm <- function(xy,lambda=seq(0.01,1.00,0.01),mapback=TRUE) {
 }
 
 plot.rlm <- function(x,y,...) {  
-   lamb <- x.$lambda
+   lamb <- x$lambda
    bhs <- t(x$bhats)
    matplot(lamb,bhs,type='l',pch='.',xlab='lambda',ylab='beta-hat')
 }

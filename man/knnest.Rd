@@ -36,20 +36,22 @@ nonparvsxplot(knnout,lmout=NULL)
   \item{y}{Response variable data in the training set. Vector or matrix,
      the latter case for vector-valued response, e.g. multiclass
      classification.}
-  \item{x}{Predictor data.}
+  \item{x}{X data, predictors, one row per data point, in the training
+     set.}
+  \item{y}{Not used, just need for consistency with generic.}
   \item{xdata}{X and associated neighbor indices. Output of
      \code{preprocessx}.} 
   \item{k}{Number of nearest neighbors} 
+  \item{object}{Output of \code{knnest}.}
   \item{predpts}{A matrix or data frame of X values, at which Y is to be
      predicted.}
   \item{predpt}{One point on which to predict, e.g. a row in
      \code{predpts}.}
+  \item{nearxy}{A set of X neighbors of a point.}
   \item{data}{A data matrix.}
   \item{query}{A data matrix.}
   \item{algorithm}{As in \code{FNN::get.knnx}.}
   \item{nearf}{Function to apply to the nearest neighbors of a point.}
-  \item{x}{"X" data, predictors, one row per data point, in the training
-     set.}
   \item{kmax}{Maximal number of nearest neighbors to find.}
   \item{xval}{Cross-validation flag. If TRUE, then the set of nearest 
      neighbors of a point will not include the point itself.}

@@ -17,7 +17,9 @@ ridgelm(xy,lambda = seq(0.01,1,0.01))
 \arguments{
   \item{xy}{Data, response variable in the last column.}
   \item{lambda}{Vector of desired values for the ridge parameter.}
-  \item{ridgelm.out}{Object of type 'rlm', output of \code{ridgelm}.}
+  \item{x}{Object of type 'rlm', output of \code{ridgelm}.}
+  \item{y}{Needed for consistency with the generic. Not used.}
+  \item{...}{Needed for consistency with the generic.  Not used.}
 }
 
 \details{

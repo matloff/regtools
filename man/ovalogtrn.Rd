@@ -36,8 +36,6 @@ classadjust(econdprobs,wrongratio,trueratio)
 \item{coefmat}{Output from \code{ovalogtrn}.}
 \item{k}{Number of nearest neighbors.} 
 \item{predx}{One data point to be predicted.} 
-\item{x}{X data, i.e. predictors, one row per data point, in the training
-  set.}
 \item{m}{Number of classes in multiclass setting.}
 \item{econdprobs}{Estimated conditional class probabilities, given the
 predictors.}

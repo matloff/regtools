@@ -43,10 +43,7 @@ nonparvsxplot(knnout,lmout=NULL)
      \code{preprocessx}.} 
   \item{k}{Number of nearest neighbors} 
   \item{object}{Output of \code{knnest}.}
-  \item{predpts}{A matrix or data frame of X values, at which Y is to be
-     predicted.}
-  \item{predpt}{One point on which to predict, e.g. a row in
-     \code{predpts}.}
+  \item{predpt}{One point on which to predict, as a vector.}
   \item{nearxy}{A set of X neighbors of a point.}
   \item{data}{A data matrix.}
   \item{query}{A data matrix.}
@@ -100,7 +97,8 @@ nonparvsxplot(knnout,lmout=NULL)
    The function \code{predict.knn} uses the output of \code{knnest} to do
    estimation or prediction on new points.  Since the output of
    \code{knnest} is of class \code{"knn"}, one invokes this function
-   with the simpler \code{predict}.  A "1-NN" method is used
+   with the simpler \code{predict}.  The second argument is the set of
+   new points, supplied as a matrix.  A "1-NN" method is used
    here:  Given a new point u whose "Y" value we wish to predict, the
    code finds the single closest row in the training set, and returns
    the previously-estimated regression function value at that row.

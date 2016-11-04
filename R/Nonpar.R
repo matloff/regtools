@@ -131,8 +131,8 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 predict.knn <- function(object,...) {
    predpts <- unlist(...)
    x <- object$x
-   if (is.vector(predpts)) 
-      predpts <- matrix(predpts,nrow=1)
+   if (!is.matrix(predpts)) 
+      stop('prediction points must be a matrix')
    # need to scale predpts with the same values that had been used in
    # the training set
    ctr <- object$scaling[,1]

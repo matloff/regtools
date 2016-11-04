@@ -10,7 +10,7 @@
 #     response variable in the last column
 # nboot:  if nonzero, this requests bootstrapped computation of the
 #         estimated covariance matrix of the estimated vector of
-#         regression coefficiengts
+#         regression coefficients
 
 # value:  an object of class 'lmac', with components 
 #
@@ -51,12 +51,12 @@ lmac <- function(xy,nboot=0) {
    lmacout
 }
 
-coef.lmac <- function(lmacout) {
-   lmacout$coefficients
+coef.lmac <- function(object,...) {
+   object$coefficients
 }
 
-vcov.lmac <- function(lmacout) {
-   lmacout$cov
+vcov.lmac <- function(object,...) {
+   object$cov
 }
 
 #############################  PCA  ###############################

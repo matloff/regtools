@@ -254,7 +254,7 @@ knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
 
 # arguments:  
 # 
-#    ktout:  output of knntrn()
+#    object:  output of knntrn()
 #    predpts:  matrix of X values at which prediction is to be done
 # 
 # value:
@@ -264,18 +264,18 @@ knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
 #       regest: estimated class probabilities at predpts
 #       predy: predicted class labels for predpts    
 
-predict.ovaknn <- function(ktout,predpts) {
-   x <- ktout$x
+predict.ovaknn <- function(object,...) {
+   x <- object$x
    if (is.vector(predpts)) 
       predpts <- matrix(predpts,ncol=1)
    # need to scale predpts with the same values that had been used in
    # the training set
-   ctr <- ktout$scaling[,1]
-   scl <- ktout$scaling[,2]
+   ctr <- object$scaling[,1]
+   scl <- object$scaling[,2]
    predpts <- scale(predpts,center=ctr,scale=scl)
    tmp <- FNN::get.knnx(x,predpts,1)
    idx <- tmp$nn.index
-   regest <- ktout$regest[idx,,drop=FALSE]
+   regest <- object$regest[idx,,drop=FALSE]
    predy <- apply(regest,1,which.max) - 1
    list(regest=regest,predy=predy)
 }

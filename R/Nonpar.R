@@ -117,7 +117,7 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 
 # arguments:
 
-#    knnout:  output from knnest(), object of class 'knn'
+#    object:  output from knnest(), object of class 'knn'
 #    predpts:  matrix/data frame of X values at which to predict Y
 
 # value:
@@ -128,18 +128,18 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 # estimated regression function value for the closest point in the
 # training data is used as our est. reg. ftn. value at that predpts row
 
-predict.knn <- function(knnout,predpts) {
-   x <- knnout$x
+predict.knn <- function(object,...) {
+   x <- object$x
    if (is.vector(predpts)) 
       predpts <- matrix(predpts,nrow=1)
    # need to scale predpts with the same values that had been used in
    # the training set
-   ctr <- knnout$scaling[,1]
-   scl <- knnout$scaling[,2]
+   ctr <- object$scaling[,1]
+   scl <- object$scaling[,2]
    predpts <- scale(predpts,center=ctr,scale=scl)
    tmp <- FNN::get.knnx(x,predpts,1)
    idx <- tmp$nn.index
-   knnout$regest[idx,]
+   object$regest[idx,]
 }
 
 ######################  kmin()  ###############################
@@ -183,8 +183,10 @@ kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
 
 ######################  plot.kmin()  ###############################
 
-plot.kmin <- function(kminout) {
-   plot(names(kminout$meanerrs),kminout$meanerrs,
+# x is output from kmin()
+
+plot.kmin <- function(x,y,...) {
+   plot(names(x$meanerrs),x$meanerrs,
       xlab='k',ylab='mean error',pch=20)
 }
 

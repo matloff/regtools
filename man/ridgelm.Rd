@@ -10,13 +10,17 @@ plotting.
 }
 
 \usage{
-ridgelm(xy,lambda = seq(0.01,1,0.01)) 
+ridgelm(xy,lambda = seq(0.01,1,0.01),mapback=TRUE) 
 \method{plot}{rlm}(x,y,...)
 }
 
 \arguments{
   \item{xy}{Data, response variable in the last column.}
   \item{lambda}{Vector of desired values for the ridge parameter.}
+  \item{mapback}{If TRUE, the scaling that had been applied to the
+     original data will be map back to the original scale, so that the
+     estimated regression coefficients are now on the scale of the original
+     data.}
   \item{x}{Object of type 'rlm', output of \code{ridgelm}.}
   \item{y}{Needed for consistency with the generic. Not used.}
   \item{...}{Needed for consistency with the generic.  Not used.}

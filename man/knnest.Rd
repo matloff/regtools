@@ -182,7 +182,7 @@ zout <- knnest(pecs1[,6],xdata,50)  # k = 50
 predict(zout,matrix(c(42,2,52,0,0),nrow=1))  # 62106
 # try k = 25; don't need to call preprocessx() again
 zout <- knnest(pecs1[,6],xdata,25)
-predict(zout,matrix(c(42,2,52,0,0)),nrow=1)  # 69104
+predict(zout,matrix(c(42,2,52,0,0),nrow=1))  # 69104
 # what about a man?
 predict(zout,matrix(c(42,1,52,0,0),nrow=1))  # 78588
 # form training and test sets, fit on the former and predict on the

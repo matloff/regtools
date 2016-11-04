@@ -182,14 +182,14 @@ kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
    result
 }
 
-######################  plot.kmin()  ###############################
-
-# x is output from kmin()
-
-plot.kmin <- function(x,y,...) {
-   plot(names(x$meanerrs),x$meanerrs,
-      xlab='k',ylab='mean error',pch=20)
-}
+### ######################  plot.kmin()  ###############################
+### 
+### # x is output from kmin()
+### 
+### plot.kmin <- function(x,y,...) {
+###    plot(names(x$meanerrs),x$meanerrs,
+###       xlab='k',ylab='mean error',pch=20)
+### }
 
 ######################  meany(), etc. ###############################
 

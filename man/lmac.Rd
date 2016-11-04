@@ -34,6 +34,7 @@ tbltofakedf(tbl)
   \item{scale}{If TRUE, call \code{cor} instead of \code{cov}.}
   \item{}{Matrix or data frame, one column per variable.}
   \item{tbl}{An R table.}
+  \item{m}{Number of synthetic NAs to insert.}
 }
 
 \details{

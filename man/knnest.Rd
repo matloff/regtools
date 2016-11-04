@@ -1,4 +1,4 @@
-\name{knnest,meany,vary,loclin,predict.knn,preprocessx,kmin,plot.kmin,parvsnonparplot,nonparvsxplot}
+\name{knnest,meany,vary,loclin,predict.knn,preprocessx,kmin,parvsnonparplot,nonparvsxplot}
 \alias{knnest}
 \alias{predict.knn}
 % \alias{parget.knnx}
@@ -7,7 +7,6 @@
 \alias{loclin}
 \alias{preprocessx}
 \alias{kmin}
-\alias{plot.kmin}
 \alias{parvsnonparplot}
 \alias{nonparvsxplot}
 
@@ -27,7 +26,7 @@ vary(predpt,nearxy,nycol)
 loclin(predpt,nearxy,nycol) 
 \method{predict}{knn}(object,...)
 kmin(y,xdata,lossftn=l2,nk=5,nearf=meany) 
-\method{plot}{kmin}(x,y,...)
+% \method{plot}{kmin}(x,y,...)
 parvsnonparplot(lmout,knnout) 
 nonparvsxplot(knnout,lmout=NULL) 
 }
@@ -35,28 +34,24 @@ nonparvsxplot(knnout,lmout=NULL)
 \arguments{
   \item{y}{Response variable data in the training set. Vector or matrix,
      the latter case for vector-valued response, e.g. multiclass
-     classification.}
+     classification.}  
   \item{x}{X data, predictors, one row per data point, in the training
      set.}
-  \item{y}{Not used, just need for consistency with generic.}
+  \item{...}{Needed for consistency with generic.  See Details below for
+     `arguments.}
   \item{xdata}{X and associated neighbor indices. Output of
      \code{preprocessx}.} 
   \item{k}{Number of nearest neighbors} 
   \item{object}{Output of \code{knnest}.}
   \item{predpt}{One point on which to predict, as a vector.}
   \item{nearxy}{A set of X neighbors of a point.}
-  \item{data}{A data matrix.}
-  \item{query}{A data matrix.}
-  \item{algorithm}{As in \code{FNN::get.knnx}.}
   \item{nearf}{Function to apply to the nearest neighbors of a point.}
   \item{kmax}{Maximal number of nearest neighbors to find.}
   \item{xval}{Cross-validation flag. If TRUE, then the set of nearest 
      neighbors of a point will not include the point itself.}
-  \item{m}{Number of classes in multiclass setting.}
   \item{lossftn}{Loss function to be used in cross-validation
      determination of "best" \code{k}.}
   \item{nk}{Number of values of \code{k} to try in cross-validation.}
-  \item{kminout}{Output of \code{kmin}.}
   \item{lmout}{Output of \code{lm}.}
   \item{knnout}{Output of \code{knnest}.}
   \item{nycol}{Number of columns in the input data for "Y" data.}
@@ -88,20 +83,21 @@ nonparvsxplot(knnout,lmout=NULL)
    \code{nearf} to \code{vary} to estimate conditional variance.
 
    The X, i.e. predictor, data will be scaled by the code, so as to put
-   all predictor variables on an equal footing.
+   all predictor variables on an equal footing.  The scaling parameters
+   will be recorded, and then applied later in prediction.
 
    One can choose the number of nearest neighbors \code{k} through the
-   \code{kmin} function, and its output can be plotted via
-   \code{plot.kmin}, invoked simply as \code{plot}.
+   \code{kmin} function. 
 
-   The function \code{predict.knn} uses the output of \code{knnest} to do
-   estimation or prediction on new points.  Since the output of
+   The function \code{predict.knn} uses the output of \code{knnest} to
+   do estimation or prediction on new points.  Since the output of
    \code{knnest} is of class \code{"knn"}, one invokes this function
    with the simpler \code{predict}.  The second argument is the set of
-   new points, supplied as a matrix.  A "1-NN" method is used
-   here:  Given a new point u whose "Y" value we wish to predict, the
-   code finds the single closest row in the training set, and returns
-   the previously-estimated regression function value at that row.
+   new points, supplied as a matrix, called \code{predpts} within the
+   code.  A "1-NN" method is used here:  Given a new point u whose "Y"
+   value we wish to predict, the code finds the single closest row in
+   the training set, and returns the previously-estimated regression
+   function value at that row.
 
    The functions \code{ovaknntrn} and \code{ovaknnpred} are multiclass
    wrappers for \code{knnest} and \code{knnpred}. Here \code{y} is coded
@@ -224,7 +220,6 @@ pecs <- pe[pe$occ >= 100 & pe$occ <= 109,]
 pecs1 <- pecs[,c(1,7,9,12,13,8)] 
 # kNN
 xdata <- preprocessx(pecs1[,1:5],25) 
-kminout <- kmin(pecs1[,6],xdata,nk=25) 
 zout <- knnest(pecs1[,6],xdata,25) 
 # look for nonlinear relations between Y and each X
 nonparvsxplot(zout)  # keep hitting Enter for next plot

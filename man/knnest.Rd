@@ -174,7 +174,7 @@ pe$ms <- as.integer(pe$educ == 14)
 pe$phd <- as.integer(pe$educ == 16)
 # computer occupations only
 pecs <- pe[pe$occ >= 100 & pe$occ <= 109,]
-pecs1 <- pecs[,c(1,7,9,12,13,8)]
+predict(zout,matrix(c(42,2,52,0,0),nrow=1))  # 69104
 # wll predict wage income from age, gender etc.
 # prepare nearest-neighbor data, k up to 50
 xdata <- preprocessx(pecs1[,1:5],50)

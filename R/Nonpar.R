@@ -230,10 +230,10 @@ loclin <- function(predpt,nearxy,nycol) {
 # arguments:
 #    lmout: object of class 'lm' or 'glm' 
 #    knnout: knnest()
-parvsnonparplot <- function(lmout,knnout) {
+parvsnonparplot <- function(lmout,knnout,cex=1.0) {
    parfitted <- lmout$fitted.values
    nonparfitted <- knnout$regest
-   plot(nonparfitted,parfitted,pch=20)
+   plot(nonparfitted,parfitted,cex=cex)
    abline(0,1)
 }
 

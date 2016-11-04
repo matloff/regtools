@@ -27,7 +27,7 @@ loclin(predpt,nearxy,nycol)
 \method{predict}{knn}(object,...)
 kmin(y,xdata,lossftn=l2,nk=5,nearf=meany) 
 % \method{plot}{kmin}(x,y,...)
-parvsnonparplot(lmout,knnout) 
+parvsnonparplot(lmout,knnout,cex=1.0) 
 nonparvsxplot(knnout,lmout=NULL) 
 }
 
@@ -54,6 +54,7 @@ nonparvsxplot(knnout,lmout=NULL)
   \item{nk}{Number of values of \code{k} to try in cross-validation.}
   \item{lmout}{Output of \code{lm}.}
   \item{knnout}{Output of \code{knnest}.}
+  \item{cex}{R parameter to control dot size in plot.}
   \item{nycol}{Number of columns in the input data for "Y" data.}
 }
 
@@ -172,28 +173,25 @@ pe$phd <- as.integer(pe$educ == 16)
 pecs <- pe[pe$occ >= 100 & pe$occ <= 109,]
 # for simplicity, let's choose a few predictors
 pecs1 <- pecs[,c(1,7,9,12,13,8)]
-xdata <- preprocessx(pecs1,50)  # k as high as 50
-zout <- knnest(pecs1$wageinc,xdata,50) 
-predict(zout,matrix(c(42,2,52,0,0),nrow=1))  # 69104
-# wll predict wage income from age, gender etc.
+# will predict wage income from age, gender etc.
 # prepare nearest-neighbor data, k up to 50
 xdata <- preprocessx(pecs1[,1:5],50)
 zout <- knnest(pecs1[,6],xdata,50)  # k = 50
 # find the est. mean income for 42-year-old women, 52 weeks worked, with
 # a Master's
-predict(zout,c(42,2,52,0,0))  # 62106
+predict(zout,matrix(c(42,2,52,0,0),nrow=1))  # 62106
 # try k = 25; don't need to call preprocessx() again
 zout <- knnest(pecs1[,6],xdata,25)
 predict(zout,c(42,2,52,0,0))  # 69104
 # what about a man?
-predict(zout,c(42,1,52,0,0))  # 89200
+predict(zout,matrix(c(42,1,52,0,0),nrow=1))  # 78588
 # form training and test sets, fit on the former and predict on the
 # latter
 fullidxs <- 1:nrow(pecs1)
 train <- sample(fullidxs,10000)
 xdata <- preprocessx(pecs1[train,1:5],50)
 trainout <- knnest(pecs1[train,6],xdata,50)
-testout <- predict(trainout,pecs1[-train,-6])
+testout <- predict(trainout,as.matrix(pecs1[-train,-6]))
 # find mean abs. prediction error (about $25K)
 mean(abs(pecs1[-train,6] - testout))
 
@@ -214,17 +212,7 @@ mx <- apply(as.matrix(ko$regest),1,which.max) - 1
 # overall correct classification rate
 mean(mx == y)  # should be about 0.87
 
-data(prgeng) 
-pe <- prgeng  # see ?knnest 
-# dummies for MS, PhD 
-pe$ms <- as.integer(pe$educ == 14) 
-pe$phd <- as.integer(pe$educ == 16) 
-# computer occupations only 
-pecs <- pe[pe$occ >= 100 & pe$occ <= 109,] 
-pecs1 <- pecs[,c(1,7,9,12,13,8)] 
-# kNN
-xdata <- preprocessx(pecs1[,1:5],25) 
-zout <- knnest(pecs1[,6],xdata,25) 
+# examples of fit assessment
 # look for nonlinear relations between Y and each X
 nonparvsxplot(zout)  # keep hitting Enter for next plot
 # there seem to be quadratic relations with age and wkswrkd, so add quad
@@ -235,8 +223,11 @@ pecs2$wks2 <- pecs1$wkswrkd^2
 lmout2 <- lm(wageinc ~ .,data=pecs2) 
 # check parametric fit by comparing to kNN
 parvsnonparplot(lmout2,zout) 
-# linear model line somewhat faint, due to large n
-# parametric model seems to overpredict at high end
+# linear model line somewhat faint, due to large n;
+# parametric model seems to overpredict at high end;
+# to deal with faintness, reduce size of points
+parvsnonparplot(lmout2,zout,cex=0.1) 
+
 }
 
 \author{

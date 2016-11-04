@@ -158,9 +158,10 @@ predict(ko,matrix(76))  # 47.5, 65.0
 
 xe <- matrix(rnorm(30000),ncol=3) 
 xe[,-3] <- xe[,-3] + 2 
-y <- xe %*% c(1,0.5,0.2)  # xe is 2 predictors and epsilon 
+# xe is 2 predictors and epsilon 
+y <- xe \%*\% c(1,0.5,0.2)  # Y
 x <- xe[,-3]  # X
-xdata <- preprocessx(x,500)  # k as high as2500
+xdata <- preprocessx(x,500)  # k as high as 500
 zout <- knnest(y,xdata,200) 
 predict(zout,matrix(c(1,1),nrow=1))  # about 1.55
 
@@ -183,7 +184,10 @@ predict(zout,matrix(c(42,2,52,0,0),nrow=1))  # 62106
 # try k = 25; don't need to call preprocessx() again
 zout <- knnest(pecs1[,6],xdata,25)
 predict(zout,matrix(c(42,2,52,0,0),nrow=1))  # 69104
+# quite a difference; what k values are good?
+kmin(pecs1[,6],xdata) # at least 50
 # what about a man?
+zout <- knnest(pecs1[,6],xdata,50)
 predict(zout,matrix(c(42,1,52,0,0),nrow=1))  # 78588
 # form training and test sets, fit on the former and predict on the
 # latter

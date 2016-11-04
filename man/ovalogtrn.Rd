@@ -87,12 +87,12 @@ the probability that Y = j given that X = row i in the X data.
 \dontrun{
 # toy example, kNN
 set.seed <- 9999
-x <- runif(10)
-y <- sample(0:2,10,replace=TRUE)
+x <- runif(25)
+y <- sample(0:2,25,replace=TRUE)
 xd <- preprocessx(x,2)
-kout <- knntrn(y,xd,3,2)
+kout <- knntrn(y,xd,m=3,k=2)
 kout$regest  # row 1:  0.5,0.5,0.0
-predict(kout,c(0.25,0.55,0.88))  # 0,0,1
+predict(kout,matrix(c(0.25,0.55,0.88),ncol=1))  # 2,0,0
 
 # sim data, kNN
 set.seed <- 9999
@@ -109,6 +109,7 @@ oo <- knntrn(y,xdata,m=3,k=20)
 predout <- predict(oo,xy[,-3])
 mean(predout$predy == y)  # about 0.87
 
+\dontrun{
 library(mlbench)
 data(Vehicle)
 xdata <- preprocessx(Vehicle[,-19],25)
@@ -128,19 +129,20 @@ lrtest <- lr[14001:20000,]
 xdata <- preprocessx(lrtrn[,-1],50)
 # without setting priors
 trnout <- knntrn(lrtrn[,1],xdata,26,50)
-ypred <- predict(trnout,lrtest[,-1])
+ypred <- predict(trnout,as.matrix(lrtest[,-1]))
 # how well did it work?
 mean(ypred$predy == lrtest[,1])  # 0.86
 # logit
 ologout <- ovalogtrn(26,lr[,c(2:17,1)])
 ypred <- ovalogpred(ologout,lr[,-1])
 mean(ypred == lr[,1])  # only 0.73
-% # try quadratic terms
-% for (i in 2:17)
-%    lr <- cbind(lr,lr[,i]^2)
-% ologout1 <- ovalogtrn(26,lr[,c(2:33,1)])
-% ypred <- ovalogpred(ologout1,lr[,-1])
-% mean(ypred == lr[,1])  # increased to 0.82
+# try quadratic terms
+for (i in 2:17)
+   lr <- cbind(lr,lr[,i]^2)
+ologout1 <- ovalogtrn(26,lr[,c(2:33,1)])
+ypred <- ovalogpred(ologout1,lr[,-1])
+mean(ypred == lr[,1])  # increased to 0.81
+}
 
 }
 

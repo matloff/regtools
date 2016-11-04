@@ -16,8 +16,8 @@ Various estimators that handle missing data via the Available Cases Method
 \usage{
 lmac(xy,nboot=0) 
 makeNA(m,probna)
-\method{coef}{lmac}(lmacout)
-\method{vcov}{lmac}(lmacout)
+\method{coef}{lmac}(object,...)
+\method{vcov}{lmac}(object,...)
 pcac(indata,scale=FALSE) 
 loglinac(x,margin) 
 tbltofakedf(tbl)

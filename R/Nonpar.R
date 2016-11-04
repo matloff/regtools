@@ -117,7 +117,7 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 
 # arguments:
 
-#    xdata:  output from knnest(), object of class 'knn'
+#    knnout:  output from knnest(), object of class 'knn'
 #    predpts:  matrix/data frame of X values at which to predict Y
 
 # value:
@@ -128,18 +128,18 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 # estimated regression function value for the closest point in the
 # training data is used as our est. reg. ftn. value at that predpts row
 
-predict.knn <- function(xdata,predpts) {
-   x <- xdata$x
+predict.knn <- function(knnout,predpts) {
+   x <- knnout$x
    if (is.vector(predpts)) 
       predpts <- matrix(predpts,nrow=1)
    # need to scale predpts with the same values that had been used in
    # the training set
-   ctr <- xdata$scaling[,1]
-   scl <- xdata$scaling[,2]
+   ctr <- knnout$scaling[,1]
+   scl <- knnout$scaling[,2]
    predpts <- scale(predpts,center=ctr,scale=scl)
    tmp <- FNN::get.knnx(x,predpts,1)
    idx <- tmp$nn.index
-   xdata$regest[idx,]
+   knnout$regest[idx,]
 }
 
 ######################  kmin()  ###############################
@@ -285,20 +285,4 @@ matrixtolist <- function (rc, m)
 # combined
 
 # value is the nn.index component of the list returned by get.knnx()
-
-#####  parget.knnx <- function(data, query, k=10, 
-#####        algorithm="kd_tree",cls=NULL) {
-#####     if (is.null(cls))  {
-#####        tmp <- get.knnx(data,query,k,algorithm)
-#####        return(tmp$nn.index)
-#####     }
-#####     require(partools)
-#####     setclsinfo(cls)
-#####     clusterExport(cls,c('data','k','algorithm'),envir=environment())
-#####     distribsplit(cls,'query')
-#####     clusterEvalQ(cls,library(FNN))
-#####     tmp <- clusterEvalQ(cls,get.knnx(data,query,k,algorithm))
-#####     tmp <- lapply(tmp,function(tmpelt) tmpelt$nn.index)
-#####     Reduce(rbind,tmp)
-#####  }
 

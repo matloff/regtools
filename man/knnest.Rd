@@ -1,4 +1,4 @@
-\name{knnest,meany,vary,loclin,predict.knn,preprocessx,kmin,parvsnonparplot,nonparvsxplot}
+\name{knnest,meany,vary,loclin,predict.knn,preprocessx,kmin,parvsnonparplot,nonparvsxplot,l1,l2}
 \alias{knnest}
 \alias{predict.knn}
 % \alias{parget.knnx}
@@ -9,6 +9,9 @@
 \alias{kmin}
 \alias{parvsnonparplot}
 \alias{nonparvsxplot}
+\alias{nonparvarplot}
+\alias{l2}
+\alias{l1}
 
 \title{Nonparametric Regression and Classification}
 
@@ -22,13 +25,16 @@ models.
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
 meany(predpt,nearxy) 
-vary(predpt,nearxy,nycol) 
-loclin(predpt,nearxy,nycol) 
+vary(predpt,nearxy) 
+loclin(predpt,nearxy) 
 \method{predict}{knn}(object,...)
 kmin(y,xdata,lossftn=l2,nk=5,nearf=meany) 
 % \method{plot}{kmin}(x,y,...)
 parvsnonparplot(lmout,knnout,cex=1.0) 
 nonparvsxplot(knnout,lmout=NULL) 
+nonparvarplot(knnout)
+l2(y,muhat)
+l1(y,muhat)
 }
 
 \arguments{
@@ -55,7 +61,7 @@ nonparvsxplot(knnout,lmout=NULL)
   \item{lmout}{Output of \code{lm}.}
   \item{knnout}{Output of \code{knnest}.}
   \item{cex}{R parameter to control dot size in plot.}
-  \item{nycol}{Number of columns in the input data for "Y" data.}
+  \item{muhat}{Vector of estimated regression function values.}
 }
 
 \details{
@@ -108,6 +114,9 @@ nonparvsxplot(knnout,lmout=NULL)
    The \code{parvsnonparplot} function plots fitted values of
    parameteric model vs. kNN fitted, \code{nonparvsxplot} k-NN fitted
    values against each predictor, one by one.
+
+   The functions \code{l2} and \code{l1} are used to define L2 and L1
+   loss.
 
    % The \code{parget.knnx} function is a wrapper for use of 'parallel'
    % package with \code{get.knnx} of the 'FNN' package.
@@ -231,6 +240,9 @@ parvsnonparplot(lmout2,zout)
 # parametric model seems to overpredict at high end;
 # to deal with faintness, reduce size of points
 parvsnonparplot(lmout2,zout,cex=0.1) 
+# assess homogeneity of conditional variance
+nonparvarplot(zout) 
+# hockey stick!
 
 }
 

@@ -71,6 +71,8 @@ knnest <- function(y,xdata,k,nearf=meany)
    regest <- if (nycol > 1) t(regest) else as.matrix(regest)
    xdata$regest <- regest
    xdata$nycol <- nycol
+   xdata$y <- y
+   xdata$k <- k
    class(xdata) <- 'knn'
    xdata
 }
@@ -208,7 +210,9 @@ meany <- function(predpt,nearxy) {
 }
 
 # find variance of Y in the neighborhood of predpt
-vary <- function(predpt,nearxy,nycol) {
+
+vary <- function(predpt,nearxy) {
+   nycol <- ncol(nearxy) - length(predpt)
    if (nycol > 1) stop('not capable of vector y yet')
    # predpt not used (but see loclin() below)
    ycol <- ncol(nearxy)
@@ -216,7 +220,8 @@ vary <- function(predpt,nearxy,nycol) {
 }
 
 # fit linear model to the data z, Y in last column, and predict at xnew
-loclin <- function(predpt,nearxy,nycol) {
+loclin <- function(predpt,nearxy) {
+   nycol <- ncol(nearxy) - length(predpt)
    if (nycol > 1) stop('not capable of vector y yet')
    ycol <- ncol(nearxy)
    bhat <- coef(lm(nearxy[,ycol] ~ nearxy[,-ycol]))
@@ -244,6 +249,7 @@ parvsnonparplot <- function(lmout,knnout,cex=1.0) {
 # arguments:
 #    lmout: object of class 'lm' or 'glm' 
 #    knnout: return value of knnest()
+
 nonparvsxplot <- function(knnout,lmout=NULL) {
    nonparfitted <- knnout$regest
    havelmout <- !is.null(lmout) 
@@ -260,7 +266,29 @@ nonparvsxplot <- function(knnout,lmout=NULL) {
    }
 }
 
-######################  matrixtolist(), etc. ###############################
+######################  nonparvarplot()  ###############################
+
+# plots nonpar estimated conditional variance against nonpar estimated
+# conditional mean 
+#
+# arguments:
+#    knnout: return value of knnest()
+
+nonparvarplot <- function(knnout) {
+   nonparcondmean <- knnout$regest
+   y <- knnout$y
+   k <- knnout$k
+   tmp <- knnest(y,knnout,k,nearf=vary)
+   plot(knnout$regest,tmp$regest)
+   abline(0,1)
+}
+
+######################  l2, etc.  ###############################
+
+l2 <- function(y,muhat) (y - muhat)^2
+l1 <- function(y,muhat) abs(y - muhat)
+
+######################  matrixtolist()  ###############################
 
 matrixtolist <- function (rc, m) 
 {

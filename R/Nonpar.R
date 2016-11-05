@@ -279,7 +279,7 @@ nonparvarplot <- function(knnout) {
    y <- knnout$y
    k <- knnout$k
    tmp <- knnest(y,knnout,k,nearf=vary)
-   plot(knnout$regest,tmp$regest)
+   plot(knnout$regest,tmp$regest,xlab='mean',ylab='var')
    abline(0,1)
 }
 

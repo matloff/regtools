@@ -55,7 +55,7 @@ The function <b>nonparvsxplot()</b> plots the nonparametric fits against
 each predictor variable, for instance to explore nonlinear effects.
 Here is the plot for wage versus (scaled) age:
 
-<img src = "wagevsage.png">
+<img src = "vignettes/wagevsage.png">
 
 Of course, the effects of the other predictors don't show up here, but
 there does seem to be a quadratic effect. The same was true for the
@@ -67,7 +67,7 @@ So, after fitting the linear model, run <b>parvsnonparplot()</b>, which
 plots the fit of the parametric model against the nonparametric one.
 Here is the result:
 
-<img src = "parvsnonpar.png">
+<img src = "vignettes/parvsnonpar.png">
 
 There is quite a bit suggested in this picture:
 
@@ -88,7 +88,7 @@ meaning that the conditional variance of Y given X is constant.  The
 function <b>nonparvarplot()</b> plots the estimated conditional variance
 against the estimated conditional mean, both computed nonparametrically::
 
-<img src = "varvsmean.png">
+<img src = "vignettes/varvsmean.png">
 
 Wow, a hockey stick!  Though there is a mild rise in <i>coefficient of
 determination</i>, i.e.  standard deviation relative to the mean, up to

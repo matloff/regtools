@@ -1,11 +1,11 @@
 
 ---
 title: "regtools"
-output: rmarkdown::html_vignette
+author: "Norm Matloff"
 vignette: >
   %\VignetteIndexEntry{regtools}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+output: rmarkdown::html_vignette
 ---
 
 # regtools 
@@ -128,7 +128,7 @@ the parametric model; it is based purely on nonparametric analysis.
 This is in contrast to classic regression fit methods, most of which are
 based on examination of residuals of the fitted model.
 
-## EXAMPLE; OVA VS. AVA IN MULTICLASS PROBLEMS
+## EXAMPLE: OVA VS. AVA IN MULTICLASS PROBLEMS
 
 A very popular prediction method in 2-class problems is to use logistic
 (logit) regression. In analyzing click-through patterns of Web users,

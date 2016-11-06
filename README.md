@@ -86,7 +86,7 @@ the goals of our analysis, we might consider removing them.
 Finally, let's check the classical assumption of homoscedasticity,
 meaning that the conditional variance of Y given X is constant.  The
 function <b>nonparvarplot()</b> plots the estimated conditional variance
-against the estimated conditional mean, both computed nonparametrically::
+against the estimated conditional mean, both computed nonparametrically:
 
 <img src = "vignettes/varvsmean.png">
 

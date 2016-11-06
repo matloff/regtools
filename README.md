@@ -3,7 +3,7 @@
 ## Novel tools tools for linear, nonlinear and nonparametric regression.
 
 These tools are associated with my forthcoming book, <i>From Linear
-Models to Machine Learning: Modern Statistical Regresison and
+Models to Machine Learning: Modern Statistical Regression and
 Classification</i>, N. Matloff, CRC, 2017.  
 
 <i>The tools are

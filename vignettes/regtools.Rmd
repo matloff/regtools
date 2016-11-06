@@ -174,22 +174,22 @@ by some data wrangling, which changed the letter data from character to
 numeric, and which divided the data set into training and test sets.
 Here is the OVA run:
 
-```{r}
-&gt; ologout <- ovalogtrn(26,lrtrn[,c(2:17,1)]) 
-&gt; ypred <- ovalogpred(ologout,lrtest[,-1]) 
-&gt; mean(ypred == lrtest[,1]) 
+<pre>
+> ologout <- ovalogtrn(26,lrtrn[,c(2:17,1)]) 
+> ypred <- ovalogpred(ologout,lrtest[,-1]) 
+> mean(ypred == lrtest[,1]) 
 [1] 0.7193333 
-```
+</pre>
 
 So, we get about a 72% rate of correct classification.  Now let's try
 AVA:
 
-```{r}
+<pre>
 > alogout <- avalogtrn(26,lrtrn[,c(2:17,1)])
 > ypred <- avalogpred(26,alogout,lrtest[,-1])
 > mean(ypred == lrtest[,1])
 [1] 0.8355
-```
+</pre>
 
 AVA did considerably better, 84%.  So, apparently AVA fixed a poor
 model. But of course, it’s better to make a good model in the first
@@ -201,12 +201,12 @@ There were 16 predictors, thus 16 possible quadratic terms, and C(16,2)
 probably produce too rich a model for the 14000 points in our training
 set.  We'll settle for adding just the squared terms (not shown):
 
-```{r}
+<pre>
 > ologout <- ovalogtrn(26,lrtrn[,c(2:33,1)])
 > ypred <- ovalogpred(ologout,lrtest[,-1])
 > mean(ypred == lrtest[,1])
 [1] 0.8086667
-```
+</pre>
 
 Ah, much better, though still not quite as good as AVA.
 

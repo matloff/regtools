@@ -15,3 +15,5 @@ Description: Tools for linear, nonlinear and nonparametric regression
              regression with Eickert-White method for dealing with 
              heteroscedasticity, k-NN for general dimension and 
              general descriptive functions.
+URL: https://github.com/matloff/regtools
+BugReports: https://github.com/matloff/regtools/issues

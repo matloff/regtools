@@ -143,7 +143,9 @@ predict.knn <- function(object,...) {
    if (class(object) != 'knn')
       stop('must be called on object of class "knn"')
    x <- object$x
-   predpts <- unlist(...)
+   ### predpts <- unlist(...)
+   arglist <- list(...)
+   predpts <- arglist[[1]]
    if (is.vector(predpts)) {
       if (ncol(x) == 1) {
           predpts <- matrix(predpts,ncol=1)
@@ -157,9 +159,33 @@ predict.knn <- function(object,...) {
    ctr <- object$scaling[,1]
    scl <- object$scaling[,2]
    predpts <- scale(predpts,center=ctr,scale=scl)
-   tmp <- FNN::get.knnx(x,predpts,1)
-   idx <- tmp$nn.index
-   object$regest[idx,]
+   k <- 1
+   if (length(arglist) > 1) k <- arglist[[2]]
+   if (k == 1) {
+      tmp <- FNN::get.knnx(x,predpts,1)
+      idxs <- tmp$nn.index
+      # in regest[,], keep in mind that Y may be multivariate, 
+      # thus regest's matrix form, rather than a vector
+      return(object$regest[idxs,])
+   }
+   # start loc linear regression code
+   if (object$nycol > 1)
+      stop('not capable of multiclass Y yet')
+   if (k <= 1 + ncol(x))
+      stop('need more neighbors than 1 + number of predictors')
+   # for each predpt fit lin reg in neighborhood of that point, and use
+   # it to predict Y for predpt
+   tmp <- FNN::get.knnx(x,predpts,k)
+   idxs <- tmp$nn.index
+   npred <- nrow(predpts)
+   result <- vector(length = npred)
+   for (i in 1:npred) {
+      nbhdyvals <- object$y[idxs[i,],]
+      nbhdxvals <- object$x[idxs[i,],]
+      tmp <- lm(nbhdyvals ~ nbhdxvals)
+      result[i] <- coef(tmp) %*% c(1,predpts[i,])
+   }
+   result
 }
 
 ######################  kmin()  ###############################

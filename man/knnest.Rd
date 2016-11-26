@@ -80,31 +80,55 @@ l1(y,muhat)
    number of nearest neighbors \code{k} at 25, 50 and 100, one can call
    \code{preprocessx} with \code{kmax} equal to 100, then reuse the
    results; in calling \code{knnest} for several values of \code{k}, we
-   do not need to call \code{preprocessx} again.  
+   do not need to call \code{preprocessx} again.  Setting \code{xval} to
+   TRUE turns out cross-validation: the neighborhood of a point will not
+   include the point itself; note that this is set in
+   \code{preprocessx}, not in \code{knnest}.
    
-   In addition to averaging the neighbor Y values, one can specify other
-   types of smoothing by proper specification of the \code{nearf}
-   function. For instance, one specifies local linear smoothing by
-   setting \code{nearf} to \code{loclin}, one could check
-   heteroscedasticity in linear regression models by setting
-   \code{nearf} to \code{vary} to estimate conditional variance.
+   One can specify various types of smoothing by proper specification of
+   the \code{nearf} function. The default is \code{meany}, specifying
+   the standard averaging of the neighbor Y values.  Another possible
+   choice is \code{vary}, specifying calculation of the sample variance
+   of those Y values; this is useful in assessing heteroscedasticity in
+   a linear model.  Another choice is to specify local linear smoothing
+   by setting \code{nearf} to \code{loclin}; note that this actually
+   gives the same results as \code{meany} if \code{xval} is FALSE; note
+   that this is not the same as using local linear regression at the
+   prediction stage, described below.
 
    The X, i.e. predictor, data will be scaled by the code, so as to put
    all predictor variables on an equal footing.  The scaling parameters
    will be recorded, and then applied later in prediction.
 
-   One can choose the number of nearest neighbors \code{k} through the
-   \code{kmin} function. 
+   One can explore the effects of various numbers of nearest neighbors
+   \code{k} through the \code{kmin} function. 
 
    The function \code{predict.knn} uses the output of \code{knnest} to
-   do estimation or prediction on new points.  Since the output of
-   \code{knnest} is of class \code{"knn"}, one invokes this function
-   with the simpler \code{predict}.  The second argument is the set of
-   new points, supplied as a matrix, called \code{predpts} within the
-   code.  A "1-NN" method is used here:  Given a new point u whose "Y"
-   value we wish to predict, the code finds the single closest row in
-   the training set, and returns the previously-estimated regression
+   do regression estimation or prediction on new points.  Since the
+   output of \code{knnest} is of class \code{'knn'}, one invokes this
+   function with the simpler \code{predict}.  The second argument is the
+   set of new points, named \code{predpts} within the code.  It is
+   specified as a matrix if there is more than one prediction point and
+   more than one predictor variable; otherwise, use a vector.
+   
+   By default, a "1-NN" method is used here:  Given a new point u whose
+   Y value we wish to predict, the code finds the single closest row
+   in the training set, and returns the previously-estimated regression
    function value at that row.
+
+   It can be shown that nearest-neighbor (or kernel) regression
+   estimates are subject to substantial bias near the fringes of the
+   data; the further away from the center of the data, the worse the
+   bias.  This can be mitigated by user specification that a local
+   linear regression be applied, as follows:  For each new point u to
+   predict, the r closest X rows in the training set to u will be found,
+   and a linear regression of the corresponding Y values against those X
+   values will be computed. The result of that operation will be used to
+   predict the Y value at the point u.  The value of r is specified as
+   the third argument in the call to \code{predict}; if left
+   unspecified, the 1-NN method is used as described above, and it may
+   be more accurate than the local-linear approach within the bulk of
+   the data set.
 
    The functions \code{ovaknntrn} and \code{ovaknnpred} are multiclass
    wrappers for \code{knnest} and \code{knnpred}. Here \code{y} is coded
@@ -165,6 +189,7 @@ ko <- knnest(x[,-1],xd,2)  # Y bivar
 ko$regest # 1st row = (74.5,31.5)
 predict(ko,matrix(76))  # 47.5, 65.0
 
+set.seed(9999)
 xe <- matrix(rnorm(30000),ncol=3) 
 xe[,-3] <- xe[,-3] + 2 
 # xe is 2 predictors and epsilon 
@@ -173,6 +198,10 @@ x <- xe[,-3]  # X
 xdata <- preprocessx(x,500)  # k as high as 500
 zout <- knnest(y,xdata,200) 
 predict(zout,matrix(c(1,1),nrow=1))  # about 1.55
+predict(zout,rbind(c(1,1),c(2,1.2)),6)  # about 1.16, 2.63
+predict(zout,rbind(c(1,1),c(2,1.2)))  # about 1.55, 2.58
+predict(zout,rbind(c(0,0)),6)  # about -0.03
+predict(zout,rbind(c(0,0)))  # about 0.63
 
 \dontrun{
 data(prgeng)

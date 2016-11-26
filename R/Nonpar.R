@@ -28,15 +28,20 @@
 
 # arguments:
 #
-#   y: Y values in training set, vector or matrix
+#   y: Y values in training set, vector or matrix (the latter case is
+#      for multivariate Y, e.g. in a classification problem with more
+#      than 2 classes)
 #   xdata: X and associated neighbor indices; output of preprocessx()
 #   k:  number of nearest neighbors
 #   nearf: function to apply to the nearest neighbors 
 #          of a point; default is mean(), as in standard kNN
 #
-# value: class of type 'knn', consisting of the components of the
-#        the input xdata and a component regest, consisting of
-#        the estimated reg. ftn. at the X values in xdata; regest
+# value: object of class 'knn':
+#        x,scaling,idxs: from input xdata
+#        regest: estimated reg. ftn. at the X values 
+#        y: the Y values at those X values
+#        nycol: dimensionality of Y, normally 1
+#        k: input k value
 
 # NOTE: knnest() does NOT have an argument corresponding to xval in
 # preprocessx(); if it is desired that xval = TRUE, the user must call
@@ -44,6 +49,8 @@
 
 knnest <- function(y,xdata,k,nearf=meany)
 {
+   if (class(xdata) != 'preknn') 
+      stop('must call preprocessx() first')
    # take only the idxs for our value of k
    idxs <- xdata$idxs 
    if (ncol(idxs) < k) stop('k must be <= kmax')
@@ -79,22 +86,23 @@ knnest <- function(y,xdata,k,nearf=meany)
 
 ######################  preprocessx()  ###############################
 
-# scale the X matrix, and form indices of neighbors
+# form indices of neighbors and scale the X matrix 
 
 # arguments:
 
-#    x: "X variables" matrix, cases in rows, predictors in columns; will
-#       be scaled by this function and returned in scaled form
+#    x: "X variables" matrix or data frame, cases in rows, predictors 
+#        in columns
 #    kmax: maximal number of nearest neighbors sought
 #    xval: cross-validation; if TRUE, the neighbors of a point 
 #          will not include the point itself
 
-# value: R list; component 'x' is the result of scale(x); 'idxs' is a
-#        matrix -- row i, column j shows the index of the jth-closest 
-#        data point to data point i, j = 1,...,kmax (actually j =
-#        2,...,kmax if xval component is TRUE; 'scaling' is a
-#        2-column matrix consisting of the attributes scaled:center and
-#        scaled:scale from scale(x)
+# value: object of class 'preknn', with components: 
+
+#        x: result of scale(x); 
+#        scaling: 2-column matrix consisting of the attributes 
+#                 scaled:center and scaled:scale from scale(x)
+#        idxs: matrix; row i, column j shows the index of jth-closest 
+#              data point to data point i, j = 1+xval,...,kmax 
 
 preprocessx <- function(x,kmax,xval=FALSE) {
    xval <- as.numeric(xval)
@@ -109,6 +117,7 @@ preprocessx <- function(x,kmax,xval=FALSE) {
    result$idxs <- nni[,(1+xval):ncol(nni)]
    result$xval <- xval
    result$kmax <- kmax
+   class(result) <- 'preknn'
    result
 }
 
@@ -131,10 +140,18 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 # training data is used as our est. reg. ftn. value at that predpts row
 
 predict.knn <- function(object,...) {
-   predpts <- unlist(...)
+   if (class(object) != 'knn')
+      stop('must be called on object of class "knn"')
    x <- object$x
+   predpts <- unlist(...)
+   if (is.vector(predpts)) {
+      if (ncol(x) == 1) {
+          predpts <- matrix(predpts,ncol=1)
+      } else
+          predpts <- matrix(predpts,nrow=1)
+   }
    if (!is.matrix(predpts)) 
-      stop('prediction points must be a matrix')
+      stop('prediction points must be in a matrix')
    # need to scale predpts with the same values that had been used in
    # the training set
    ctr <- object$scaling[,1]

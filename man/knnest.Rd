@@ -90,11 +90,14 @@ l1(y,muhat)
    the standard averaging of the neighbor Y values.  Another possible
    choice is \code{vary}, specifying calculation of the sample variance
    of those Y values; this is useful in assessing heteroscedasticity in
-   a linear model.  Another choice is to specify local linear smoothing
-   by setting \code{nearf} to \code{loclin}; note that this actually
-   gives the same results as \code{meany} if \code{xval} is FALSE; note
-   that this is not the same as using local linear regression at the
-   prediction stage, described below.
+   a linear model.  
+   
+   Another choice is to specify local linear smoothing by setting
+   \code{nearf} to \code{loclin}.  Here the value of the regression
+   function at a point is predicted from a linear fit to the point's
+   neighbors.  This is not the same as using local linear regression at
+   the prediction stage, described below, but the two should probably be
+   used together.
 
    The X, i.e. predictor, data will be scaled by the code, so as to put
    all predictor variables on an equal footing.  The scaling parameters

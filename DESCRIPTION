@@ -1,6 +1,6 @@
 Package: regtools
 Version: 1.0.0
-Title: Regression Tools
+Title: Regression and Classification Tools
 Author: Norm Matloff
 Maintainer: Norm Matloff <matloff@cs.ucdavis.edu>
 Depends: FNN,mvtnorm,dummies,car

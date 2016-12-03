@@ -97,7 +97,10 @@ l1(y,muhat)
    function at a point is predicted from a linear fit to the point's
    neighbors.  This is not the same as using local linear regression at
    the prediction stage, described below, but the two should probably be
-   used together.
+   used together.  Note:  If some predictor is, say, integer-valued, it
+   may result in a situation in which that predictor is constant in some
+   neighborhood. This will result in an NA value for the corresponding
+   element of \code{regest}.
 
    The X, i.e. predictor, data will be scaled by the code, so as to put
    all predictor variables on an equal footing.  The scaling parameters

@@ -1,12 +1,15 @@
 
 # undoes 'scale()'
 
-# scaledx is the result of calling 'scale()' on a matrix x; 'unscale()'
-# returns the original x
+# reverses scaling on scaledx, dividing its columns by sds and adding
+# ctrs; if either of the latter 2 is NULL, it is obtained via attr(), on
+# the assumption that scaledx was produced from x by scale() or similar
 
-unscale <- function(scaledx) {
-   ctrs <- attr(scaledx,'scaled:center')
-   sds <- attr(scaledx,'scaled:scale')
+# returns the original x; if scaledx 
+
+unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
+   if (is.null(ctrs)) ctrs <- attr(scaledx,'scaled:center')
+   if (is.null(sds)) sds <- attr(scaledx,'scaled:scale')
    origx <- scaledx
    for (j in 1:ncol(scaledx)) {
       origx[,j] <- origx[,j] * sds[j]

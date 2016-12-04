@@ -8,16 +8,17 @@ Utilities.
 }
 
 \usage{
-unscale(scaledx)
+unscale(scaledx,ctrs=NULL,sds=NULL)
 }
 
 \arguments{
-  \item{scaledx}{Object returned from \code{scale}.}
+  \item{scaledx}{Matrix.}
 }
 
 \value{
 The function \code{unscale} returns the original object to which
-\code{scale} had been applied.
+\code{scale} had been applied.  Or, the attributes \code{ctrs} and
+\code{sds} can be specified by the user.
 }
 
 \author{

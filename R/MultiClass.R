@@ -286,9 +286,10 @@ classadjust <- function(econdprobs,wrongratio,trueratio) {
    1 / (1 + trueratio * fratios)
 }
 
-# plot estimated regression/probability function of a univariate Y
-# against each pair of predictors; plots codes Yhat = 1 with 1, else 0
-pwplot <- function(y,x,k) {
+# plot estimated regression/probability function of a univariate, 
+# binary y against each pair of predictors in x; plots codes 
+# Yhat = 1 with 1, else 0; cexval is the value of cex in 'plot'
+pwplot <- function(y,x,k,cexval=0.5) {
 print('under construction')
    p <- ncol(x)
    pairs <- combn(p,2)
@@ -301,8 +302,10 @@ print('under construction')
       kout <- knnest(y,xd,k)
       regest <- kout$regest
       pred1 <- which(regest >= meanyval)
-      plot(x2[pred1,1],x2[pred1,2],pch='1')
-      points(x2[-pred1,1],x2[-pred1,2],pch='0')
+      xnames <- names(x2)
+      plot(x2[pred1,1],x2[pred1,2],pch='1',cex=cexval,
+         xlab=xnames[1],ylab=xnames[2])
+      points(x2[-pred1,1],x2[-pred1,2],pch='0',cex=cexval)
       readline("next plot")
    }
 }

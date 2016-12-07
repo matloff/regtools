@@ -286,6 +286,27 @@ classadjust <- function(econdprobs,wrongratio,trueratio) {
    1 / (1 + trueratio * fratios)
 }
 
+# plot estimated regression/probability function of a univariate Y
+# against each pair of predictors; plots codes Yhat = 1 with 1, else 0
+pwplot <- function(y,x,k) {
+print('under construction')
+   p <- ncol(x)
+   pairs <- combn(p,2)
+   meanyval <- mean(y)
+   for (m in 1:ncol(pairs)) {
+      i <- pairs[1,m]
+      j <- pairs[2,m]
+      x2 <- x[,c(i,j)]
+      xd <- preprocessx(x2,k)
+      kout <- knnest(y,xd,k)
+      regest <- kout$regest
+      pred1 <- which(regest >= meanyval)
+      plot(x2[pred1,1],x2[pred1,2],pch='1')
+      points(x2[-pred1,1],x2[-pred1,2],pch='0')
+      readline("next plot")
+   }
+}
+
 
 # parget.knnx():
 
@@ -295,24 +316,24 @@ classadjust <- function(econdprobs,wrongratio,trueratio) {
 # and except for cls, a 'parallel' cluster; 'query' is distributed to
 # chunks at the cluster nodes, and 'data' is copied to all cluster
 # nodes; gen.knnx() is called at each node, then the results are
-# combined
+# combined; PARALLEL OP NOT NOW IMPLEMENTED
 
 # value is the nn.index component of the list returned by get.knnx()
 
-parget.knnx <- function(data, query, k=10, 
-      algorithm="kd_tree",cls=NULL) {
-   if (is.null(cls))  {
-      tmp <- get.knnx(data,query,k,algorithm)
-      return(tmp$nn.index)
-   }
-   partools::setclsinfo(cls)
-   partools::clusterExport(cls,c('data','k','algorithm'),envir=environment())
-   partools::distribsplit(cls,'query')
-   partools::clusterEvalQ(cls,library(FNN))
-   tmp <- partools::clusterEvalQ(cls,get.knnx(data,query,k,algorithm))
-   tmp <- lapply(tmp,function(tmpelt) tmpelt$nn.index)
-   Reduce(rbind,tmp)
-}
+## parget.knnx <- function(data, query, k=10, 
+##       algorithm="kd_tree",cls=NULL) {
+##    if (is.null(cls))  {
+##       tmp <- get.knnx(data,query,k,algorithm)
+##       return(tmp$nn.index)
+##    }
+##    partools::setclsinfo(cls)
+##    partools::clusterExport(cls,c('data','k','algorithm'),envir=environment())
+##    partools::distribsplit(cls,'query')
+##    partools::clusterEvalQ(cls,liibrary(FNN))
+##    tmp <- partools::clusterEvalQ(cls,get.knnx(data,query,k,algorithm))
+##    tmp <- lapply(tmp,function(tmpelt) tmpelt$nn.index)
+##    Reduce(rbind,tmp)
+## }
 
 
 

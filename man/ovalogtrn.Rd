@@ -89,7 +89,7 @@ the probability that Y = j given that X = row i in the X data.
 set.seed <- 9999
 x <- runif(25)
 y <- sample(0:2,25,replace=TRUE)
-xd <- preprocessx(x,2)
+xd <- preprocessx(x,2,xval=TRUE)
 kout <- knntrn(y,xd,m=3,k=2)
 kout$regest  # row 1:  0.5,0.5,0.0
 predict(kout,matrix(c(0.25,0.55,0.88),ncol=1))  # 2,0,0

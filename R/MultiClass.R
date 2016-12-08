@@ -218,7 +218,8 @@ matrixtolist <- function (rc,m)
 #               that Y = j given that X = row i in the X data, 
 #               estimated from the training set
 
-knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
+knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL)
+{
    if (m < 3) stop('m must be at least 3; use knnest() instead')  
    if (class(y) == 'factor') {
       y <- as.numeric(y) - 1
@@ -227,7 +228,7 @@ knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL) {
    # replace y with m-1 dummies
    ds <- dummies::dummy(y)[,-m]
    for (i in 1:(m-1)) colnames(ds)[i] <- sprintf('y%d',i-1)
-   knnout <- knnest(ds,xdata,k)
+   knnout <- knnest(ds,xdata,k,nearf=nearf)
    outmat <- knnout$regest
    outmat <- cbind(outmat,1-apply(outmat,1,sum))
    if (!is.null(truepriors)) {

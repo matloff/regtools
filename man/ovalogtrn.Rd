@@ -86,16 +86,16 @@ the probability that Y = j given that X = row i in the X data.
 
 \dontrun{
 # toy example, kNN
-set.seed <- 9999
+set.seed(9999)
 x <- runif(25)
 y <- sample(0:2,25,replace=TRUE)
 xd <- preprocessx(x,2,xval=TRUE)
 kout <- knntrn(y,xd,m=3,k=2)
-kout$regest  # row 1:  0.5,0.5,0.0
-predict(kout,matrix(c(0.25,0.55,0.88),ncol=1))  # 2,0,0
+kout$regest  # row 2:  0.0,0.5,0.5
+predict(kout,matrix(c(0.81,0.55,0.15),ncol=1))  # 0,1,2
 
 # sim data, kNN
-set.seed <- 9999
+set.seed(9999)
 n <- 1500  
 # within-grp cov matrix 
 cv <- rbind(c(1,0.2),c(0.2,1))  

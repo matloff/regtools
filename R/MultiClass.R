@@ -228,9 +228,10 @@ knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL)
    # replace y with m-1 dummies
    ds <- dummies::dummy(y)[,-m]
    for (i in 1:(m-1)) colnames(ds)[i] <- sprintf('y%d',i-1)
-   knnout <- knnest(ds,xdata,k,nearf=nearf)
+   knnout <- knnest(ds,xdata,k)
    outmat <- knnout$regest
    outmat <- cbind(outmat,1-apply(outmat,1,sum))
+   colnames(outmat)[m] <- sprintf('y%d',m-1)
    if (!is.null(truepriors)) {
       tmp <- table(y)
       if (length(tmp) != m) 

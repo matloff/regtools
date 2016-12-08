@@ -289,12 +289,11 @@ classadjust <- function(econdprobs,wrongratio,trueratio) {
 }
 
 # plot estimated regression/probability function of a univariate, 
-# binary y against each pair of predictors in x; plots codes 
-# Yhat = 1 with 1, else 0; cexval is the value of cex in 'plot'
-pwplot <- function(y,x,k,cexval=0.5) {
-print('under construction')
+# binary y against each specified pair of predictors in x; plots codes 
+# Yhat = 1 with 1, else 0; cexval is the value of cex in 'plot'; if user
+# specifies 'pairs', the format is one pair per column in a matrix
+pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5) {
    p <- ncol(x)
-   pairs <- combn(p,2)
    meanyval <- mean(y)
    for (m in 1:ncol(pairs)) {
       i <- pairs[1,m]

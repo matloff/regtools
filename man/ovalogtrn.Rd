@@ -1,4 +1,4 @@
-\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,knntrn,predict.ovaknn}
+\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,knntrn,predict.ovaknn,pwplot}
 \alias{ovalogtrn}
 \alias{ovalogpred}
 \alias{avalogtrn}
@@ -6,6 +6,7 @@
 \alias{knntrn}
 \alias{predict.ovaknn}
 \alias{classadjust}
+\alias{pwplot}
 
 \title{Classification with More Than 2 Classes}
 
@@ -22,9 +23,14 @@ avalogpred(m,coefmat,predx)
 knntrn(y,xdata,m,k,truepriors=NULL) 
 \method{predict}{ovaknn}(object,...) 
 classadjust(econdprobs,wrongratio,trueratio) 
+pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5) 
 }
 
 \arguments{
+\item{x}{X data matrix or data frame.}
+\item{pairs}{Two-row matrix, column i of which is pair i of predictor
+   variables to graph.}
+\item{cexval}{Symbol size for plotting.}
 \item{trnxy}{Data matrix, one data point per row, Y in the last
    column.}
 \item{object}{Needed for consistency with generic.}
@@ -60,6 +66,8 @@ used on the training set, and then fed into the prediction functions,
 arguments for the latter are the output of \code{knntrn} and a matrix of
 prediction points (internally referred to as \code{predpts} in the
 code), one per row.
+
+In \code{pwplot}, \code{y} must be a column of 0s and 1s.
 
 }
 
@@ -109,7 +117,6 @@ oo <- knntrn(y,xdata,m=3,k=20)
 predout <- predict(oo,xy[,-3])
 mean(predout$predy == y)  # about 0.87
 
-\dontrun{
 library(mlbench)
 data(Vehicle)
 xdata <- preprocessx(Vehicle[,-19],25)
@@ -142,7 +149,12 @@ for (i in 2:17)
 ologout1 <- ovalogtrn(26,lr[,c(2:33,1)])
 ypred <- ovalogpred(ologout1,lr[,-1])
 mean(ypred == lr[,1])  # increased to 0.81
-}
+
+library(mlbench)
+data(PimaIndiansDiabetes) 
+pima <- PimaIndiansDiabetes 
+pima$diabetes <- as.integer(pima$diabetes == 'pos')
+pwplot(pima$diabetes,pima[,1:8],25,pairs=cbind(c(2,3),c(2,6),c(6,8)),cex=0.8)
 
 }
 

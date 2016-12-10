@@ -24,6 +24,7 @@ knntrn(y,xdata,m,k,truepriors=NULL)
 \method{predict}{ovaknn}(object,...) 
 classadjust(econdprobs,wrongratio,trueratio) 
 pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) 
+pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=0.05) 
 }
 
 \arguments{

@@ -23,7 +23,7 @@ avalogpred(m,coefmat,predx)
 knntrn(y,xdata,m,k,truepriors=NULL) 
 \method{predict}{ovaknn}(object,...) 
 classadjust(econdprobs,wrongratio,trueratio) 
-pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5) 
+pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) 
 }
 
 \arguments{
@@ -31,6 +31,8 @@ pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5)
 \item{pairs}{Two-row matrix, column i of which is pair i of predictor
    variables to graph.}
 \item{cexval}{Symbol size for plotting.}
+\item{band}{If \code{band} is non-NULL, only points within \code{band}, 
+   say 0.1, of est. P(Y = 1) are displayed, for a contour-like effect.}
 \item{trnxy}{Data matrix, one data point per row, Y in the last
    column.}
 \item{object}{Needed for consistency with generic.}
@@ -67,7 +69,12 @@ arguments for the latter are the output of \code{knntrn} and a matrix of
 prediction points (internally referred to as \code{predpts} in the
 code), one per row.
 
-In \code{pwplot}, \code{y} must be a column of 0s and 1s.
+In \code{pwplot}, \code{y} must be a column of 0s and 1s.  For each pair
+of predictor columns X12 in \code{x}, we compute estimated P(Y = 1) and P(Y
+= 1 | X12).  If the latter is larger, plot a '1', else a '0'. The plot
+is intended to be helpful in exploring a relation between Y and X.  For
+non-NULL \code{band}, a contour-like plot is made, showing where X12
+changes from making Y = 1 less likely to more likely.
 
 }
 

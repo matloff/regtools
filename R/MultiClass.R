@@ -289,12 +289,23 @@ classadjust <- function(econdprobs,wrongratio,trueratio) {
 }
 
 # plot estimated regression/probability function of a univariate, 
-# binary y against each specified pair of predictors in x; plots codes 
-# Yhat = 1 with 1, else 0; cexval is the value of cex in 'plot'; if user
-# specifies 'pairs', the format is one pair per column in a matrix
-pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5) {
+# binary y against each specified pair of predictors in x 
+
+# for each point t, we ask whether est. P(Y = 1 | X = t) > P(Y = 1); if
+# yes, plot '1', else '0'
+ 
+# cexval is the value of cex in 'plot' 
+
+# if user specifies 'pairs', the format is one pair per column in the
+# provided matrix
+
+# if band is non-NULL, only points within band, say 0.1, of est. P(Y =
+# 1) are displayed, for a contour-like effect
+
+pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) {
    p <- ncol(x)
    meanyval <- mean(y)
+   ny <- length(y)
    for (m in 1:ncol(pairs)) {
       i <- pairs[1,m]
       j <- pairs[2,m]
@@ -303,6 +314,10 @@ pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5) {
       kout <- knnest(y,xd,k)
       regest <- kout$regest
       pred1 <- which(regest >= meanyval)
+      if (!is.null(band))  {
+         contourpts <- which(abs(regest - meanyval) < band)
+         x2 <- x2[contourpts,]
+      }
       xnames <- names(x2)
       plot(x2[pred1,1],x2[pred1,2],pch='1',cex=cexval,
          xlab=xnames[1],ylab=xnames[2])

@@ -24,7 +24,6 @@ knntrn(y,xdata,m,k,truepriors=NULL)
 \method{predict}{ovaknn}(object,...) 
 classadjust(econdprobs,wrongratio,trueratio) 
 pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) 
-pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=0.05) 
 }
 
 \arguments{
@@ -163,6 +162,7 @@ data(PimaIndiansDiabetes)
 pima <- PimaIndiansDiabetes 
 pima$diabetes <- as.integer(pima$diabetes == 'pos')
 pwplot(pima$diabetes,pima[,1:8],25,pairs=cbind(c(2,3),c(2,6),c(6,8)),cex=0.8)
+pwplot(pima$diabetes,pima[,1:8],25,pairs=cbind(c(2,3),c(2,6),c(6,8)),cex=0.8,band=0.05)
 
 }
 

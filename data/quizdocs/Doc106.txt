@@ -1,0 +1,126 @@
+[twocolumn]article
+
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+Important note:  Remember that in problems calling for R code, you
+are allowed to use any built-in R function, e.g. choose(), 
+sum(), integrate()etc.  
+
+1.  This problem concerns the dice game example, Section 7.3.5 of
+our book.  In writing R code, assume that the matrix (7.60) is already
+stored in a matrix named v.
+
+And there is good news!  Players now win 8 each time they roll a four,
+five or six.  Let ,  and  represent how much a player
+wins in all her rolls that come up 1 dot, 2 or 3 dots, or 4, 5 or 6 dots,
+respectively; for example, .  Denote the (column) vector
+consisting of ,  and  by U.
+
+Find the following quantities.  Unless specifically allowed, do not use
+loops, + or sum().  Do not make corrections for continuity.
+
+
+
+[(a)] (10) 
+
+[(b)] (10) 
+
+[(c)] (10)  (exact)
+
+[(d)] (10)  (exact)
+
+[(e)] (15)  (approximate)
+
+[(f)] (15)  where 
+
+[(g)] (10) 
+
+
+
+2. (20) Here you will write code to help Justin conduct his
+opinion poll on Amanda's chances of winning the election.  It will be an
+e-mail poll.  Assume (as will actually be the case when my grading
+script runs) that we have the following global variables: voters,
+a data frame containing information on all the registered voters in
+Davis, one voter per row; emailcol, the column number in which the
+voters' e-mail addresses are stored; and n, the number of people
+to sample.  The code will display a simple random sample of e-mail
+addresses.  Single line of code (semicolons OK), no loops.
+
+
+
+
+
+Solutions:
+
+1.a  
+
+1.b  
+
+1.c 
+
+
+dbinom(12,50,2/6)
+
+
+1.d 
+
+
+pbinom(12,50,2/6)
+
+
+1.e
+
+
+pnorm(12,50*2/6,sqrt(50*(2/6)*(4/6)))
+
+
+1.f
+
+
+a <- rbind(c(1,-1,0),c(0,1,1)); a 
+
+
+1.g
+
+
+a <- matrix(0,nrow=3,ncol=3); diag(a) <- c(5,2,8); a 
+
+
+2.
+
+
+polled <- sample(1:nrow(voters),n,replace=F); voters[polled,emailcol]
+
+
+
+

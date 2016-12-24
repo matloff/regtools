@@ -1,0 +1,112 @@
+article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed); do not turn in any supplementary sheets of paper. There is
+actually plenty of room for your answers, as long as you organize
+yourself BEFORE starting writing.
+
+Unless otherwise stated, give numerical answers as
+expressions, e.g. .  Do NOT use
+calculators.
+
+1. (35) Consider the lottery ticket example on pp.147ff. Suppose
+500 tickets are sold, and you have data on 8 of them. Continue to assume
+sampling with replacement.  Fill in the blank:  The probability that the
+MLE is exactly equal to the true value of c is 1 -
+.
+
+2. In an analysis published on the Web (Sparks et al,
+Disease Progress over Time, The Plant Health Instructor, 2008,
+the following R output is presented:
+
+[fontsize=-2]
+> severity.lm <- lm(diseasesev temperature,data=severity)
+> summary(severity.lm)
+Coefficients:
+        Estimate Std. Error t value Pr(>t)   
+(Intercept)  2.66233    1.10082   2.418  0.04195 * 
+temperature  0.24168    0.06346   3.808  0.00518 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+
+Fill in the blanks:
+
+
+
+[(a)] (15) The model here is 
+
+
+ =
+ +  
+
+
+[(b)] (15) The two null hypotheses being tested here are
+  and
+ . 
+
+
+
+
+
+3. Let X denote the number we obtain when we roll a single die
+once.  Let  denote the generating function of X.
+
+
+
+[(a)] (20) Find .  
+
+[(b)] (15) Suppose we roll the die 5 times, and let T denote the
+total number of dots we get from the 5 rolls.  Find .
+
+
+
+Solutions:
+
+1.
+
+
+
+
+
+2a. mean, diseasesev, temperature (the word mean is crucial)
+
+2b. 
+, 
+
+3a.
+
+
+
+
+
+3b.  Write .  Then
+
+
+
+
+
+
+
+
+
+
+

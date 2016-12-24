@@ -1,0 +1,129 @@
+[twocolumn]article
+
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+Important note:  Remember that in problems calling for R code, you
+are allowed to use any built-in R function, e.g. choose(), 
+sum(), integrate()etc.  
+
+1.  Consider the good ol' bus ridership examples.  Except when
+referring to the examples in which there is a limit on the number of
+passengers who can fit into the bus, assume no limit.
+
+
+
+[(a)] (15) Find the probability that in 10 consecutive stops, it
+turns out that at exactly 3 of them there are no new passengers
+boarding.  
+
+[(b)] (10) Find Var(T) in (3.134).  (Helpful hint:   and 
+have the same distribution, thus the same variance.)
+
+[(c)] (10) In Sec. 4.5 (max 20 riders), find .
+
+[(d)] (15) Consider (4.2).  The variable t there
+corresponds to what variable in the code in Sec. 2.12.4?  (Assume the
+code has been modified to reflect a 20-rider limit.)
+
+[(e)] (10) In Sec. 4.5 (max 20 riders), suppose we code the
+transition matrix in the R matrix p.  Find 
+.  Your answer must be a valid R expression that involves p;
+no loops.
+
+[(f)] (10) In Sec. 4.5, suppose the bus is tiny, with a capacity of
+only 3 passengers.  Find the long-run average number of passengers who
+alight from the bus.  Write your answer as a valid R expression in the
+ vector, which we will assume is named pivec.  Remember, 
+pivec[1] is , etc.
+
+
+
+2. (10) Find Var(L) in (3.118).  
+
+3. (10) Suppose X has the density  on , 0
+elsewhere.  Find EX.  You'll probably want to use  the exp()
+function in R.
+
+
+
+
+
+Solutions:
+
+1.a dbinom(3,10,0.5)
+
+1.b
+
+
+
+
+
+
+
+
+
+1.c
+
+
+
+
+
+
+
+1.d nstops
+
+1.e
+
+
+(p 
+
+
+1.f  Mean of binomial is np.
+
+
+pivec[2] * (1 * 0.2) + pivec[3] * (2 * 0.2) + pivec[4] * (3 * 0.2) 
+
+
+2.  From (3.117),
+
+
+
+
+
+3.
+
+
+integrate(function(t) t^2 * exp(-t) ,0,Inf)
+
+
+
+

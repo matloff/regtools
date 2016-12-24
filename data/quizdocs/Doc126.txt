@@ -1,0 +1,144 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+Important note:  Remember that in problems calling for R code, you
+are allowed to use any built-in R function, e.g. choose(), 
+sum(), etc.  
+
+1. Consider the OOP study described at the top of p.281, which was
+actually a bit different from the description in our book: They
+also used logarithms, but we'll ignore that here.  
+
+
+
+
+
+
+
+
+
+
+The results were:
+
+rrrr
+
+coef. & betahat & std.err.  
+ & 4.37 & 0.23  
+ & 0.49 & 0.07  
+ & 0.56 & 1.57  
+ & -0.13 & -1.34  
+
+
+
+
+[(a)] (10) The last term in () is known as the 
+ term.
+
+[(b)] (20) Find the estimated difference in mean completion time
+under OOP and using procedure language  (former minus the latter), for
+1000-line programs.
+
+[(c)] (15) Find an approximate 95 confidence interval for
+, answering with R's c() form.
+
+[(d)] (15) Find .
+
+
+
+2. (15) In the marbles example, p.147, find .
+
+3. The code below estimates the regression function 
+for scalar X, without assuming a linear or other parametric model.  The
+vector parameters y, x, and the scalar parameter t, 
+are self-explanatory.  As to the scalar parameter h, I'll 
+simply say that we consider one number u ``near'' another number v if 
+. 
+
+
+nonparregest <- function(y,x,t,h) 
+   dists <- blank (a)
+   xnear <- blank (b)
+   blank (c) 
+
+
+
+
+
+[(5)] Fill blank (a).
+
+[(10)] Fill blank (b).
+
+[(10)] Fill blank (c).
+
+
+
+Solutions:
+
+1.a interaction
+
+1.b 
+
+
+(4.37 + 0.49*1000 + 0.56*1 - 0.13*1000*1) -
+(4.37 + 0.49*1000 + 0.56*0 - 0.13*1000*0) 
+
+
+1.c
+
+
+c(0.49 - 1.96 * 0.07, 0.49 + 1.96 * 0.07)
+
+
+1.d
+
+
+0.23 ^ 2
+
+
+2.
+
+
+(0.036*0 + 0.048*1 + 0.006*2) / (0.036 + 0.048 + 0.006)
+
+
+3.
+
+
+nonparregest <- function(y,x,t,h) 
+   dists <- abs(x-t)
+   xnear <- which(dists < h)
+   mean(y[xnear])
+
+
+
+
+

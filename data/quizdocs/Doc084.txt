@@ -1,0 +1,135 @@
+article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+hyperref
+
+listings,relsize
+
+
+
+language=R,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do not
+turn in any supplementary sheets of paper. There is actually plenty of room
+for your answers, as long as you organize yourself BEFORE starting writing.
+
+SHOW YOUR WORK!  Any arithmetical answer must be expressed
+as a common fraction (e.g. 2/3, 7/4), reduced to lowest terms.
+
+1. (25) Urn I contains three blue marbles and three yellow ones, while
+Urn II contains five and seven of these colors.  We draw a marble at
+random from Urn I and place it in Urn II.  We then draw a marble at
+random from Urn II.  Let  denote the event that the first marble
+drawn is blue,  denote the event that the second marble drawn is
+yellow, and so on.  Fill in the blanks with equation numbers which will
+serve as reasons for the steps,
+
+
+
+
+
+
+
+
+
+
+2. (25) Fill in the blanks (and only those blanks, no
+extra code elsewhere) in the following R code, which returns the
+(approximate) probability in (2.36) in the board game example:
+
+[numbers=left]
+boardsim <- function(nreps) 
+   count4 <- 0
+   countbonusgiven4 <- 0
+   for (i in 1:                             )   # blank 1
+      position <- sample(1:6,1)
+      if (position == 3) 
+                                                 # blank 2
+         position <- (position + sample(1:6,1)) 
+                                                # blank 3
+      if (position == 4) 
+                                                 # blank 4
+         if (bonus) countbonusgiven4 <- countbonusgiven4 + 1
+      
+   
+   return(                                  )    # blank 5
+
+
+
+3. (25) Suppose the random variable X takes on only the values 0 and
+1.  Fill in the blank with either , , , ,  or
+:
+
+
+EX               P(X = 1)
+
+
+4. (25) Again for the board game example, suppose that the telephone
+report is that A ended up at square 1 after his first turn.  Find the
+probability that he got a bonus.
+
+Solutions:
+
+1. (2.2), (2.5)
+
+2.
+
+
+boardsim <- function(nreps) 
+   count4 <- 0
+   countbonusgiven4 <- 0
+   for (i in 1:nreps) 
+      position <- sample(1:6,1)
+      if (position == 3) 
+         bonus <- TRUE
+         position <- (position + sample(1:6,1)) 
+       else bonus <- FALSE
+      if (position == 4) 
+         count4 <- count4 + 1
+         if (bonus) countbousngiven4 <- countbousngiven4 + 1
+      
+   
+   return(countbousngiven4/count4)
+
+
+
+3.  The answer is , since
+
+
+
+
+
+4.  Landing at square 1 after one turn means R+B is either 1 or 9.
+Let T = R + B.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

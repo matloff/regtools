@@ -1,0 +1,114 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed); do not turn in any supplementary sheets of paper. There is
+actually plenty of room for your answers, as long as you organize
+yourself BEFORE starting writing.
+
+Unless otherwise stated, give numerical answers as
+expressions, e.g. .  Do NOT use
+calculators.
+
+1. (15) What is the relation of the value of  printed out by R's
+var() function to the value I use?  (Assume neither is 0.)
+(i) My value is larger.  (ii) R's value is larger.  (iii) They are
+equal.  (iv) The var() function has no relation to my ; they
+just have similar names.
+
+2. Consider the R code on p.125. 
+
+
+
+[(a)] (15) Of all the variables in that code, which one---if
+any---corresponds to the ``number of lines in the notebook''?
+
+[(b)] (15) Which R expression in that code is a standard error?  And
+for which variable in the code is that expression a standard error?
+
+
+
+3. (5) Fill in the blank. The variable Y on p.131 is an example of
+what is generally called a/an
+ variable.
+
+4. (10) Consider Equation (4.16), p.122.  In each of the entries in
+the table below, fill in either R for random, or NR for nonrandom:
+
+rr
+
+quantity & R or NR?  
+ &   
+ &   
+ &   
+ &   
+
+
+(That quantity on the left, second line, is , ``W-bar,''
+not so clear in the table.)
+
+5. (10) Consider , the estimator of a population
+proportion p, based on a sample of size n.  Give the expression for the
+standard error of .
+
+6. (15) The term random sample means with replacement.
+If it is without replacement, it is called a simple random
+sample.  Suppose we take a simple random sample of size 2 from a
+population consisting of just three values, 66, 67 and 69.  Let
+ denote the resulting sample mean.  Find
+.
+
+7. (15) Suppose we have a random sample , and we wish
+to estimate the population mean , as usual.  But we decide to place
+double weight on , so our estimator for  is
+
+
+
+
+
+Find E(U) and Var(U) in terms of  and the population variance
+.  Do reasonable algebraic simplification.
+
+Solutions:
+
+1. (ii)
+
+2a. numruns
+
+2b. s/sqrt(nreps)
+
+3. indicator
+
+4. R, R, NR, NR
+
+5. 
+
+6.
+
+
+
+
+
+
+7. , 
+
+
+
+

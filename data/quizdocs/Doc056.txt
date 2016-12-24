@@ -1,0 +1,67 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do not
+turn in any supplementary sheets of paper. There is actually plenty of room
+for your answers, as long as you organize yourself BEFORE starting writing.
+
+1. (15) A scheme under which an I/O device communicates with memory
+without the intervention of the CPU is called 
+.
+
+2. (15) Consider the example in Section 6.11.  Fill in the blanks:
+By using a macro instead of a subroutine, we made the program
+ by the amount of 
+ bytes, and we
+made its run time 
+.  (The first
+blank must be filled in by larger or smaller, the second by
+a number, and the third by faster or slower.)
+
+3. Answer either HW (``hardware'') or SW (``software'')
+concerning what entity performs each of the following tasks:
+
+
+
+[(a)] (10) Saving c(EBX) within a device driver.
+
+[(b)] (10) Setting c(IDT).
+
+[(c)] (10) Setting c(c(IDT)+8).
+
+[(d)] (15) Saving the ``bread crumbs'' when an interrupt is
+detected.
+
+[(e)] (10) Acknowledging an interrupt.
+
+[(f)] (15) Evicting a cache block.
+
+
+
+Solutions:
+
+1. DMA
+
+2. larger; 6; faster
+
+3. SW; SW; SW; HW; HW; HW
+
+
+

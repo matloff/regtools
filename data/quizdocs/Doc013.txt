@@ -1,0 +1,200 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+IMPORTANT NOTE:  If you believe that nothing needs to be
+placed into a blank, simply give Nothing as your answer in your
+file.  If you do not answer at all, put 00 in your file.
+
+1.  Here we will use MPI to find cumulative sums, as we did in
+Quiz 4 with CUDA.  For instance, if the original array is
+(3,1,2,0,3,0,1,2), then it is changed to (3,4,6,6,9,9,10,12).
+
+The original array starts out life at Node 0, which distributes chunks
+of it to the other nodes, though keeping one chunk for itself.  A node
+will find cumulative sums for its chunk, and then adjust them based on
+the high values of the chunks that precede it.  In the above example,
+for instance, say we have 4 nodes.  The nodes will first produce (3,4),
+(2,2), (3,3) and (1,3).  Since Node 0 found a cumulative sum of 4 in the
+end, we must add 4 to each element of (2,2), yielding (6,6).  Etc.
+
+Fill in the blanks.
+
+[numbers=left]
+// finds cumulative sums in the array x
+
+#include <mpi.h>
+#include <stdlib.h>
+
+#define MAX_N 10000000  
+#define MAX_NODES 10
+
+int nnodes,  // number of MPI processes
+    n,  // size of x
+    me,  // MPI rank of this node
+    // full data for node 0, part for the rest
+    x[MAX_N],  
+    // cumulative sums for this node, and
+    // eventually for full array at Node 0
+    csums[MAX_N],  
+    // max values at the various nodes 
+    maxvals[MAX_NODES];  
+
+int debug; 
+
+init(int argc, char **argv)
+  // not shown, nothing special here  
+
+
+void cumulsums()
+  
+   MPI_Status status;
+   int i,lenchunk,sum,node; 
+   // assumed divides evenly
+   lenchunk = n / nnodes;  
+   // note that node 0 will participate 
+   // in the computation too
+   BLANKa(BLANKb,lenchunk,MPI_INT,
+      BLANKc,lenchunk,MPI_INT,
+      0,MPI_COMM_WORLD);
+   sum = 0;
+   for (i = 0; i < lenchunk; i++) 
+      csums[i] = sum + x[i];
+      BLANKd;
+   
+   BLANKe(BLANKf,1,MPI_INT,BLANKg,1,MPI_INT,
+      0,MPI_COMM_WORLD);
+   BLANKh(BLANKi,nnodes,MPI_INT,0,MPI_COMM_WORLD);
+   if (me > 0) 
+      sum = 0;
+      for (node = 0; node < BLANKj; node++) 
+         sum += BLANKj[node];
+      
+      for (i = 0; i < lenchunk; i++) 
+         csums[i] += sum;
+   
+   BLANKk(csums,lenchunk,MPI_INT,csums,lenchunk,MPI_INT,
+      0,MPI_COMM_WORLD);
+
+
+int main(int argc,char **argv)
+  // not shown, nothing special here, other
+   // than a call to cumulsums()
+
+
+
+
+
+Solutions:
+
+[numbers=left]
+// finds cumulative sums in the array x
+
+#include <mpi.h>
+#include <stdlib.h>
+
+#define MAX_N 10000000  
+#define MAX_NODES 10
+
+int nnodes,  // number of MPI processes
+    n,  // size of x
+    me,  // MPI rank of this node
+    // full data for node 0, part for the rest
+    x[MAX_N],  
+    csums[MAX_N],  // cumulative sums for this node
+    maxvals[MAX_NODES];  // the max values at the various nodes 
+
+int debug; 
+
+init(int argc, char **argv)
+  
+   int i;
+   MPI_Init(&argc,&argv);
+   MPI_Comm_size(MPI_COMM_WORLD,&nnodes);
+   MPI_Comm_rank(MPI_COMM_WORLD,&me); 
+   n = atoi(argv[1]); 
+   // test data
+   if (me == 0) 
+      for (i = 0; i < n; i++) 
+         x[i] = rand() 
+    
+   debug = atoi(argv[2]); 
+   while (debug) ;
+
+
+void cumulsums()
+  
+   MPI_Status status;
+   int i,lenchunk,sum,node; 
+   lenchunk = n / nnodes;  // assumed to divide evenly
+   // note that node 0 will participate in the computation too
+   MPI_Scatter(x,lenchunk,MPI_INT,x,lenchunk,MPI_INT,
+      0,MPI_COMM_WORLD);
+   sum = 0;
+   for (i = 0; i < lenchunk; i++) 
+      csums[i] = sum + x[i];
+      sum += x[i];
+   
+   MPI_Gather(&csums[lenchunk-1],1,MPI_INT,
+      maxvals,1,MPI_INT,0,MPI_COMM_WORLD);
+   MPI_Bcast(maxvals,nnodes,MPI_INT,0,MPI_COMM_WORLD);
+   if (me > 0) 
+      sum = 0;
+      for (node = 0; node < me; node++) 
+         sum += maxvals[node];
+      
+      for (i = 0; i < lenchunk; i++) 
+         csums[i] += sum;
+   
+   MPI_Gather(csums,lenchunk,MPI_INT,csums,lenchunk,MPI_INT,
+      0,MPI_COMM_WORLD);
+
+
+int main(int argc,char **argv)
+  
+   int i;
+   init(argc,argv);
+   if (me == 0 && n < 25) 
+      for (i = 0; i < n; i++) printf("
+      printf("");
+   
+   cumulsums();
+   if (me == 0 && n < 25) 
+      for (i = 0; i < n; i++) printf("
+      printf("");
+   
+   MPI_Finalize();
+
+
+
+
+
+
+

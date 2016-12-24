@@ -1,0 +1,114 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+Important note:  Remember that in problems calling for R code, you
+are allowed to use any built-in R function, e.g. choose(), 
+sum(), etc.  
+
+1. Suppose X has the density  on , 0 elsewhere.
+Note:  This problem is numerical (as are most of our Quiz problems), so
+it requires R expressions as answers.  That R expression must
+evaluate to a number.  You may use integrate() if you know how,
+but it's easier just to do the integration yourself.
+
+
+
+[(a)] (15) Find .
+
+[(b)] (20) Find EX.
+
+
+
+2. Consider the Markov model of bus ridership, pp.87ff.
+
+
+
+[(a)] (15) Find .
+
+[(b)] (10) Suppose we wish to find the long-run average number of
+passengers that alight from the bus, per stop.  This will be 
+
+
+
+
+
+Give the value of .
+
+
+
+3. (20) Suppose in modeling disk performance, we describe the position
+X of the read/write head as a number between 0 and 1, representing the
+innermost and outermost tracks, respectively.  Say we assume X has a
+uniform distribution on (0,1).  Consider two consecutive positions (i.e.
+due to two consecutive seeks),  and , which we'll assume are
+independent.  Find .
+
+4. (20) Consider the network intrusion model, pp.104-105.  Assume
+there is never an intrusion, i.e. all logins are from Jill herself.  Say
+we've set our network intrusion monitor to notify us every time Jill
+logs in and accesses 535 or more disk sectors.  In what proportion of
+all such notifications will Jill have accessed at least 545 sectors?
+
+Solutions:
+
+1.a 
+
+
+
+
+
+1.b 
+
+
+
+
+
+2.a 
+
+
+
+
+
+2.b 0.2
+
+3.  1/12 + 1/2
+
+4.  This is .  By an analysis similar
+to that in Section 5.5.2.3, this probability is
+
+
+(1 - pnorm(545,500,15) / (1 - pnorm(535,500,15))
+
+
+
+
+

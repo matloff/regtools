@@ -1,0 +1,199 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+IMPORTANT NOTE:  If you believe that nothing needs to be placed
+into a blank, simply give Nothing as your answer.  
+
+1.  The CUDA code below converts an array to cumulative sums.  For
+instance, if the original array is (3,1,2,0,3,0,1,2), then it is changed
+to (3,4,6,6,9,9,10,12).
+
+The general plan is for each thread to operate on one
+chunk of the array.  A thread will find cumulative sums for its chunk,
+and then adjust them based on the high values of the chunks that precede
+it.  In the above example, for instance, say we have 4 threads.  The
+threads will first produce (3,4), (2,2), (3,3) and (1,3).  Since thread
+0 found a cumulative sum of 4 in the end, we must add 4 to each element
+of (2,2), yielding (6,6).  Thread 1 had found a cumulative sum of 2 in
+the end, which together with the 4 found by thread 0 makes 6.  Thus
+thread 2 must add 6 to each of its elements, i.e. add 6 to (3,3),
+yielding (9,9).  The case of thread 3 is similar.
+
+Fill in the blanks.
+
+[numbers=left]
+// CUDA example
+
+// inputs an int array x of length n and 
+// computes cumulative sums of the
+// elements, writing them back to x
+
+// for this simple illustration, it is 
+// assumed that the code runs in just 
+// one block, and that the number of threads 
+// evenly divides n
+
+#include <cuda.h>
+#include <stdio.h>
+
+__global__ void cumulker(int *dx, int n)
+  
+   int me = BLANKa;
+   int csize  = n / BLANKb;
+   int start = BLANKc * csize;
+   int i,j,base;
+   for (i = 1; i < csize; i++) 
+      BLANKd;
+      dx[j] = dx[j-1] + dx[j];
+   
+   BLANKe;
+   if (BLANKf) 
+      base = 0;
+      for (j = 0; j < me; j++)
+         BLANKg;
+   
+   BLANKh;
+   if (me > 0) 
+      for (BLANKi)
+         dx[i] += base;
+   
+
+
+int cumul(int *x, int n, int bsize)
+  
+   int *dx;  // device copy of x
+   BLANKi;
+   BLANKj;
+   dim3 dimGrid(1,1);
+   dim3 dimBlock(BLANKk,1,1);
+   cumulker<<<dimGrid,dimBlock>>>(dx,n);
+   BLANKl;
+   cudaMemcpy(x,dx,n*sizeof(int),cudaMemcpyDeviceToHost);
+   cudaFree(dx);
+
+
+int main(int argc, char **argv)
+  int i;
+   int *x;  // host output matrix
+   int n = atoi(argv[1]);
+   int bsize = atoi(argv[2]);
+   x = (int *) malloc(n*sizeof(int));
+   for (i = 0; i < n; i++)
+         x[i] = rand() 
+   if (n < 25) 
+      for (i = 0; i < n; i++) printf("
+      printf("");
+   
+   cumul(x,n,bsize);
+   if (n < 25) 
+      for (i = 0; i < n; i++) printf("
+      printf("");
+   
+
+
+
+
+
+Solutions:
+
+1.
+
+[numbers=left]
+// CUDA example
+
+// inputs an int array x of length nand computes cumulative sums of the
+// elements, writing them back to x
+
+// for this simple illustration, it is assumed that the code runs in
+// just one block, and that the number of threads evenly divides n
+
+#include <cuda.h>
+#include <stdio.h>
+
+__global__ void cumulker(int *dx, int n)
+  
+   int me = threadIdx.x;
+   int csize  = n / blockDim.x;
+   int start = me * csize;
+   int i,j,base;
+   for (i = 1; i < csize; i++) 
+      j = start + i;
+      dx[j] = dx[j-1] + dx[j];
+   
+   __syncthreads();
+   if (me > 0) 
+      base = 0;
+      for (j = 0; j < me; j++)
+         base += dx[(j+1)*csize-1];
+   
+   __syncthreads();
+   if (me > 0) 
+      for (i = start; i < start + csize; i++)
+         dx[i] += base;
+   
+
+
+int cumul(int *x, int n, int bsize)
+  
+   int *dx;  // device copy of x
+   int chunksize = n / bsize;  // number of elements handled by each thread
+   cudaMalloc((void **)&dx,n*sizeof(int));
+   cudaMemcpy(dx,x,n*sizeof(int),cudaMemcpyHostToDevice);
+   dim3 dimGrid(1,1);
+   dim3 dimBlock(bsize,1,1);
+   cumulker<<<dimGrid,dimBlock>>>(dx,n);
+   cudaThreadSynchronize();
+   cudaMemcpy(x,dx,n*sizeof(int),cudaMemcpyDeviceToHost);
+   cudaFree(dx);
+
+
+int main(int argc, char **argv)
+  int i;
+   int *x;  // host output matrix
+   int n = atoi(argv[1]);
+   int bsize = atoi(argv[2]);
+   x = (int *) malloc(n*sizeof(int));
+   for (i = 0; i < n; i++)
+         x[i] = rand() 
+   if (n < 25) 
+      for (i = 0; i < n; i++) printf("
+      printf("");
+   
+   cumul(x,n,bsize);
+   if (n < 25) 
+      for (i = 0; i < n; i++) printf("
+      printf("");
+   
+
+
+
+
+

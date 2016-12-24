@@ -1,0 +1,159 @@
+[twocolumn]article
+
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+Important note:  Remember that in problems calling for R code, you
+are allowed to use any built-in R function, e.g. choose(), 
+sum(), etc.  
+
+1. (15)  A class has 68 students, 48 of which are CS majors.  The
+68 students will be randomly assigned to groups of 4.  Find the
+probability that a random group of 4 has exactly 2 CS majors.
+
+2.  This problem concerns the bus ridership example, Sec. 2.11 in
+our book.
+
+
+
+[(a)] (15) Find .
+
+[(b)] (15) Find .
+
+
+
+3.  This problem again concerns the bus ridership example, but
+focuses on the simulation, Sec. 2.12.4.  Here we are interested in
+finding .  
+
+
+
+[(a)] (10) Where should a line 
+
+
+tot_l2 <- 0
+
+
+be placed?  Answer using a half-line number, e.g. 6.5 if you think 
+this code should be inserted between lines 6 and 7.
+
+[(b)] (15) What code should be inserted at line 12.5?
+
+[(c)] (10) Give a print statement to go after line 16, printing the
+approximate value of 
+
+
+
+4. (10) Say a large research program measures boys' heights at age
+10 and age 15.  Call the two heights X and Y.  So, each boy has an X
+and a Y.  Each boy is a ``notebook line'', and the notebook has two
+columns, for X and Y.  We are interested in Var(Y-X).  Which of the
+following is true?  (Answer with a Roman numeral, e.g. (v).)
+
+
+
+[(i)] 
+[(ii)] 
+[(iii)] 
+[(iv)] 
+[(v)] 
+[(vi)] 
+[(vii)] None of the above.
+
+
+
+5. (10) Suppose at some public library, patrons return books
+exactly 7 days after borrowing them, never early or late.  However, they
+are allowed to return their books to another branch, rather than the
+branch where they borrowed their books.  In that situation, it takes 9
+days for a book to return to its proper library, as opposed to the
+normal 7.  Suppose 50 of patrons return their books to a ``foreign''
+library.  Find Var(T), where T is the time, either 7 or 9 days, for a
+book to come back to its proper location.  (Hint:  Use the concept of
+indicator random variables.)
+
+
+
+
+
+
+Solutions:
+
+1.
+
+
+
+
+
+
+
+2.a
+
+
+
+
+
+2.b First, note that ; then
+compute .
+
+3.a 3.5 (or earlier)
+
+3.b
+
+
+if(j == 8) tot_l2 <- tot_l2 + passengers
+
+
+3.c
+
+
+print(tot_l2 / nreps)
+
+
+4.
+
+
+
+
+
+
+Since X and Y are positively correlated, their covariance is positive,
+so the answer is (iii).
+
+5.  , where I is an indicator random variable for the
+event that the book is returned to a ``foreign'' branch.  Then
+
+
+
+
+
+
+

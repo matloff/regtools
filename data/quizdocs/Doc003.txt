@@ -1,0 +1,279 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+IMPORTANT NOTE:  If you believe that nothing needs to be placed
+into a blank, simply give NA as your answer.  
+
+1. (40) You know that array padding is used to try to get
+better parallel access to memory banks.  The code below is aimed to
+provide utilities to assist in this.  Details are explained in the
+comments.
+
+[numbers=left,basicstyle=]
+#include<stdio.h>
+#include<stdlib.h>
+
+// routines to initialize, read and write 
+// padded versions of a matrix of floats; 
+// the matrix is nominally mxn, but its 
+// rows will be padded on the right ends, 
+// so as to enable a stride of s down each 
+// column; it is assumed that s >= n
+
+// allocate space for the padded matrix, 
+// initially empty
+float *padmalloc(int m, int n, int s) 
+   return malloc(BLANKa);
+
+
+// store the value tostore in the matrix q, 
+// at row i, column j; m, n and
+// s are as in padmalloc() above
+void setter(float *q, int m, int n, int s, 
+      int i, int j, float tostore) 
+   BLANKb
+
+
+// fetch the value in the matrix q, 
+// at row i, column j; m, n and s are
+// as in padmalloc() above
+float getter(float *q, int m, int n, int s, 
+      int i, int j) 
+   BLANKc
+
+
+// test example
+int main() 
+   int i; float *q;
+   q = padmalloc(2,2,3);
+   setter(q,2,2,3,1,0,8);
+   printf("
+
+
+// check, using GDB
+// Breakpoint 1, main () at padding.c:31
+// 31      printf("
+// (gdb) x/6f q
+// 0x804b008:      0       0       0       8
+// 0x804b018:      0       0
+
+
+2. (60) The code below does root-finding.  The problem and the
+strategy used by the code are explained in the comments.
+
+Pointers to functions are used.  You probably have seen these before,
+but if not don't worry about it; it doesn't affect the parts of the code
+you must fill in.  Suffice it to say that the user-supplied function
+does get called properly.
+
+[numbers=left,basicstyle=]
+#include<omp.h>
+#include<math.h>
+
+// OpenMP example:  root finding
+
+// the function f() is known to be negative 
+// at a, positive at b, and to have exactly 
+// one root in (a,b); the procedure runs 
+// for niters iterations
+
+// strategy: in each iteration, the current 
+// interval is split into nth equal parts, 
+// and each thread checks its subinterval 
+// for a sign change of f(); if one is 
+// found, this subinterval becomes the 
+// new current interval; the current guess 
+// for the root is the left endpoint of the
+// current interval
+
+// of course, this approach is useful in 
+// parallel only if f() is very expensive 
+// to evaluate
+
+// for simplicity, assumes that no endpoint 
+// of a subinterval will ever exactly 
+// coincide with a root
+
+float root(float(*f)(float), 
+   float inita, float initb, int niters) 
+   BLANKa
+   BLANKb  
+   
+      int nth = omp_get_num_threads();
+      int me = omp_get_thread_num();
+      int iter;
+      BLANKc  
+      for (iter = 0; iter < niters; iter++) 
+         BLANKd
+         subintwidth = (currb - curra) / nth;
+         myleft = curra + me * subintwidth;
+         myright = myleft + subintwidth;
+         if ((*f)(myleft) < 0 && 
+             (*f)(myright) > 0) 
+            curra = myleft;
+            currb = myright;
+         
+      
+   
+   return curra;
+
+
+// example
+float testf(float x) 
+   return pow(x-2.1,3);
+
+
+int main(int argc, char **argv)
+  // should print 2.1
+   printf("
+
+
+
+
+Solutions:
+
+1.
+
+[numbers=left,basicstyle=]
+#include<stdio.h>
+#include<stdlib.h>
+
+// routines to initialize, read and write 
+// padded versions of a matrix of floats; 
+// the matrix is nominally mxn, but its 
+// rows will be padded on the right ends, 
+// so as to enable a stride of s down each 
+// column; it is assumed that s >= n
+
+// allocate space for the padded matrix, 
+// initially empty
+float *padmalloc(int m, int n, int s) 
+   return(malloc(m*s*sizeof(float)));
+
+
+// store the value tostore in the matrix q, 
+// at row i, column j; m, n and
+// s are as in padmalloc() above
+void setter(float *q, int m, int n, int s, 
+      int i, int j, float tostore) 
+   *(q + i*s+j) = tostore;
+
+
+// fetch the value in the matrix q, 
+// at row i, column j; m, n and s are
+// as in padmalloc() above
+float getter(float *q, int m, int n, int s, 
+      int i, int j) 
+   return *(q + i*s+j);
+
+
+int main() 
+   int i; float *q;
+   q = padmalloc(2,2,3);
+   setter(q,2,2,3,1,0,8);
+   printf("
+
+
+// check, using GDB
+// Breakpoint 1, main () at padding.c:31
+// 31         printf("
+// (gdb) x/6f q
+// 0x804b008:      0       0       0       8
+// 0x804b018:      0       0
+
+
+2.
+
+[numbers=left,basicstyle=]
+#include<omp.h>
+#include<math.h>
+
+// OpenMP example:  root finding
+
+// the function f() is known to be negative 
+// at a, positive at b, and thus has at 
+// least one root in (a,b); if there are 
+// multiple roots, only one is found; 
+// the procedure runs for niters iterations
+
+// strategy: in each iteration, the current 
+// interval is split into nth equal parts, 
+// and each thread checks its subinterval 
+// for a sign change of f(); if one is 
+// found, this subinterval becomes the 
+// new current interval; the current guess 
+// for the root is the left endpoint of the
+// current interval
+
+// of course, this approach is useful in 
+// parallel only if f() is very expensive 
+// to evaluate
+
+// for simplicity, assumes that no endpoint 
+// of a subinterval will ever exactly 
+// coincide with a root
+
+float root(float(*f)(float), 
+   float inita, float initb, int niters) 
+   float curra = inita;
+   float currb = initb;
+   #pragma omp parallel
+   
+      int nth = omp_get_num_threads();
+      int me = omp_get_thread_num();
+      int iter;
+      for (iter = 0; iter < niters; iter++) 
+         #pragma omp barrier
+         float subintwidth = 
+            (currb - curra) / nth;
+         float myleft = 
+            curra + me * subintwidth;
+         float myright = myleft + subintwidth;
+         if ((*f)(myleft) < 0 && 
+             (*f)(myright) > 0) 
+            curra = myleft;
+            currb = myright;
+         
+      
+   
+   return curra;
+
+
+float testf(float x) 
+   return pow(x-2.1,3);
+
+
+int main(int argc, char **argv)
+  printf("
+
+
+
+

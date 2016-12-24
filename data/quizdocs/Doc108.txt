@@ -1,0 +1,123 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+Important note:  Remember that in problems calling for R code, you
+are allowed to use any built-in R function, e.g. choose(), 
+pnorm(), etc.  
+
+Note too the R function integrate(), e.g.
+
+
+> integrate(function(x) x^2,0,1)
+0.3333333 with absolute error < 3.7e-15
+
+
+The limits of integration must be numbers or Inf or -Inf, not symbols.
+Thus one cannot use it for the inner integral in a double integral.
+
+1. Say X and Y have means 1 and 2, with variances 4 and 8, and
+with covariance -1.  Find the following:
+
+
+
+[(a)] (20) Var(X+Y)
+
+[(b)] (20) 
+
+[(c)] (15) Cov(X,X+Y) 
+
+
+
+2. Find the cdf values:
+
+
+
+
+[(a)] (15) In the marbles problem, pp.156-158, find .
+
+[(b)] (20) In the example in Sec. 8.2.3, find .
+
+
+
+3. (10) In Sec. 7.3.5, find Var(X - 2Y + Z), using matrix methods.
+Note:  Recall that in R, matrix multiplication is done via
+
+
+[numbers=left]
+> m <- matrix(c(5,12,13,3,4,5),ncol=2)
+> m
+     [,1] [,2]
+[1,]    5    3
+[2,]   12    4
+[3,]   13    5
+
+
+
+
+Solutions:
+
+1.a
+
+
+
+
+
+1.b
+
+
+
+
+
+
+1.c
+
+
+
+
+
+2.a 0.002 + 0.024 + 0.162 + 0.073
+
+2.b 
+
+
+
+
+
+
+3.
+
+[numbers=left]
+50 * c(1,-2,1) 
+
+
+
+

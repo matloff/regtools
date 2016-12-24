@@ -1,0 +1,135 @@
+
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do
+not turn in any supplementary sheets of paper. There is actually plenty
+of room for your answers, as long as you organize yourself BEFORE
+starting writing.
+
+1. (20) List the various arrays from our book that are created by
+the OS.  In each case, state whether the array is accessed by the
+hardware.
+
+rr
+
+array name in book & hardware access?  
+
+      &    
+      &    
+      &    
+      &    
+      &    
+      &    
+      &    
+
+
+2. Running the Linux pstree command displays ``parents''
+and ``children'' of processes.  Suppose we run the command on CSIF, and
+notice that there is a gcc process running.  
+
+   
+
+   [(a)] (15) The likely parent of that process is either 
+     or
+     or 
+     or ...
+   (Fill in as many command names as appropriate; answer ``none'' if 
+   there is likely no parent.)
+
+   [(b)] (15) The likely child of that process is either 
+     or
+     or 
+     or ...
+   (Fill in as many command names as appropriate; answer ``none'' if 
+   there is likely no child.)
+
+   
+
+3 (20) Consider the 11-line excerpt of Linux internal code on
+p.186, at the instant just before line 12 is executed.  Suppose at that
+time, c(ESP) = 0x8000.  What will be in memory location 0x8000 at that
+time?
+
+4. Consider the threads example that begins on p.190.
+
+   
+
+   [(a)] (15) For each of the following variables in the code, write
+   either SAAT (``same address across threads'') or DAAT (``different
+   address across threads'').
+
+   rr
+   
+   kb &        
+   nthreads &        
+   id[0] &        
+   
+
+   [(b)] (15) Suppose we run the program with the command
+
+   [fontsize=-2]
+   
+   
+
+   and we then type ps axH in another window.  In the output of
+   this latter command, we will likely see
+    entries for hw,
+    of which are in Run state,
+   and  of which are in Sleep
+   state.
+
+   
+
+
+Solutions: 
+
+1.  
+
+rr
+
+array & hardware access?  
+
+memory-allocation table & no   
+process table & no   
+page table & yes   
+interrupt vector table & yes   
+
+
+2a. tcsh, make
+
+2b. cpp, cc1, as, ld
+
+3. PC value of the process that we are about to resume (called
+v in the text)
+
+4a.
+
+   rr
+   
+   kb & DAAT 
+   nthreads & SAAT  
+   id[0] & SAAT  
+   
+
+4b. 4, 1, 3
+
+
+

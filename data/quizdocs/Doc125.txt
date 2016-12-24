@@ -1,0 +1,151 @@
+[twocolumn]article
+
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+1. (20) Fill in the blanks:  One can often get good speed with R
+code by using vectorization.  The reason R is slow without using such
+devices is that it is a(n) blank (a) language.  The basic programming
+construct that is of particular concern in terms of slowness is blank
+(b).  (Note: Examples of programming constructs are functions, loops,
+if-else, arrays, strings etc., NOT types of programming, e.g.,
+simulation.)
+
+2. (10)  Consider Equation (2.60), p.21, numerator.  Which
+``mailing tube'' justifies the fact that 0.4 multiplies something?  Cite
+a specific equation number among mailing tubes.
+
+3. (20)  Consider the ALOHA network model.  Say we have two such
+networks, A and B.  In A, the network typically is used for keyboard
+input, such as a user typing e-mail or editing a file.  But in B, users
+tend to do a lot of file uploading, not just typing.  Fill in the
+blanks:  In B, the model parameter blank (a) is blank (b) than in A, and
+in order to accommodate this, we should set the parameter blank (c) to
+be relatively blank (d) in B.
+
+4. Consider the ALOHA network model with ,  and 
+.  We are interested in .
+
+
+
+[(a)] (10) Find that probability.  (You should probably make use of
+existing computations, to save time.)
+
+[(b)] (10) Suppose we were to actually do the ``notebook''
+process, shown in Table 2.3, p.14.  We observe the network for many
+2-epoch stints, 10000 of them, yielding 10000 lines in our notebook.
+And say we store our notebook data in an R data frame named 
+notebook, with 10000 lines and 4 columns.  (Of course, the column
+labeled ``notebook line'' is not stored.)  We enter 1s and 0s instead of
+Yes's and No's.  State an R expression which would give us the
+approximate value of .
+ 
+
+
+5. (15) A famous graph model is Preferential Attachment.
+Think of it as a social network, with each edge representing a
+``friend'' relation.  (The graph is undirected, i.e. friendships are
+mutual.) The number of vertices grows over time, one vertex per time
+step.  At time 0, we have just two vertices,  and , with a
+link between them.
+
+In any graph, the degree of a vertex is its number of edges.  Thus
+at time 0, each of the two vertices has degree 1.  Whenever a new vertex
+is added to the graph, it randomly chooses an existing vertex to 
+attach to, creating a new edge with that existing vertex.  In making
+that random choice, it follows probabilities in proportion to the
+degrees of the existing edges.  
+
+For instance (just an example!), suppose that at time 2, when  is
+added, the adjacency matrix for the graph is
+
+
+
+
+
+
+
+
+
+
+
+Then there will be an edge created between  with ,  or
+, with probability 2/4, 1/4 and 1/4, respectively.  
+
+Find .
+
+6. (15) Consider the simulation of the bus ridership model, p.26.  Give
+a single R statement that replaces lines 8-10, by calling 
+sample().
+
+
+
+
+
+Solutions:
+
+1. interpreted; for loops
+
+2. (2.5)
+
+3. q; larger; p; low
+
+4a. One way is to use (2.3).  From quantities already caculated in
+the text, this is
+
+
+
+
+
+4b.
+
+
+mean(notebook[,1] + notebook[,2] > 0)
+
+
+5. Let  denote the node that  attaches to, i = 3,4,...
+Then
+
+
+
+
+
+
+
+
+
+6.
+
+
+passengers <- passengers - sum(sample(0:1,passengers,replace=T,prob=c(0.8,0.2)))
+
+
+
+

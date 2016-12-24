@@ -1,0 +1,143 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+hyperref
+
+listings,relsize
+
+amsmath
+
+
+
+language=R,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do not
+turn in any supplementary sheets of paper. There is actually plenty of room
+for your answers, as long as you organize yourself BEFORE starting writing.
+
+1.  X be the number of dots we get in rolling a three-sided
+die once.  (It's cylindrical in shape.)  The die is weighted so that the
+probabilities of one, two and three dots are 1/2, 1/3 and 1/6,
+respectively.  Note:  Express all answers in this problem as common
+fractions, reduced to lowest terms, such as 2/3 and 9/7.
+
+   
+
+   [(a)] (10) State the value of .
+
+   [(b)] (10) Find EX and Var(X).
+
+   [(c)] (15) Suppose you win 2 for each dot.  Find EW, where W is the
+   amount you win.
+
+   
+
+2. This problem concerns the REVISED version of the
+committee/gender example.  
+
+   
+
+   [(a)] (10) Find .  Express your answer as an 
+unsimpilfied expression involving combinatorial quantities such as
+.
+
+   [(b)] (15) Find .  Express your answer as a
+   common fraction.
+
+   
+
+3. (15) State the (approximate) return value for the function below, in
+terms of w.  You must cite an equation number in the book to get
+full credit.
+
+[numbers=left]
+xsim <- function(nreps,w) 
+   sumn <- 0
+   for (i in 1:nreps) 
+      n <- 0
+      while (TRUE) 
+         n <- n + 1
+         u <- runif(1)
+         if (u < w) break
+      
+      sumn <- sumn + n
+   
+   return(sumn/nreps)
+
+
+
+4. (15) Consider the parking space example on p.48.  (NOT the
+variant in the homework.)  Let N denote the number of empty spaces in
+the first block.  State the value of Var(N), expressed as a common
+fraction. 
+
+5. (10) Suppose X and Y are independent, with variances 1 and 2,
+respectively.  Find the value of c that minimizes Var[cX + (1-c)Y].
+
+Solutions:
+
+1.a 1/3
+
+1.b 
+
+
+
+*
+
+
+
+
+
+
+*
+
+1.c EW = E(2X) = 2 EX = 10/3
+
+2.a 
+
+
+
+
+
+
+*
+
+2.b
+
+
+
+
+
+
+
+*
+
+3. 1/w, by (3.74)
+
+4. 10(0.2)(1-0.2) = 8/5, by (3.82)
+
+5.
+
+
+
+
+
+
+*
+
+So, the best c is 2/3.
+
+
+

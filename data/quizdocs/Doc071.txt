@@ -1,0 +1,101 @@
+
+article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+listings
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do
+not turn in any supplementary sheets of paper. There is actually plenty
+of room for your answers, as long as you organize yourself BEFORE
+starting writing.
+
+1. () The function findfile() searches for a file (which
+could be a directory) in the specified directory tree, returning the
+full path name of the first instance of the file found with the
+specified name, or returning None if not found.
+
+For instance, suppose we have the directory tree /a shown on
+pp.51-52, except that /b contains a file z.  Then the code
+
+
+print findfile('/a','y')
+print findfile('/a','b')
+print findfile('/a','u')
+print findfile('/a','z')
+print findfile('/a/b','z')
+
+
+produces the output
+
+
+/a/y
+/a/b
+None
+/a/b/z
+/a/b/z
+
+
+Fill in the blanks:
+
+
+import            # blank
+
+def findfile(treeroot,flname):
+   os.chdir(treeroot)
+   currfls = os.listdir('.')
+   for fl in currfls:
+      if fl == flname:   # blank
+   for fl in currfls:
+       # blank; insert <= 5 lines of code,
+       # possibly including with lesser indentation
+
+
+Solutions: 
+
+1.
+
+
+import os
+
+# returns full path name of flname in the tree rooted at treeroot;
+# returns None if not found; directories do count as finding the file
+def findfile(treeroot,flname):
+   os.chdir(treeroot)
+   currfls = os.listdir('.')
+   for fl in currfls:
+      if fl == flname:
+         return os.path.abspath(fl)
+   for fl in currfls:
+      if os.path.isdir(fl):
+         tmp = findfile(fl,flname)
+         if not tmp == None: return tmp
+   return None
+
+def main():
+   print findfile('/a','y')
+   print findfile('/a','u')
+   print findfile('/a','z')
+   print findfile('/a/b','z')
+
+if __name__ == '__main__': main()
+
+
+
+

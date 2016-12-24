@@ -1,0 +1,99 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+1. (20) Fill in the blank:  The set of parallel wires connecting the
+CPU to memory is called a .
+
+2. Say we have a 5-bit word size.  In each part below, answer with
+two bit strings, separated by a space, such as
+
+
+01010 11110
+
+
+
+
+[(a)] (10) Find the signed-magnitude and 2s complement representations
+(in that order) of 5.
+
+[(b)] (10) Find the signed-magnitude and 2s complement representations
+(in that order) of -5.
+
+
+
+3. (20) What is printed out?
+
+
+int x[3][4] 5,3,8,2,1,8,3,7,88,168,8,8888;
+printf("
+
+
+4. (20) Suppose we were to build a base-4 machine, i.e. 4 voltage
+levels coding the numbers 0,1,2,3, with word size of 3 base-4 digits.
+The decimal number 51, for instance, would be stored as 303, since 303
+means .  The machine will use
+using ``4s complement'' storage for signed integers, the base-4 analog
+of 2s complement.  Show the coding for -5.
+
+5. (20) Say we have a disk with a rotation speed of 9600 revolutions
+per minute, 1000 tracks, a seek speed of  seconds per track,
+and a sector size of 528 bytes.  Give the time in seconds for  a read 
+request to start, measured from the start of the seek and the time
+the first byte is read.  Give your answer as an R expression.  Assume
+that at the time the seek begins: the read/write head is at the
+innermost track; the desired sector is in the middle track; and
+the start of the sector is a half revolution from the read/write head
+when the seek completes.
+
+Solutions:
+
+1. bus
+
+2a. 00101 00101
+
+2b. 10101 11011
+
+3. 168
+
+4. To find -5, ``wind backwards'' from 000 five times, yielding
+333, 332, 331, 330, 323.  So 323 is the representation of -5.
+
+5.
+
+seek time:  0.5 * 1000 * 0.000001
+
+rotation time before read first byte:  0.5 * 1/(9600/60)
+
+total:  0.5 * 1000 * 0.000001 + 0.5 * 1/(9600/60
+ 
+
+

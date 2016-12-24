@@ -1,0 +1,143 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+In all Test problems, assume 32-bit words unless stated otherwise.
+
+1. (20) Fill in the blanks:  During the execution of the jump
+instruction in line 24, p.94, the jump will be done if the 
+ Flag and the
+ Flag bits satisfy certain
+conditions.
+
+2.   Consider the following code, which multiples each element in
+an array of 4 words by 28.  It is assumed that x is a label in the
+.data segment (not shown), that all elements of x are
+considered unsigned, and that no product will need more than 32-bits.
+
+
+.text
+.globl _start
+_start:
+   blank (a) (entire line)
+   movl 
+4, 
+top:
+   movl x(
+   imul blank (b)
+   movl 
+   decl 
+   jz done
+   blank (c) (entire line)
+   blank (d) (entire line)
+done:  movl 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+0, 
+   movl 
+4, 
+top:
+   movl x(
+   imul 
+   movl 
+   decl 
+   jz done
+   addl 
+
+0, 
+
+
+2.e  Even though we know the product is unsigned and will fit in
+EAX, IMUL won't know that, and will sign-extend in EDX.  That will wipe
+out our value of expressions like x(
+first element of x will be changed, and the final values in that
+array will be 140, 5, 1, 8.
+
+3. 16, 30
+
+
+
+CODE TO MULTIPLY X BY 28:
+
+
+PART (E) OF THE MUL28 PROBLEM:  56, 5, 1, 8 (EDX gets wiped out by IMUL)
+
+CODE TO MULTIPLY 8 BY 9:
+
+.text
+.globl _start
+_start:
+   movl x, 
+   movl 
+   shll 
+
+
+
+
+
+
+
+
+
+
+
+13, 
+
+

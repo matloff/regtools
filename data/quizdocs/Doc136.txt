@@ -1,0 +1,136 @@
+[twocolumn]article
+
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+1. (10) Suppose  is the length of a random rod, in inches, and
+.  Let  denote the length in feet.  Find .
+
+2. (10) In the board game, Sec. 2.11, suppose we start at square 3
+(no bonus, since we start there rather than landing there).
+Let  denote the square we land on after one turn.  Find .
+
+3. This problem concerns the Monty Hall example, pp.40ff.
+
+
+
+[(a)] (15) Give the numbers of the ``mailing tubes'' in (3.1) and
+(3.2), respectively.  Use a comma and/or spaces to separate the two
+equation numbers, e.g.  ``(2.1) (2.3)''.
+
+[(b)] (15) Consider (3.1).  Say we change the left-hand side to 
+.  What would be the new numerical value of the
+numerator on the right-hand side?
+
+
+
+4. (20) Look at the simulation code on p.26.  Say we wish to find
+the expected value of , where  is the sum of the d dice.
+Give a line of code, to replace line 11.
+
+5. Consider the Preferential Attachment Graph model, Sec. 2.13.1..
+
+
+
+[(a)] (10) Give the number of the ``mailing tube'' justifying (2.69).
+
+[(b)] (10) Find .
+
+[(c)] (10) Find .
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Solutions:
+
+1.
+
+
+
+
+
+2.
+
+
+
+
+
+
+
+
+
+
+3.a (2.8), (2.7)
+
+3.b
+
+
+
+
+
+
+
+4.
+
+
+mean(sums^2)
+
+
+5.a (2.2)
+
+5.b 
+
+
+
+
+
+5.c 
+
+
+
+
+
+
+

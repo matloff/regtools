@@ -1,0 +1,99 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed); do not turn in any supplementary sheets of paper. There is
+actually plenty of room for your answers, as long as you organize
+yourself BEFORE starting writing.
+
+Unless otherwise stated, give numerical answers as
+expressions, e.g. .  Do NOT use
+calculators.
+
+1. Consider a six-dimensional hypercube , subdivided into two
+five-dimensional hypercubes  and .
+
+
+
+[(a)] () What is the node number of the partner of node 23?
+
+[(b)] () What is the node number of the root in ?
+
+[(c)] () Suppose our algorithm requires partners in the two
+5-cubes to exchange their values of an int variable x.
+What would be the best MPI function for this purpose?
+
+
+
+2. Consider the program on pp.85-87.
+
+
+
+[(a)] () Suppose that while running the program, someone runs the
+shell commands ps and gdb.  At this point, the likely line
+number on which the program is running (at all nodes) is
+.
+
+[(b)] () Fill in the table regarding the actions of lines 107 and
+108 and the array overallmin, at a given node.  Mark an entry R if the
+array is read, W if it is RW if both, and N if neither:
+
+rrr
+
+node number & 107 & 108  
+0 &   &    
+ 0 &   &    
+
+
+[(c)] () This example program is somewhat artificial, in that each
+node generates its data matrix ohd.  Instead, say that node 0 has
+the matrix, say by reading it from disk, and wishes to distribute it to
+the other nodes.  Give a single line of code that would replace lines
+57-64, that would accomplish this distribution.
+
+
+
+Solutions:
+
+1a.  23 + 32 = 55
+
+1b. 100000, i.e. 32
+
+1c. MPISendrecv() 
+
+2a. 70
+
+2b.
+
+rrr
+
+node number & 107 & 108  
+0 & W & R  
+ 0 & N & W  
+
+
+2c.
+
+[fontsize=-2]
+MPI_Bcast(ohd,nv*nv,MPI_INT,0,MPI_COMM_WORLD);
+
+
+
+

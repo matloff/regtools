@@ -1,0 +1,138 @@
+[twocolumn]article
+
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+1. (10) In the phrasing of the article on Microsoft's new Azure
+software, the firm aims the app to  machine learning.
+
+2. (10) A trucking company transports many things, including
+furniture.  Let  be the proportion of a truckload that consists of
+furniture.  For instance, if 15 of given truckload is furniture, then
+X = 0.15.  We have data on , and will plot histograms and so on, in
+order to find a good model.  Suggest a good parametric distribution
+family for modeling .  
+
+3. This problem concerns the material in Section 5.5.5,  The
+random variables  and  are as in the bottom of p.122 and the
+top of p.124, respectively.  In the case of , say the mean lifetime
+of ligh bulbs is 120 hours.  If you need the  function, R
+offers it as gamma().  Also, there are factorial() and 
+exp().
+
+
+
+[(a)] (10) State the value of .
+
+[(b)] (10) Find .
+
+[(c)] (15) Find .
+
+[(d)] (10) Concerning , we've asked someone to notify us when the
+eighth bulb burns out.  At time 102.2 hours after the first bulb is
+installed, we still haven't heard from our notifier.  Find the
+probability that at time 222.1, we still have not been notified.
+
+[(e)] (15) The text remarks that in Figure 5.2, the curve for r = 10.0
+is already looking rather bell-shaped.  By calling pnorm(),
+we can find the normal approximation to, say, the cdf corresponding to that
+density, evaluated at 14.2.  What would be our third argument in that
+function?  Say that figure used .
+
+
+
+4. (10) Suppose  for , 0 otherwise.  Find the
+median of , i.e. the 0.5 quantile.
+
+5. (10) Suppose  and  are independent, each having
+distribution N(0,1).  Find ).
+
+
+
+
+
+Solutions:
+
+1. democratize
+
+2. beta distributions
+
+3a. The gamma family has variance , so
+
+
+
+
+
+3b.
+
+
+dgamma(88,5,0.01
+
+
+3c.  Use Property E:
+
+
+integrate(function(t) (1/t) * 1/(factorial(4)) * 0.01^5 * t^4 * exp(-0.01*t),0,Inf)
+
+
+3d.
+
+
+
+
+
+
+Then use
+
+
+(1 - pnorm(222.1,5,0.01)) / (1 - pnorm(102.2,5,0.01))
+
+
+3e.
+
+
+
+
+
+So, we would use the standard deviation, .
+
+4.  We have , so set , yielding t = 2.
+
+5.  
+
+
+
+
+
+ has a chi-square distribution with k = 1 degree of freedom.  So,
+its variance is .  The original expression has value 4.
+
+
+

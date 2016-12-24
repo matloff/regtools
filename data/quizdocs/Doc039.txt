@@ -1,0 +1,114 @@
+article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do not
+turn in any supplementary sheets of paper. There is actually plenty of room
+for your answers, as long as you organize yourself BEFORE starting writing.
+
+SHOW YOUR WORK! 
+
+1. (20) We wish to have additional output from the DES code 
+MM1.R:  Among all the times that the server finishes a job, what
+proportion have the property that the server immediately starts another
+job?  Add code to MM1.R to achieve this.  Your answer must be in
+the form, ``Between lines 22 and 23, add the following code...''
+
+2. Consider the file backup storage example on p.356, but with 
+.  Express your answers as common
+fractions, reduced to the lowest terms.
+
+
+
+[(a)] (25) Say we look at the end of track n, for n large.  Find the
+probability that the current file has occupied all or part of exactly
+three tracks so far.
+
+[(b)] (25) Find the probability that the first two tracks (0 and 1)
+have at most two files in it.  (In any case, the last file in the track
+will necessarily be partial.)  
+
+
+
+3. (30) We will draw a sample of size 2 from a population that
+consists of k subgroups.  Our sampling procedure is to choose a person
+at random from the entire population, and then to choose our second
+person from the same subgroup that the first person belongs to.  (The
+sampling is done with replacement.) The variable of interest, X, has
+mean  and variance  in subgroup i, i = 1,...,k.  A
+proportion  of the population consists of subgroup i, i = 1,...,k,
+with .  Find the variance of the sample mean,
+, in terms of these quantitites.  Your answer will use the
+ symbol, but should be reasonably concise for full credit.
+
+Solutions:
+
+1.  The main point is to add code somewhere between lines 53 and
+57 to increment the proper count.  It also must be initialized and
+printed out.
+
+2a.  We need P(A(n)  2.0).  So, evaluate the long-run age density 
+from our book, and then integrate from 2 to 3.
+
+2b.  Let  and  be the lengths of the two files.  We need
+.  Drawing a picture, we see that the easiest way to
+evaluate this is to find  and then subtract from 1.0.
+That probability is equal to
+
+
+
+
+
+
+
+3.  Use the Law of Total Expectation.
+
+
+
+
+
+
+where G is the group number.
+
+From our usual properties of  in random samples, we have
+
+
+
+
+
+
+So,
+
+
+
+
+
+Also
+
+
+
+
+
+
+
+
+
+Finally, add.
+
+ 

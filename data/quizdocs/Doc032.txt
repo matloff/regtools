@@ -1,0 +1,207 @@
+[twocolumn]article
+
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+1. (10) Fill in the blanks:  We are considering using MPI or 
+snow on a certain app, with 8 workers.  For MPI, the number of sockets
+used at each worker will be [  blank (a)  ] while for snow it will
+be [  blank (b)  ].
+
+2. Suppose we have partitioned matrices  and , written in
+partitioned form:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Here each of the submatrices in  and , including the one drawn as
+``,0'' are .
+
+
+
+[(a)] (20) Let , with 
+
+
+
+
+
+
+
+
+
+
+
+Express  in terms of the submatrices in  and .  (In your
+electronic submission, use ``A1'' for  etc.  Use ' for transpose,
+and use juxtaposition for multiplication.
+
+[(b)] (20) Assume all the  are invertible (you may not need all
+of them to be so), with .   will then exist, and
+we'll write the inverse as
+
+
+
+
+
+
+
+
+
+
+
+Show  in terms of the  and .  Again, write  as
+``V1,'' etc.
+
+
+
+3. (15) Consider the matrix-vector multiply snow code on p.22.
+If we were to convert it to a matrix-matrix multiply, everything in 
+mmul() would pretty much carry over, except for the call to 
+Reduce() in line 10.  Show what the new contents of that line would be.
+
+4. Consider the MPI code on pp.19ff. Suppose N is 10.
+(Note: The fact that this latter point is stated outside of (a) and (b)
+implies that it applies to both parts.  Please keep this in mind in
+future quizzes.)
+
+
+
+[(a)] (20) 
+How many times will Node 1 call MPISend()?
+
+[(b)] (15) Suppose in line 31 we were to accidentally write 1
+instead of 0.  What would happen?  Choose one of the following:
+
+   
+
+   [(i)] One of the nodes will have an execution error, e.g.
+   divide by 0.
+
+   [(ii)] Two of the nodes will have an execution error.
+
+   [(iii)] Three of the nodes will have an execution error. 
+
+   [(iv)] One of the nodes will hang.
+
+   [(v)] Two of the nodes will hang.
+
+   [(vi)] Three of the nodes will hang.
+
+   [(vii)] No node will have an execution error or hang, but the
+   printed answer will be incorrect.
+
+   [(viii)] The correct answer will be printed out.
+
+   
+
+
+
+
+
+
+
+Solutions:
+
+1.a  8 (7 worker connections, 1 manager)
+
+1.b  1 manager connection
+
+2.a  
+
+2.b  We have
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thus , so .
+
+We also have .  Solving for , we get
+
+
+
+
+
+3.
+
+
+Reduce(rbind,mout)
+
+
+4.a Node 0 will check values, 3, 5, 7 and 9 for divisibility by 3,
+with 5 and 7 surviving to go on to Node 1.  The latter will take the 5
+as Divisor, and then check 7 for divisibility by 5.  The 7
+survives this check and goes on to Node 2.  That accounts for one call
+by Node 1 to MPISend().  Later it will make another such call,
+for ENDMSG, thus a total of 2 calls.
+
+4.b The PIPEMSG messages become ENDMSGs.  Node 0 will send
+three of them to Node 1.  The latter will use the first to set 
+Divisor, and upon receiving the second, will send Dummy to Node
+2.  That node will use that message to set StartDivisor, then wait
+for a message to use for ToCheck --- but that message will never
+come.  So, the answer is (iv).
+
+
+
+

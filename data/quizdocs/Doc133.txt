@@ -1,0 +1,142 @@
+[twocolumn]article
+
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+1. (10) On p.144, in an application of the Central Limit Theorem, it
+states ``The exact answer [to 3 decimal places] is 0.132.''  Write an R
+expression that would give us to that exact answer.
+
+2. (10) Consider the network intrusion example, Section 6.2.
+(Suppose it really is Jill, no intrusion.) Find .
+
+3. This problem concerns the toy population example, Section
+10.1.2.  
+
+
+[(a)] (10) Find .
+
+[(b)] (15) Find .
+
+[(c)] (15) Find .
+
+[(d)] (15) In this part only, suppose we draw a simple random
+sample of size 2.  Find .
+
+
+
+4. Suppose  on (0,c), 0 elsewhere.
+Call this the ``t2 family.''  
+
+
+
+[(a)] (10) Write (on one line) pt2(x,c), for scalar x.
+
+[(b)] (15) Write (on one line) rt2(n,c), to generate n
+random variates.
+
+
+
+
+
+
+
+Solutions:
+
+1.
+
+
+1 - pbinom(12,20,0.5)
+
+
+2.
+
+
+pnorm(535,500,15) - pnorm(510,500,15) 
+
+
+3a.  
+
+
+
+
+
+3b.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3c. 
+
+
+
+
+
+
+3d.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4a.
+
+
+function(x,c) (t/c)^3
+
+
+4b.
+
+
+rtc <- function(n,c) c * runif(n)^(1/3)
+
+
+
+

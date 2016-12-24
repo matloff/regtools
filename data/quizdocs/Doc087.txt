@@ -1,0 +1,108 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+hyperref
+
+listings,relsize
+
+
+
+language=R,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do not
+turn in any supplementary sheets of paper. There is actually plenty of room
+for your answers, as long as you organize yourself BEFORE starting writing.
+
+SHOW YOUR WORK!  
+
+1. (15) Exercise 7(b), Chapter 4, p.97.  Give your answer 
+as a decimal or common fraction.
+
+2. (15) Exercise 8(a), Chapter 4, p.97.  Give your answers as 
+decimal or common fractions.
+
+3. (20) Suppose X has a uniform distribution on the interval
+(20,40), and we know that X is greater than 25.  What is the probability
+that X is greater than 32?  Give your answer as a common fraction.
+
+4. (25) Suppose U and V have the 2t/15 density on p.74.  Let N
+denote the number of values among U and V that are greater than 1.5.
+(CORRECTED SUBSEQUENT TO QUIZ.) (So N is either 0, 1 or 2.)  Find
+Var(N), expressing your answer as a decimal or common fraction.
+
+5. (25) What is the (approximate) value returned from the following
+R code?
+
+[fontsize=-2]
+mean((rnorm(10000,mean=28,sd=5))^4)
+
+
+Your answer must be expressed as a definite integral.
+
+Solutions:
+
+1  
+
+
+
+
+
+
+
+
+
+2.  Let X be the error.   On p.75, we have r = 0.5, q = -0.5.
+Using the formulas for the mean and variance at the bottom of p.75, we
+have
+
+
+
+
+
+
+
+
+3.  Because of the uniformity, .
+Following the pattern on p.79, we have
+
+
+
+
+
+
+4.  N has a binomial distribution with n = 2 and 
+
+
+
+
+
+So, (once again) using (3.82), we have
+
+
+
+
+
+5. The simulation is calculating , where X has a normal
+distribution with mean 28 and standard deviation 5.  That expected
+value, by (4.21), is
+
+
+
+
+
+
+
+
+

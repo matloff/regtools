@@ -1,0 +1,105 @@
+
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+listings
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do
+not turn in any supplementary sheets of paper. There is actually plenty
+of room for your answers, as long as you organize yourself BEFORE
+starting writing.
+
+1. (20) On p.105, it says, ``Since the simulated time variable 
+Simulation.t is in a separate module...''  Suppose we've installed
+SimPy in /a/b/c/.  What will be the full path name of the module
+referred to here?
+
+2. (20) What kind of object is requred for the second argument to
+SimPy's activate() function?  Your answer must be a single Python
+term.
+
+3. This problem concerns the first example in our Oct. 24 handout
+titled 3des.pdf.
+
+
+
+[(a)] (20) The difference computed in line 39 is equal to the value
+of an expression computed in another line.  State the number of the
+latter.
+
+[(b)] (20) Say we're interested in the mean idle period per machine.
+(Note that due to the symmetry of the situation, this will be the same
+for all machines.)  Add code to compute this and print it out.  Write
+your answer in the form, ``Between lines 40 and 41, insert this
+line...''
+
+
+
+4. (20) Consider the cell phone model in the handout in Problem 3.
+Suppose that 5 of all the calls made by those in cars passing through
+the cell ends before the car gets all the way through the cell.  Among
+such calls, let Y denote the proportion of the trip through the cell
+during which the call is still active.  For instance, Y = 0.88 means the
+call end when the car was 88 through the cell.   Assume Y is uniformly
+distributed on (0,1), which by the way can be simulated by calling
+uniform(0,1) in Python's random library.  Show how to alter
+the code to reflect this variation on the original model.  As in Problem
+3, express your answer in terms of what code you insert where, and in
+this case, also state the lines to be deleted, if any.
+
+Solutions: 
+
+1. /a/b/c/SimPy/Simulation.py
+
+2. iterator
+
+3.a 36
+
+3.b 
+
+between 21 and 22:
+
+TotIdle = 0.0
+NIdle = 0
+
+between 27 and 28:
+
+StartIdle = now()
+MachineClass.NIdle += 1
+
+between 28 and 29:
+
+MachineClass.TotIdle += now() - StartIdle
+
+between 73 and 74:
+
+print MachineClass.TotIdle / MachineClass.NIdle
+
+4.
+
+between 157 and 158:
+
+[numbers=left]
+if Globals.Rnd.uniform(0,1) < 0.1:
+   self.Dur *= Globals.Rnd.uniform(0,1)
+
+
+
+

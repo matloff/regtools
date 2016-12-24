@@ -1,0 +1,78 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed); do not turn in any supplementary sheets of paper. There is
+actually plenty of room for your answers, as long as you organize
+yourself BEFORE starting writing.
+
+1. (20) In (2.30) and (2.32), cite ``mailing tubes'' for each, in
+the form of equation numbers that were used.
+
+2. (40) This problem concerns the ALOHA network example.  Let 
+denote the event that Node A attempts to transmit during epoch i, i =
+1,2,... and define  similarly for Node B.
+
+In each case below, you are given two events, in the
+first two columns of the table.  Write in the third column either I, for
+independent, D, for disjoint, or N, for neither.
+
+rrr
+
+ &  &   
+ &  &   
+ &  &   
+ and  &  and not  &   
+
+
+3. (40) In the simple board game on pp.15ff, let  denote your
+position after your i turn, i = 1,2,...  Find  and
+, giving your answers as fractional expressions,
+e.g. (1+2/3) / (2 + 1/2).
+
+Solutions:
+
+1. (2.2), (2.5)
+
+2.
+
+rrr
+
+ &  & I  
+ &  & N  
+ &  & N  
+ and  &  and not  & D  
+
+
+3.  Let  denote your i ordinary roll, with 
+being the bonus you get for roll i.
+
+
+
+
+*
+
+Get  by reasoning it out.  After our first turn,
+if we are at square 2, the only way to be at that square after the next
+turn is to first roll a 1, getting us to the bonus square 3, and then
+roll a 6 for our bonus.  The probability is thus (1/6) (1/6).
+
+
+

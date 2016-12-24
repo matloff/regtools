@@ -1,0 +1,83 @@
+
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do
+not turn in any supplementary sheets of paper. There is actually plenty
+of room for your answers, as long as you organize yourself BEFORE
+starting writing.
+
+1. (20) Below is an excerpt from a conversation on the Web,
+written by a developer of some commercial software product:
+
+
+
+For a reasonably large project, the procedure symbols add over 1MB of
+data to the final executable. Not only that, but one does not
+necessarily want customers to see all the functions and files called...
+
+
+
+In the context of our course, how would one avoid this? 
+
+2. In the ``toy'' example on p.13, suppose we devote 9 bits to the
+mantissa and 7 bits to the exponent.
+
+
+
+[(a)] (20) What would be the representation of 1.25?  Answer in hex.
+
+[(b)] (20) What is the largest positive number that can be stored?
+Express your answer in the form , with  and  in base
+10, in simple form.  
+
+ 
+
+3. (40) Consider the code in the middle of p.19.  What would the
+following print out?
+
+[fontsize=-2]
+printf("
+printf("
+
+
+Solutions:
+
+1. The writer is referring to retaining the symbol table during
+compilation.  In our context, this would be remedied by NOT using the
+-g option in GCC.
+
+2.a The 5 would now be represented as 000000101 and the -2 as
+1111110, so the full representation would be 0000001011111110 or 0x02fe.
+
+2.b The mantissa would have to be as large as possible, which
+would be 011111111, which is .   Similarly, set the exponent to
+0111111, which is .  So, the largest possible storable number
+would be .
+
+3.
+
+[fontsize=-2]
+64636261
+1
+
+
+
+

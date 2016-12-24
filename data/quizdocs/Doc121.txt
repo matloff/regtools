@@ -1,0 +1,133 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Do NOT turn in this sheet of paper (unless you
+lack a laptop or have a laptop failure during the Exam).  You will
+submit electronic files to handin. 
+
+
+
+INSTRUCTIONS FOR SUBMISSION:
+
+
+ 
+Submit to the CSIF handin, under my account, using the
+alphabetically earliest UCD e-mail address among your group members.
+
+Submit ONLY the files Problem1.tex and Problem2.R. 
+
+
+
+1. (50) Suppose  on , 0 elsewhere.
+Find  for the case .  Tip:  Find  first.  
+
+Submit your derivation in a LaTeX file Problem1.tex.  My grading
+script will check it by running
+
+
+
+
+
+
+2. (50) Lifetimes of some electronic component formerly had an
+exponential distribution with mean 100.0.  However, it's claimed that
+now the mean has increased.  (Suppose we are somehow sure it has not
+decreased.)  Someone has tested 50 of these new components, and has
+recorded their lifetimes, .  Unfortunately, they only
+reported to us the range of the data, .
+
+We will need to do a significance test with this limited data, at the
+0.05 level.  Note (p.222) that it will necessarily be a bit different 
+from 0.05.  Take the one that is nearest but no larger than 0.05.  
+You may wish to use the R ceiling() function here.
+
+Use simulation (because the problem is too difficult mathematically) to
+find a cutoff value v for our significance test, and state whether we
+reject  if  or .
+
+Submit your full code in a file Problem2.R.  My grading script
+will check it by running
+
+
+> source("Problem2.R")
+
+
+and your code will print out something like ``reject if R 202.8.''
+
+Solutions:
+
+1.  Since X and Y are not independent, we cannot use convolution.
+
+
+
+
+
+
+
+
+
+So .
+
+2.
+
+[numbers=left]
+# random sample of size 50, test H0: mu = 100.0, 
+# against HA: mu > 100.0, exponential distribution; 
+# just have range R 
+
+# code to determine the cutoff point for significance 
+# at 0.05 level
+
+nreps <- 200000
+n <- 50
+
+rvec <- vector(length=nreps)
+for (i in 1:nreps) 
+   x <- rexp(n,0.01)
+   rng <- range(x)
+   rvec[i] <- rng[2] - rng[1]
+
+
+rvec <- sort(rvec)
+cutoff <- rvec[ceiling(0.95*nreps)]
+cat("reject H0 if R >",rvec[cutoff],"")
+
+# check (not requested):
+
+tvec <- vector(length=nreps)
+for (i in 1:nreps) 
+   x <- rexp(n,0.01)
+   rng <- range(x)
+   rej <- (rng[2] - rng[1]) > cutoff
+   tvec[i] <- rej
+
+
+print(mean(tvec))  # should be near 0.05
+
+
+
+

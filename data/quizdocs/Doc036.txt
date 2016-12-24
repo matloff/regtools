@@ -1,0 +1,166 @@
+[twocolumn]article 
+
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+1. (20) The NVIDIA GPU execution model is Single Instruction
+Multiple Threads, SIMT.  What is the acronym for MPI?
+
+2. (20) The process ID in MPI has a 2-level hierarchical structure,
+rather analogous to blockIdx and threadIdx in CUDA.  What
+are the official MPI terms for the two levels? (Answer on one line.)
+
+3. (20) Consider the run-length decoding examples in Secs. 10.5 and
+10.6, the first in OMP and the second in Thrust.  State the line number
+in Sec. 10.6 that is analogous to line 10 in Sec. 10.5.  If there is no
+such line in 10.6, answer None.
+
+4. (20) In the example titled, Removing 0s from an Array, Sec.
+8.4, consider what may happen in terms of the order of the nonzero
+values within the no0s array.  Which one of the following is true?
+
+
+
+[(i)] The order will be the same as in the has0s array.  For
+instance, if 12 and 5 were in has0s, with 12 in a lower-index
+position than 5, then the index of 12 in no0s will be lower than
+that of 5.
+
+[(ii)] The order will be reversed.
+
+[(iii)] The order will be random, in the sense that in several runs
+of the program, different orders may occur in different runs.
+
+[(iv)] The order will be nonrandom, but neither (i) nor (ii) will
+necessarily occur.
+
+
+
+5. (20) In this problem you will develop an OpenMP function that
+works like thrust::copyif().  Fill in the blanks:
+
+
+#include <stdio.h>  
+#include <omp.h>  
+
+int u[8] = 1,0,1,1,0,1,0,1,
+    v[8] = 1,5,6,3,0,2,0,8,  
+    w[8];
+
+int f(int a) return a != 0;
+
+void omp_copy_if(int *x1, int *x2, int nin,
+                 int *y, int *nout,
+                 int (*boolftn)(int)) 
+   blank (a)
+   #pragma omp parallel 
+     
+      int i;
+      #pragma omp for
+      for (i = 0; i < nin; i++)
+         if (  blank (b)
+            blank (c)
+            ntrue++;
+            blank (d)
+         
+      #pragma omp single
+      *nout = ntrue;
+   
+
+
+main(int argc, char **argv)
+  int i,no;
+   omp_copy_if(v,u,8,w,&no,f);
+   // should print 1 6 3 2 8 
+   for (i = 0; i < no; i++) printf("
+  
+
+
+
+
+
+
+
+
+Solutions:
+
+1. SPMD
+
+2. communicator, rank
+
+3. None; Thrust does not work directly with thread number.
+
+4. (i)
+
+5.
+
+
+
+#include <stdio.h>  
+#include <omp.h>  
+
+int u[8] = 1,0,1,1,0,1,0,1,
+    v[8] = 1,5,6,3,0,2,0,8,  
+    w[8];
+
+int f(int a) return a != 0;
+
+void omp_copy_if(int *x1, int *x2, int nin,
+                 int *y, int *nout,
+                 int (*bool )(int)) 
+   int ntrue = 0;
+   #pragma omp parallel 
+     
+      int i;
+      #pragma omp for
+      for (i = 0; i < nin; i++)
+         if (boolftn(x2[i]))   
+            #pragma omp atomic
+            ntrue++;
+            y[ntrue-1] = x1[i];  
+         
+      #pragma omp single
+      *nout = ntrue;
+   
+
+
+main(int argc, char **argv)
+  int i,no;
+   omp_copy_if(v,u,8,w,&no,f);
+   // should print 1 6 3 2 8 
+   for (i = 0; i < no; i++) printf("
+  
+
+
+
+
+
+
+

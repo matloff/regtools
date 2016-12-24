@@ -1,0 +1,108 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+listings
+
+amsmath
+
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed); do not turn in any supplementary sheets of paper. There is
+actually plenty of room for your answers, as long as you organize
+yourself BEFORE starting writing.
+
+1.  (20) Consider the ALOHA example, Sec. 3.14.3.  Write a call to the
+built-in R function dbinom() to evaluate (3.123) for general m and
+p.
+
+2.  Consider the bus ridership example, Sec. 2.10.  Suppose upon
+arrival to a certain stop, there are 2 passengers.  Let A denote the
+number of them who choose to alight at that stop.
+
+
+
+[(a)] (10) State the parametric family that the distribution of A
+belongs to.
+
+[(b)] (20) Find  and , writing each answer in
+decimal expression form e.g. .
+
+
+
+3. (20) Consider the following simple inventory model.  A store
+has 1 or 2 customers for a certain item each day, with probabilities p
+and q (p+1 = 1).  Each customer is allowed to buy only 1 item.
+
+When the stock on hand reaches 0 on a day, it is replenished to r
+items immediately after the store closes that day.
+
+If at the start of a day the stock is only 1 item and 2 customers wish
+to buy the item, only one customer will complete the purchase, and the
+other customer will leave emptyhanded.  
+
+Let  be the stock on hand at the end of day n (after
+replenishment, if any).  Then  form a Markov chain, with
+state space 1,2,...,r.
+
+Write a function inventory(p,q,r) that returns the  vector
+for this Markov chain.  It will call findpi1(), similarly to the
+two code snippets in p.65.
+
+
+
+Solutions:
+
+1.
+
+[numbers=left]
+dbinom(1,m,p)
+
+
+2.a binomial
+
+2.b
+
+
+
+
+
+
+
+
+
+
+
+3.
+
+
+inventory <- function(p,q,r) 
+   tm <- matrix(rep(0,r^2),nrow=r)
+   for (i in 3:r) 
+      tm[i,i-1] <- p
+      tm[i,i-2] <- q
+   
+   tm[2,1] <- p
+   tm[2,r] <- q
+   tm[1,r] <- 1
+   return(findpi1(tm))
+
+
+
+
+

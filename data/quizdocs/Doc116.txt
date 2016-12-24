@@ -1,0 +1,118 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+Important note:  Remember that in problems calling for R code, you
+are allowed to use any built-in R function, e.g. choose(), 
+pnorm(), etc.  
+
+Note too the R function integrate(), e.g.
+
+
+> integrate(function(x) x^2,0,1)
+0.3333333 with absolute error < 3.7e-15
+
+
+The limits of integration must be numbers or Inf or -Inf, not symbols.
+Thus one cannot use it for the inner integral in a double integral.
+
+1. Consider the computer worm example in Sec. 8.3.  Say g = 5.
+
+
+
+[(a)] (25) Find the probability that the time spent at state 2
+(before going to state 3) is greater than 0.10.
+
+[(b)] (15) Let  denote the time needed to go from state 3
+to state 5.  Find .
+
+
+
+2. In each of the following, state---using mathematical symbols,
+e.g. E(), P(), F, f, , names of the variables used in the example
+(don't make up your own names), etc.---what the integral is calculating.
+Use an underscore for subscripts in your Answers file, e.g.
+write U_1 for .
+
+
+
+[(a)] (0)  in Section 8.3.4.
+
+[(b)] (25)  in
+Section 8.2.4.
+
+[(c)] (20) 
+, where we have independent random variables X and Y with density 
+ on . 
+
+
+
+3. (15) Suppose X and Y be independent and each have a uniform
+distribution on the interval (0,1).  Let Z = min(X,Y).  Find .
+
+
+
+Solutions:
+
+1.a  The text says that the time spent at state 2 is exponentially
+distributed with parameter 2x3 = 6.  So, the probability is
+
+
+1-pexp(0.10,6 
+
+
+1.b Have sum of two independent exponentials, but with different
+ values---just like the backup battery example.  So,
+ is equal to exp(-0.3/6) + exp(-0.3/4
+(where  and ).
+
+2.a  (error in original problem statement)
+
+2.b E(XY)
+
+2.c 
+
+3. Using the same derivation as on p.168,
+
+
+
+
+
+
+
+
+So,  and .
+
+4. This is the density of X+Y, where X and Y are independent with
+the given density.
+
+
+

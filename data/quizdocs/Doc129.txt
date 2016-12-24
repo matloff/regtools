@@ -1,0 +1,86 @@
+[twocolumn]article 
+
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+1.  This problem concerns the parking space model, pp.66ff.  Let
+ denote the number of open spaces in the i block.
+
+
+
+[(a)] (10) Find .
+
+[(b)] (10) Give a loop-free R expression for , using one or
+more of the functions on p.66.
+
+[(c)] (10) Give a loop-free R expression for .
+
+[(d)] (15) Give a loop-free R expression vor .
+
+[(e)] (10) Give a loop-free R expression vor .
+
+[(f)] (15) Give a loop-free R statement to place between lines 5 and 6
+in the code on p.67 that will print the approximate value of
+.
+
+
+
+2. (15) Give a single, loop-free R statement to replace lines 9-10 in
+the ALOHA network model on p.57, making use of one of the functions
+introduced in Chapter 3.  Think of the notebook!
+
+3. (15) In the bus ridership model, first introduced in Sec. 2.11, find
+.
+
+
+
+
+
+Solutions:
+
+1a. 
+
+1b. pgeom(5,0.15)
+
+1c. dbinom(3,10,0.5
+
+1d. 
+
+
+1e. Same as (d); see definition of Var().
+
+1f. mean(1/(1+dvals^2))
+
+2. rbinom(1,2,p)
+
+3. dbinom(4,8,0.2)
+
+
+

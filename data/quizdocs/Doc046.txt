@@ -1,0 +1,109 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do not
+turn in any supplementary sheets of paper. There is actually plenty of room
+for your answers, as long as you organize yourself BEFORE starting writing.
+
+1. (20) Consider the output of the code on p.29.  Suppose we had a
+64-bit system.  Assuming the address of X did not
+change, what would be the address of Y?
+
+2. (20)  Consider the declaration
+
+[fontsize=-2]
+char q[8][3];
+
+
+If q[0][2] happens to be stored at address 0x20c, at what address
+will q[2][1] be stored?
+
+3. (15) Consider the code
+
+[fontsize=-2]
+unsigned int *f,*g; char *s1 = "gr88", *s2 = "bb99";
+f = s1; g = s2;
+printf("
+
+
+Fill in the blank:  The number printed out will be negative if and only
+if the machine 
+.
+
+4.  The function print5() below prints out an 
+unsigned int in base-5.  So,
+
+[fontsize=-2]
+unsigned int x = 39;
+print5(x);
+
+
+would output 124  (actually 0124, since leading 0s aren't suppressed
+here).  Assume we have 8-bit words.
+
+
+
+[(a)] (30) Fill in the blanks in the code:
+
+[fontsize=-2]
+int print5(unsigned int x) 
+   unsigned int i,d, power5=_____________________, r=x;
+   for (i = 0; i < 4; i++) 
+      d = r / power5;
+      r = r 
+      printf(________________________________);
+      power5 /= 5;
+   
+   printf("");
+
+
+
+[(b)] (15) What impact, if any, did the assumption of an 8-bit word
+size have on the code?
+
+
+
+Solutions:
+
+1.  0xbffffb7c 
+
+2   0x211
+
+3. is little-endian
+
+4a
+
+[fontsize=-2]
+int print5(int x) 
+   int i,d, power5=125, r=x;
+   for (i = 0; i < 4; i++) 
+      d = r / power5;
+      r = r 
+      printf("
+      power5 /= 5;
+   
+   printf("");
+
+
+
+4b the initial value of power5 was 125
+
+
+

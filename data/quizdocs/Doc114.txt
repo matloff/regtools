@@ -1,0 +1,120 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+listings
+
+amsmath
+
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed); do not turn in any supplementary sheets of paper. There is
+actually plenty of room for your answers, as long as you organize
+yourself BEFORE starting writing.
+
+1. Consider once again the Jack and Jill example, Sec.  3.14.1.
+Write you answers as a decimal expression, e.g. 
+.
+
+
+
+[(a)] (20) Find .
+
+[(b)] (15) Find .  
+
+
+
+2.  Consider the Ethernet example, Sec. 5.5.4.  Answer the
+following with either decimal expressions (see above) or integrals.  The
+latter must be definite integrals that calculus students could evaluate
+to actual numbers.
+
+
+
+[(a)] (10) Find Var(X).
+
+[(b)] (10) Find .
+
+[(c)] (15) Find .
+
+[(d)] (15) (BONUS PROBLEM: Points plus Extra Credit) Suppose
+transmission time T for a message is also random, exponentially
+distributed with mean 0.1.  Find 
+.
+
+
+
+3. (15) Fill in the following R code to find  in Sec.
+4.4.7.2:
+
+
+xpois(blank2, blank3)
+
+
+The "x" here is blank1.
+
+
+
+Solutions:
+
+1.a
+
+
+
+
+
+
+1.b 
+
+
+
+
+
+
+
+
+
+2.a Since , then  (p.95).
+
+2.b .
+
+2.c 0
+
+2.d Here T will be the transmission time for X.  We need to find
+.  Following the computation in Sec. 5.5.6, we have
+
+
+
+
+
+So, similar to the reasoning in (5.87), we have
+
+
+
+
+
+
+
+3. Use Sec. 4.4.6.1.
+
+
+ppois(4,5.52)
+
+
+
+

@@ -1,0 +1,180 @@
+article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do not
+turn in any supplementary sheets of paper. There is actually plenty of room
+for your answers, as long as you organize yourself BEFORE starting writing.
+
+SHOW YOUR WORK! 
+
+1. (20) Just above (10.39), p.318, supposed it said, ``The nodes
+collectively will repeatedly cycle through idle and busy periods, termed
+I and B periods,'' instead of defining I and B in terms of just node 0.
+Here we are in an I period if no nodes are active, and in a B period if
+at least one node is active.  How would (10.39) change?
+
+2. (20) Exercise 20, Chapter 5, p.155.
+
+3. Consider the board game in Sec. 2.8, pp.14-15.  This can be
+modeled as a Markov chain, with state space 0,1,2,...,7.
+
+
+
+[(a)] (10) Find .
+
+[(b)] (10) Find the long-run fraction of turns in which you get a
+bonus roll, expressed as a function of .  Note:  If you roll and
+hit 3, and then roll a second time for the bonus, that still only counts
+one turn, not two.
+
+
+
+4. The moment generating function of the random pair (X,Y) is
+defined by
+
+
+
+
+
+
+
+[(a)] (10) For the density (5.17), p.105, find .
+Express your answer in integral form.
+
+[(b)] (10) For a general random pair (X,Y), express Cov(X,Y) in
+terms of moment generating functions.  
+
+
+
+5. (20) Consider a Markov chain .  Let  have the
+distribution  (an example is discussed in Sec. 10.1.2.4).  Show
+that ``given the present, the past and the future are independent,'' in
+the sense that for ,  and  are independent,
+given .
+
+Solutions:
+
+1.  Again I will have a geometric distribution.  However, the
+``success probability'' (the parameter p in (3.66)) changes.
+``Success'' here will be that at least one of the n nodes becomes
+active, i.e. generates a message to send.  This occurs with probability 
+
+
+
+
+
+So, 
+
+
+
+
+
+2.  From the Law of Total Variance,
+
+
+
+
+
+Since the conditional distribution of N given L is Poisson with
+parameter L, .  The result follows.
+
+3.a We can go from square 6 to square 7 either directly, by
+rolling a 1, or via a bonus, by rolling a 5 to get to 3, then rolling a
+4 to get to 7.  The probability of this is
+
+
+
+
+
+3.b  We can only get a bonus from squares 0 (by rolling a 3), 1
+(by rolling a 2), 2, 5, 6 and 7.  It's impossible from square 4, and we
+are never on square 3 anyway.  So,
+
+
+
+
+
+
+
+
+4.a  Use (5.15):
+
+
+
+
+
+
+
+4.b  For example, to get E(XY), note that
+
+
+
+
+
+
+Thus
+
+
+
+
+
+
+5. We must show that
+
+
+
+
+
+
+
+
+But the left-hand side of () is
+
+
+
+
+
+
+
+
+
+
+
+while the two factors in the right-hand side are
+
+
+
+
+
+
+
+
+
+and
+
+
+
+
+
+
+Multiplying () by (), we find that the product
+matches ()!  So we're done.
+
+ 

@@ -1,0 +1,154 @@
+[twocolumn]article
+
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+Important note:  Remember that in problems calling for R code, you
+are allowed to use any built-in R function, e.g. choose(), 
+sum(), etc.  
+
+1.  Consider the derivation on p.19 of our text, starting with
+(2.48).  We would like to add reasons for the steps, as in (2.9) and
+(2.10).  Write your answers as equation numbers, e.g.  (8.88).  (Do not
+include the English word ``equation.''  Remember, this will be graded by
+computer, and in this problem the script will assume a numerical answer.)
+
+
+
+[(a)] (10) Give the ``mailing tube'' for (2.48).
+
+[(b)] (15) Give the ``mailing tube'' for (2.49).
+
+
+
+2.  Suppose three fair dice are rolled.  We wish to find 
+the approximate probability that the first die shows fewer than 3 dots,
+given that the total number of dots for the 3 dice is more than 8, using
+the code below.
+
+Fill in the blanks with a single line of code in each case.
+
+
+
+[(a)] (15) Fill in Line 5.
+
+[(b)] (15) Fill in Line 8.
+
+[(c)] (15) Fill in Line 11.
+
+
+
+[numbers=left]
+dicesim <- function(nreps) 
+   count1 <- 0
+   count2 <- 0
+   for (i in 1:nreps) 
+      
+      if (sum(d) > 8) 
+         count1 <- count1 + 1
+     
+      
+   
+   
+
+
+
+3.  Consider the bus ridership example, in Sec. 2.11 of our text.
+
+
+
+[(a)] (15) Find the probability that fewer people board at the
+second stop than at the first.
+
+[(b)] (15) Someone tells you that as she got off the bus at the
+second stop, she saw that the bus then left that stop empty.  Find the
+probability that she was the only passenger when the bus left the first
+stop.
+
+
+
+
+
+
+
+Solutions:
+
+1.a (2.2)
+
+1.b (2.5)
+
+2.
+
+[numbers=left]
+dicesim <- function(nreps) 
+   count1 <- 0
+   count2 <- 0
+   for (i in 1:nreps) 
+      d <- sample(1:6,3,replace=T)
+      if (sum(d) > 8) 
+         count1 <- count1 + 1
+         if (d[1] < 3) count2 <- count2 + 1
+      
+   
+   return(count2 / count1)
+
+
+
+3.a
+
+
+
+
+
+
+
+
+
+3.b We are given that .  But we are also given that
+.  Then
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

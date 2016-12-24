@@ -1,0 +1,109 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+On all Tests, 32-bit word size on Intel machines running Linux is
+assumed unless otherwise stated.
+
+
+1. (15) The name for the Intel stack pointer register is
+.
+ 
+2. (20) Suppose we wish to call scanf() from x.s.  Then
+instead of running as, it's more convenient to run
+
+because the latter will automatically link in the C
+.
+
+3. (20) Suppose there is a certain C language function, f(),
+with type int, i.e. it has an integer return value.  Suppose the
+compiler produces code in which the return value is held in ECX during
+intermediate computation.  Fill in the blank in the code below, which
+shows what the compiler produces near the end of the function.
+
+
+movl __________, __________
+ret
+
+
+4. I ran the code in pp.137-139 with GDB.  Here is part of my
+session:
+
+
+Breakpoint 1, addone () at AddOne.s:25
+25         push 
+(gdb) n
+30         movl 8(
+(gdb) n
+32         incl (
+(gdb) info registers
+eax            0xbffff7e4       -1073743900
+ecx            0xcbe07bea       -874480662
+edx            0x1      1
+ebx            0x804a020        134520864
+esp            0xbffff718       0xbffff718
+ebp            0xbffff738       0xbffff738
+esi            0x0      0
+edi            0x0      0
+eip            0x8048439        0x8048439 <addone+5>
+eflags         0x200282 [ SF IF ID ]
+cs             0x73     115
+ss             0x7b     123
+ds             0x7b     123
+es             0x7b     123
+fs             0x0      0
+gs             0x33     51
+
+
+
+
+[(a)] (15) At what address is the return address ( the ``bread
+crumbs'') stored?
+
+[(b)] (15) At what address is x (in the main program) stored?
+
+[(c)] (15) During the execution (not fetch) of the incl
+instruction, what value(s) will be placed on the data bus?
+
+
+
+
+
+Solutions:
+
+name of stack ptr:  ESP
+
+calling scanf():  gcc, library
+
+ECX:  movl 
+
+GDB session:  0xbffff71c, 0x804a020, 7, 8
+

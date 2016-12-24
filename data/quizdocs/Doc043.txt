@@ -1,0 +1,114 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do not
+turn in any supplementary sheets of paper. There is actually plenty of room
+for your answers, as long as you organize yourself BEFORE starting writing.
+
+1. Consider the GDB output at the top of p.149.  Answer the
+following questions about line 15:
+
+
+
+[(a)] (10) Which of the four numbers is an address?
+
+[(b)] (10) What kind of address is your answer in (a)?  (i) Physical
+address. (ii) Virtual address. (iii) Page number.  (iv) Offset.  (v)
+Stack position.  (vi) I/O port number.  (vii) None of these.
+
+
+
+2. (20) Suppose we are running a program on CSIF. It seems slow
+to us, and we suspect that this may be due to excessive cache misses or
+page faults.  Fill in the blanks:  Using material from our course, we
+can determine the number of
+
+using the 
+
+command, but we cannot determine the number of 
+.
+Of these two numbers the one that causes more slowdown is
+.
+
+3. (10) Consider the code on p.231.  What is the slot number for
+z?
+
+4. (25) In the example on p.199, give a numerical expression for the
+offset-within-page of q[0].
+
+5. (25) I changed the function Min() on p.225 to:
+
+[fontsize=-2]
+public static int gy(int U, int V)
+  int T;
+   _______________________________________________________________
+   _______________________________________________________________
+   _______________________________________________________________
+
+
+
+This produced the code
+
+[fontsize=-2]
+public static int gy(int, int);
+  Code:
+   0:	iload_0
+   1:	iconst_3
+   2:	iadd
+   3:	iload_1
+   4:	if_icmpge	14
+   7:	iload_0
+   8:	iconst_3
+   9:	iadd
+   10:	istore_2
+   11:	goto	18
+   14:	iload_1
+   15:	iconst_3
+   16:	iadd
+   17:	istore_2
+   18:	iload_2
+   19:	ireturn
+
+
+
+Fill in the blanks above.
+
+Solutions:
+
+1a. Not graded.
+
+1b. (ii)
+
+2. page faults, time, cache misses, page faults
+
+3. 3
+
+4.  0x7bf-4-1999  4
+
+5.
+
+[fontsize=-2]
+if (U+3 < V) T = U+3;
+else T = V+3;
+return T;
+
+
+
+

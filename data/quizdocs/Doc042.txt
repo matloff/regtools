@@ -1,0 +1,138 @@
+
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if needed); do
+not turn in any supplementary sheets of paper. There is actually plenty
+of room for your answers, as long as you organize yourself BEFORE
+starting writing.
+
+1. (10) Give a single assembly language instruction equivalent to
+
+[fontsize=-2]
+popl 
+popl 
+popl 
+
+
+assuming that we do not care what the popped values actually are.
+
+2. (10) When the call scanf("ddd",u,v,w) is
+compiled, how many push operations will appear before the CALL
+instruction?
+
+3. (10) Say you are running some program on CSIF that makes use of
+a special library in your own home directory, say /home/thisisme/.
+What command should you run to enable the OS to find that library when
+you execute the program?
+
+4. (10) List the Intel-specific registers (using their official
+Intel names) whose values are affected when a RET instruction executes.
+
+5. This problem concerns the code in pp.137-139.  Suppose we were
+to change things so that addone() would have (as viewed as a
+function callable from C) the signature
+
+[fontsize=-2]
+int addone(int x)
+
+
+as opposed to what was in the version in the book,
+
+[fontsize=-2]
+void addone(int *x)
+
+
+The function will now return the value of its argument plus 1.
+
+
+
+[(a)] (30) Fill in the gap in the revised version of 
+addone():
+
+[fontsize=-2]
+.text
+.globl addone
+addone:
+                            # insert at most 4 instructions here
+   ret
+
+
+[(b)] (30) Suppose the call in TryAddOne.c is now wrapped
+inside a print call:
+
+[fontsize=-2]
+printf("
+
+
+I ran the new code through gcc -S, an excerpt of which appears
+below.  Fill in the gaps.
+
+[fontsize=-2]
+movl	
+
+
+
+
+.LC0, (
+call	printf
+
+
+
+
+Solutions:
+
+1. addl 12, esp
+
+2. 4
+
+3 
+
+[fontsize=-2]
+setenv LD_LIBRARY_PATH /home/thisisme
+
+
+4. ESP, EIP
+
+5.a
+
+[fontsize=-2]
+.text
+.globl addone
+addone:
+   movl 4(
+   incl 
+   ret
+
+
+5.b
+
+[fontsize=-2]
+movl    
+
+
+
+
+.LC0, (
+call    printf
+
+
+
+

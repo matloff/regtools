@@ -1,0 +1,105 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+1. (20) The formal term used when two events cannot occur ``in the
+same notebook line'' is that they are
+.
+
+2. Consider the simple board game in Section 2.10.  Let X denote
+your position after your first turn.
+
+
+
+[(a)] (20) Find P(X = 1).
+
+[(b)] (20) Find P(R = 1  X = 1).
+
+
+
+3. Consider the ALOHA example, same as in the book, except that
+both nodes start out inactive, i.e. .  Assume p = 0.6, q = 0.2.
+
+
+
+[(a)] (20) Find the probability that there is a collision in first
+epoch.
+
+[(b)] (20) Find .
+
+
+
+Solutions:
+
+1. disjoint
+
+2.a
+
+
+
+
+
+
+
+
+2.b
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3.a  How can it happen?  A collision will occur in the
+first epoch if and only both nodes develop messages and both try to
+send, which has probability 
+
+
+
+
+
+3.b  How can it happen?   will occur if and only if both
+nodes go active and either both send or both refrain from sending.  the
+probability of that is
+
+
+
+
+
+
+

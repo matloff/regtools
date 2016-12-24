@@ -1,0 +1,110 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+
+25pt
+
+fancyvrb
+relsize
+hyperref
+
+listings
+amsmath
+
+
+
+xleftmargin=5mm,framexleftmargin=10mm,basicstyle=
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed).  MAKE SURE TO COPY YOUR ANSWERS TO A SEPARATE SHEET FOR SENDING
+ME AN ELECTRONIC COPY LATER.
+
+Important note:  Remember that in problems calling for R code, you
+are allowed to use any built-in R function, e.g. choose(), 
+sum(), etc.  
+
+1. This problem deals with the ALOHA simulation example on p.23.
+
+
+
+[(a)] (20) What variable in the program is analogous with the number of lines
+in our ``notebook'' view?
+
+[(b)](20) Suppose we want to add code to find P(collision during epoch
+2).  We'll set a variable ce2 to 0 early in the code, and near the
+end, we'll divide it by nreps.  We'll need to add one more line of
+code.  State the line number after which the new line is to be inserted,
+and state what code goes there.  Sample answer:
+
+
+after line 10 insert "if (x == 0) y <- 3"
+
+
+
+
+2. This problem involves the bus ridership example in Section
+2.11.
+
+
+
+[(a)] (20) Find the probability that no passengers board the bus at
+the first three stops.
+
+[(b)] (20) Suppose it is observed that the bus arrives empty at the
+third stop.  What is the probability that exactly two people boarded the
+bus at the first stop?
+
+[(c)] (20) Suppose we wish to find  via simulation, by
+modifying the program on p.24.  Say we initialize to 0 a variable named
+tl2 near the beginning of the program, and will divide it by 
+nreps near the end of the code.  State the line number after which the
+new line is to be inserted, and state what code goes there.  
+
+
+
+Solutions:
+
+1.a nreps
+
+1.b  After line 29, insert
+
+
+if (numsend == 2) ce2 <- ce2 + 1
+
+
+2.a 
+
+
+0.5^3
+
+
+2.b  The event of the bus arriving empty at stop 3 is the same as
+.  Then we have:
+
+
+
+
+
+
+
+where the numbers in the last step come from p.19.
+
+2.c  After line 12, insert:
+
+
+if (j == 2) tl2 <- tl2 + passengers
+
+
+
+

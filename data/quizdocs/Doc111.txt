@@ -1,0 +1,98 @@
+[twocolumn]article
+
+-0.5in
+-0.5in
+0.0in
+0in
+0in
+7.0in
+9.5in
+0in
+0.05in
+0.3pt
+fancyvrb
+relsize
+hyperref
+listings
+
+
+
+Name: 
+
+Directions: Work only on this sheet (on both sides, if
+needed); do not turn in any supplementary sheets of paper. There is
+actually plenty of room for your answers, as long as you organize
+yourself BEFORE starting writing.
+
+1.  Consider the ALOHA simulation on p.47.
+
+
+
+[(a)] (20) On what line do we simulate the possible creation of a
+new message?
+
+[(b)] (20) Change line 10 so that it uses sample() instead of
+runif().
+
+
+
+2. (20) Say we roll two dice, a blue one and a yellow one.  Let B
+and Y denote the number of dots we get, respectively.  Now let G denote
+the indicator random variable for the event S = 2.  Find E(G).
+
+3. Suppose  are independent indicator
+random variables, with , j = 1,2,3.  Find the
+following in terms of the , writing your derivation in ``stacked
+equation'' form [as for example in (3.53)-(3.55)], with reasons in
+the form of mailing tube numbers.  You should do reasonable algebraic
+simplfication of your expressions.
+
+Let .
+
+
+
+[(a)] (20) ES
+
+[(b)] (20) Var(S)
+
+
+
+
+
+Solutions:
+
+1.a 14
+
+1.b 
+
+[fontsize=-2]
+numsend <- numsend + sample(0:1,1,prob=c(p,1-p))
+
+
+2.  EG = P(G = 1) = P(B+Y = 1) = 1/36
+
+3.a
+
+
+
+
+
+
+3.b
+
+
+
+
+
+
+Let  denote the event associated with , j = 1,2,3, and let 
+denote the event that  and  both occur.  Then  is the
+indicator random variable for .  Thus
+
+
+
+
+
+
+
+

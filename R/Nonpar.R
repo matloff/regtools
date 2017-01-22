@@ -218,6 +218,8 @@ kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
    }
    # evaluate at these values of k
    ks <- floor(kmax/nk) * (1:nk)
+   if (min(ks) <= 1)
+      stop('need k at least 2')
    merrs <- ks
    for (i in 1:nk) merrs[i] <- meanerr(ks[i])
    names(merrs) <- ks
@@ -227,14 +229,18 @@ kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
    result
 }
 
+# incorrect prediction in 2-class classification problem
+predwrong <- function(muhat,y)
+   as.integer(y == round(muhat))
+
 ### ######################  plot.kmin()  ###############################
-### 
-### # x is output from kmin()
-### 
-### plot.kmin <- function(x,y,...) {
-###    plot(names(x$meanerrs),x$meanerrs,
-###       xlab='k',ylab='mean error',pch=20)
-### }
+
+# x is output from kmin()
+
+plot.kmin <- function(x,y,...) {
+   plot(names(x$meanerrs),x$meanerrs,
+      xlab='k',ylab='mean error',pch=20)
+}
 
 ######################  meany(), etc. ###############################
 

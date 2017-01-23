@@ -106,13 +106,6 @@ l1(y,muhat)
    all predictor variables on an equal footing.  The scaling parameters
    will be recorded, and then applied later in prediction.
 
-   One can explore the effects of various numbers of nearest neighbors
-   \code{k} through the \code{kmin} function.  It will run
-   \code{knnest} for the values of \code{k} specified in \code{nk}.  If
-   the latter is a number, the range 0 to \code{xdata$kmax} will be
-   divided into \code{nk} equally subintervals, and the values of
-   \code{k} used will then be the right endpoints of the subintervals.
-
    The function \code{predict.knn} uses the output of \code{knnest} to
    do regression estimation or prediction on new points.  Since the
    output of \code{knnest} is of class \code{'knn'}, one invokes this
@@ -179,10 +172,16 @@ estimated regression function values at the training set points.
 The function \code{predict.knn} returns the predicted Y values at
 \code{predpts}.  It is called simply via \code{predict}.
 
-The function \code{kmin} returns an R list, with the component
-\code{meanerrs} containing the cross-validated mean loss function values
-and \code{ks} containing the corresponding values of \code{k};
-\code{plot.knn} then plots the former against the latter.
+One can explore the effects of various numbers of nearest neighbors
+\code{k} through the \code{kmin} function.  (This function should be
+cosidered experimental.) It will run \code{knnest} for the values of
+\code{k} specified in \code{nk}.  If the latter is a number, the range 0
+to \code{xdata$kmax} will be divided into \code{nk} equally
+subintervals, and the values of \code{k} used will then be the right
+endpoints of the subintervals.  The function returns an R list, with the
+component \code{meanerrs} containing the cross-validated mean loss
+function values and \code{ks} containing the corresponding values of
+\code{k}; \code{plot.knn} then plots the former against the latter.
 
 % The \code{parget.knnx} function returns the matrix of indices of nearest
 % neighbors, as with the \code{nn.index} component of the return value of
@@ -196,10 +195,10 @@ x <- matrix(sample(1:100,30),ncol=3)
 xd <- preprocessx(x[,1],2,TRUE)  # just 1 predictor
 ko <- knnest(x[,2],xd,2)  # Y is x[,2]
 ko$regest # 1st element = 74.5
-predict(ko,matrix(76))  # 47.5
+predict(ko,matrix(76),TRUE)  # 47.5
 ko <- knnest(x[,-1],xd,2)  # Y bivar
 ko$regest # 1st row = (74.5,31.5)
-predict(ko,matrix(76),FALSE)  # 47.5, 65.0
+predict(ko,matrix(76),TRUE)  # 47.5, 65.0
 
 set.seed(9999)
 xe <- matrix(rnorm(30000),ncol=3) 
@@ -209,11 +208,9 @@ y <- xe \%*\% c(1,0.5,0.2)  # Y
 x <- xe[,-3]  # X
 xdata <- preprocessx(x,500)  # k as high as 500
 zout <- knnest(y,xdata,200) 
-predict(zout,matrix(c(1,1),nrow=1))  # about 1.55
-predict(zout,rbind(c(1,1),c(2,1.2)),6)  # about 1.16, 2.63
-predict(zout,rbind(c(1,1),c(2,1.2)))  # about 1.55, 2.58
-predict(zout,rbind(c(0,0)),6)  # about -0.03
-predict(zout,rbind(c(0,0)))  # about 0.63
+predict(zout,matrix(c(1,1),nrow=1),TRUE)  # about 1.55
+predict(zout,rbind(c(1,1),c(2,1.2)),TRUE)  # about 1.55, 2.58
+predict(zout,rbind(c(0,0)),TRUE)  # about 0.63
 
 \dontrun{
 data(prgeng)
@@ -234,12 +231,12 @@ zout <- knnest(pecs1[,6],xdata,50)  # k = 50
 predict(zout,matrix(c(42,2,52,0,0),nrow=1),TRUE)  # 62106
 # try k = 25; don't need to call preprocessx() again
 zout <- knnest(pecs1[,6],xdata,25)
-predict(zout,matrix(c(42,2,52,0,0),nrow=1))  # 69104
+predict(zout,matrix(c(42,2,52,0,0),nrow=1),TRUE)  # 69104
 # quite a difference; what k values are good?
-kmin(pecs1[,6],xdata) # at least 50
+kmout <- kmin(pecs1[,6],xdata) # at least 50
 # what about a man?
 zout <- knnest(pecs1[,6],xdata,50)
-predict(zout,matrix(c(42,1,52,0,0),nrow=1))  # 78588
+predict(zout,matrix(c(42,1,52,0,0),nrow=1),TRUE)  # 78588
 # form training and test sets, fit on the former and predict on the
 # latter
 fullidxs <- 1:nrow(pecs1)

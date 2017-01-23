@@ -11,10 +11,11 @@ S3method(coef,lmac)
 S3method(vcov,lmac)
 S3method(plot,rlm)
 S3method(predict,knn)
+S3method(plot,kmin)
 S3method(predict,ovaknn)
 
 export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
-   kmin,
+   kmin,predwrong,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
    ovalogtrn,ovalogpred,avalogtrn,avalogpred,
    knntrn,predict.ovaknn,classadjust,

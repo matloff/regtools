@@ -107,7 +107,11 @@ l1(y,muhat)
    will be recorded, and then applied later in prediction.
 
    One can explore the effects of various numbers of nearest neighbors
-   \code{k} through the \code{kmin} function. 
+   \code{k} through the \code{kmin} function.  It will run
+   \code{knnest} for the values of \code{k} specified in \code{nk}.  If
+   the latter is a number, the range 0 to \code{xdata$kmax} will be
+   divided into \code{nk} equally subintervals, and the values of
+   \code{k} used will then be the right endpoints of the subintervals.
 
    The function \code{predict.knn} uses the output of \code{knnest} to
    do regression estimation or prediction on new points.  Since the
@@ -117,10 +121,12 @@ l1(y,muhat)
    specified as a matrix if there is more than one prediction point and
    more than one predictor variable; otherwise, use a vector.
    
-   By default, a "1-NN" method is used here:  Given a new point u whose
+   A "1-NN" method is used here:  Given a new point u whose
    Y value we wish to predict, the code finds the single closest row
    in the training set, and returns the previously-estimated regression
-   function value at that row.
+   function value at that row.  If u needs to be scaled, specify 
+   \code{TRUE} in the third argument of \code{predict};
+   otherwise specify FALSE.
 
    It can be shown that nearest-neighbor (or kernel) regression
    estimates are subject to substantial bias near the fringes of the
@@ -193,7 +199,7 @@ ko$regest # 1st element = 74.5
 predict(ko,matrix(76))  # 47.5
 ko <- knnest(x[,-1],xd,2)  # Y bivar
 ko$regest # 1st row = (74.5,31.5)
-predict(ko,matrix(76))  # 47.5, 65.0
+predict(ko,matrix(76),FALSE)  # 47.5, 65.0
 
 set.seed(9999)
 xe <- matrix(rnorm(30000),ncol=3) 
@@ -225,7 +231,7 @@ xdata <- preprocessx(pecs1[,1:5],50)
 zout <- knnest(pecs1[,6],xdata,50)  # k = 50
 # find the est. mean income for 42-year-old women, 52 weeks worked, with
 # a Master's
-predict(zout,matrix(c(42,2,52,0,0),nrow=1))  # 62106
+predict(zout,matrix(c(42,2,52,0,0),nrow=1),TRUE)  # 62106
 # try k = 25; don't need to call preprocessx() again
 zout <- knnest(pecs1[,6],xdata,25)
 predict(zout,matrix(c(42,2,52,0,0),nrow=1))  # 69104
@@ -240,7 +246,7 @@ fullidxs <- 1:nrow(pecs1)
 train <- sample(fullidxs,10000)
 xdata <- preprocessx(pecs1[train,1:5],50)
 trainout <- knnest(pecs1[train,6],xdata,50)
-testout <- predict(trainout,as.matrix(pecs1[-train,-6]))
+testout <- predict(trainout,as.matrix(pecs1[-train,-6]),TRUE)
 # find mean abs. prediction error (about $25K)
 mean(abs(pecs1[-train,6] - testout))
 # examples of fit assessment

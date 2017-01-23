@@ -130,6 +130,7 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 
 #    object:  output from knnest(), object of class 'knn'
 #    predpts:  matrix/data frame of X values at which to predict Y
+#    needtoscale:  if TRUE, scale predpts according to xdata
 
 # value:
 
@@ -154,13 +155,16 @@ predict.knn <- function(object,...) {
    }
    if (!is.matrix(predpts)) 
       stop('prediction points must be in a matrix')
-   # need to scale predpts with the same values that had been used in
-   # the training set
-   ctr <- object$scaling[,1]
-   scl <- object$scaling[,2]
-   predpts <- scale(predpts,center=ctr,scale=scl)
+   needtoscale <- arglist[[2]]
+   if (needtoscale) {
+      # scale predpts with the same values that had been used in
+      # the training set
+      ctr <- object$scaling[,1]
+      scl <- object$scaling[,2]
+      predpts <- scale(predpts,center=ctr,scale=scl)
+   }
    k <- 1
-   if (length(arglist) > 1) k <- arglist[[2]]
+   # if (length(arglist) > 1) k <- arglist[[2]]
    if (k == 1) {
       tmp <- FNN::get.knnx(x,predpts,1)
       idxs <- tmp$nn.index
@@ -199,7 +203,8 @@ predict.knn <- function(object,...) {
 #   xdata: result of calling preprocessx() on the X portion of the data;
 #          xval=True is suggested for that call
 #   lossftn(y,muhat): measure of loss if muhat used to predict y
-#   nk: number of values to try for k, evenly spaced
+#   nk: number of values to try for k, evenly spaced; or, if specified
+#       as a vector, the actual values to try
 #   nearf: see knnest()
 
 #   value: the value of k found to be "best"
@@ -213,15 +218,17 @@ kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
    kmax <- xdata$kmax
    meanerr <- function(k) {
       kout <- knnest(y,xdata,k,nearf)
-      kpred <- predict(kout,x)
+      kpred <- predict(kout,x,needtoscale=FALSE)
       mean(lossftn(y,kpred))
    }
    # evaluate at these values of k
-   ks <- floor(kmax/nk) * (1:nk)
+   if (length(nk) == 1) {
+      ks <- floor(kmax/nk) * (1:nk)
+   } else ks <- nk
    if (min(ks) <= 1)
       stop('need k at least 2')
    merrs <- ks
-   for (i in 1:nk) merrs[i] <- meanerr(ks[i])
+   for (i in 1:length((ks))) merrs[i] <- meanerr(ks[i])
    names(merrs) <- ks
    result <- list(meanerrs = merrs)
    result$kmin <- ks[which.min(merrs)]

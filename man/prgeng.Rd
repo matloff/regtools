@@ -47,8 +47,11 @@ The variables are:
    }
 }
 
+The convenience function \code{getPE} loads \code{prgeng} and creates
+dummies from the factors, producing \code{pe}.
+
 \usage{
 data(prgeng); head(prgeng)
-getPE()  # loads prgeng, creates dummies from the factors, producing pe
+getPE()  
 }
 

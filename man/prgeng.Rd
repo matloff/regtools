@@ -1,5 +1,6 @@
-\name{prgeng}
+\name{prgeng,getPE}
 \alias{prgeng}
+\alias{getPE}
 
 \title{
 Silicon Valley programmers and engineers
@@ -47,6 +48,7 @@ The variables are:
 }
 
 \usage{
-data(prgeng); prgeng
+data(prgeng); head(prgeng)
+getPE()  # loads prgeng, creates dummies from the factors, producing pe
 }
 

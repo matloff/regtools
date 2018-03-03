@@ -45,10 +45,10 @@ The variables are:
    \item{\code{gender}, 1 for male, 2 for female}
 
    }
-}
 
 The convenience function \code{getPE} loads \code{prgeng} and creates
 dummies from the factors, producing \code{pe}.
+}
 
 \usage{
 data(prgeng); head(prgeng)

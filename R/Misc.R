@@ -30,7 +30,7 @@ getPE <- function()
    pe$educ <- NULL
    pe$engl <- NULL
    pe$birth <- NULL
-   pe$powpuma <- NULL
+   pe$powspuma <- NULL
    pe$yrentry <- ifelse(pe$yrentry == 0,round(2000-pe$age),pe$yrentry)
    # dummies for the rest
    require(dummies)

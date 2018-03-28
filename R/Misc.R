@@ -46,3 +46,22 @@ getPE <- function()
    pe <<- pe
 }
 
+# make a matrix or data frame (fmt = ''' or 'd') of 
+# dummies from a factor f; col names will be 'dms' concatenated
+# with the factor levels
+factorToDummies <- function(f,fmt='m')
+{
+   n <- length(f)
+   fl <- levels(f)
+   ndumms <- length(fl) - 1
+   dms <- if(fmt=='m') {
+      matrix(nrow=n,ncol=ndumms) 
+   }
+   else 
+      data.frame(nrow=n,ncol=ndumms)
+   for (i in 1:ndumms) 
+      dms[,i] <- as.integer(f == fl[i])
+   colnames(dms) <- paste('dms',fl[-(length(fl))],sep='')
+   dms
+}
+

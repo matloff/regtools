@@ -314,11 +314,12 @@ nonparvsxplot <- function(knnout,lmout=NULL) {
       vertval <- parfitted - nonparfitted
    } else vertval <- nonparfitted
    x <- knnout$x
+   par(mfrow=c(1, 1))
    for (i in 1:ncol(x)) {
       xlab <- colnames(x)[i]
       plot(x[,i],vertval,xlab=xlab,pch=20)
       if (havelmout) abline(0,0)
-      readline('next plot')
+      #readline('next plot')
    }
 }
 

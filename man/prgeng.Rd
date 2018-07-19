@@ -5,6 +5,10 @@
 \title{
 Silicon Valley programmers and engineers
 }
+\usage{
+data(prgeng); head(prgeng)
+getPE(Dummies=TRUE)  
+}
 
 \description{
 This data set is adapted from the 2000 Census (5\% sample, person
@@ -46,12 +50,8 @@ The variables are:
 
    }
 
-The convenience function \code{getPE} loads \code{prgeng} and creates
-dummies from the factors, producing \code{pe}.
+The convenience function \code{getPE} loads \code{prgeng},
+optionally creating dummies from the factors, and producing \code{pe}.
 }
 
-\usage{
-data(prgeng); head(prgeng)
-getPE()  
-}
 

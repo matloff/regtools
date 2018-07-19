@@ -18,13 +18,19 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
    origx
 }
 
-# convenience function to load and prep the 'prgeng' data
-
-getPE <- function()
+# convenience function to load and prep the 'prgeng' data; creates 
+# global data frame pe; if Dummies, then factors are changed to 
+# dummy variables
+getPE <- function(Dummies=TRUE)
 {
    data(prgeng)
-   # dummies for MS, PhD
    pe <- prgeng
+   pe$sex <- 2 - pe$sex
+   if (!Dummies) {
+      pe <<- pe
+      return()
+   }
+   # dummies for MS, PhD etc.
    pe$ms <- as.integer(pe$educ == 14)
    pe$phd <- as.integer(pe$educ == 16)
    pe$educ <- NULL
@@ -32,7 +38,6 @@ getPE <- function()
    pe$birth <- NULL
    pe$powspuma <- NULL
    pe$yrentry <- ifelse(pe$yrentry == 0,round(2000-pe$age),pe$yrentry)
-   # dummies for the rest
    require(dummies)
    citstatus <- dummy(pe$cit)[,1:4]
    colnames(citstatus) <- c('cit1','cit2','cit3','cit4')
@@ -42,7 +47,6 @@ getPE <- function()
    colnames(occcode) <- c('occ1','occ2','occ3','occ4','occ5')
    pe <- cbind(pe,occcode)
    pe$occ <- NULL
-   pe$sex <- 2 - pe$sex
    pe <<- pe
 }
 

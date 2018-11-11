@@ -25,5 +25,6 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    ridgelm,plot.rlm,
    l2,l1,
    mm,
-   unscale,factorToDummies,
+   unscale,
+   factorsToDummies,
    pwplot)

@@ -101,4 +101,24 @@ factorToDummies <- function (f,fname)
     dms
 }
 
+# check for columns that are all the same value, or all the same value
+# except for NAs
+
+checkConstCols <- function(df) 
+{
+   tmp <- sapply(df,checkConstCol)
+   if (any(tmp)) {
+      print('offending columns')
+      print(which(tmp))
+   }
+}
+
+checkConstCol <- function(col) 
+{
+   u <- unique(col)
+   if (length(u) == 1 || (length(u) == 2 && NA %in% u))  {
+      warning('column values all identical or NA')
+      return(TRUE)
+   } else return(FALSE)
+}
 

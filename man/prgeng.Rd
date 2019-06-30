@@ -1,9 +1,10 @@
-\name{prgeng,getPE}
+\name{prgeng}
 \alias{prgeng}
-\alias{getPE}
+\alias{peDumms}
+\alias{peFactors}
 
 \title{
-Silicon Valley programmers and engineers
+Silicon Valley programmers and engineers data
 }
 \usage{
 data(prgeng); head(prgeng)
@@ -12,8 +13,24 @@ getPE(Dummies=TRUE)
 
 \description{
 This data set is adapted from the 2000 Census (5\% sample, person
-records).  It is restricted to programmers and engineers in the 
-Silicon Valley area.
+records).  It is mainly restricted to programmers and engineers in the 
+Silicon Valley area.  (Apparently due to errors, there are some from
+other ZIP codes.)
+
+There are three versions:
+
+   \itemize{
+
+    \item{\code{prgeng}, the original data, with categorical variables
+    in their original codes}
+
+    \item{\code{peDumms}, same but with categorical variables
+    converted to dummies}
+
+    \item{\code{peDumms}, same but with categorical variables
+    converted to factors}
+
+    }
 
 The variable codes, e.g. occupational codes, are available from the Census
 Bureau, at
@@ -50,8 +67,6 @@ The variables are:
 
    }
 
-The convenience function \code{getPE} loads \code{prgeng},
-optionally creating dummies from the factors, and producing \code{pe}.
 }
 
 

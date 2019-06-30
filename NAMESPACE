@@ -17,7 +17,6 @@ S3method(predict,ovaknn)
 export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    kmin,predwrong,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
-   getPE,
    ovalogtrn,ovalogpred,avalogtrn,avalogpred,
    knntrn,predict.ovaknn,classadjust,
    parvsnonparplot,nonparvsxplot, 

@@ -25,30 +25,11 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
 # these routines are useful in that some regression packages insist that
 # predictor be factors, while some require dummy variables
 
-# make a matrix or data frame (fmt = 'm' or 'd') of # dummies from a
-# factor f; column names will be 'dms' concatenated with the factor
-# levels
+# for each column in dfr, if factor then replace by dummies,
+# else just copy column; if omitLast, then dummy for last level of
+# factor is not included in output
 
-# factorToDummies <- function(f,fmt='m')
-# {
-#    n <- length(f)
-#    fl <- levels(f)
-#    ndumms <- length(fl) - 1
-#    dms <- if(fmt=='m') {
-#       matrix(nrow=n,ncol=ndumms) 
-#    }
-#    else 
-#       data.frame(nrow=n,ncol=ndumms)
-#    for (i in 1:ndumms) 
-#       dms[,i] <- as.integer(f == fl[i])
-#    colnames(dms) <- paste('dms',fl[-(length(fl))],sep='')
-#    dms
-# }
-
-# for each column in dfr, if factor then replace by dummies, all but last
-# class, else just copy column
-
-factorsToDummies <- function(dfr) 
+factorsToDummies <- function(dfr,omitLast=TRUE) 
 {
    require(dummies)
    outDF <- data.frame(rep(0,nrow((dfr))))  # filler start
@@ -58,7 +39,7 @@ factorsToDummies <- function(dfr)
          outDF <- cbind(outDF,dfi) 
          names(outDF)[ncol(outDF)] <- names(dfr)[i]
       } else {
-         dumms <- factorToDummies(dfi,names(dfr)[i])
+         dumms <- factorToDummies(dfi,names(dfr)[i],omitLast)
          outDF <- cbind(outDF,dumms)
       }
    }
@@ -66,16 +47,21 @@ factorsToDummies <- function(dfr)
    outDF
 }
 
-factorToDummies <- function (f,fname) 
+# converts just a single factor; def of omitLast is in comments above
+
+factorToDummies <- function (f,fname,omitLast=TRUE) 
 {
     n <- length(f)
     fl <- levels(f)
-    ndumms <- length(fl) - 1
+    ndumms <- length(fl) - omitLast
     dms <- matrix(nrow = n, ncol = ndumms)
     for (i in 1:ndumms) dms[, i] <- as.integer(f == fl[i])
-    colnames(dms) <- paste(fname,'.', fl[-(length(fl))], sep = "")
+    if (omitLast) fl <-  fl[-(length(fl))]
+    colnames(dms) <- paste(fname,'.', fl, sep = "")
     dms
 }
+
+
 
 # check for columns that are all the same value, or all the same value
 # except for NAs

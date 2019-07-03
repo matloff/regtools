@@ -61,7 +61,22 @@ factorToDummies <- function (f,fname,omitLast=TRUE)
     dms
 }
 
+# makes a factor dms from a single related set of dummies; returns a
+# 1-col data frame; if the variable has k levels, inclLast = FALSE means
+# there are only k-1 dummies provided; dms will have either k-1 or k
+# columns
 
+dummiesToFactor <- function(dms,inclLast=FALSE) {
+   dms <- as.matrix(dms)
+   lastCol <- 1 - apply(dms,1,sum)
+   dms <- cbind(dms,lastCol)
+   where1s <- apply(dms,1,function(rw) which(rw == 1))
+   nms <- colnames(dms)
+   f <- nms[where1s]
+   as.factor(f)
+}
+
+###################   useful for NA data  ############################
 
 # check for columns that are all the same value, or all the same value
 # except for NAs

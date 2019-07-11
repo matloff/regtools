@@ -56,12 +56,23 @@ ovalogtrn <- function(m,trnxy,truepriors=NULL) {
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predx
 
-ovalogpred <- function(coefmat,predx) {
+ovalogpred <- function(coefmat,predx,probs=FALSE) {
    # get est reg ftn values for each row of predx and each col of
    # coefmat; vals from coefmat[,] in tmp[,i]
    tmp <- as.matrix(cbind(1,predx)) %*% coefmat
    tmp <- logit(tmp)
-   apply(tmp,1,which.max) - 1
+   preds <- apply(tmp,1,which.max) - 1
+   if (probs) {
+      sumtmp <- apply(tmp,1,sum)
+      # normalized <- diag(1/sumtmp) %*% tmp
+      normalized <- normalized * 1/sumtmp
+      nc <- ncol(tmp)
+      for (i in 1:nc) {
+      }
+      names(normalized) <- as.character(0:(ncol(tmp)-1))
+      attr(preds,'probs') <- normalized
+   }
+   preds
 }
 
 ##################################################################

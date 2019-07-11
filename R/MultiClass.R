@@ -1,5 +1,9 @@
 
-# One-vs.-All (OVA) and All-vs.All (AVA), logit models
+# One-vs.-All (OVA) and All-vs.All (AVA), parametric models
+
+##################################################################
+# ovalogtrn: generate estimated regression functions
+##################################################################
 
 # arguments:
 
@@ -7,12 +11,7 @@
 #    trnxy:  X, Y training set; Y in last column; Y coded 0,1,...,m-1
 #            for the m classes
 #    predx:  X values from which to predict Y values
-#    tstxy:  X, Y test set, same format
 #    truepriors:  true class probabilities, typically from external source
-
-##################################################################
-# ovalogtrn: generate estimated regression functions
-##################################################################
 
 # arguments:
 
@@ -94,8 +93,8 @@ ovalogloom <- function(m,trnxy) {
 
 # arguments:
 
-#    m:  as above
-#    trnxy:  as above
+#    m:  as above in ovalogtrn()
+#    trnxy:  as above in ovalogtrn()
 
 # value:
 

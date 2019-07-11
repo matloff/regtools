@@ -34,7 +34,7 @@ pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL)
 \item{band}{If \code{band} is non-NULL, only points within \code{band}, 
    say 0.1, of est. P(Y = 1) are displayed, for a contour-like effect.}
 \item{trnxy}{Data matrix, one data point per row, Y in the last
-   column.}
+   column.  Y must be numeric; see Details for conversion from factor.}
 \item{object}{Needed for consistency with generic.}
 \item{...}{Needed for consistency with generic.}
 \item{y}{Vector of response variable data in the training set, with
@@ -57,10 +57,26 @@ obtained externally.}
 
 \details{
 
-These functions do classification in the multiclass setting, using the
-One vs. All method.  In addition to logit, the k-Nearest Neighbor method
-is available.  For this, \code{preprocessx} must first be called.  In
-the logit case, All vs. All is also offered.  
+These functions do classification in the multiclass setting.  During
+training, the \code{ova*} functions use the One vs. All method:  For
+each class i, \code{as.integer(Y == i)} is regressed against the
+predictors, yielding a vector of beta coefficients for each class.  For
+prediction, the new X is used with each such vector in the logit
+function, producing a conditional probability for Y == i over all
+classes i.  The predicted value is then the i with maximal probability.
+
+The \code{ava*} functions use the All vs. All method:  During training,
+for each pair of classes i and j, i less than j, the data are restricted
+to cases having those classes.  \code{as.integer(Y == i)} is regressed
+against the predictors, yielding a vector of beta coefficients for each
+pair.  In prediction, the new X is used with each such vector in the
+logit function, producing a conditional probability for Y == i over all
+classes i and j, resulting in a "winner" between i and j.  The
+predicted value is then the class with the most "wins."
+
+In addition to logit, the k-Nearest Neighbor method is available.  For
+this, \code{preprocessx} must first be called.  In the logit case, All
+vs. All is also offered.  
 
 The functions \code{ovalogtrn}, \code{avalogtrn} and \code{knntrn} are
 used on the training set, and then fed into the prediction functions,

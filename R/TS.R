@@ -4,8 +4,8 @@
 
 ########################## TStoXBase() #####################################
 
-# inputs a time series of length m, converts to an n X (p+1) matrix, where p
-# is the lag of a quasi-autoregressive/moving average model and 
+# inputs a time series of length m, converts to an n x (p+1) matrix,
+# where p is the lag of a quasi-autoregressive/moving average model and
 # n = m - p + 1
 
 # two cases:
@@ -17,6 +17,30 @@
 #   2. one time series predicting another (y not NULL)
 
 #      last col in output will consist of y_{p+1},y_{p+2},...,y_n
+
+# arguments:
+# 
+#    x:  a time series of length m, possibly multivariate; 
+#        either a vector or an m x p matrix; p is set to 
+#        ncol(x) in the latter case, 1 otherwise
+#    lg:  the code is intended to enable the fitting of a model
+#         in which observations at time t will be predicted
+#         from observations at times t-lg, t-lg+1,...,t-1
+#    y:  if non-NULL, a time series to be predicted, vector; if
+#        y is NULL, x must be a vector, and it will be taken to be
+#        x[lg+1],x[lg+2],...,x[m]
+
+
+# value:
+# 
+#    matrix, suitable for fitting a prediction model; m-lg rows,
+lg*p+1 columns
+
+if y is non-null, in which case
+rhe 
+
+otherwise
+
 
 TStoXBase <- function(x,lag,y=NULL) 
 {
@@ -36,8 +60,4 @@ TStoXBase <- function(x,lag,y=NULL)
    if (!is.null(y)) tmp[,lag] <- y[-(1:origlag)]
    tmp
 }
-
-########################## TStoXMult() #####################################
-
-# adds ability to predict multiple time series
 

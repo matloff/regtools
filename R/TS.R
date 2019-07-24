@@ -26,21 +26,23 @@
 #    lg:  the code is intended to enable the fitting of a model
 #         in which observations at time t will be predicted
 #         from observations at times t-lg, t-lg+1,...,t-1
-#    y:  if non-NULL, a time series to be predicted, vector; if
-#        y is NULL, x must be a vector, and it will be taken to be
-#        x[lg+1],x[lg+2],...,x[m]
-
+#    y:  if non-NULL, a time series to be predicted, vector of length m; 
+#        if y is NULL, x must be a vector, and y will be taken to be x
 
 # value:
 # 
 #    matrix, suitable for fitting a prediction model; m-lg rows,
-lg*p+1 columns
+#    lg*p+1 columns; y[-(1:lg)] will be in the last column
 
-if y is non-null, in which case
-rhe 
-
-otherwise
-
+#    in the case of vector x, the "X portion" will be 
+#    
+#    x[1], x[2], ..., x[lg]
+#    x[2], x[3], ..., x[lg+1]
+#    ...
+#    x[m-lg], x[m-lg+2], ..., x[m-1]
+#    
+#    for matix x, the first row will consist of all p observations for
+#    time 1, the second row will have the ones for time 2 etc.
 
 TStoXBase <- function(x,lag,y=NULL) 
 {

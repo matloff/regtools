@@ -1,8 +1,10 @@
 
 
-# routines to convert time series to rectangular data
+# routines to convert time series to rectangular data, so that we can
+# then fit using lm() or whatever, predicting from the last lg
+# observations
 
-########################## TStoXBase() #####################################
+########################## TStoX() #####################################
 
 # inputs a time series, and transforms rectangular shape suitable for
 # lm() or some other regression model, in which any current observation
@@ -33,9 +35,10 @@
 #    time 1, then all p observations for time 2 etc., through time lg;
 #    the second row is similar, but for times 2 through lg+1
 
-TStoXBase <- function(x,lg,y=NULL) 
+TStoX <- function(x,lg,y=NULL) 
 {
    lx <- length(x)
+   if (lg >= lx) stop('lg must be < length(x)')
    origlg <- lg
    lg <- lg + 1
    lxl <- lx - lg + 1
@@ -50,5 +53,18 @@ TStoXBase <- function(x,lg,y=NULL)
    tmp <- t(apply(mt,1,onerow))
    if (!is.null(y)) tmp[,lg] <- y[-(1:origlg)]
    tmp
+}
+
+# multivariate time series version
+# each row of xmat is a time series, y is a vector
+
+TStoMat <- function(xmat,lg,y) {
+   m <- nrow(xmat)
+   rslt <- NULL
+   for (i in 1:m) {
+      tmp <- TStoX(xmat[i,],lg,y)[,1:lg]
+      rslt <- cbind(rslt,tmp)
+   }
+   cbind(rslt,y[-(1:lg)])
 }
 

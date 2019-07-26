@@ -25,7 +25,7 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    l2,l1,
    mm, 
    unscale,
-   factorsToDummies,
+   factorsToDummies,factorToDummies,dummiesToFactor,
    checkConstCols,
    pwplot,
    TStoX,TStoMat)

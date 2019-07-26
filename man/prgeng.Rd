@@ -7,8 +7,9 @@
 Silicon Valley programmers and engineers data
 }
 \usage{
-data(prgeng); head(prgeng)
-getPE(Dummies=TRUE)  
+data(prgeng)
+data(peDumms)
+data(peFactors)
 }
 
 \description{
@@ -21,13 +22,13 @@ There are three versions:
 
    \itemize{
 
-    \item{\code{prgeng}, the original data, with categorical variables
-    in their original codes}
+    \item{\code{prgeng}, the original data, with categorical variables,
+    e.g. Occupation, in their original codes}
 
     \item{\code{peDumms}, same but with categorical variables
     converted to dummies}
 
-    \item{\code{peDumms}, same but with categorical variables
+    \item{\code{peFactors}, same but with categorical variables
     converted to factors}
 
     }
@@ -45,10 +46,10 @@ The variables are:
    \item{\code{age}, with a U(0,1) variate added for jitter}
 
    \item{\code{cit}, citizenship; 1-4 code various categories of
-   citizens; 5 means noncitizen (including permanent residents}
+   citizens; 5 means noncitizen (including permanent residents)}
 
    \item{\code{educ}: 01-09 code no college; 10-12 means some college;
-   13 is a bachelor's degree, 14 a master's, 15 a professiona deal and
+   13 is a bachelor's degree, 14 a master's, 15 a professional degree and
    16 is a doctorate}
 
    \item{\code{occ}, occupation}

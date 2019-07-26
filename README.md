@@ -2,31 +2,29 @@
 
 ## Novel tools tools for linear, nonlinear and nonparametric regression.
 
-These tools are associated with my forthcoming book, <i>From Linear
+These tools are associated with my book, <i>From Linear
 Models to Machine Learning: Modern Statistical Regression and
-Classification</i>, N. Matloff, CRC, 2017.  
+Classification</i>, N. Matloff, CRC, 2017 (recipient of the
+*Technometrics* Eric Ziegel Award for Best Book Reviewed in 2017).
 
-<i>The tools are
-useful in general, independently of the book</i>.
+*The tools are useful in general, independently of the book*.
 
 ## FEATURES:
 
+* Tools for multiclass classification, parametric and nonparametric, any
+  number of classes.  One vs. All and All vs. All paradigms.  Novel
+adjustment for artificially balanced (or undesirably imbalanced) data.
+
+* Innovative graphical tools for assessing fit in linear and nonlinear
+  parametric models, via nonparametric methods.  Model evaluation,
+examination of quadratic effects, investigation of nonhomogeneity of
+variance.
+
 * Nonparametric regression for general dimensions in predictor and
-response variables, using k-Nearest Neighbors.  Local-linear option.
-Allows for user-specified smoothing method.  Allows for accelerated
-exploration of multiple values of <i>k</i> at once.  Tool to aid in
-choosing <i>k</i>.
-
-* Innovative tools for assessing fit in linear and nonlinear parametric
-models, via nonparametric methods.  Model evaluation, examination of
-quadratic effects, investigation of nonhomogeneity of variance.
-
-* Tools for multiclass classification, parametric and nonparametric.
-One vs. All and All vs. All.  Novel adjustment for artificially
-balanced data.
-
-* Linear regression, PCA and log-linear model estimation in missing-data
-setting, via the Available Cases method.
+  response variables, using k-Nearest Neighbors (k-NN.  Local-linear
+option to deal with edge aliasing.  Allows for user-specified smoothing
+method.  Allows for accelerated exploration of multiple values of **k**
+at once.  Tool to aid in choosing **k**.
 
 * Nicer implementation of ridge regression, with more meaningful scaling
 and better plotting.
@@ -37,14 +35,43 @@ technique to handle heteroscedasticity.
 * Misc. tools, e.g. Method of Moments estimation (including for
 nonregression settings).
 
+* Utilities for conversion of time series data to rectangular form,
+  enabling lagged prediction by **lm** or other regression model.
+
+* Linear regression, PCA and log-linear model estimation in missing-data
+setting, via the Available Cases method.
+
+* Utilities for conversion between factor and dummy variable forms,
+  useful since among various regression packages, some use factors while
+some others use dummies.
+
 ## EXAMPLE:  MODEL FIT ASSESSMENT
 
-Let's take a look at the data set <b>prgeng</b>, some Census data for
-California engineers and programmers in the year 2000. The response
+Let's take a look at the included dataset **prgeng**, some Census data
+for California engineers and programmers in the year 2000. The response
 variable in this example is wage income, and the predictors are age,
 number of weeks worked, and dummy variables for MS and PhD degrees.
-(Some data wrangling was performed first; type <b>?knnest</b> for the
-details.)
+You can read the details of the data by typing
+
+``` r
+> ?prgeng
+```
+
+One of the graphical functions for model fit assessment plots the
+parametric (e.g. **lm()**) values against the nonparametric fit via
+k-NN.  Let's try this on the Census data.
+
+The package includes three versions of the dataset:  The original; a
+version with categorical variables in dummy form; and a version with
+categorical variables in R factor form.  Since the k-NN routines require
+dummies, we'll use that second version, **peDumms**.
+
+We need to generate the parametric and nonparametric fits, then call
+**parvsnonparplot()**:
+
+``` r
+data(peDumms)
+
 
 The fit assessment techniques in <b>regtools</b> gauge the fit of
 parametric models by comparing to nonparametric ones.  Since the latter

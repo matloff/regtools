@@ -18,7 +18,7 @@ TStoMat(xmat,lg,y)
    \item{x}{A vector.}
    \item{lg}{Lag, a positive integer.}
    \item{xmat}{A matrix, data frame etc.}
-   \item{y}{A vector.}
+   \item{y}{A vector.  If NULL, it is set to \code{x}.}
 }
 
 \details{
@@ -28,38 +28,15 @@ TStoMat(xmat,lg,y)
 
 \value{
 
-    Matrix.  In the univariate case, there will   
+    Let \code{m} denote length of \code{x}, and in the matrix input case, let
+    \code{p} be the number of rows in \code{xmat}, 1 otherwise.  The 
+    return value is a matrix with \code{m-lg} rows.  There will be
+    \code{p*lg+1} columns.
 
 }
 
 \examples{
-x <- rgamma(1000,2)
-m <- c(mean(x),var(x))
-g <- function(x,theta) {  # from theoretical properties of gamma distr.
-   g1 <-  theta[1] / theta[2]
-   g2 <-  theta[1] / theta[2]^2
-   c(g1,g2)
-}
-# should output about 2 and 1
-mm(m,g,x)
 
-\dontrun{
-library(mfp)
-data(bodyfat)
-# model as a beta distribution 
-g <- function(x,theta) {
-   t1 <- theta[1]
-   t2 <- theta[2]
-   t12 <- t1 + t2
-   meanb <- t1 / t12
-   m1 <- meanb 
-   m2 <- t1*t2 / (t12^2 * (t12+1)) 
-   c(m1,m2)
-}
-x <- bodyfat$brozek/100
-m <- c(mean(x),var(x))
-# about 4.65 and 19.89
-mm(m,g,x)
 }
 
 }

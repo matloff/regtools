@@ -295,7 +295,7 @@ parvsnonparplot <- function(lmout,knnout,cex=1.0) {
    parfitted <- lmout$fitted.values
    nonparfitted <- knnout$regest
    plot(nonparfitted,parfitted,cex=cex)
-   abline(0,1)
+   abline(0,1,col='red')
 }
 
 ######################  nonparvsxplot(), etc. ###############################

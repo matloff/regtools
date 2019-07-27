@@ -50,8 +50,8 @@ some others use dummies.
 Let's take a look at the included dataset **prgeng**, some Census data
 for California engineers and programmers in the year 2000. The response
 variable in this example is wage income, and the predictors are age,
-number of weeks worked, and dummy variables for MS and PhD degrees.
-You can read the details of the data by typing
+gender, number of weeks worked, and dummy variables for MS and PhD
+degrees.  You can read the details of the data by typing
 
 ``` r
 > ?prgeng
@@ -71,44 +71,31 @@ We need to generate the parametric and nonparametric fits, then call
 
 ``` r
 data(peDumms)
+pe1 <- peDumms[c('age','educ.14','educ.16','sex.1','wageinc','wkswrkd')]
+lmout <- lm(wageinc ~ .,data=pe1)
+lmpreds <- lmout$fitted.values
 
+```
 
-The fit assessment techniques in <b>regtools</b> gauge the fit of
+![result](inst/images/ParVsNonpar.jpg)
+
+The fit assessment techniques in **regtools** gauge the fit of
 parametric models by comparing to nonparametric ones.  Since the latter
 are free of model bias, they are very useful in assessing the parametric
 models.
-
-The function <b>nonparvsxplot()</b> plots the nonparametric fits against
-each predictor variable, for instance to explore nonlinear effects.
-Here is the plot for wage versus (scaled) age:
-
-<img src = "vignettes/wagevsage.png">
-
-Of course, the effects of the other predictors don't show up here, but
-there does seem to be a quadratic effect. The same was true for the
-predictor measuring the number of weeks worked (slightly concave up, not
-shown here).  In our linear parametric model, then, we will include
-squared terms for these two predictors.
-
-So, after fitting the linear model, run <b>parvsnonparplot()</b>, which
-plots the fit of the parametric model against the nonparametric one.
-Here is the result:
-
-<img src = "vignettes/parvsnonpar.png">
 
 There is quite a bit suggested in this picture:
 
 * There seems to be some overfitting near the low end, and underfitting at
 the high end.  
 
-* The outliers, meaning points far from the fitted linear model, are
-almost all below the linear fit.
-
-* There are intriguing "sreaks" or "tails" of points, suggesting the
+* There are intriguing "streaks" or "tails" of points, suggesting the
 possible existence of important subpopulations.
 
 * There appear to be a number of people with 0 wage income. Depending on
 the goals of our analysis, we might consider removing them.
+
+The package includes various other graphical diagnostic functions.
 
 Finally, let's check the classical assumption of homoscedasticity,
 meaning that the conditional variance of Y given X is constant.  The

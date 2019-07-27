@@ -73,11 +73,12 @@ We need to generate the parametric and nonparametric fits, then call
 data(peDumms)
 pe1 <- peDumms[c('age','educ.14','educ.16','sex.1','wageinc','wkswrkd')]
 lmout <- lm(wageinc ~ .,data=pe1)
-lmpreds <- lmout$fitted.values
-
+xd <- preprocessx(pe1[,-5],10)  # prep for k-NN, k = 10
+knnout <- knnest(pe1$wageinc,xd,10)
+parvsnonparplot(lmout,knnout)
 ```
 
-![result](inst/images/ParVsNonpar.jpg)
+![result](inst/images/ParVsNonpar.png)
 
 The fit assessment techniques in **regtools** gauge the fit of
 parametric models by comparing to nonparametric ones.  Since the latter

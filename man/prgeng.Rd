@@ -26,7 +26,8 @@ There are three versions:
     e.g. Occupation, in their original codes}
 
     \item{\code{peDumms}, same but with categorical variables
-    converted to dummies}
+    converted to dummies; due to the large number of levels the birth
+    and PUMA data is not included}
 
     \item{\code{peFactors}, same but with categorical variables
     converted to factors}

@@ -49,7 +49,7 @@
 
 knnest <- function(y,xdata,k,nearf=meany)
 {
-   if (class(xdata) != 'preknn') 
+   if (class(xdata) != 'preknn' && class(xdata) != 'knn') 
       stop('must call preprocessx() first')
    # take only the idxs for our value of k
    idxs <- xdata$idxs 

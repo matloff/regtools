@@ -330,13 +330,14 @@ nonparvsxplot <- function(knnout,lmout=NULL) {
 # arguments:
 #    knnout: return value of knnest()
 
-nonparvarplot <- function(knnout) {
+nonparvarplot <- function(knnout,returnPts=FALSE) {
    nonparcondmean <- knnout$regest
    y <- knnout$y
    k <- knnout$k
    tmp <- knnest(y,knnout,k,nearf=vary)
    plot(knnout$regest,tmp$regest,xlab='mean',ylab='var')
    abline(0,1)
+   if (returnPts) return(cbind(knnout$regest,tmp$regest))
 }
 
 ######################  l2, etc.  ###############################

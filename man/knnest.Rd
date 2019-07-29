@@ -95,12 +95,10 @@ l1(y,muhat)
    Another choice is to specify local linear smoothing by setting
    \code{nearf} to \code{loclin}.  Here the value of the regression
    function at a point is predicted from a linear fit to the point's
-   neighbors.  This is not the same as using local linear regression at
-   the prediction stage, described below, but the two should probably be
-   used together.  Note:  If some predictor is, say, integer-valued, it
-   may result in a situation in which that predictor is constant in some
-   neighborhood. This will result in an NA value for the corresponding
-   element of \code{regest}.
+   neighbors.  This may be especially helpful 
+   to counteract bias near the edges of the data.  As in any regression
+   fit, the number of predictors should be considerably less than the
+   number of neighbors.
 
    The X, i.e. predictor, data will be scaled by the code, so as to put
    all predictor variables on an equal footing.  The scaling parameters

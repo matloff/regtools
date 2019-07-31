@@ -29,7 +29,7 @@ at once.  Tool to aid in choosing **k**.
 * Nicer implementation of ridge regression, with more meaningful scaling
 and better plotting.
 
-* Extension to nonlinear parametric regression with of Eickert-White
+* Extension to nonlinear parametric regression of Eicker-White
 technique to handle heteroscedasticity.
 
 * Misc. tools, e.g. Method of Moments estimation (including for
@@ -45,7 +45,12 @@ setting, via the Available Cases method.
   useful since among various regression packages, some use factors while
 some others use dummies.
 
-## EXAMPLE:  MODEL FIT ASSESSMENT
+## EXAMPLE:  PARAMETRIC MODEL FIT ASSESSMENT
+
+The fit assessment techniques in **regtools** gauge the fit of
+parametric models by comparing to nonparametric ones.  Since the latter
+are free of model bias, they are very useful in assessing the parametric
+models.
 
 Let's take a look at the included dataset **prgeng**, some Census data
 for California engineers and programmers in the year 2000. The response
@@ -73,25 +78,21 @@ We need to generate the parametric and nonparametric fits, then call
 data(peDumms)
 pe1 <- peDumms[c('age','educ.14','educ.16','sex.1','wageinc','wkswrkd')]
 lmout <- lm(wageinc ~ .,data=pe1)
-xd <- preprocessx(pe1[,-5],10)  # prep for k-NN, k = 10
+xd <- preprocessx(pe1[,-5],10)  # prep for k-NN, k <= 10
 knnout <- knnest(pe1$wageinc,xd,10)
 parvsnonparplot(lmout,knnout)
 ```
 
 ![result](inst/images/ParVsNonpar.png)
 
-The fit assessment techniques in **regtools** gauge the fit of
-parametric models by comparing to nonparametric ones.  Since the latter
-are free of model bias, they are very useful in assessing the parametric
-models.
-
 There is quite a bit suggested in this picture:
 
-* There seems to be some overfitting near the low end, and underfitting at
-the high end.  
+* There seems to be some overfitting near the low end, and quite
+substantial underfitting at the high end.  
 
 * There are intriguing "streaks" or "tails" of points, suggesting the
-possible existence of important subpopulations.
+  possible existence of small but important subpopulations.  Moreover,
+one can imagine seeing two separate large subpopulations
 
 * There appear to be a number of people with 0 wage income. Depending on
 the goals of our analysis, we might consider removing them.
@@ -103,35 +104,20 @@ meaning that the conditional variance of Y given X is constant.  The
 function <b>nonparvarplot()</b> plots the estimated conditional variance
 against the estimated conditional mean, both computed nonparametrically:
 
-<img src = "vignettes/varvsmean.png">
+![result](inst/images/PrgengVar.png)
 
-Wow, a hockey stick!  Though there is a mild rise in <i>coefficient of
-determination</i>, i.e.  standard deviation relative to the mean, up to
-about $80K, the slope increases sharply after that.
+Though we ran the plot thinking of the homoscedasticity assumption, this
+is much more remarkable, confirming that there are interesting
+subpopulations within this data.
 
-What to do?  As long as our linear regression model assumption holds,
-violation of the homoscedasticity assumption won't invalidate our
-estimates; they still will be <i>statistically consistent</i>.  But the
-standard errors we compute, and thus the statistical inference we
-perform, will be affected.  This is correctible using the  Eickert-White
-procedure, which for linear models is available in the <b>car</b>
-package, included in <b>regtools</b>.  Our package also extends
-this to nonlinear parametric models, in our function <b>nlshc()</b> (the
+By the way, violation of the homoscedasticity assumption won't
+invalidate our estimates; they still will be *statistically consistent*.
+But the standard errors we compute, and thus the statistical inference
+we perform, will be affected.  This is correctible using the
+Eicker-White procedure, which for linear models is available in the
+**car** and **sandwich** packagers.  Our package here also extends this
+to nonlinear parametric models, in our function <b>nlshc()</b> (the
 validity of this extension is shown in the book).
-
-Of course, the "hockey stick" form is another indication that we should
-further investigate the model itself.  It may well be useful to fit two
-separate linear models, one for incomes below $80K and the other for the
-higher incomes.  For a more formal approach to this, we might consider
-<i>changepoint</i> methods, such as in the CRAN package
-<strong>chngpt</strong>.
-
-<strong>What is different:</strong>
-
-Note carefully that the above graph is unaffected by the validity of
-the parametric model; it is based purely on nonparametric analysis.
-This is in contrast to classic regression fit methods, most of which are
-based on examination of residuals of the fitted model.
 
 ## EXAMPLE; OVA VS. AVA IN MULTICLASS PROBLEMS
 

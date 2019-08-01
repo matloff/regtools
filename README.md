@@ -97,9 +97,7 @@ one can imagine seeing two separate large subpopulations
 * There appear to be a number of people with 0 wage income. Depending on
 the goals of our analysis, we might consider removing them.
 
-The package includes various other graphical diagnostic functions.
-
-Finally, let's check the classical assumption of homoscedasticity,
+Let's now check the classical assumption of homoscedasticity,
 meaning that the conditional variance of Y given X is constant.  The
 function <b>nonparvarplot()</b> plots the estimated conditional variance
 against the estimated conditional mean, both computed nonparametrically:
@@ -109,6 +107,8 @@ against the estimated conditional mean, both computed nonparametrically:
 Though we ran the plot thinking of the homoscedasticity assumption, this
 is much more remarkable, confirming that there are interesting
 subpopulations within this data.
+
+The package includes various other graphical diagnostic functions.
 
 By the way, violation of the homoscedasticity assumption won't
 invalidate our estimates; they still will be *statistically consistent*.
@@ -133,71 +133,69 @@ our application is recognition of hand-written digits (a famous machine
 learning example). The predictor variables are pixel patterns in images.
 There are two schools of thought on this:
 
-* <i>One vs. All (OVA):</i>  We would run 26 logistic regression models,
+* *One vs. All (OVA):*  We would run 10 logistic regression models,
   one for predicting '0' vs. non-'0', one for '1' vs. non-'1', and so
-on.  For a particular image, we would thus obtain 26 estimated
+on.  For a particular image, we would thus obtain 10 estimated
 probabilities.  Let i<sub>max</sub> be the image that yields the largest
 probability; we would then guess the digit for the image to be 'i'.
 
-* <i>All vs. All (AVA):</i>  Here we would run C(10,2) = 45 logit
+* *All vs. All (AVA):*  Here we would run C(10,2) = 45 logit
 analyses, one for each pair of digits.  There would be one for '0' vs.
 '1', one for '0' vs. '2', etc., all the way up through '8' vs. '9'.
+In each case there is a "winner" for our new image to be predicted, and
+in the end we predict the new image to be whichever i has the most
+winners.
+
 Many in the machine learning literature recommend AVA over OVA, on the
-grounds that might be linearly separable (in the statistical sense) in
-pairs but not otherwise.  My book counters by positing that such a
-situation could be remedied under OVA by adding quadratic terms to the
-logit models.
+grounds that there might be linearly separability (in the statistical
+sense) in pairs but not otherwise.  My book counters by positing that
+such a situation could be remedied under OVA by adding quadratic terms
+to the logit models.
 
-At any rate, the <strong>regtools</strong> package gives you a choice,
-OVA or AVA, for both parametric and nonparametric methods.  For example,
-<strong>avalogtrn()</strong> and <strong>avalogpred()</strong> do
-training and prediction operations for logit with AVA.
+At any rate, the **regtools** package gives you a choice, OVA or AVA,
+for both parametric and nonparametric methods.  For example,
+**avalogtrn()** and **avalogpred()** do training and prediction
+operations for logit with AVA.
 
-Another feature concerns adjustment of class probabilities.  In many
-multiclass data sets, the numbers of points in each class is the same,
-or least not reflective of the population class probabilities. In
-<strong>regtools</strong>, the user can specify estimates of the latter,
-for logit and nonparametric methods.
+Let's look at an example, again using the Census data from above.  We'll
+predict occupation from age, sex, education (MS, PhD, other) wage income
+and weeks worked.
 
-So, let's look at an example, using the UCI Letter Recognition data set,
-another image recognition example.  Again, the code below was preceded
-by some data wrangling, which changed the letter data from character to
-numeric, and which divided the data set into training and test sets.
-Here is the OVA run:
-
-```{r}
-> ologout <- ovalogtrn(26,lrtrn[,c(2:17,1)]) 
-> ypred <- ovalogpred(ologout,lrtest[,-1]) 
-> mean(ypred == lrtest[,1]) 
-[1] 0.7193333 
+``` r
+data(peFactors) 
+pef <- peFactors 
+pef1 <- pef[,c('age','educ','sex','wageinc','wkswrkd','occ')] 
+# "Y" must be in last column, class ID 0,1,2,...; convert from factor
+pef1$occ <- as.numeric(pef1$occ) 
+pef1$occ <- pef1$occ - 1
+pef2 <- pef1 
+# create the education dummy varibles
+pef2$ms <- as.integer(pef2$educ == 14) 
+pef2$phd <- as.integer(pef2$educ == 16) 
+pef2$educ <- NULL 
+pef2$sex <- as.integer(pef2$sex == 1) 
+pef2 <- pef2[,c(1,2,3,4,6,7,5)] 
+ovaout <- ovalogtrn(6,pef2) 
+# estimated coefficients, one set per class
+> ovaout
+                  betahat       betahat       betahat       betahat
+(Intercept) -9.411834e-01 -6.381329e-01 -2.579483e-01 -3.370758e+00
+xage         9.090437e-03 -3.302790e-03 -2.205695e-02 -2.193359e-03
+xsex        -5.187912e-01 -1.122531e-02 -9.802006e-03 -7.856923e-01
+xwageinc    -6.741141e-06 -4.609168e-06  5.132813e-06 -4.076872e-06
+xwkswrkd     5.058947e-03 -2.247113e-03  2.623924e-04  1.311084e-02
+xms         -5.201286e-01 -4.272846e-01  5.280520e-01 -1.797544e-01
+xphd        -3.302821e-01 -8.035287e-01  3.531951e-01 -3.883463e-01
+                  betahat       betahat
+(Intercept) -3.322356e+00 -4.456788e+00
+xage        -1.206640e-02  3.323948e-02
+xsex         5.173516e-01  1.175657e+00
+xwageinc     2.033175e-06  1.831774e-06
+xwkswrkd     5.517912e-04  2.794453e-03
+xms          9.947253e-02  2.705293e-01
+xphd         4.967115e-01  4.633907e-01
+# predict the occupation of a woman, age 35, no MS/PhD, inc 60000, 52
+# weeks worked
+ovalogpred(ovaout,matrix(c(35,0,60000,52,0,0),nrow=1))
+# outputs class 2, Census occupation code 102
 ```
-
-So, we get about a 72% rate of correct classification.  Now let's try
-AVA:
-
-```{r}
-> alogout <- avalogtrn(26,lrtrn[,c(2:17,1)])
-> ypred <- avalogpred(26,alogout,lrtest[,-1])
-> mean(ypred == lrtest[,1])
-[1] 0.8355
-```
-
-AVA did considerably better, 84%.  So, apparently AVA fixed a poor
-model. But of course, it’s better to make a good model in the first
-place. Based on our previous observation that the boundaries may be
-better approximated by curves than lines, let's try a quadratic model.
-
-There were 16 predictors, thus 16 possible quadratic terms, and C(16,2)
-= 120 possible interaction terms.  Inclusion of all such variables would
-probably produce too rich a model for the 14000 points in our training
-set.  We'll settle for adding just the squared terms (not shown):
-
-```{r}
-> ologout <- ovalogtrn(26,lrtrn[,c(2:33,1)])
-> ypred <- ovalogpred(ologout,lrtest[,-1])
-> mean(ypred == lrtest[,1])
-[1] 0.8086667
-```
-
-Ah, much better, though still not quite as good as AVA.
-

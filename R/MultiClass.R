@@ -51,6 +51,8 @@ ovalogtrn <- function(m,trnxy,truepriors=NULL) {
 # 
 #    coefmat:  coefficient matrix, output from ovalogtrn()
 #    predx:  as above
+#    probs:  in addition to predicted classes, return the condtional
+#            class probabilities as an attribute, 'probs'
 # 
 # value:
 # 
@@ -60,17 +62,14 @@ ovalogtrn <- function(m,trnxy,truepriors=NULL) {
 ovalogpred <- function(coefmat,predx,probs=FALSE) {
    # get est reg ftn values for each row of predx and each col of
    # coefmat; vals from coefmat[,] in tmp[,i]
-   tmp <- as.matrix(cbind(1,predx)) %*% coefmat
+   #
+   # let m = number of classes, np = number of obs to be predicted
+   tmp <- as.matrix(cbind(1,predx)) %*% coefmat  # np x m 
    tmp <- logit(tmp)
    preds <- apply(tmp,1,which.max) - 1
    if (probs) {
-      sumtmp <- apply(tmp,1,sum)
-      # normalized <- diag(1/sumtmp) %*% tmp
-      normalized <- normalized * 1/sumtmp
-      nc <- ncol(tmp)
-      for (i in 1:nc) {
-      }
-      names(normalized) <- as.character(0:(ncol(tmp)-1))
+      sumtmp <- apply(tmp,1,sum)  # length np
+      normalized <- diag(1/sumtmp) %*% tmp
       attr(preds,'probs') <- normalized
    }
    preds

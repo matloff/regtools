@@ -32,9 +32,6 @@ and better plotting.
 * Extension to nonlinear parametric regression of Eicker-White
 technique to handle heteroscedasticity.
 
-* Misc. tools, e.g. Method of Moments estimation (including for
-nonregression settings).
-
 * Utilities for conversion of time series data to rectangular form,
   enabling lagged prediction by **lm** or other regression model.
 
@@ -44,6 +41,9 @@ setting, via the Available Cases method.
 * Utilities for conversion between factor and dummy variable forms,
   useful since among various regression packages, some use factors while
 some others use dummies.
+
+* Misc. tools, e.g. to reverse the effects of an earlier call to
+  **scale()**.
 
 ## EXAMPLE:  PARAMETRIC MODEL FIT ASSESSMENT
 
@@ -291,5 +291,55 @@ occDumms <- factorToDummies(as.factor(pef2$occ),'occ',omitLast=FALSE
 pef3 <- cbind(pef2[,-7],occDumms)
 ```
 
-## SOME NOTABLE UTILITY FUNCTIONS
+Note that in cases in which "Y" is multivariate, **knnest()** requires
+it in multivariate form.  Here "Y" is 6-variate, so we've set the last 6
+columns of **pef3** to the corresponding dummies.
+
+Many popular regression packages, e.g. **lars** for the LASSO, require
+data in numeric form, so the **regtools**' conversion utilities are quite
+handy.
+
+Now fit the regression model:
+
+``` r
+kout <- knnest(pef3[, -(1:6)],xd,10) 
+```
+
+One of the components of **kout** is the matrix of fitted values:
+
+``` r
+> head(kout$regest) 
+     occ.0 occ.1 occ.2 occ.3 occ.4 occ.5
+[1,]   0.2   0.4   0.2     0   0.0   0.2
+[2,]   0.2   0.5   0.2     0   0.0   0.1
+[3,]   0.5   0.1   0.3     0   0.1   0.0
+[4,]   0.3   0.4   0.1     0   0.0   0.2
+[5,]   1.0   0.0   0.0     0   0.0   0.0
+[6,]   0.2   0.4   0.2     0   0.0   0.2
+```
+
+So for example the conditional probability of Occupation 4 for the
+third observation is 0.1.
+
+Now let's do the same prediction as above:
+
+``` r
+> predict(kout,matrix(c(35,0,60000,52,0,0),nrow=1),TRUE)
+occ.0 occ.1 occ.2 occ.3 occ.4 occ.5 
+  0.1   0.4   0.5   0.0   0.0   0.0 
+```
+
+These are conditional probabilities.  The most likely one is Occupation
+2.
+
+The TRUE argument was to specify that we need to scale the new cases in
+the same way the original data were scaled.
+
+By default, our k-NN routines find the mean Y in the neighborhood.
+Another option is to do local linear smoothing.  Among other things,
+this may remedy aliasing at the edges of the data.  This should be done
+with a value of **k** much larger than the number of predictor
+variables.
+
+## EXAMPLE:  TIME SERIES
 

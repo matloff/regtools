@@ -147,8 +147,8 @@ in the end we predict the new image to be whichever i has the most
 winners.
 
 Many in the machine learning literature recommend AVA over OVA, on the
-grounds that there might be linearly separability (in the statistical
-sense) in pairs but not otherwise.  My book counters by positing that
+grounds that there might be linear separability (in the statistical
+sense) in pairs but not otherwise.  My book counters by noting that
 such a situation could be remedied under OVA by adding quadratic terms
 to the logit models.
 
@@ -177,8 +177,8 @@ pef2$sex <- as.integer(pef2$sex == 1)
 pef2 <- pef2[,c(1,2,3,4,6,7,5)] 
 ovaout <- ovalogtrn(6,pef2) 
 # estimated coefficients, one set per class
-> ovaout
-                        0             1             2             3
+ovaout  
+# prints
 (Intercept) -9.411834e-01 -6.381329e-01 -2.579483e-01 -3.370758e+00
 xage         9.090437e-03 -3.302790e-03 -2.205695e-02 -2.193359e-03
 xsex        -5.187912e-01 -1.122531e-02 -9.802006e-03 -7.856923e-01
@@ -200,6 +200,54 @@ ovalogpred(ovaout,matrix(c(35,0,60000,52,0,0),nrow=1))
 # outputs class 2, Census occupation code 102
 ```
 
+With the optional argument **probs=TRUE**, the call to **ovalogpred()**
+will also return the conditional probabilities of the classes, given the
+predictor values, in the R attribute 'probs'.
+
+Here is the AVA version:
+
+``` r
+avaout <- avalogtrn(6,pef2) 
+avaout
+# prints
+                      1,2           1,3           1,4           1,5
+(Intercept) -1.914000e-01 -4.457460e-01  2.086223e+00  2.182711e+00
+xijage       8.551176e-03  2.199740e-02  1.017490e-02  1.772913e-02
+xijsex      -3.643608e-01 -3.758687e-01  3.804932e-01 -8.982992e-01
+xijwageinc  -1.207755e-06 -9.679473e-06 -6.967489e-07 -4.273828e-06
+xijwkswrkd   4.517229e-03  4.395890e-03 -9.535784e-03 -1.543710e-03
+xijms       -9.460392e-02 -7.509925e-01 -2.702961e-01 -5.466462e-01
+xijphd       3.983077e-01 -5.389224e-01  7.503942e-02 -7.424787e-01
+                      1,6           2,3           2,4           2,5
+(Intercept)  3.115845e+00 -2.834012e-01  2.276943e+00  2.280739e+00
+xijage      -2.139193e-02  1.466992e-02  1.950032e-03  1.084527e-02
+xijsex      -1.458056e+00  3.720012e-03  7.569766e-01 -5.130827e-01
+xijwageinc  -5.424842e-06 -9.709168e-06 -1.838009e-07 -4.908563e-06
+xijwkswrkd  -2.526987e-03  9.884673e-04 -1.382032e-02 -3.290367e-03
+xijms       -6.399600e-01 -6.710261e-01 -1.448368e-01 -4.818512e-01
+xijphd      -6.404008e-01 -9.576587e-01 -2.988396e-01 -1.174245e+00
+                      2,6           3,4           3,5           3,6
+(Intercept)  3.172786e+00  2.619465e+00  2.516647e+00  3.486811e+00
+xijage      -2.908482e-02 -1.312368e-02 -3.051624e-03 -4.236516e-02
+xijsex      -1.052226e+00  7.455830e-01 -5.051875e-01 -1.010688e+00
+xijwageinc  -5.336828e-06  1.157401e-05  1.131685e-06  1.329288e-06
+xijwkswrkd  -3.792371e-03 -1.804920e-02  5.606399e-04 -3.217069e-03
+xijms       -5.987265e-01  4.873494e-01  2.227347e-01  5.247488e-02
+xijphd      -1.140915e+00  6.522510e-01 -2.470988e-01 -1.971213e-01
+                      4,5           4,6           5,6
+(Intercept) -9.998252e-02  6.822355e-01  9.537969e-01
+xijage       1.055143e-02 -2.273444e-02 -3.906653e-02
+xijsex      -1.248663e+00 -1.702186e+00 -4.195561e-01
+xijwageinc  -4.986472e-06 -7.237963e-06  6.807733e-07
+xijwkswrkd   1.070949e-02  8.097722e-03 -5.808361e-03
+xijms       -1.911361e-01 -3.957808e-01 -1.919405e-01
+xijphd      -8.398231e-01 -8.940497e-01 -2.745368e-02
+# predict the occupation of a woman, age 35, no MS/PhD, inc 60000, 52
+# weeks worked
+avalogpred(6,ovaout,matrix(c(35,0,60000,52,0,0),nrow=1))
+# outputs class 2, Census occupation code 102
+```
+
 ## EXAMPLE:  ADJUSTMENT OF CLASS PROBABILITIES IN CLASSIFICATION PROBLEMS
 
 The **LetterRecognition** dataset in the **mlbench** package lists
@@ -212,6 +260,36 @@ here in the **regtools** package.
 In order to adjust the analysis accordingly, the **ovalogtrn()**
 function we saw above has an optional **truepriors** argument.  For the
 letters example, we could set this argument to **ltrfreqs**.
+
+## MULTICLASS CLASSIFICATION WITH k-NN
+
+In addition to use in linear regression graphical diagnostics, k-NN can
+be very effective as a nonparametric regression/machine learning tool.
+I would recommend it in cases in which the number of predictors is
+moderate and there are nonmonotonic relations.  (See also our **polyreg**
+package.)  Let's continue the above example on predicting occupation,
+using k-NN.
+
+The three components of k-NN analysis in **regtools** are:
+
+1. **preprocessx()**:  This finds the sets of nearest neighbors in the
+   training set, for all values of **k** up to a user-specified maximum.
+This facilitates the user's trying various values of **k**.
+
+2.  **knnest()**:  This fits the regression model.
+
+3.  **knnpred()**:  This does prediction on the user's desired set of
+    points of new cases.
+
+Since k-NN involves finding distances between points, our data must be
+numeric, not factors.  This means that in **pef2**, we'll need to
+replace the **occ** column by a matrix of dummy variables.  Utilities in
+the **regtools** package make this convenient:
+
+``` r
+occDumms <- factorToDummies(as.factor(pef2$occ),'occ',omitLast=FALSE
+pef3 <- cbind(pef2[,-7],occDumms)
+```
 
 ## SOME NOTABLE UTILITY FUNCTIONS
 

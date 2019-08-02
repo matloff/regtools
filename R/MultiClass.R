@@ -132,7 +132,9 @@ avalogtrn <- function(m,trnxy) {
    }
    coefmat <- NULL
    for (k in 1:ncol(ijs)) {
-      coefmat <- cbind(coefmat,doreg(ijs[,k]))
+      ij <- ijs[,k]
+      coefmat <- cbind(coefmat,doreg(ij))
+      colnames(coefmat)[k] <- paste(ij,collapse=',')
    }
    coefmat
 }

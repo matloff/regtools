@@ -202,5 +202,16 @@ ovalogpred(ovaout,matrix(c(35,0,60000,52,0,0),nrow=1))
 
 ## EXAMPLE:  ADJUSTMENT OF CLASS PROBABILITIES IN CLASSIFICATION PROBLEMS
 
+The **LetterRecognition** dataset in the **mlbench** package lists
+various geometric measurements of capital English letters, thus another
+image recognition problem.  One problem is that the frequencies of the
+letters in the dataset are not similar to those in actual English texts.
+The correct frequencies are given in the **ltrfreqs** dataset included
+here in the **regtools** package.
+
+In order to adjust the analysis accordingly, the **ovalogtrn()**
+function we saw above has an optional **truepriors** argument.  For the
+letters example, we could set this argument to **ltrfreqs**.
+
 ## SOME NOTABLE UTILITY FUNCTIONS
 

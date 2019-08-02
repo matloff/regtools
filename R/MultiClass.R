@@ -39,6 +39,7 @@ ovalogtrn <- function(m,trnxy,truepriors=NULL) {
       outmat[1,] <- outmat[1,] 
          - log((1-truepriors)/truepriors) + log((1-wrongpriors)/wrongpriors)
    }
+   colnames(outmat) <- as.character(0:(m-1))
    outmat
 }
 

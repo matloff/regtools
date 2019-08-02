@@ -178,7 +178,7 @@ pef2 <- pef2[,c(1,2,3,4,6,7,5)]
 ovaout <- ovalogtrn(6,pef2) 
 # estimated coefficients, one set per class
 > ovaout
-                  betahat       betahat       betahat       betahat
+                        0             1             2             3
 (Intercept) -9.411834e-01 -6.381329e-01 -2.579483e-01 -3.370758e+00
 xage         9.090437e-03 -3.302790e-03 -2.205695e-02 -2.193359e-03
 xsex        -5.187912e-01 -1.122531e-02 -9.802006e-03 -7.856923e-01
@@ -186,7 +186,7 @@ xwageinc    -6.741141e-06 -4.609168e-06  5.132813e-06 -4.076872e-06
 xwkswrkd     5.058947e-03 -2.247113e-03  2.623924e-04  1.311084e-02
 xms         -5.201286e-01 -4.272846e-01  5.280520e-01 -1.797544e-01
 xphd        -3.302821e-01 -8.035287e-01  3.531951e-01 -3.883463e-01
-                  betahat       betahat
+                        4             5
 (Intercept) -3.322356e+00 -4.456788e+00
 xage        -1.206640e-02  3.323948e-02
 xsex         5.173516e-01  1.175657e+00
@@ -199,3 +199,8 @@ xphd         4.967115e-01  4.633907e-01
 ovalogpred(ovaout,matrix(c(35,0,60000,52,0,0),nrow=1))
 # outputs class 2, Census occupation code 102
 ```
+
+## EXAMPLE:  ADJUSTMENT OF CLASS PROBABILITIES IN CLASSIFICATION PROBLEMS
+
+## SOME NOTABLE UTILITY FUNCTIONS
+

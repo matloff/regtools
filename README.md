@@ -341,5 +341,51 @@ this may remedy aliasing at the edges of the data.  This should be done
 with a value of **k** much larger than the number of predictor
 variables.
 
-## EXAMPLE:  TIME SERIES
+## EXAMPLE:  RECTANGULARIZATION OF TIME SERIES
 
+This allows use of ordinary tools like **lm()** for prediction in time
+series data.  Since the goal here is prediction rather than inference,
+an informal model can be quite effective.
+
+The basic idea is that **x[i]** is predicted by
+**x[i-lg],
+x[i-lg+1],
+x[i-lg+2],
+i...
+x[i-1]**, 
+where **lg** is the lag.
+
+``` r
+xy <- TStoX(Nile,5)
+head(xy)
+#      [,1] [,2] [,3] [,4] [,5] [,6]
+# [1,] 1120 1160  963 1210 1160 1160
+# [2,] 1160  963 1210 1160 1160  813
+# [3,]  963 1210 1160 1160  813 1230
+# [4,] 1210 1160 1160  813 1230 1370
+# [5,] 1160 1160  813 1230 1370 1140
+# [6,] 1160  813 1230 1370 1140  995
+head(Nile,36)
+#  [1] 1120 1160  963 1210 1160 1160  813 1230 1370 1140  995  935 1110  994 1020
+# [16]  960 1180  799  958 1140 1100 1210 1150 1250 1260 1220 1030 1100  774  840
+# [31]  874  694  940  833  701  916
+```
+
+Try **lm()**:
+
+``` r
+lm(xy[,6] ~ xy[,1:5])
+...
+Coefficients:
+Coefficients:
+(Intercept)   xy[, 1:5]1   xy[, 1:5]2   xy[, 1:5]3   xy[, 1:5]4   xy[, 1:5]5  
+  307.84354      0.08833     -0.02009      0.08385      0.13171      0.37160  
+```
+
+Predict the 101st observation:
+
+``` r
+cfs %*% c(1,Nile[96:100])
+#          [,1]
+# [1,] 784.4925
+```

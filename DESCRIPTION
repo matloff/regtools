@@ -8,13 +8,14 @@ Suggests: knitr, rmarkdown, car
 VignetteBuilder: knitr
 License: GPL (>= 2)
 Description: Tools for linear, nonlinear and nonparametric regression
-             and classification.  Parametric fit assessment using
-             nonparametric methods. One vs. All and All vs. All
-             multiclass classification.  Nonparametric regression (k-NN) 
-             for general dimension, locally-linear option.  Nonlinear 
+             and classification.  Novel graphical methods for assessment 
+             of parametric models using nonparametric methods. One 
+             vs. All and All vs. All multiclass classification, optional
+             class probabilities adjustment.  Nonparametric regression 
+             (k-NN) for general dimension, local-linear option.  Nonlinear 
              regression with Eickert-White method for dealing with 
              heteroscedasticity.  Utilities for converting time series
-             to rectangualr form.  Utilities for conversion between
+             to rectangular form.  Utilities for conversion between
              factors and indicator variables.
 URL: https://github.com/matloff/regtools
 BugReports: https://github.com/matloff/regtools/issues

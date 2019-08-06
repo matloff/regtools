@@ -3,7 +3,7 @@
 ## Novel tools tools for linear, nonlinear and nonparametric regression.
 
 These tools are associated with my book, <i>From Linear
-Models to Machine Learning: Modern Statistical Regression and
+Models to Machine Learning: Statistical Regression and
 Classification</i>, N. Matloff, CRC, 2017 (recipient of the
 *Technometrics* Eric Ziegel Award for Best Book Reviewed in 2017).
 
@@ -11,32 +11,30 @@ Classification</i>, N. Matloff, CRC, 2017 (recipient of the
 
 ## FEATURES:
 
-* Tools for multiclass classification, parametric and nonparametric, any
-  number of classes.  One vs. All and All vs. All paradigms.  Novel
-adjustment for artificially balanced (or undesirably imbalanced) data.
-
 * Innovative graphical tools for assessing fit in linear and nonlinear
   parametric models, via nonparametric methods.  Model evaluation,
 examination of quadratic effects, investigation of nonhomogeneity of
 variance.
 
+* Tools for multiclass classification, parametric and nonparametric, any
+  number of classes.  One vs. All and All vs. All paradigms.  Novel
+adjustment for artificially balanced (or undesirably imbalanced) data.
+
 * Nonparametric regression for general dimensions in predictor and
-  response variables, using k-Nearest Neighbors (k-NN.  Local-linear
+  response variables, using k-Nearest Neighbors (k-NN).  Local-linear
 option to deal with edge aliasing.  Allows for user-specified smoothing
 method.  Allows for accelerated exploration of multiple values of **k**
 at once.  Tool to aid in choosing **k**.
-
-* Nicer implementation of ridge regression, with more meaningful scaling
-and better plotting.
 
 * Extension to nonlinear parametric regression of Eicker-White
 technique to handle heteroscedasticity.
 
 * Utilities for conversion of time series data to rectangular form,
-  enabling lagged prediction by **lm** or other regression model.
+  enabling lagged prediction by **lm()** or other regression model.
 
 * Linear regression, PCA and log-linear model estimation in missing-data
-setting, via the Available Cases method.
+setting, via the Available Cases method.  (For Prediction contexts, see
+[our toweranNA package](http://github.com/matloff/toweranNA).)
 
 * Utilities for conversion between factor and dummy variable forms,
   useful since among various regression packages, some use factors while
@@ -44,6 +42,9 @@ some others use dummies.
 
 * Misc. tools, e.g. to reverse the effects of an earlier call to
   **scale()**.
+
+* Nicer implementation of ridge regression, with more meaningful scaling
+and better plotting.
 
 ## EXAMPLE:  PARAMETRIC MODEL FIT ASSESSMENT
 
@@ -92,7 +93,9 @@ substantial underfitting at the high end.
 
 * There are intriguing "streaks" or "tails" of points, suggesting the
   possible existence of small but important subpopulations.  Moreover,
-one can imagine seeing two separate large subpopulations
+the plot suggests two separate large subpopulations, for wages less than
+or greater than about $40,000, possibly related to full- vs. part-time
+employment.
 
 * There appear to be a number of people with 0 wage income. Depending on
 the goals of our analysis, we might consider removing them.
@@ -133,17 +136,18 @@ our application is recognition of hand-written digits (a famous machine
 learning example). The predictor variables are pixel patterns in images.
 There are two schools of thought on this:
 
-* *One vs. All (OVA):*  We would run 10 logistic regression models,
-  one for predicting '0' vs. non-'0', one for '1' vs. non-'1', and so
-on.  For a particular image, we would thus obtain 10 estimated
-probabilities.  Let i<sub>max</sub> be the image that yields the largest
-probability; we would then guess the digit for the image to be 'i'.
+* *One vs. All (OVA):*  We would run 10 logistic regression models, one
+  for predicting '0' vs. non-'0', one for '1' vs. non-'1', and so on.
+For a particular new image to be classified, we would thus obtain 10
+estimated conditional probabilities.  We would then guess the digit for
+this image to be the digit with the highest estimated conditional
+probability.
 
 * *All vs. All (AVA):*  Here we would run C(10,2) = 45 logit
 analyses, one for each pair of digits.  There would be one for '0' vs.
 '1', one for '0' vs. '2', etc., all the way up through '8' vs. '9'.
 In each case there is a "winner" for our new image to be predicted, and
-in the end we predict the new image to be whichever i has the most
+in the end we predict the new image to be whichever digit has the most
 winners.
 
 Many in the machine learning literature recommend AVA over OVA, on the
@@ -258,17 +262,19 @@ The correct frequencies are given in the **ltrfreqs** dataset included
 here in the **regtools** package.
 
 In order to adjust the analysis accordingly, the **ovalogtrn()**
-function we saw above has an optional **truepriors** argument.  For the
+function has an optional **truepriors** argument.  For the
 letters example, we could set this argument to **ltrfreqs**.
+(The term *priors* here does refer to a subjective Bayesian analysis. It
+is merely a standard term for the class probabilities.)
 
 ## MULTICLASS CLASSIFICATION WITH k-NN
 
 In addition to use in linear regression graphical diagnostics, k-NN can
 be very effective as a nonparametric regression/machine learning tool.
 I would recommend it in cases in which the number of predictors is
-moderate and there are nonmonotonic relations.  (See also our **polyreg**
-package.)  Let's continue the above example on predicting occupation,
-using k-NN.
+moderate and there are nonmonotonic relations.  (See also 
+[our polyreg package](http://github.com/matloff/polyreg).)
+Let's continue the above example on predicting occupation, using k-NN.
 
 The three components of k-NN analysis in **regtools** are:
 
@@ -287,7 +293,7 @@ replace the **occ** column by a matrix of dummy variables.  Utilities in
 the **regtools** package make this convenient:
 
 ``` r
-occDumms <- factorToDummies(as.factor(pef2$occ),'occ',omitLast=FALSE
+occDumms <- factorToDummies(as.factor(pef2$occ),'occ',omitLast=FALSE)
 pef3 <- cbind(pef2[,-7],occDumms)
 ```
 

@@ -27,7 +27,7 @@ regression and classification analysis.
 
    \item nonlinear regression:  nlshc
 
-   \item ridge regression:  plot.rlm, ridgelmb
+   \item ridge regression:  ridgelm, plot
 
    \item conversion between factors and dummies: dummiesToFactor,
    factorsToDummies, factorToDummies

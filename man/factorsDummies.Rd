@@ -17,8 +17,9 @@ dummiesToFactor(dms,inclLast=FALSE)
 
 \details{
 Many R users prefer to use R factors in their coding, or work with data
-that is of this type to begin with.  On the other hand,
-
+that is of this type to begin with.  On the other hand, many regression
+packages, e.g. \pkg{lars}, disallow factors.  These utilities facilitate
+conversion from one form to another.
 }
 
 \arguments{
@@ -32,10 +33,10 @@ that is of this type to begin with.  On the other hand,
   levels are provided.}
 }
 
-\value{
-The function \code{unscale} returns the original object to which
-\code{scale} had been applied.  Or, the attributes \code{ctrs} and
-\code{sds} can be specified by the user.
+\value{The function \code{factorToDummies} returns a matrix of dummy
+variables, while \code{factorsToDummies} returns a new version of the
+input data frame, in which each factor is replaced by columns of
+dummies.
 }
 
 \author{

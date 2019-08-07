@@ -17,8 +17,9 @@ TStoMat(xmat,lg,y)
 \arguments{
    \item{x}{A vector.}
    \item{lg}{Lag, a positive integer.}
-   \item{xmat}{A matrix, data frame etc., with each row a time series.}
-   \item{y}{A vector.  If NULL, it is set to \code{x}}.
+   \item{xmat}{A matrix, data frame etc., with each column a time series,
+         over a common time period.}
+   \item{y}{A time series, again on that common time period  If NULL, it is set to \code{x}}.
 }
 
 \details{
@@ -40,45 +41,40 @@ TStoMat(xmat,lg,y)
     In the matrix case, in a given row, there will be all \code{lg}
     recent observations for the first time series, then all \code{lg}
     recent observations for the second one, and so on, and finally the
-    \code{} value.
+    \code{y} value.
 
 }
 
 \examples{
+set.seed(9999)
 z <- sample(1:100,12)
 z
-# [1] 59 56  6 95 16 94 96 78 17  7 35 87
+# [1] 87 66 79 21 67 81 97 77 92 68 74  3
 TStoX(z,3)
-      [,1] [,2] [,3] [,4]
-#  [1,]   59   56    6   95
-#  [2,]   56    6   95   16
-#  [3,]    6   95   16   94
-#  [4,]   95   16   94   96
-#  [5,]   16   94   96   78
-#  [6,]   94   96   78   17
-#  [7,]   96   78   17    7
-#  [8,]   78   17    7   35
-#  [9,]   17    7   35   87
-
+#      [,1] [,2] [,3] [,4]
+# [1,]   87   66   79   21
+# [2,]   66   79   21   67
+# [3,]   79   21   67   81
+# [4,]   21   67   81   97
+# [5,]   67   81   97   77
+# [6,]   81   97   77   92
+# [7,]   97   77   92   68
+# [8,]   77   92   68   74
+# [9,]   92   68   74    3
+set.seed(9999)
 zm <- matrix(sample(1:100,24),nrow=2,byrow=TRUE)
+y <- sample(1:5,12,replace=TRUE)
 zm
-#      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-# [1,]   46   74   88   70   43   21   20   59   91    63     6    40
-# [2,]   67   56   47   94   90   14   80   22   15    64    39    79
-TStoMat(zm,3,zm[1,])
-#       [,1] [,2] [,3] [,4] [,5] [,6] [,7]
-#  [1,]   46   74   88   67   56   47   70
-#  [2,]   74   88   70   56   47   94   43
-#  [3,]   88   70   43   47   94   90   21
-#  [4,]   70   43   21   94   90   14   20
-#  [5,]   43   21   20   90   14   80   59
-#  [6,]   21   20   59   14   80   22   91
-#  [7,]   20   59   91   80   22   15   63
-#  [8,]   59   91   63   22   15   64    6
-#  [9,]   91   63    6   15   64   39   40
-
-xy <- TStoX(Nile,5)
-lm(xy[,5] ~ xy[,1:4])
+#      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+# [1,]   87   66   79   21   67   81   97   77   92    68
+# [2,]   15   96   37   80   78    7   69   12   27    84
+#      [,11] [,12]
+# [1,]    74     3
+# [2,]   100    43
+y
+# [1] 2 2 2 1 3 2 2 4 3 1 5 1
+xy <- TStoMat(zm,5,y)
+lm(xy[,11] ~ xy[,1:10])  # toy example, need larger m
 }
 
 \author{

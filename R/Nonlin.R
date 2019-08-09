@@ -1,5 +1,5 @@
 
-# uses output of nls() to get an asymptotic covariance 
+# uses output of R's nls() to get an asymptotic covariance 
 # matrix in general heteroscedastic case
 
 # arguments:

@@ -4,7 +4,7 @@ Title: Regression and Classification Tools
 Author: Norm Matloff
 Maintainer: Norm Matloff <matloff@cs.ucdavis.edu>
 Depends: FNN,mvtnorm,dummies,sandwich
-Suggests: knitr, rmarkdown, car
+Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 License: GPL (>= 2)
 Description: Tools for linear, nonlinear and nonparametric regression

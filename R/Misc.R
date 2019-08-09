@@ -31,7 +31,6 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
 
 factorsToDummies <- function(dfr,omitLast=TRUE) 
 {
-   require(dummies)
    outDF <- data.frame(rep(0,nrow((dfr))))  # filler start
    for (i in 1:ncol(dfr)) {
       dfi <- dfr[,i]

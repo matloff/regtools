@@ -333,7 +333,7 @@ pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) {
       xnames <- names(x2)
       plot(x2[pred1,1],x2[pred1,2],pch='1',cex=cexval,
          xlab=xnames[1],ylab=xnames[2])
-      points(x2[-pred1,1],x2[-pred1,2],pch='0',cex=cexval)
+      graphics::points(x2[-pred1,1],x2[-pred1,2],pch='0',cex=cexval)
       readline("next plot")
    }
 }

@@ -1,5 +1,6 @@
 \name{factorsToDummies}
 \alias{factorToDummies}
+\alias{factorsToDummies}
 \alias{dummiesToFactor}
 
 \title{Factor Conversion Utilities}

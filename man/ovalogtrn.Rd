@@ -17,7 +17,7 @@ and nonparametric.
 
 \usage{
 ovalogtrn(m,trnxy,truepriors=NULL)
-ovalogpred(coefmat,predx)
+ovalogpred(coefmat,predx,probs=FALSE)
 avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx)
 knntrn(y,xdata,m,k,truepriors=NULL) 
@@ -33,8 +33,8 @@ pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL)
 \item{cexval}{Symbol size for plotting.}
 \item{band}{If \code{band} is non-NULL, only points within \code{band}, 
    say 0.1, of est. P(Y = 1) are displayed, for a contour-like effect.}
-\item{trnxy}{Data matrix, one data point per row, Y in the last
-   column.  Y must be numeric; see Details for conversion from factor.}
+\item{trnxy}{Data matrix (not a data frame), one data point 
+   per row, Y in the last column.  Y must be numeric, 0,1,2,... \code{m-1}.}
 \item{object}{Needed for consistency with generic.}
 \item{...}{Needed for consistency with generic.}
 \item{y}{Vector of response variable data in the training set, with
@@ -53,6 +53,8 @@ the unconditional probability of a certain class.}
 value.}
 \item{truepriors}{True unconditional class probabilities, typically
 obtained externally.}
+\item{probs}{If TRUE, return the estimated conditional probabilities of class
+membership.}
 }
 
 \details{

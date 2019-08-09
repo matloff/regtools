@@ -32,7 +32,7 @@ kmin(y,xdata,lossftn=l2,nk=5,nearf=meany)
 % \method{plot}{kmin}(x,y,...)
 parvsnonparplot(lmout,knnout,cex=1.0) 
 nonparvsxplot(knnout,lmout=NULL) 
-nonparvarplot(knnout)
+nonparvarplot(knnout,returnPts=FALSE)
 l2(y,muhat)
 l1(y,muhat)
 }
@@ -62,6 +62,7 @@ l1(y,muhat)
   \item{knnout}{Output of \code{knnest}.}
   \item{cex}{R parameter to control dot size in plot.}
   \item{muhat}{Vector of estimated regression function values.}
+  \item{returnPts}{If TRUE, return matrix of plotted points.}
 }
 
 \details{

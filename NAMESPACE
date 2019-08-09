@@ -16,7 +16,7 @@ S3method(plot,kmin)
 S3method(predict,ovaknn)
 
 export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
-   kmin,predwrong,
+   kmin,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
    ovalogtrn,ovalogpred,avalogtrn,avalogpred,
    knntrn,predict.ovaknn,classadjust,

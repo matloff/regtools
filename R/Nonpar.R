@@ -236,9 +236,11 @@ kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
    result
 }
 
-# incorrect prediction in 2-class classification problem
-predwrong <- function(muhat,y)
-   as.integer(y == round(muhat))
+#### removed, Aug. 8, 2019
+
+## # incorrect prediction in 2-class classification problem
+## predwrong <- function(muhat,y)
+##    as.integer(y == round(muhat))
 
 ### ######################  plot.kmin()  ###############################
 

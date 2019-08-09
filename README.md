@@ -46,6 +46,8 @@ some others use dummies.
 * Nicer implementation of ridge regression, with more meaningful scaling
 and better plotting.
 
+* Interesting datasets.
+
 ## EXAMPLE:  PARAMETRIC MODEL FIT ASSESSMENT
 
 The fit assessment techniques in **regtools** gauge the fit of

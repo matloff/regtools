@@ -10,7 +10,6 @@
 #        estimated parameter vector
 
 nlshc <- function(nlsout,type='hc3') {
-   require(sandwich)
    # notation: g(t,b) is the regression model, 
    # where t is the vector of variables for a 
    # given observation; b is the estimated parameter
@@ -29,5 +28,5 @@ nlshc <- function(nlsout,type='hc3') {
    # -1 means no constant term in the model
    lmout <- lm(yresidhm ~ xhm - 1)
    # vcovHC(lmout); was getting NAs for some data sets
-   car::hccm(lmout,type)
+   sandwich::vcovHC(lmout,type)
 }

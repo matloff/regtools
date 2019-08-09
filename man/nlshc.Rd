@@ -8,7 +8,7 @@ Extension of \code{nls} to the heteroscedastic case.
 }
 
 \usage{
-nlshc(nlsout,type='hc3')
+nlshc(nlsout,type='HC')
 }
 
 \arguments{

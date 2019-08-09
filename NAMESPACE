@@ -1,11 +1,12 @@
 
-import(FNN,car,dummies,mvtnorm)
+import(FNN,dummies,mvtnorm)
 
   importFrom("graphics", "abline", "matplot", "plot")
   importFrom("stats", "binomial", "coef", "cor", "cov", "glm", "lm",
              "loglin", "na.omit", "numericDeriv", "predict", "rbinom",
              "var")
   importFrom("utils", "combn")
+  importFrom("sandwich")
 
 S3method(coef,lmac)
 S3method(vcov,lmac)

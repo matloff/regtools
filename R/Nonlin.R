@@ -9,7 +9,7 @@
 # value: approximate covariance matrix for the 
 #        estimated parameter vector
 
-nlshc <- function(nlsout,type='hc3') {
+nlshc <- function(nlsout,type='HC') {
    # notation: g(t,b) is the regression model, 
    # where t is the vector of variables for a 
    # given observation; b is the estimated parameter

@@ -6,7 +6,7 @@ import(FNN,dummies,mvtnorm)
              "loglin", "na.omit", "numericDeriv", "predict", "rbinom",
              "var")
   importFrom("utils", "combn")
-  importFrom("sandwich")
+  importFrom("sandwich","vcovHC")
 
 S3method(coef,lmac)
 S3method(vcov,lmac)

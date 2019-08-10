@@ -25,6 +25,8 @@ ECS 132:  an undergraduate course in probabilistic modeling
 
 ECS 145:  a course in scripting languages (Python, R)
 
+ECS 158:  an undergraduate course in parallel computation
+
 ECS 256:  a graduate course in probabilistic modeling
 
 }

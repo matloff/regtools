@@ -7,7 +7,7 @@ Models to Machine Learning: Statistical Regression and
 Classification</i>, N. Matloff, CRC, 2017 (recipient of the
 *Technometrics* Eric Ziegel Award for Best Book Reviewed in 2017).
 
-*The tools are useful in general, independently of the book*.
+The tools are useful in general, **independently of the book**.
 
 ## FEATURES:
 
@@ -16,8 +16,8 @@ Classification</i>, N. Matloff, CRC, 2017 (recipient of the
 examination of quadratic effects, investigation of nonhomogeneity of
 variance.
 
-* Tools for multiclass classification, parametric and nonparametric, any
-  number of classes.  One vs. All and All vs. All paradigms.  Novel
+* Tools for multiclass classification, parametric and nonparametric, for
+  any number of classes.  One vs. All and All vs. All paradigms.  Novel
 adjustment for artificially balanced (or undesirably imbalanced) data.
 
 * Nonparametric regression for general dimensions in predictor and
@@ -65,14 +65,14 @@ degrees.  You can read the details of the data by typing
 > ?prgeng
 ```
 
-One of the graphical functions for model fit assessment plots the
+One of the package's graphical functions for model fit assessment plots the
 parametric (e.g. **lm()**) values against the nonparametric fit via
 k-NN.  Let's try this on the Census data.
 
 The package includes three versions of the dataset:  The original; a
 version with categorical variables in dummy form; and a version with
 categorical variables in R factor form.  Since the k-NN routines require
-dummies, we'll use that second version, **peDumms**.
+dummies, we'll use that first version, **peDumms**.
 
 We need to generate the parametric and nonparametric fits, then call
 **parvsnonparplot()**:
@@ -87,6 +87,14 @@ parvsnonparplot(lmout,knnout)
 ```
 
 ![result](inst/images/ParVsNonpar.png)
+
+We see above how the k-NN code is used.  We first call **preprocessx()** 
+to determine the nearest neighbors of each data point.  Here **k** is
+10, so we can later computer various k-NN fits for **k** anywhere from 1
+to 10.  The actual fit is done by **knnest()**.  Then
+**parvsnonparplot()** plots the linear model fit against the
+nonparametric one..  Again, since the latter is model-free, it serves as
+a good assessment of the linear model.
 
 There is quite a bit suggested in this picture:
 
@@ -116,13 +124,13 @@ subpopulations within this data.
 The package includes various other graphical diagnostic functions.
 
 By the way, violation of the homoscedasticity assumption won't
-invalidate our estimates; they still will be *statistically consistent*.
-But the standard errors we compute, and thus the statistical inference
-we perform, will be affected.  This is correctible using the
-Eicker-White procedure, which for linear models is available in the
-**car** and **sandwich** packagers.  Our package here also extends this
-to nonlinear parametric models, in our function <b>nlshc()</b> (the
-validity of this extension is shown in the book).
+invalidate the estimates in our linear model.  They still will be
+*statistically consistent*.  But the standard errors we compute, and
+thus the statistical inference we perform, will be affected.  This is
+correctible using the Eicker-White procedure, which for linear models is
+available in the **car** and **sandwich** packagers.  Our package here
+also extends this to nonlinear parametric models, in our function
+<b>nlshc()</b> (the validity of this extension is shown in the book).
 
 ## EXAMPLE; OVA VS. AVA IN MULTICLASS PROBLEMS
 

@@ -38,7 +38,8 @@ setting, via the Available Cases method.  (For Prediction contexts, see
 
 * Utilities for conversion between factor and dummy variable forms,
   useful since among various regression packages, some use factors while
-some others use dummies.
+some others use dummies.  (The **lars** package is an example of the
+latter case.)
 
 * Misc. tools, e.g. to reverse the effects of an earlier call to
   **scale()**.
@@ -90,11 +91,11 @@ parvsnonparplot(lmout,knnout)
 
 We see above how the k-NN code is used.  We first call **preprocessx()** 
 to determine the nearest neighbors of each data point.  Here **k** is
-10, so we can later computer various k-NN fits for **k** anywhere from 1
+10, so we can later compute various k-NN fits for **k** anywhere from 1
 to 10.  The actual fit is done by **knnest()**.  Then
 **parvsnonparplot()** plots the linear model fit against the
 nonparametric one..  Again, since the latter is model-free, it serves as
-a good assessment of the linear model.
+a good assessment of the fit of the linear model.
 
 There is quite a bit suggested in this picture:
 
@@ -119,7 +120,8 @@ against the estimated conditional mean, both computed nonparametrically:
 
 Though we ran the plot thinking of the homoscedasticity assumption, this
 is much more remarkable, confirming that there are interesting
-subpopulations within this data.
+subpopulations within this data.  These may correspond to different
+occupations, something to be investigated.
 
 The package includes various other graphical diagnostic functions.
 
@@ -183,35 +185,37 @@ pef1 <- pef[,c('age','educ','sex','wageinc','wkswrkd','occ')]
 pef1$occ <- as.numeric(pef1$occ) 
 pef1$occ <- pef1$occ - 1
 pef2 <- pef1 
-# create the education dummy varibles
+# create the education, gender dummy varibles
 pef2$ms <- as.integer(pef2$educ == 14) 
 pef2$phd <- as.integer(pef2$educ == 16) 
 pef2$educ <- NULL 
 pef2$sex <- as.integer(pef2$sex == 1) 
 pef2 <- pef2[,c(1,2,3,4,6,7,5)] 
 ovaout <- ovalogtrn(6,pef2) 
-# estimated coefficients, one set per class
+# estimated coefficients, one set ofr each of the 6 classes
 ovaout  
 # prints
-(Intercept) -9.411834e-01 -6.381329e-01 -2.579483e-01 -3.370758e+00
-xage         9.090437e-03 -3.302790e-03 -2.205695e-02 -2.193359e-03
-xsex        -5.187912e-01 -1.122531e-02 -9.802006e-03 -7.856923e-01
-xwageinc    -6.741141e-06 -4.609168e-06  5.132813e-06 -4.076872e-06
-xwkswrkd     5.058947e-03 -2.247113e-03  2.623924e-04  1.311084e-02
-xms         -5.201286e-01 -4.272846e-01  5.280520e-01 -1.797544e-01
-xphd        -3.302821e-01 -8.035287e-01  3.531951e-01 -3.883463e-01
-                        4             5
-(Intercept) -3.322356e+00 -4.456788e+00
-xage        -1.206640e-02  3.323948e-02
-xsex         5.173516e-01  1.175657e+00
-xwageinc     2.033175e-06  1.831774e-06
-xwkswrkd     5.517912e-04  2.794453e-03
-xms          9.947253e-02  2.705293e-01
-xphd         4.967115e-01  4.633907e-01
+                        0             1             2
+(Intercept) -9.411834e-01 -6.381329e-01 -2.579483e-01
+xage         9.090437e-03 -3.302790e-03 -2.205695e-02
+xsex        -5.187912e-01 -1.122531e-02 -9.802006e-03
+xwageinc    -6.741141e-06 -4.609168e-06  5.132813e-06
+xwkswrkd     5.058947e-03 -2.247113e-03  2.623924e-04
+xms         -5.201286e-01 -4.272846e-01  5.280520e-01
+xphd        -3.302821e-01 -8.035287e-01  3.531951e-01
+                        3             4             5
+(Intercept) -3.370758e+00 -3.322356e+00 -4.456788e+00
+xage        -2.193359e-03 -1.206640e-02  3.323948e-02
+xsex        -7.856923e-01  5.173516e-01  1.175657e+00
+xwageinc    -4.076872e-06  2.033175e-06  1.831774e-06
+xwkswrkd     1.311084e-02  5.517912e-04  2.794453e-03
+xms         -1.797544e-01  9.947253e-02  2.705293e-01
+xphd        -3.883463e-01  4.967115e-01  4.633907e-01
 # predict the occupation of a woman, age 35, no MS/PhD, inc 60000, 52
 # weeks worked
 ovalogpred(ovaout,matrix(c(35,0,60000,52,0,0),nrow=1))
 # outputs class 2, Census occupation code 102
+[1] 2
 ```
 
 With the optional argument **probs=TRUE**, the call to **ovalogpred()**
@@ -361,7 +365,7 @@ variables.
 
 This allows use of ordinary tools like **lm()** for prediction in time
 series data.  Since the goal here is prediction rather than inference,
-an informal model can be quite effective.
+an informal model can be quite effective, as well as convenient.
 
 The basic idea is that **x[i]** is predicted by
 **x[i-lg],
@@ -390,7 +394,8 @@ head(Nile,36)
 Try **lm()**:
 
 ``` r
-lm(xy[,6] ~ xy[,1:5])
+lmout <- lm(xy[,6] ~ xy[,1:5])
+lmout
 ...
 Coefficients:
 Coefficients:
@@ -401,6 +406,7 @@ Coefficients:
 Predict the 101st observation:
 
 ``` r
+cfs <- coef(lmout)
 cfs %*% c(1,Nile[96:100])
 #          [,1]
 # [1,] 784.4925

@@ -18,6 +18,7 @@ Description: Tools for linear, nonlinear and nonparametric regression
              to rectangular form.  Utilities for conversion between
              factors and indicator variables.  Some code related to
              "Statistical Regression and Classification: from Linear
-             Models to Machine Learning", N. Matloff, 2017, CRC.
+             Models to Machine Learning", N. Matloff, 2017, CRC,
+             ISBN 9781498710916.
 URL: https://github.com/matloff/regtools
 BugReports: https://github.com/matloff/regtools/issues

@@ -16,6 +16,8 @@ Description: Tools for linear, nonlinear and nonparametric regression
              regression with Eickert-White method for dealing with 
              heteroscedasticity.  Utilities for converting time series
              to rectangular form.  Utilities for conversion between
-             factors and indicator variables.
+             factors and indicator variables.  Some code related to
+             "Statistical Regression and Classification: from Linear
+             Models to Machine Learning", N. Matloff, 2017, CRC.
 URL: https://github.com/matloff/regtools
 BugReports: https://github.com/matloff/regtools/issues

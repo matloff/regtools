@@ -51,8 +51,8 @@ factorsToDummies <- function(dfr,omitLast=TRUE)
    outDF
 }
 
-# converts just a single factor; def of omitLast is in comments above
-
+# converts just a single factor; def of omitLast is in comments above;
+# easier to have both f, fname required
 factorToDummies <- function (f,fname,omitLast=TRUE) 
 {
     n <- length(f)

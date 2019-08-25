@@ -42,7 +42,7 @@ dummies.
 
 \examples{
 f <- as.factor(c('abc','de','f','de','abc'))
-factorToDummies('f')
+factorToDummies(f,'f')
 # outputs
 #      f.abc f.de
 # [1,]     1    0
@@ -51,7 +51,7 @@ factorToDummies('f')
 # [4,]     0    1
 # [5,]     1    0
 d <- data.frame(a=1:5,b=f)
-factorsToDummies(d)
+factorsToDummies(d,omitLast=FALSE)
 # outputs
 #   a b.abc b.de
 # 1 1     1    0

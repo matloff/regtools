@@ -40,6 +40,27 @@ input data frame, in which each factor is replaced by columns of
 dummies.
 }
 
+\examples{
+f <- as.factor(c('abc','de','f','de','abc'))
+factorToDummies('f')
+# outputs
+#      f.abc f.de
+# [1,]     1    0
+# [2,]     0    1
+# [3,]     0    0
+# [4,]     0    1
+# [5,]     1    0
+d <- data.frame(a=1:5,b=f)
+factorsToDummies(d)
+# outputs
+#   a b.abc b.de
+# 1 1     1    0
+# 2 2     0    1
+# 3 3     0    0
+# 4 4     0    1
+# 5 5     1    0
+}
+
 \author{
 Norm Matloff
 }

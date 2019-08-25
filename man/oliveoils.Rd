@@ -12,7 +12,3 @@ Heike Hofmann, Springer, 2006.  Included here with permission of Dr.
 Martin Theus.  
 }
 
-\usage{
-data(oliveoils); oliveoils
-}
-

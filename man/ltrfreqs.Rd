@@ -12,7 +12,3 @@ http://www.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.h
 tml
 }
 
-\usage{
-data(ltrfreqs); ltrfreqs
-}
-

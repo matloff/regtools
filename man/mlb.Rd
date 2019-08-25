@@ -13,7 +13,3 @@ Outfielders, Catchers and Pitchers.
 Included here with the permission of the UCLA Statistics Department.
 }
 
-\usage{
-data(mlb); mlb
-}
-

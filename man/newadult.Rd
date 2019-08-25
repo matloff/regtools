@@ -30,7 +30,3 @@ The variables are:
 
 }
 
-\usage{
-data(newadult); newadult
-}
-

@@ -38,6 +38,11 @@ factorsToDummies <- function(dfr,omitLast=TRUE)
          outDF <- cbind(outDF,dfi) 
          names(outDF)[ncol(outDF)] <- names(dfr)[i]
       } else {
+            if (length(levels(dfi)) == 1) {
+               msg <- paste(names(dfr)[i],'constant, not included')
+               warning(msg)
+               next
+            }
          dumms <- factorToDummies(dfi,names(dfr)[i],omitLast)
          outDF <- cbind(outDF,dumms)
       }

@@ -28,4 +28,5 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    unscale,
    factorsToDummies,factorToDummies,dummiesToFactor,
    pwplot,
+   imgTo2D,
    TStoX,TStoMat)

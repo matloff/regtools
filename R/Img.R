@@ -18,8 +18,8 @@
 
 imgTo2D <- function(img,nr,hasClassID=FALSE) 
 {
+   if (mode(img) == 'list') img <- sapply(img,function(t) t)
    lImg <- length(img)
-
    if (hasClassID) {
       classID <- img[lImg]
       img <- img[-lImg]

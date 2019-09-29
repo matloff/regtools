@@ -70,9 +70,11 @@ l1(y,muhat)
    The \code{knnest} function does k-nearest neighbor regression
    function estimation, in any dimension, i.e. any number of predictor
    variables, and any number of response variables.  This of course 
-   includes classification problems case; a scalar Y = 0,1 would
+   includes classification problems case. A scalar Y = 0,1 would
    represent two classes, with the regression function reducing to 
-   the conditional probability of class 1, given the predictors.  
+   the conditional probability of class 1, given the predictors.  With
+   more than 2 classes, the response variable, \code{y}, should be a
+   matrix of dummy variables, one column for each class.
 
    The \code{preprocessx} function does the prep work.  For each row in
    \code{x}, the code finds the \code{kmax} closest rows to that row.

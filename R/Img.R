@@ -6,7 +6,7 @@
 
 # arguments:
 
-#   img: the image, in row-major order
+#   img: the image, in col-major order
 #   nr: number of rows in the image
 #   hasClassID: if TRUE, last element of img is a class ID
 

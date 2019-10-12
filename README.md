@@ -1,6 +1,6 @@
 # regtools 
 
-## Novel tools tools for linear, nonlinear and nonparametric regression.
+## Novel tools for linear, nonlinear and nonparametric regression.
 
 These tools are associated with my book, <i>From Linear
 Models to Machine Learning: Statistical Regression and

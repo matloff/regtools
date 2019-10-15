@@ -1,11 +1,31 @@
 
 ######################  k-NN routines  #############################
 
-# use knnest() to estimate the regression function values; send output
-# to predict(), i.e. predict.knn() to predict; before calling knnest(),
-# run preprocessx(), to determine nearest neighbors, thus allowing for
-# trying several different values of k without recomputing nearest
-# neighbors
+# basicKNN() does a straightforward k-NN, but is not computationally
+# efficient
+
+# use knnest() for greater speed, though with a "shortcut":  the
+# preprocessing steps will fit k-NN estimates of the regression function
+# at all the training set points; then to predict a new point, we find
+# the closest point to it in the training set, and use the k-NN
+# estimates at THAT point
+
+# under this latter scheme, we call preprocessx() on the "X" portion of
+# the training set, then call knnest() on the output; then to predict a
+# new point, call predict.knn(), for the generic function predict()
+
+######################  basicKNN()  ###############################
+
+# newX is a vector, and trainX is a matrix, one row per data point;
+# return value is a vector of distances
+
+basicKNN <- function(trainX,newX) 
+{
+   require(pdist)
+   pdOut <- pdist(newX,trainX)
+}
+
+
 
 ######################  knnest()  ###############################
 

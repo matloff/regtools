@@ -1,4 +1,5 @@
-\name{knnest,meany,vary,loclin,predict.knn,preprocessx,kmin,parvsnonparplot,nonparvsxplot,l1,l2}
+\name{knnest,meany,vary,loclin,predict.knn,preprocessx,kmin,parvsnonparplot,nonparvsxplot,l1,l2,basicKNN}
+\alias{basicKNN}
 \alias{knnest}
 \alias{predict.knn}
 % \alias{parget.knnx}
@@ -22,6 +23,7 @@ models.
 }
 
 \usage{
+basicKNN(x,y,newx,k)
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
 meany(predpt,nearxy) 
@@ -38,6 +40,7 @@ l1(y,muhat)
 }
 
 \arguments{
+  \item{newx}{New data point to be predicted.}
   \item{y}{Response variable data in the training set. Vector or matrix,
      the latter case for vector-valued response, e.g. multiclass
      classification.}  

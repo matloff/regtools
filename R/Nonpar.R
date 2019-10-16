@@ -16,16 +16,18 @@
 
 ######################  basicKNN()  ###############################
 
-# newX is a vector, and trainX is a matrix, one row per data point;
+# newx is a vector, and x is a matrix, one row per data point;
+# y is the vector of Y values corrsponding to x
 # return value is a vector of distances
 
-basicKNN <- function(trainX,newX) 
+basicKNN <- function(x,y,newx,k) 
 {
    require(pdist)
-   pdOut <- pdist(newX,trainX)
+   pdOut <- pdist(newx,x)
+   whichClose <- order(pdOut@dist)
+   kClosest <- whichClose[1:k]
+   mean(y[kClosest])
 }
-
-
 
 ######################  knnest()  ###############################
 

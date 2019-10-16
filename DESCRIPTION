@@ -3,7 +3,7 @@ Version: 1.1.0
 Title: Regression and Classification Tools
 Author: Norm Matloff
 Maintainer: Norm Matloff <matloff@cs.ucdavis.edu>
-Depends: R (>= 3.5.0),FNN,mvtnorm,dummies,sandwich
+Depends: R (>= 3.5.0),FNN,mvtnorm,dummies,sandwich,pdist
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 License: GPL (>= 2)

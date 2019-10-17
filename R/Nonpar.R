@@ -26,7 +26,7 @@ basicKNN <- function(x,y,newx,k)
    pdOut <- pdist(newx,x)
    whichClose <- order(pdOut@dist)
    kClosest <- whichClose[1:k]
-   mean(y[kClosest])
+   list(whichClosest=kClosest,meanClosest=mean(y[kClosest]))
 }
 
 ######################  knnest()  ###############################

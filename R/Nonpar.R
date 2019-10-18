@@ -23,6 +23,10 @@
 basicKNN <- function(x,y,newx,k) 
 {
    require(pdist)
+   x <- scale(x)
+   xcntr <- attr(x,'scaled:center')
+   xscl <- attr(x,'scaled:scale')
+   newx <- scale(newx,center=xcntr,scale=xscl)
    pdOut <- pdist(newx,x)
    whichClose <- order(pdOut@dist)
    kClosest <- whichClose[1:k]

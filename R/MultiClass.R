@@ -338,6 +338,38 @@ pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) {
    }
 }
 
+#######################  mvrlm()  ################################
+
+# uses multivariate (i.e. vector R) lm() for classification; faster than
+# glm(), and may be useful as a rough tool; if have some quadratic terms
+# in the X_i, may approximate glm()
+
+# arguments:
+
+#    x: the usual matrix/df of predictor values
+#    y: an R factor, vector or matrix/df; if vector, assumed to contain
+#       class ID codes, and converted to a factor, which is then
+#       converted to dummies; if matrix/df, assumed to already consist
+#       of dummies
+#    yname: name to be used as a base in dummies created from y
+
+# value:
+
+#    object of class 'mvrlm'
+mvrlm <- function(x,y,yname=NULL) {
+   if (!is.matrix(y) && !is.data.frame(y)) {
+      if (is.vector(y)) y <- as.factor(y)
+      if (is.null(yname)) stop('need non-null yname')
+      ydumms <- factorToDummies(y,yname,FALSE)
+   } else ydumms <- y 
+   xy <- cbind(x,ydumms)
+   xnames <- names(x)
+   ynames <- names(ydumms)
+   ynames <- paste0(ynames,collapse=',')
+   browser()
+   cmd <- paste0('lmout <- lm(cbind(',ynames,') ~ .,data=xy)')
+   eval(parse(text=cmd))
+}
 
 # parget.knnx():
 

@@ -341,8 +341,8 @@ pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) {
 #######################  mvrlm()  ################################
 
 # uses multivariate (i.e. vector R) lm() for classification; faster than
-# glm(), and may be useful as a rough tool; if have some quadratic terms
-# in the X_i, may approximate glm()
+# glm(), and may be useful as a rough tool if the goal is prediction, 
+# esp. if have some quadratic terms
 
 # arguments:
 
@@ -362,6 +362,7 @@ mvrlm <- function(x,y,yname=NULL) {
       if (is.null(yname)) stop('need non-null yname')
       ydumms <- factorToDummies(y,yname,FALSE)
    } else ydumms <- y 
+   ydumms <- as.data.frame(ydumms)
    xy <- cbind(x,ydumms)
    xnames <- names(x)
    ynames <- names(ydumms)
@@ -369,7 +370,21 @@ mvrlm <- function(x,y,yname=NULL) {
    browser()
    cmd <- paste0('lmout <- lm(cbind(',ynames,') ~ .,data=xy)')
    eval(parse(text=cmd))
+   class(lmout) <- c('mvrlm',class(lmout))
+   lmout
 }
+
+# mvrlmObj is output of mvrlm(), newx is a data frame compatible with x
+# in mvrlm()
+
+predict.mvrlm <- function(mvrlmObj,newx) {
+   class(mvrlmObj) <- class(mvrlmObj)[-1]
+   preds <- predict(mvrlmObj,newx)
+   tmp <- apply(preds,1,which.max)
+   colnames(preds)[tmp]
+}
+
+
 
 # parget.knnx():
 

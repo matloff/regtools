@@ -367,7 +367,6 @@ mvrlm <- function(x,y,yname=NULL) {
    xnames <- names(x)
    ynames <- names(ydumms)
    ynames <- paste0(ynames,collapse=',')
-   browser()
    cmd <- paste0('lmout <- lm(cbind(',ynames,') ~ .,data=xy)')
    eval(parse(text=cmd))
    class(lmout) <- c('mvrlm',class(lmout))

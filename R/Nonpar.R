@@ -24,7 +24,7 @@
 # smoothingFtn could be, e.g., median
 
 basicKNN <- function(x,y,newx,k,scaleX = TRUE,smoothingFtn=mean) 
-{  stop('under construction')
+{  
    require(pdist)
    if (!is.matrix(newx)) newx <- matrix(newx,nrow=1)
    if (scaleX) {
@@ -41,11 +41,12 @@ basicKNN <- function(x,y,newx,k,scaleX = TRUE,smoothingFtn=mean)
       kClosest <- whichClose[1:k]
       closestIdxs <- rbind(closestIdxs,kClosest)
    }
-   regests <- apply(closestIdxs,1,findYhat)
-   list(whichClosest=closestIdxs,regests=regest())
+   fyh <- function(closeIdxs) findYhat(y,closeIdxs,smoothingFtn)
+   regests <- apply(closestIdxs,1,fyh)
+   list(whichClosest=closestIdxs,regests=regests)
 }
 
-findYhat <- function(y,closestIdxs,smoothingFtn) smoothingFtn(y[closeIdxs])
+findYhat <- function(y,closeIdxs,smoothingFtn) smoothingFtn(y[closeIdxs])
 
 ######################  knnest()  ###############################
 

@@ -23,7 +23,7 @@ models.
 }
 
 \usage{
-basicKNN(x,y,newx,k)
+basicKNN(x,y,newx,k,scaleX=TRUE,smoothingFtn=mean)
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
 meany(predpt,nearxy) 
@@ -69,6 +69,10 @@ l1(y,muhat)
 }
 
 \details{
+
+   The \code{basicKNN} function is convenient for small- to medium-sized
+   problems, and is simpler to use.  For larger problems, use the
+   combination \code{preprocessx}, \code{knnest} and \code{predict.knn}.
    
    The \code{knnest} function does k-nearest neighbor regression
    function estimation, in any dimension, i.e. any number of predictor

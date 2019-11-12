@@ -16,22 +16,36 @@
 
 ######################  basicKNN()  ###############################
 
-# newx is a vector, and x is a matrix, one row per data point;
+# newx is a vector/matrix, and x is a matrix, one row per data point;
 # y is the vector of Y values corrsponding to x
-# return value is a vector of distances
+# return value is a vector of nearest-neighbor indices and a vector of
+# predicted Y values
 
-basicKNN <- function(x,y,newx,k) 
-{
+# smoothingFtn could be, e.g., median
+
+basicKNN <- function(x,y,newx,k,scaleX = TRUE,smoothingFtn=mean) 
+{  stop('under construction')
    require(pdist)
-   x <- scale(x)
-   xcntr <- attr(x,'scaled:center')
-   xscl <- attr(x,'scaled:scale')
-   newx <- scale(matrix(newx,nrow=1),center=xcntr,scale=xscl)
-   pdOut <- pdist(newx,x)
-   whichClose <- order(pdOut@dist)
-   kClosest <- whichClose[1:k]
-   list(whichClosest=kClosest,meanClosest=mean(y[kClosest]))
+   if (!is.matrix(newx)) newx <- matrix(newx,nrow=1)
+   if (scaleX) {
+      x <- scale(x)
+      xcntr <- attr(x,'scaled:center')
+      xscl <- attr(x,'scaled:scale')
+      newx <- scale(newx,center=xcntr,scale=xscl)
+   }
+   pdOut <- as.matrix(pdist(newx,x))
+   # row i of pdOut is dists from newx[i,] to x
+   closestIdxs <- NULL  # row i will be indices of closest x to newx[i,]
+   for (i in 1:nrow(newx)) {
+      whichClose <- order(pdOut[i,])
+      kClosest <- whichClose[1:k]
+      closestIdxs <- rbind(closestIdxs,kClosest)
+   }
+   regests <- apply(closestIdxs,1,findYhat)
+   list(whichClosest=closestIdxs,regests=regest())
 }
+
+findYhat <- function(y,closestIdxs,smoothingFtn) smoothingFtn(y[closeIdxs])
 
 ######################  knnest()  ###############################
 

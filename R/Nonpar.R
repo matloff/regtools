@@ -34,19 +34,18 @@ basicKNN <- function(x,y,newx,k,scaleX = TRUE,smoothingFtn=mean)
       newx <- scale(newx,center=xcntr,scale=xscl)
    }
    pdOut <- as.matrix(pdist(newx,x))
+   kmax <- k[length(k)]  # prep for future allowance of vector k
    # row i of pdOut is dists from newx[i,] to x
-   closestIdxs <- NULL  # row i will be indices of closest x to newx[i,]
-   for (i in 1:nrow(newx)) {
-      whichClose <- order(pdOut[i,])
-      kClosest <- whichClose[1:k]
-      closestIdxs <- rbind(closestIdxs,kClosest)
+   # now find out which rows in x are closest
+   findClosest <- function(pdOutRow) {
+      whichClose <- order(pdOutRow)
+      whichClose[1:kmax]
    }
-   fyh <- function(closeIdxs) findYhat(y,closeIdxs,smoothingFtn)
+   closestIdxs <- t(apply(pdOut,1,findClosest))
+   fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs])
    regests <- apply(closestIdxs,1,fyh)
    list(whichClosest=closestIdxs,regests=regests)
 }
-
-findYhat <- function(y,closeIdxs,smoothingFtn) smoothingFtn(y[closeIdxs])
 
 ######################  knnest()  ###############################
 

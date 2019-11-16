@@ -32,7 +32,11 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
       x <- as.matrix(x)
       warning('x converted to matrix')
    }
-   if (!is.matrix(newx)) newx <- matrix(newx,nrow=1)
+   if (is.vector(newx)) newx <- matrix(newx,nrow=1)
+   if (is.data.frame(newx)) {
+      newx <- as.matrix(newx)
+      warning('newx converted to matrix')
+   }
    if (scaleX) {
       x <- scale(x)
       xcntr <- attr(x,'scaled:center')
@@ -61,7 +65,7 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
    } else {
       regests <- NULL
       for (k in 1:kmax) 
-         regests <- c(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
+         regests <- rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
    }
    list(whichClosest=closestIdxs,regests=regests)
 }

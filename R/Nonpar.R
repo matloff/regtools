@@ -27,6 +27,11 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
    smoothingFtn=mean,allK=FALSE) 
 {  
    require(pdist)
+   if (is.vector(x)) x <- matrix(x,ncol=1)
+   if (is.data.frame(x)) {
+      x <- as.matrix(x)
+      warning('x converted to matrix')
+   }
    if (!is.matrix(newx)) newx <- matrix(newx,nrow=1)
    if (scaleX) {
       x <- scale(x)
@@ -49,14 +54,15 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
    # but we might want to try various values of k (allK = T), up through
    # kmax; e.g.  for k = 2 would just use the first 2 columns; in fyh(),
    # closeIdxs is a row in pdOut, with the first k columns
+   browser()
 
    fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs])
    if (!allK) {
-      regests <- apply(closestIdxs[,1:k],fyh)
+      regests <- apply(closestIdxs[,1:kmax,drop=FALSE],1,fyh)
    } else {
       regests <- NULL
       for (k in 1:kmax) 
-         regests <- c(regests,apply(closestIdxs[,1:k],fyh))
+         regests <- c(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
    }
    list(whichClosest=closestIdxs,regests=regests)
 }

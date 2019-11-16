@@ -23,7 +23,7 @@ models.
 }
 
 \usage{
-basicKNN(x,y,newx,k,scaleX=TRUE,smoothingFtn=mean)
+basicKNN(x,y,newx,k,scaleX=TRUE,smoothingFtn=mean,allK=FALSE)
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
 meany(predpt,nearxy) 

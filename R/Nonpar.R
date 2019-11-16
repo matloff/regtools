@@ -54,7 +54,6 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
    # but we might want to try various values of k (allK = T), up through
    # kmax; e.g.  for k = 2 would just use the first 2 columns; in fyh(),
    # closeIdxs is a row in pdOut, with the first k columns
-   browser()
 
    fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs])
    if (!allK) {

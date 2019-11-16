@@ -23,7 +23,8 @@
 
 # smoothingFtn could be, e.g., median
 
-basicKNN <- function(x,y,newx,k,scaleX = TRUE,smoothingFtn=mean) 
+basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
+   smoothingFtn=mean,allK=FALSE) 
 {  
    require(pdist)
    if (!is.matrix(newx)) newx <- matrix(newx,nrow=1)
@@ -34,7 +35,7 @@ basicKNN <- function(x,y,newx,k,scaleX = TRUE,smoothingFtn=mean)
       newx <- scale(newx,center=xcntr,scale=xscl)
    }
    pdOut <- as.matrix(pdist(newx,x))
-   kmax <- k[length(k)]  # prep for future allowance of vector k
+   ### kmax <- k[length(k)]  # prep for future allowance of vector k
    # row i of pdOut is dists from newx[i,] to x
    # now find out which rows in x are closest
    findClosest <- function(pdOutRow) {
@@ -42,8 +43,21 @@ basicKNN <- function(x,y,newx,k,scaleX = TRUE,smoothingFtn=mean)
       whichClose[1:kmax]
    }
    closestIdxs <- t(apply(pdOut,1,findClosest))
+   # closestIdxs is a matrix; row i gives the indices of the closest
+   # rows in x to newx[i,]; there will be kmax columns
+
+   # but we might want to try various values of k (allK = T), up through
+   # kmax; e.g.  for k = 2 would just use the first 2 columns; in fyh(),
+   # closeIdxs is a row in pdOut, with the first k columns
+
    fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs])
-   regests <- apply(closestIdxs,1,fyh)
+   if (!allK) {
+      regests <- apply(closestIdxs[,1:k],fyh)
+   } else {
+      regests <- NULL
+      for (k in 1:kmax) 
+         regests <- c(regests,apply(closestIdxs[,1:k],fyh))
+   }
    list(whichClosest=closestIdxs,regests=regests)
 }
 

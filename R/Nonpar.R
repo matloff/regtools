@@ -24,19 +24,18 @@
 # smoothingFtn could be, e.g., median
 
 basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
-   smoothingFtn=mean,allK=FALSE) 
+   smoothingFtn=mean,allK=FALSE,leave1out=FALSE) 
 {  
    require(pdist)
    if (is.vector(x)) x <- matrix(x,ncol=1)
    if (is.data.frame(x)) {
       x <- as.matrix(x)
-      warning('x converted to matrix')
    }
    if (is.vector(newx)) newx <- matrix(newx,nrow=1)
    if (is.data.frame(newx)) {
       newx <- as.matrix(newx)
-      warning('newx converted to matrix')
    }
+   kmax1 <- kmax + leave1out
    if (scaleX) {
       x <- scale(x)
       xcntr <- attr(x,'scaled:center')
@@ -44,14 +43,14 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
       newx <- scale(newx,center=xcntr,scale=xscl)
    }
    pdOut <- as.matrix(pdist(newx,x))
-   ### kmax <- k[length(k)]  # prep for future allowance of vector k
    # row i of pdOut is dists from newx[i,] to x
    # now find out which rows in x are closest
    findClosest <- function(pdOutRow) {
       whichClose <- order(pdOutRow)
-      whichClose[1:kmax]
+      whichClose[1:kmax1]
    }
    closestIdxs <- t(apply(pdOut,1,findClosest))
+   if (leave1out) closestIdxs <- closestIdxs[,-1,drop=FALSE]
    # closestIdxs is a matrix; row i gives the indices of the closest
    # rows in x to newx[i,]; there will be kmax columns
 
@@ -65,7 +64,8 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
    } else {
       regests <- NULL
       for (k in 1:kmax) 
-         regests <- rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
+         regests <- 
+           rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
    }
    list(whichClosest=closestIdxs,regests=regests)
 }

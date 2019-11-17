@@ -70,6 +70,23 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
    list(whichClosest=closestIdxs,regests=regests)
 }
 
+# mean absolute prediction error
+MAPE <- function(y,yhat) mean(abs(y-yhat))
+
+# overall probability of correct classification, y as a vector of 0s and
+# 1s, yhat a vector of estimated probabilities of 1
+probCorrectClass <- function(y,yhat) 
+{
+   yhat <- round(yhat)
+   mean(yhat == y)
+}
+
+findOverallLoss <- function(regests,y,lossFtn=MAPE) 
+{
+   loss1row <- function(regestsRow) lossFtn(y,regestsRow)
+   apply(regests,1,loss1row)
+}
+
 ######################  knnest()  ###############################
 
 # use kNN to estimate the regression function at each data point in the

@@ -281,7 +281,7 @@ letters example, we could set this argument to **ltrfreqs**.
 (The term *priors* here does refer to a subjective Bayesian analysis. It
 is merely a standard term for the class probabilities.)
 
-## MULTICLASS CLASSIFICATION WITH k-NN
+## MULTICLASS k-NN CLASSIFICATION WITH knnest
 
 In addition to use in linear regression graphical diagnostics, k-NN can
 be very effective as a nonparametric regression/machine learning tool.
@@ -290,7 +290,10 @@ moderate and there are nonmonotonic relations.  (See also
 [our polyreg package](http://github.com/matloff/polyreg).)
 Let's continue the above example on predicting occupation, using k-NN.
 
-The three components of k-NN analysis in **regtools** are:
+The "industrial strength" k-NN functions in **regtools**, described
+below.  See also the **basicKNN()**, described later in this document.
+
+The three components are:
 
 1. **preprocessx()**:  This finds the sets of nearest neighbors in the
    training set, for all values of **k** up to a user-specified maximum.
@@ -360,6 +363,81 @@ Another option is to do local linear smoothing.  Among other things,
 this may remedy aliasing at the edges of the data.  This should be done
 with a value of **k** much larger than the number of predictor
 variables.
+
+## EXAMPLE:  REGRESSION ANALYSIS WITH basicKNN()
+
+The k-NN function **knnest()** and its related unctions are rather
+complex.  Those who are new to k-NN should use the simpler **basicKNN()**.
+Again, it can be used for both regression and classification (viewing
+the latter as a special case of the former).
+
+Our example here will be **day1** from the famous bike sharing dataset 
+from the [UC Irvine Machine Learning Repository](https://archive.ics.uci.edu).
+It is included in **regtools** by permission of the data
+curator.  A detailed description of the data is available on the 
+[UCI site](https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset).
+
+(The original data is in **day**.  It has some transformed values for
+the weather variables; here we'll use **day1**, which retains the
+original scale.)
+
+We'll predict total ridership.  Let's start out using as features just
+the dummy for working day, and the numeric weather variables, columns 8,
+10-13 and 16:
+
+``` r
+> data(day1)
+> day1 <- day1[,c(8,10:13,16)]
+> head(day1)
+  workingday     temp     atemp      hum windspeed  tot
+1          0 8.175849  7.999250 0.805833 10.749882  985
+2          0 9.083466  7.346774 0.696087 16.652113  801
+3          1 1.229108 -3.499270 0.437273 16.636703 1349
+4          1 1.400000 -1.999948 0.590435 10.739832 1562
+5          1 2.666979 -0.868180 0.436957 12.522300 1600
+6          1 1.604356 -0.608206 0.518261  6.000868 1606
+```
+
+In its simplest version, the call form is
+
+``` r
+basicKNN(x,y,newx,k)
+```
+
+where the arguments are:
+
+* **x:** the "X" matrix, i.e. matrix of predictor values,
+for the training set (it cannot be a data frame, as nearest-neighbor 
+distances between rows must be computed); in this case, it's the entire
+data except for the **tot** column
+
+* **y:** the "Y" vector for the training set, i.e. the response values,
+in this case the **tot** column
+
+* **newx:** a vector of feature values for a new case to be predicted
+
+* **k:** the number of nearest neighbors we wish to use
+
+So, say you are the manager this morning, and the day is a working day,
+with temperature 12.0, atemp 11.8, humidity 45\% and wind at 8.5 miles per
+hour.  What is your prediction for the ridership?
+
+``` r
+> day1x <- day1[,1:5]
+> tot <- day1$tot
+> knnout <- basicKNN(day1x,tot,c(1,12.0,11.8,0.23,5),5)
+> knnout
+$whichClosest
+     [,1] [,2] [,3] [,4] [,5]
+[1,]  459  481  469  452   67
+
+$regests
+[1] 5320.2
+```
+
+The output shows which rows in the training set were closest to the
+point to be predicted --- rows 459, 481 and so on --- and the prediction
+itself.  Our prediction would then be about 5320 riders. 
 
 ## EXAMPLE:  RECTANGULARIZATION OF TIME SERIES
 

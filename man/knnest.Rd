@@ -198,6 +198,21 @@ function values and \code{ks} containing the corresponding values of
 }
 
 \examples{
+
+set.seed(9999)
+x <- matrix(sample(1:10,16,replace=TRUE),ncol=2)
+y <- sample(1:10,8,replace=TRUE)
+basicKNN(x,y,c(3,4),2,scaleX=FALSE)  # 4,6; 6.5
+basicKNN(x,y,c(3,4),2,scaleX=FALSE,allK=T)  # 4,6; 7.0, 6.5
+y <- matrix(nrow=8,ncol=2)
+set.seed(9999)
+for (i in 1:8) {
+   j <- sample(1:2,1)
+   y[i,j] <- 1
+   y[i,3-j] <- 0
+}
+basicKNN(x,y,c(5,6),2,scaleX=FALSE)  # 4,8; 0.5,0.5
+
 set.seed(9999)
 x <- matrix(sample(1:100,30),ncol=3)
 xd <- preprocessx(x[,1],2,TRUE)  # just 1 predictor

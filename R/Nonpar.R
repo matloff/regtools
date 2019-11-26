@@ -17,7 +17,9 @@
 ######################  basicKNN()  ###############################
 
 # newx is a vector/matrix, and x is a matrix, one row per data point;
-# y is the vector of Y values corrsponding to x
+# y is the vector of Y values corrsponding to x, except for multiclass (> 2
+# classes) case, y is matrix of dummies, one column per class
+
 # return value is a vector of nearest-neighbor indices and a vector of
 # predicted Y values
 
@@ -27,15 +29,27 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
    smoothingFtn=mean,allK=FALSE,leave1out=FALSE) 
 {  
    require(pdist)
+
+   if (is.matrix(y) && identical(smoothingFtn,mean)) 
+      smoothingFtn <- colMeans
+
    if (is.vector(x)) x <- matrix(x,ncol=1)
    if (is.data.frame(x)) {
       x <- as.matrix(x)
    }
+   if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
+   # for now, not covering this complex case
+   if (is.matrix(y) && allK)
+      stop('in multiclass case, allK must be FALSE')
+   # but now that we've excluded it, easier to make y a matrix
+   if (is.vector(y)) y <- matrix(y,ncol=1)
    if (is.vector(newx)) newx <- matrix(newx,nrow=1)
    if (is.data.frame(newx)) {
       newx <- as.matrix(newx)
    }
+
    kmax1 <- kmax + leave1out
+
    if (scaleX) {
       x <- scale(x)
       xcntr <- attr(x,'scaled:center')
@@ -55,10 +69,11 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
    # rows in x to newx[i,]; there will be kmax columns
 
    # but we might want to try various values of k (allK = T), up through
-   # kmax; e.g.  for k = 2 would just use the first 2 columns; in fyh(),
-   # closeIdxs is a row in pdOut, with the first k columns
+   # kmax; e.g.  for k = 2 would just use the first 2 columns; 
+   
+   # in fyh(), closeIdxs is a row in pdOut, with the first k columns
+   fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs,])
 
-   fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs])
    if (!allK) {
       regests <- apply(closestIdxs[,1:kmax,drop=FALSE],1,fyh)
    } else {

@@ -1,6 +1,6 @@
 # regtools 
 
-## Novel tools tools for linear, nonlinear and nonparametric regression.
+## Novel tools tools for linear, nonlinear and nonparametric regression and classification
 
 These tools are associated with my book, <i>From Linear
 Models to Machine Learning: Statistical Regression and
@@ -33,7 +33,8 @@ technique to handle heteroscedasticity.
   enabling lagged prediction by **lm()** or other regression model.
 
 * Linear regression, PCA and log-linear model estimation in missing-data
-setting, via the Available Cases method.  (For Prediction contexts, see
+setting, via the Available Cases method.  (For handling missing values
+in Prediction contexts, see
 [our toweranNA package](http://github.com/matloff/toweranNA).)
 
 * Utilities for conversion between factor and dummy variable forms,
@@ -48,6 +49,8 @@ latter case.)
 and better plotting.
 
 * Interesting datasets.
+
+A number of examples of use follow below.
 
 ## EXAMPLE:  PARAMETRIC MODEL FIT ASSESSMENT
 
@@ -92,21 +95,22 @@ parvsnonparplot(lmout,knnout)
 We see above how the k-NN code is used.  We first call **preprocessx()** 
 to determine the nearest neighbors of each data point.  Here **k** is
 10, so we can later compute various k-NN fits for **k** anywhere from 1
-to 10.  The actual fit is done by **knnest()**.  Then
+to 10.  (A somewhat simpler function, **basicKNN()**, is also
+available.) The actual fit is done by **knnest()**.  Then
 **parvsnonparplot()** plots the linear model fit against the
 nonparametric one..  Again, since the latter is model-free, it serves as
 a good assessment of the fit of the linear model.
 
 There is quite a bit suggested in this picture:
 
-* There seems to be some overfitting near the low end, and quite
-substantial underfitting at the high end.  
+* There seems to be some overestimating near the low end, and quite
+substantial underestimating at the high end.  
 
 * There are intriguing "streaks" or "tails" of points, suggesting the
-  possible existence of small but important subpopulations.  Moreover,
-the plot suggests two separate large subpopulations, for wages less than
-or greater than about $40,000, possibly related to full- vs. part-time
-employment.
+  possible existence of small but important subpopulations arising
+  from the dummy variables.  Moreover, the plot suggests two separate large 
+  subpopulations, for wages less than or greater than about $40,000, 
+  possibly related to full- vs. part-time employment.
 
 * There appear to be a number of people with 0 wage income. Depending on
 the goals of our analysis, we might consider removing them.
@@ -118,7 +122,8 @@ against the estimated conditional mean, both computed nonparametrically:
 
 ![result](inst/images/PrgengVar.png)
 
-Though we ran the plot thinking of the homoscedasticity assumption, this
+Though we ran the plot thinking of the homoscedasticity assumption, and
+indeed we see larger variance at large mean values, this
 is much more remarkable, confirming that there are interesting
 subpopulations within this data.  These may correspond to different
 occupations, something to be investigated.
@@ -130,7 +135,7 @@ invalidate the estimates in our linear model.  They still will be
 *statistically consistent*.  But the standard errors we compute, and
 thus the statistical inference we perform, will be affected.  This is
 correctible using the Eicker-White procedure, which for linear models is
-available in the **car** and **sandwich** packagers.  Our package here
+available in the **car** and **sandwich** packages.  Our package here
 also extends this to nonlinear parametric models, in our function
 <b>nlshc()</b> (the validity of this extension is shown in the book).
 
@@ -266,22 +271,7 @@ avalogpred(6,ovaout,matrix(c(35,0,60000,52,0,0),nrow=1))
 # outputs class 2, Census occupation code 102
 ```
 
-## EXAMPLE:  ADJUSTMENT OF CLASS PROBABILITIES IN CLASSIFICATION PROBLEMS
-
-The **LetterRecognition** dataset in the **mlbench** package lists
-various geometric measurements of capital English letters, thus another
-image recognition problem.  One problem is that the frequencies of the
-letters in the dataset are not similar to those in actual English texts.
-The correct frequencies are given in the **ltrfreqs** dataset included
-here in the **regtools** package.
-
-In order to adjust the analysis accordingly, the **ovalogtrn()**
-function has an optional **truepriors** argument.  For the
-letters example, we could set this argument to **ltrfreqs**.
-(The term *priors* here does refer to a subjective Bayesian analysis. It
-is merely a standard term for the class probabilities.)
-
-## MULTICLASS k-NN CLASSIFICATION WITH knnest
+## EXAMPLE:  MULTICLASS k-NN CLASSIFICATION WITH knnest
 
 In addition to use in linear regression graphical diagnostics, k-NN can
 be very effective as a nonparametric regression/machine learning tool.
@@ -291,7 +281,8 @@ moderate and there are nonmonotonic relations.  (See also
 Let's continue the above example on predicting occupation, using k-NN.
 
 The "industrial strength" k-NN functions in **regtools**, described
-below.  See also the **basicKNN()**, described later in this document.
+below.  (See also the simpler **basicKNN()**, described later in this
+document.)
 
 The three components are:
 
@@ -419,7 +410,7 @@ in this case the **tot** column
 * **k:** the number of nearest neighbors we wish to use
 
 So, say you are the manager this morning, and the day is a working day,
-with temperature 12.0, atemp 11.8, humidity 45\% and wind at 8.5 miles per
+with temperature 12.0, atemp 11.8, humidity 45% and wind at 8.5 miles per
 hour.  What is your prediction for the ridership?
 
 ``` r
@@ -438,6 +429,57 @@ $regests
 The output shows which rows in the training set were closest to the
 point to be predicted --- rows 459, 481 and so on --- and the prediction
 itself.  Our prediction would then be about 5320 riders. 
+
+## EXAMPLE: USING basicknn() IN MULTICLASS PROBLEMS
+
+Let's redo the occupation-prediction example from above, using
+**basicknn()**.  
+
+Again, the arguments in the simple version ae:
+
+``` r
+function (x,y,newx,kmax)
+```
+
+Here **x** and **y** must be matrices.
+
+``` r
+> basicKNN(pef3[,1:6],as.matrix(pef3[7:12]),c(35,0,60000,52,0,0),10)
+$whichClosest
+      [,1]  [,2]  [,3]  [,4]  [,5]  [,6] [,7]  [,8] [,9] [,10]
+[1,] 14261 15552 16514 13592 13973 13709 1527 12579 5900 10914
+
+$regests
+      [,1]
+occ.0  0.1
+occ.1  0.4
+occ.2  0.5
+occ.3  0.0
+occ.4  0.0
+occ.5  0.0
+
+```
+
+Same answer as before, guessing Occupation 2.
+
+## EXAMPLE:  ADJUSTMENT OF CLASS PROBABILITIES IN CLASSIFICATION PROBLEMS
+
+The **LetterRecognition** dataset in the **mlbench** package lists
+various geometric measurements of capital English letters, thus another
+image recognition problem.  One problem is that the frequencies of the
+letters in the dataset are not similar to those in actual English texts.
+The correct frequencies are given in the **ltrfreqs** dataset included
+here in the **regtools** package.
+
+In order to adjust the analysis accordingly, the **ovalogtrn()**
+function has an optional **truepriors** argument.  For the letters
+example, we could set this argument to **ltrfreqs**.  The function
+**knntrn()** also has such an argument.  (The term *priors*
+here does NOT refer to a subjective Bayesian analysis. It is merely a
+standard term for the class probabilities.)
+
+In the book, it is shown that the use of correct priors increased the
+rate of correct classification from 75 to 88%.
 
 ## EXAMPLE:  RECTANGULARIZATION OF TIME SERIES
 

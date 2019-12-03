@@ -19,14 +19,17 @@
 # newx is a vector/matrix, and x is a matrix, one row per data point;
 # y is the vector of Y values corrsponding to x, except for multiclass (> 2
 # classes) case, y is matrix of dummies, one column per class
+# expand is a vector containing indexes of variables that need to be expanded
+# expandVar is a vector indicating how many times those variables should be expanded
+# expand and expandVar will be used when scaleX == TRUE, their length must be the same
 
 # return value is a vector of nearest-neighbor indices and a vector of
 # predicted Y values
 
 # smoothingFtn could be, e.g., median
 
-basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
-   smoothingFtn=mean,allK=FALSE,leave1out=FALSE) 
+basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,expand = NULL,expandVars = NULL,
+  smoothingFtn=mean,allK=FALSE,leave1out=FALSE)
 {  
    require(pdist)
 
@@ -55,6 +58,23 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
       xcntr <- attr(x,'scaled:center')
       xscl <- attr(x,'scaled:scale')
       newx <- scale(newx,center=xcntr,scale=xscl)
+      
+      # expand and expandVars should only be used
+      # when scaleX == TRUE
+      if(xor(is.null(expand), is.null(expandVars)))
+        stop('expand and expandVars must be used together')
+      
+      if(!is.null(expand) && !is.null(expandVars)) {
+        if(!is.vector(expand) || !is.vector(expandVars))
+          stop('Both expand and expandVars must be vectors')
+        if(length(expand) != length(expandVars))
+          stop('expand and expandVars should have the same length')
+        x[,expand] <- t(t(x[,expand])*expandVars)
+        newx[,expand] <- t(t(newx[,expand])*expandVars)
+      }
+      #test code
+      #print(x);
+      #print(newx);
    }
    pdOut <- as.matrix(pdist(newx,x))
    # row i of pdOut is dists from newx[i,] to x

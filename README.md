@@ -410,7 +410,7 @@ in this case the **tot** column
 * **k:** the number of nearest neighbors we wish to use
 
 So, say you are the manager this morning, and the day is a working day,
-with temperature 12.0, atemp 11.8, humidity 45% and wind at 8.5 miles per
+with temperature 12.0, atemp 11.8, humidity 23% and wind at 5 miles per
 hour.  What is your prediction for the ridership?
 
 ``` r
@@ -430,7 +430,7 @@ The output shows which rows in the training set were closest to the
 point to be predicted --- rows 459, 481 and so on --- and the prediction
 itself.  Our prediction would then be about 5320 riders. 
 
-## EXAMPLE: USING basicknn() IN MULTICLASS PROBLEMS
+## EXAMPLE: USING basicKNN() IN MULTICLASS PROBLEMS
 
 Let's redo the occupation-prediction example from above, using
 **basicknn()**.  

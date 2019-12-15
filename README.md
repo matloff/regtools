@@ -16,11 +16,13 @@ the tools are useful in general, **independently of the book**.
 examination of quadratic effects, investigation of nonhomogeneity of
 variance.
 
-* Tools for multiclass classification, parametric and nonparametric, for
-  any number of classes.  One vs. All and All vs. All paradigms.  Novel
-adjustment for artificially balanced (or undesirably imbalanced) data.
+* Tools for multiclass classification, parametric and k-NN, for
+  any number of classes.  One vs. All and All vs. All paradigms.  
 
-* Nonparametric regression for general dimensions in predictor and
+* Novel adjustment for artificially balanced (or undesirably imbalanced)
+  data.
+
+* K-NN regression for general dimensions in predictor and
   response variables, using k-Nearest Neighbors (k-NN).  Local-linear
 option to deal with edge aliasing.  Allows for user-specified smoothing
 method.  Allows for accelerated exploration of multiple values of **k**
@@ -32,11 +34,6 @@ technique to handle heteroscedasticity.
 * Utilities for conversion of time series data to rectangular form,
   enabling lagged prediction by **lm()** or other regression model.
 
-* Linear regression, PCA and log-linear model estimation in missing-data
-setting, via the Available Cases method.  (For handling missing values
-in Prediction contexts, see
-[our toweranNA package](http://github.com/matloff/toweranNA).)
-
 * Utilities for conversion between factor and dummy variable forms,
   useful since among various regression packages, some use factors while
 some others use dummies.  (The **lars** package is an example of the
@@ -47,6 +44,11 @@ latter case.)
 
 * Nicer implementation of ridge regression, with more meaningful scaling
 and better plotting.
+
+* Linear regression, PCA and log-linear model estimation in missing-data
+setting, via the Available Cases method.  (For handling missing values
+in Prediction contexts, see
+[our toweranNA package](http://github.com/matloff/toweranNA).)
 
 * Interesting datasets.
 
@@ -302,16 +304,17 @@ the dummy for working day, and the numeric weather variables, columns 8,
 10-13 and 16:
 
 ``` r
-> data(day1)
-> day1 <- day1[,c(8,10:13,16)]
-> head(day1)
-  workingday     temp     atemp      hum windspeed  tot
-1          0 8.175849  7.999250 0.805833 10.749882  985
-2          0 9.083466  7.346774 0.696087 16.652113  801
-3          1 1.229108 -3.499270 0.437273 16.636703 1349
-4          1 1.400000 -1.999948 0.590435 10.739832 1562
-5          1 2.666979 -0.868180 0.436957 12.522300 1600
-6          1 1.604356 -0.608206 0.518261  6.000868 1606
+data(day1)
+day1 <- day1[,c(8,10:13,16)]
+head(day1)
+# prints
+#   workingday     temp     atemp      hum windspeed  tot
+# 1          0 8.175849  7.999250 0.805833 10.749882  985
+# 2          0 9.083466  7.346774 0.696087 16.652113  801
+# 3          1 1.229108 -3.499270 0.437273 16.636703 1349
+# 4          1 1.400000 -1.999948 0.590435 10.739832 1562
+# 5          1 2.666979 -0.868180 0.436957 12.522300 1600
+# 6          1 1.604356 -0.608206 0.518261  6.000868 1606
 ```
 
 In its simplest version, the call form is
@@ -335,19 +338,19 @@ in this case the **tot** column
 * **k:** the number of nearest neighbors we wish to use
 
 So, say you are the manager this morning, and the day is a working day,
-with temperature 12.0, atemp 11.8, humidity 23% and wind at 5 miles per
-hour.  What is your prediction for the ridership?
+with temperature 12.0, atemp 11.8, humidity 23% and wind at 5 miles
+(80.6 km) per hour.  What is your prediction for the ridership?
 
 ``` r
-> tot <- day1$tot
-> knnout <- kNN(day1,tot,c(1,12.0,11.8,0.23,5),5)
-> knnout
-$whichClosest
-     [,1] [,2] [,3] [,4] [,5]
-[1,]  459  481  469  452   67
-
-$regests
-[1] 5320.2
+tot <- day1$tot
+knnout <- kNN(day1,tot,c(1,12.0,11.8,0.23,5),5)
+# prints
+# $whichClosest
+#      [,1] [,2] [,3] [,4] [,5]
+# [1,]  459  481  469  452   67
+# 
+# $regests
+# [1] 5320.2
 ```
 
 The output shows which rows in the training set were closest to the
@@ -356,113 +359,33 @@ itself.  Our prediction would then be about 5320 riders.
 
 ## EXAMPLE: USING kNN() IN MULTICLASS PROBLEMS
 
-Let's redo the occupation-prediction example from above, using
-**kNN()**.  
-
-Again, the arguments in the simple version ae:
+In the above Census data, let's predict the occupation of a college
+graduate, age 32, male, with income $67,500 and having worked 52 weeks.
 
 ``` r
-function (x,y,newx,kmax)
+data(peDumms) 
+x <- peDumms[,c(1,8:22,29,31,32)] 
+y <- peDumms[,c(23:28)] 
+kNN(x,as.matrix(y),c(32,c(rep(0,13),1,0,1),67500,52),25)
+# prints
+# $whichClosest
+#      [,1] [,2] [,3] [,4] [,5]  [,6] [,7] [,8]  [,9] [,10] [,11] [,12] [,13]
+# [1,] 1437 8922 3437 5743 1576 17371 3565 7197 16513  7734  4023  4741 19143
+#      [,14] [,15] [,16] [,17] [,18] [,19] [,20] [,21] [,22] [,23] [,24] [,25]
+# [1,] 15858  3648   988 19728 19345 15441  3470  7724 19005 16029  4259  4115
+# 
+# $regests
+#         [,1]
+# occ.100 0.16
+# occ.101 0.24
+# occ.102 0.44
+# occ.106 0.00
+# occ.140 0.04
+# occ.141 0.12
+
 ```
 
-Here **x** and **y** must be matrices.
-
-``` r
-> kNN(pef3[,1:6],as.matrix(pef3[7:12]),c(35,0,60000,52,0,0),10)
-$whichClosest
-      [,1]  [,2]  [,3]  [,4]  [,5]  [,6] [,7]  [,8] [,9] [,10]
-[1,] 14261 15552 16514 13592 13973 13709 1527 12579 5900 10914
-
-$regests
-      [,1]
-occ.0  0.1
-occ.1  0.4
-occ.2  0.5
-occ.3  0.0
-occ.4  0.0
-occ.5  0.0
-
-```
-
-Same answer as before, guessing Occupation 2.
-
-## EXAMPLE:  MULTICLASS k-NN CLASSIFICATION WITH knnest
-Let's continue the above example on predicting occupation, using k-NN.
-
-The "industrial strength" k-NN functions in **regtools**, described
-below.  (See also the simpler **kNN()**, described later in this
-document.)
-
-The three components are:
-
-1. **preprocessx()**:  This finds the sets of nearest neighbors in the
-   training set, for all values of **k** up to a user-specified maximum.
-This facilitates the user's trying various values of **k**.
-
-2.  **knnest()**:  This fits the regression model.
-
-3.  **knnpred()**:  This does prediction on the user's desired set of
-    points of new cases.
-
-Since k-NN involves finding distances between points, our data must be
-numeric, not factors.  This means that in **pef2**, we'll need to
-replace the **occ** column by a matrix of dummy variables.  Utilities in
-the **regtools** package make this convenient:
-
-``` r
-occDumms <- factorToDummies(as.factor(pef2$occ),'occ',omitLast=FALSE)
-pef3 <- cbind(pef2[,-7],occDumms)
-```
-
-Note that in cases in which "Y" is multivariate, **knnest()** requires
-it in multivariate form.  Here "Y" is 6-variate, so we've set the last 6
-columns of **pef3** to the corresponding dummies.
-
-Many popular regression packages, e.g. **lars** for the LASSO, require
-data in numeric form, so the **regtools**' conversion utilities are quite
-handy.
-
-Now fit the regression model:
-
-``` r
-kout <- knnest(pef3[, -(1:6)],xd,10) 
-```
-
-One of the components of **kout** is the matrix of fitted values:
-
-``` r
-> head(kout$regest) 
-     occ.0 occ.1 occ.2 occ.3 occ.4 occ.5
-[1,]   0.2   0.4   0.2     0   0.0   0.2
-[2,]   0.2   0.5   0.2     0   0.0   0.1
-[3,]   0.5   0.1   0.3     0   0.1   0.0
-[4,]   0.3   0.4   0.1     0   0.0   0.2
-[5,]   1.0   0.0   0.0     0   0.0   0.0
-[6,]   0.2   0.4   0.2     0   0.0   0.2
-```
-
-So for example the conditional probability of Occupation 4 for the
-third observation is 0.1.
-
-Now let's do the same prediction as above:
-
-``` r
-> predict(kout,matrix(c(35,0,60000,52,0,0),nrow=1),TRUE)
-occ.0 occ.1 occ.2 occ.3 occ.4 occ.5 
-  0.1   0.4   0.5   0.0   0.0   0.0 
-```
-
-These are conditional probabilities.  The most likely one is Occupation
-2.
-
-The TRUE argument was to specify that we need to scale the new cases in
-the same way the original data were scaled.
-
-By default, our k-NN routines find the mean Y in the neighborhood.
-Another option is to do local linear smoothing.  Among other things,
-this may remedy aliasing at the edges of the data.  This should be done
-with a value of **k** much larger than the number of predictor
-variables.
+We guess Occupation 102.
 
 ## EXAMPLE:  ADJUSTMENT OF CLASS PROBABILITIES IN CLASSIFICATION PROBLEMS
 
@@ -480,8 +403,9 @@ example, we could set this argument to **ltrfreqs**.  The function
 here does NOT refer to a subjective Bayesian analysis. It is merely a
 standard term for the class probabilities.)
 
-In the book, it is shown that the use of correct priors increased the
-rate of correct classification from 75 to 88%.
+In an example in the book associated with this package, the use of
+correct priors increased the rate of correct classification from 75 to
+88%.
 
 ## EXAMPLE:  RECTANGULARIZATION OF TIME SERIES
 

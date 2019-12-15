@@ -23,6 +23,8 @@
 #   newx: vector or matrix; "X" values to be predicted
 #   kmax: maximum value of k requested
 #   scaleX: "X" in x and newx to be scaled
+#   PCAcomps: apply PCA (after scaling, if any) to x, newx, using this
+#      this many components; 0 means no PCA
 #   smoothingFtn: op applied to the "Y"s of nearest neighbors; could be,
 #      say, median instead of mean
 #   allK: report kNN estimates for all k = 1,...,kmax; otherwise just kmax
@@ -38,7 +40,8 @@
 #    apply(    ,1,which.max) for multiclass
 
 kNN <- 
-   function(x,y,newx,kmax,scaleX=TRUE,smoothingFtn=mean,allK=FALSE,leave1out=FALSE)
+   function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
+   smoothingFtn=mean,allK=FALSE,leave1out=FALSE)
 {  
    require(pdist)
 
@@ -72,6 +75,12 @@ kNN <-
       xcntr <- attr(x,'scaled:center')
       xscl <- attr(x,'scaled:scale')
       newx <- scale(newx,center=xcntr,scale=xscl)
+   }
+   if (PCAcomps > 0) {
+      colnames(newx) <- colnames(x)
+      pcaout <- prcomp(x,center=FALSE,scale.=FALSE)
+      x <- predict(pcaout,x)
+      newx <- predict(pcaout,newx)
    }
    pdOut <- as.matrix(pdist(newx,x))
    # row i of pdOut is dists from newx[i,] to x

@@ -1,4 +1,14 @@
 
+
+
+#########################  confusion()  #################################
+
+# generates the confusion matrix
+
+confusion <- function(actual,pred) {
+   table(actual,pred)
+}
+
 #########################  unscale()  #################################
 
 # undoes 'scale()'

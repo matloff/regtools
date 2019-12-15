@@ -1,13 +1,13 @@
 # regtools 
 
-## Novel tools tools for linear, nonlinear and nonparametric regression and classification
+## Novel tools tools for linear, nonlinear and machine learning in regression and classification
 
-These tools are associated with my book, <i>From Linear
-Models to Machine Learning: Statistical Regression and
+Various tools for Prediction and/or Description goals in regression and
+classification.  Some of them are associated with my book, <i>From
+Linear Models to Machine Learning: Statistical Regression and
 Classification</i>, N. Matloff, CRC, 2017 (recipient of the
-*Technometrics* Eric Ziegel Award for Best Book Reviewed in 2017).
-
-The tools are useful in general, **independently of the book**.
+*Technometrics* Eric Ziegel Award for Best Book Reviewed in 2017).  But
+the tools are useful in general, **independently of the book**.
 
 ## FEATURES:
 
@@ -95,7 +95,7 @@ parvsnonparplot(lmout,knnout)
 We see above how the k-NN code is used.  We first call **preprocessx()** 
 to determine the nearest neighbors of each data point.  Here **k** is
 10, so we can later compute various k-NN fits for **k** anywhere from 1
-to 10.  (A somewhat simpler function, **basicKNN()**, is also
+to 10.  (A somewhat simpler function, **kNN()**, is also
 available.) The actual fit is done by **knnest()**.  Then
 **parvsnonparplot()** plots the linear model fit against the
 nonparametric one..  Again, since the latter is model-free, it serves as
@@ -201,21 +201,21 @@ ovaout <- ovalogtrn(6,pef2)
 ovaout  
 # prints
                         0             1             2
-(Intercept) -9.411834e-01 -6.381329e-01 -2.579483e-01
-xage         9.090437e-03 -3.302790e-03 -2.205695e-02
-xsex        -5.187912e-01 -1.122531e-02 -9.802006e-03
-xwageinc    -6.741141e-06 -4.609168e-06  5.132813e-06
-xwkswrkd     5.058947e-03 -2.247113e-03  2.623924e-04
-xms         -5.201286e-01 -4.272846e-01  5.280520e-01
-xphd        -3.302821e-01 -8.035287e-01  3.531951e-01
-                        3             4             5
-(Intercept) -3.370758e+00 -3.322356e+00 -4.456788e+00
-xage        -2.193359e-03 -1.206640e-02  3.323948e-02
-xsex        -7.856923e-01  5.173516e-01  1.175657e+00
-xwageinc    -4.076872e-06  2.033175e-06  1.831774e-06
-xwkswrkd     1.311084e-02  5.517912e-04  2.794453e-03
-xms         -1.797544e-01  9.947253e-02  2.705293e-01
-xphd        -3.883463e-01  4.967115e-01  4.633907e-01
+# (Intercept) -9.411834e-01 -6.381329e-01 -2.579483e-01
+# xage         9.090437e-03 -3.302790e-03 -2.205695e-02
+# xsex        -5.187912e-01 -1.122531e-02 -9.802006e-03
+# xwageinc    -6.741141e-06 -4.609168e-06  5.132813e-06
+# xwkswrkd     5.058947e-03 -2.247113e-03  2.623924e-04
+# xms         -5.201286e-01 -4.272846e-01  5.280520e-01
+# xphd        -3.302821e-01 -8.035287e-01  3.531951e-01
+#                         3             4             5
+# (Intercept) -3.370758e+00 -3.322356e+00 -4.456788e+00
+# xage        -2.193359e-03 -1.206640e-02  3.323948e-02
+# xsex        -7.856923e-01  5.173516e-01  1.175657e+00
+# xwageinc    -4.076872e-06  2.033175e-06  1.831774e-06
+# xwkswrkd     1.311084e-02  5.517912e-04  2.794453e-03
+# xms         -1.797544e-01  9.947253e-02  2.705293e-01
+# xphd        -3.883463e-01  4.967115e-01  4.633907e-01
 # predict the occupation of a woman, age 35, no MS/PhD, inc 60000, 52
 # weeks worked
 ovalogpred(ovaout,matrix(c(35,0,60000,52,0,0),nrow=1))
@@ -271,17 +271,126 @@ avalogpred(6,ovaout,matrix(c(35,0,60000,52,0,0),nrow=1))
 # outputs class 2, Census occupation code 102
 ```
 
-## EXAMPLE:  MULTICLASS k-NN CLASSIFICATION WITH knnest
+## K-NEAREST NEIGHBOR METHODS
 
 In addition to use in linear regression graphical diagnostics, k-NN can
 be very effective as a nonparametric regression/machine learning tool.
 I would recommend it in cases in which the number of predictors is
 moderate and there are nonmonotonic relations.  (See also 
 [our polyreg package](http://github.com/matloff/polyreg).)
+
+The **regtools** package has two k-NN functions to choose from,
+**kNN()** and **knnest()**.  The latter is more efficient once a model
+has been settled on, as it greatly reduces computation in continuing
+prediction of new cases.  However, it is more complex, and **kNN()** is
+recommended for ordinary use.
+
+## EXAMPLE:  REGRESSION ANALYSIS WITH kNN()
+
+Our example here will be **day1** from the famous bike sharing dataset 
+from the [UC Irvine Machine Learning Repository](https://archive.ics.uci.edu).
+It is included in **regtools** by permission of the data
+curator.  A detailed description of the data is available on the 
+[UCI site](https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset).
+
+(The original data is in **day**.  It has some transformed values for
+the weather variables; here we'll use **day1**, which retains the
+original scale.)
+
+We'll predict total ridership.  Let's start out using as features just
+the dummy for working day, and the numeric weather variables, columns 8,
+10-13 and 16:
+
+``` r
+> data(day1)
+> day1 <- day1[,c(8,10:13,16)]
+> head(day1)
+  workingday     temp     atemp      hum windspeed  tot
+1          0 8.175849  7.999250 0.805833 10.749882  985
+2          0 9.083466  7.346774 0.696087 16.652113  801
+3          1 1.229108 -3.499270 0.437273 16.636703 1349
+4          1 1.400000 -1.999948 0.590435 10.739832 1562
+5          1 2.666979 -0.868180 0.436957 12.522300 1600
+6          1 1.604356 -0.608206 0.518261  6.000868 1606
+```
+
+In its simplest version, the call form is
+
+``` r
+kNN(x,y,newx,k)
+```
+
+where the arguments are:
+
+* **x:** the "X" matrix, i.e. matrix of predictor values,
+for the training set (it cannot be a data frame, as nearest-neighbor 
+distances between rows must be computed); in this case, it's the entire
+data except for the **tot** column
+
+* **y:** the "Y" vector for the training set, i.e. the response values,
+in this case the **tot** column
+
+* **newx:** a vector of feature values for a new case to be predicted
+
+* **k:** the number of nearest neighbors we wish to use
+
+So, say you are the manager this morning, and the day is a working day,
+with temperature 12.0, atemp 11.8, humidity 23% and wind at 5 miles per
+hour.  What is your prediction for the ridership?
+
+``` r
+> tot <- day1$tot
+> knnout <- kNN(day1,tot,c(1,12.0,11.8,0.23,5),5)
+> knnout
+$whichClosest
+     [,1] [,2] [,3] [,4] [,5]
+[1,]  459  481  469  452   67
+
+$regests
+[1] 5320.2
+```
+
+The output shows which rows in the training set were closest to the
+point to be predicted --- rows 459, 481 and so on --- and the prediction
+itself.  Our prediction would then be about 5320 riders. 
+
+## EXAMPLE: USING kNN() IN MULTICLASS PROBLEMS
+
+Let's redo the occupation-prediction example from above, using
+**kNN()**.  
+
+Again, the arguments in the simple version ae:
+
+``` r
+function (x,y,newx,kmax)
+```
+
+Here **x** and **y** must be matrices.
+
+``` r
+> kNN(pef3[,1:6],as.matrix(pef3[7:12]),c(35,0,60000,52,0,0),10)
+$whichClosest
+      [,1]  [,2]  [,3]  [,4]  [,5]  [,6] [,7]  [,8] [,9] [,10]
+[1,] 14261 15552 16514 13592 13973 13709 1527 12579 5900 10914
+
+$regests
+      [,1]
+occ.0  0.1
+occ.1  0.4
+occ.2  0.5
+occ.3  0.0
+occ.4  0.0
+occ.5  0.0
+
+```
+
+Same answer as before, guessing Occupation 2.
+
+## EXAMPLE:  MULTICLASS k-NN CLASSIFICATION WITH knnest
 Let's continue the above example on predicting occupation, using k-NN.
 
 The "industrial strength" k-NN functions in **regtools**, described
-below.  (See also the simpler **basicKNN()**, described later in this
+below.  (See also the simpler **kNN()**, described later in this
 document.)
 
 The three components are:
@@ -354,113 +463,6 @@ Another option is to do local linear smoothing.  Among other things,
 this may remedy aliasing at the edges of the data.  This should be done
 with a value of **k** much larger than the number of predictor
 variables.
-
-## EXAMPLE:  REGRESSION ANALYSIS WITH basicKNN()
-
-The k-NN function **knnest()** and its related unctions are rather
-complex.  Those who are new to k-NN should use the simpler **basicKNN()**.
-Again, it can be used for both regression and classification (viewing
-the latter as a special case of the former).
-
-Our example here will be **day1** from the famous bike sharing dataset 
-from the [UC Irvine Machine Learning Repository](https://archive.ics.uci.edu).
-It is included in **regtools** by permission of the data
-curator.  A detailed description of the data is available on the 
-[UCI site](https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset).
-
-(The original data is in **day**.  It has some transformed values for
-the weather variables; here we'll use **day1**, which retains the
-original scale.)
-
-We'll predict total ridership.  Let's start out using as features just
-the dummy for working day, and the numeric weather variables, columns 8,
-10-13 and 16:
-
-``` r
-> data(day1)
-> day1 <- day1[,c(8,10:13,16)]
-> head(day1)
-  workingday     temp     atemp      hum windspeed  tot
-1          0 8.175849  7.999250 0.805833 10.749882  985
-2          0 9.083466  7.346774 0.696087 16.652113  801
-3          1 1.229108 -3.499270 0.437273 16.636703 1349
-4          1 1.400000 -1.999948 0.590435 10.739832 1562
-5          1 2.666979 -0.868180 0.436957 12.522300 1600
-6          1 1.604356 -0.608206 0.518261  6.000868 1606
-```
-
-In its simplest version, the call form is
-
-``` r
-basicKNN(x,y,newx,k)
-```
-
-where the arguments are:
-
-* **x:** the "X" matrix, i.e. matrix of predictor values,
-for the training set (it cannot be a data frame, as nearest-neighbor 
-distances between rows must be computed); in this case, it's the entire
-data except for the **tot** column
-
-* **y:** the "Y" vector for the training set, i.e. the response values,
-in this case the **tot** column
-
-* **newx:** a vector of feature values for a new case to be predicted
-
-* **k:** the number of nearest neighbors we wish to use
-
-So, say you are the manager this morning, and the day is a working day,
-with temperature 12.0, atemp 11.8, humidity 23% and wind at 5 miles per
-hour.  What is your prediction for the ridership?
-
-``` r
-> day1x <- day1[,1:5]
-> tot <- day1$tot
-> knnout <- basicKNN(day1x,tot,c(1,12.0,11.8,0.23,5),5)
-> knnout
-$whichClosest
-     [,1] [,2] [,3] [,4] [,5]
-[1,]  459  481  469  452   67
-
-$regests
-[1] 5320.2
-```
-
-The output shows which rows in the training set were closest to the
-point to be predicted --- rows 459, 481 and so on --- and the prediction
-itself.  Our prediction would then be about 5320 riders. 
-
-## EXAMPLE: USING basicKNN() IN MULTICLASS PROBLEMS
-
-Let's redo the occupation-prediction example from above, using
-**basicknn()**.  
-
-Again, the arguments in the simple version ae:
-
-``` r
-function (x,y,newx,kmax)
-```
-
-Here **x** and **y** must be matrices.
-
-``` r
-> basicKNN(pef3[,1:6],as.matrix(pef3[7:12]),c(35,0,60000,52,0,0),10)
-$whichClosest
-      [,1]  [,2]  [,3]  [,4]  [,5]  [,6] [,7]  [,8] [,9] [,10]
-[1,] 14261 15552 16514 13592 13973 13709 1527 12579 5900 10914
-
-$regests
-      [,1]
-occ.0  0.1
-occ.1  0.4
-occ.2  0.5
-occ.3  0.0
-occ.4  0.0
-occ.5  0.0
-
-```
-
-Same answer as before, guessing Occupation 2.
 
 ## EXAMPLE:  ADJUSTMENT OF CLASS PROBABILITIES IN CLASSIFICATION PROBLEMS
 

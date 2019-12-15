@@ -20,6 +20,15 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
    origx
 }
 
+# x is a data frame; returns TRUE if at least one column is a factor
+hasFactors <- function(x) 
+{
+   for (i in 1:ncol(x)) {
+      if (is.factor(x[,i])) return(TRUE)
+   }
+   FALSE
+}
+
 #################  convert between factors and dummies  ##################
 
 # these routines are useful in that some regression packages insist that

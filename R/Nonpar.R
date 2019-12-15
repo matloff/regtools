@@ -1,52 +1,69 @@
 
 ######################  k-NN routines  #############################
 
-# basicKNN() does a straightforward k-NN, but is not computationally
+# kNN() does a straightforward k-NN, but is not computationally
 # efficient
 
-# use knnest() for greater speed, though with a "shortcut":  the
-# preprocessing steps will fit k-NN estimates of the regression function
-# at all the training set points; then to predict a new point, we find
-# the closest point to it in the training set, and use the k-NN
-# estimates at THAT point
+# use knnest() for greater speed for continuing prediction activity,
+# though with a "shortcut":  the preprocessing steps will fit k-NN
+# estimates of the regression function at all the training set points;
+# then to predict a new point, we find the closest point to it in the
+# training set, and use the k-NN estimates at THAT point
 
 # under this latter scheme, we call preprocessx() on the "X" portion of
 # the training set, then call knnest() on the output; then to predict a
 # new point, call predict.knn(), for the generic function predict()
 
-######################  basicKNN()  ###############################
+######################  kNN()  ###############################
 
-# newx is a vector/matrix, and x is a matrix, one row per data point;
-# y is the vector of Y values corrsponding to x, except for multiclass (> 2
-# classes) case, y is matrix of dummies, one column per class
+# arguments:
 
-# return value is a vector of nearest-neighbor indices and a vector of
-# predicted Y values
+#   x: matrix (df or vec will be converted), "X" of training set
+#   y: vector or matrix, "Y" of training set; matrix in multiclass (> 2) case
+#   newx: vector or matrix; "X" values to be predicted
+#   kmax: maximum value of k requested
+#   scaleX: "X" in x and newx to be scaled
+#   smoothingFtn: op applied to the "Y"s of nearest neighbors; could be,
+#      say, median instead of mean
+#   allK: report kNN estimates for all k = 1,...,kmax; otherwise just kmax
+#   leave1out: delete the 1-nearest neighbor (cross-validation
 
-# smoothingFtn could be, e.g., median
+# value:
 
-basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
-   smoothingFtn=mean,allK=FALSE,leave1out=FALSE) 
+#    R list, containing vector of nearest-neighbor indices and a
+#    vector/matrix of estimated regression function values at the rows
+#    of newx; these are conditional means, used directly as predicted Y values
+#    in the continuous "Y" case; in classification case, 2 classes, do
+#    something like round(regest) to get 0,1 prediction, or 
+#    apply(    ,1,which.max) for multiclass
+
+kNN <- 
+   function(x,y,newx,kmax,scaleX=TRUE,smoothingFtn=mean,allK=FALSE,leave1out=FALSE)
 {  
    require(pdist)
 
+   # type checks etc.
+   # checks on x
+   if (is.vector(x)) {
+      x <- matrix(x,ncol=1)
+   }
+   if (is.factor(x)) stop('factor converions not implemented yet')
+   if (hasFactors(x)) stop('factor conversion not implemented yet')
+   if (is.data.frame(x)) 
+      x <- as.matrix(x)
+   # checks on y
+   if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
    if (is.matrix(y) && identical(smoothingFtn,mean)) 
       smoothingFtn <- colMeans
-
-   if (is.vector(x)) x <- matrix(x,ncol=1)
-   if (is.data.frame(x)) {
-      x <- as.matrix(x)
-   }
-   if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
-   # for now, not covering this complex case
    if (is.matrix(y) && allK)
-      stop('in multiclass case, allK must be FALSE')
-   # but now that we've excluded it, easier to make y a matrix
+      stop('for now, in multiclass case, allK must be FALSE')
    if (is.vector(y)) y <- matrix(y,ncol=1)
+   # checks on newx
    if (is.vector(newx)) newx <- matrix(newx,nrow=1)
    if (is.data.frame(newx)) {
       newx <- as.matrix(newx)
    }
+   # at this point, x, y and newx will all be matrices
 
    kmax1 <- kmax + leave1out
 
@@ -65,22 +82,26 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,
    }
    closestIdxs <- t(apply(pdOut,1,findClosest))
    if (leave1out) closestIdxs <- closestIdxs[,-1,drop=FALSE]
-   # closestIdxs is a matrix; row i gives the indices of the closest
-   # rows in x to newx[i,]; there will be kmax columns
+   # closestIdxs is a matrix; row i gives the indices of the kmax 
+   # closest rows in x to newx[i,]
 
-   # but we might want to try various values of k (allK = T), up through
+   # we might want to try various values of k (allK = T), up through
    # kmax; e.g.  for k = 2 would just use the first 2 columns; 
-   
-   # in fyh(), closeIdxs is a row in pdOut, with the first k columns
-   fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs,])
 
-   if (!allK) {
-      regests <- apply(closestIdxs[,1:kmax,drop=FALSE],1,fyh)
+   # treat this specially, as otherwise get 1x1 matrix issues
+   if (kmax1 == 1) {
+      regests <- y[closestIdxs,]
    } else {
-      regests <- NULL
-      for (k in 1:kmax) 
-         regests <- 
-           rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
+      # in fyh(), closeIdxs is a row in closestIdxs, with the first k columns
+      fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs,])
+      if (!allK) {
+         regests <- apply(closestIdxs,1,fyh)
+      } else {
+         regests <- NULL
+         for (k in 1:kmax) 
+            regests <- 
+              rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
+      }
    }
    list(whichClosest=closestIdxs,regests=regests)
 }

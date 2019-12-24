@@ -39,12 +39,9 @@
 #    something like round(regest) to get 0,1 prediction, or 
 #    apply(    ,1,which.max) for multiclass
 
-kNN <- 
-   function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
-   smoothingFtn=mean,allK=FALSE,leave1out=FALSE)
+kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
+          smoothingFtn=mean,allK=FALSE,leave1out=FALSE)
 {  
-   require(pdist)
-
    # type checks etc.
    # checks on x
    if (is.vector(x)) {
@@ -82,14 +79,8 @@ kNN <-
       x <- predict(pcaout,x)
       newx <- predict(pcaout,newx)
    }
-   pdOut <- as.matrix(pdist(newx,x))
-   # row i of pdOut is dists from newx[i,] to x
-   # now find out which rows in x are closest
-   findClosest <- function(pdOutRow) {
-      whichClose <- order(pdOutRow)
-      whichClose[1:kmax1]
-   }
-   closestIdxs <- t(apply(pdOut,1,findClosest))
+   tmp <- FNN::get.knnx(data=x, query=newx, k=kmax1)
+   closestIdxs <- tmp$nn.index
    if (leave1out) closestIdxs <- closestIdxs[,-1,drop=FALSE]
    # closestIdxs is a matrix; row i gives the indices of the kmax 
    # closest rows in x to newx[i,]
@@ -113,6 +104,30 @@ kNN <-
       }
    }
    list(whichClosest=closestIdxs,regests=regests)
+}
+
+# n-fold cross validation for kNN(); instead of applying "leave 1 out"
+# to all possible singletons, we do so for a random nSubSam of them;
+# return matrix of estimated regression ftn values, one row for each
+# leave-1-out op; number of columns will be 1 in the regression case,
+# and number of classes in the classification case; other than nSubSam,
+# args are as in kNN()
+kNNxv <- function(x,y,k,scaleX=TRUE,PCAcomps=0,
+          smoothingFtn=mean,nSubSam=500)
+{
+   if (!is.matrix(x) && !is.vector(x)) stop('x must be a matrix or vector')
+   if (is.vector(x)) x <- matrix(x,ncol=1)
+   if (is.factor(y)) stop('y must not be a factor')
+   if (is.vector(y)) y <- matrix(y,ncol=1)
+   n <- nrow(x)
+   regests <- matrix(nrow=nSubSam,ncol=ncol(y))
+   for (i in 1:nSubSam) {
+      leftOutIdx <- sample(1:n,1)
+      tmp <- kNN(x[-leftOutIdx,],y[-leftOutIdx,],x[leftOutIdx,],k,
+         scaleX,PCAcomps,smoothingFtn)
+      regests[i,] <- tmp$regests
+   }
+   regests
 }
 
 # mean absolute prediction error

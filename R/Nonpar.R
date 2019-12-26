@@ -96,6 +96,7 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
       fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs,])
       if (!allK) {
          regests <- apply(closestIdxs,1,fyh)
+         if (ncol(y) > 1) regests <- t(regests)
       } else {
          regests <- NULL
          for (k in 1:kmax) 
@@ -135,16 +136,24 @@ MAPE <- function(y,yhat) mean(abs(y-yhat))
 
 # overall probability of correct classification, y as a vector of 0s and
 # 1s, yhat a vector of estimated probabilities of 1
-probCorrectClass <- function(y,yhat) 
+probIncorrectClass <- function(y,yhat) 
 {
-   yhat <- round(yhat)
-   mean(yhat == y)
+   if (is.vector(y)) {
+      yhat <- round(yhat)
+      return(mean(yhat == y))
+   }
+   classPred <- apply(yhat,1,which.max) 
+   classActual <- apply(y,1,which.max)
+   mean(classPred != classActual)
 }
 
 findOverallLoss <- function(regests,y,lossFtn=MAPE) 
 {
-   loss1row <- function(regestsRow) lossFtn(y,regestsRow)
-   apply(regests,1,loss1row)
+   if (!identical(lossFtn,probIncorrectClass)) {
+      loss1row <- function(regestsRow) lossFtn(y,regestsRow)
+      return(apply(regests,1,loss1row))
+   }
+   probIncorrectClass(y,regests)
 }
 
 ######################  knnest()  ###############################

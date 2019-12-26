@@ -26,6 +26,8 @@ book](https://books.google.com/books?id=IHs2DwAAQBAJ&printsec=frontcover&dq=matl
 
 In other words, resampling methods **are both harmful and unnecessay**.
 
+## Motivating example:  Missed appointments
+
 ## Key issue:  How were the data generated?
 
 (under construction)

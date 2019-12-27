@@ -24,7 +24,7 @@ features), **discarding data weakens our ability to predict new cases.**
 it is ignored.
 
 * For most ML methods, **a principled alternative to resampling, an
-  adjustment method, is available,** to be presented here.  (See also
+  adjustment formula, is available,** to be presented here.  (See also
 [my regression and classification
 book](https://books.google.com/books?id=IHs2DwAAQBAJ&printsec=frontcover&dq=matloff&hl=en&newbks=1&newbks_redir=0&sa=X&ved=2ahUKEwje9LbA5dLmAhVJsZ4KHTvdADIQ6AEwAHoECAQQAg#v=onepage&q=matloff&f=false).)
 
@@ -121,7 +121,7 @@ realistic frequencies above, and fit the logit model to this new data.
 
 As you can see, **balanced data can be our enemy**.
 
-But the good news is that using the adjustment method below, one can
+But the good news is that using the adjustment formula below, one can
 still use the correct class probabilities even if the data is balanced.
 
 ### Credit card fraud data
@@ -178,7 +178,7 @@ Actually, both `caret` and `mlr3` allow one to extract probabilities in
 this manner.  But again, this should be done instead of forcing balance,
 as recommended by those packages.
 
-## An adjustment method
+## An adjustment formula
 
 For convenience, we'll assume the two-class setting here, with Class 0
 and Class 1. This is the code for adjustment:
@@ -210,8 +210,6 @@ numbers of the two classes in our dataset, yet we know the true
 Then `wrongratio` would be 0.5/0.5 = 1.0, and `trueratio` would be
 0.2/0.8 = 0.25. 
 
-The derivation of this method is in my book.
-
 What if the data are balanced but the true unconditional class
 probabilities are unknown?  Other than creating various scenarios
 involving the true values and exploring the results, there is not much
@@ -233,7 +231,8 @@ probabilities, and flag new cases that exceed it.
 
 - If your data is unrealistically balanced, as in the letters example,
   and the true unconditional class probabilities are known, use the
-adjustment method to convert the reported unconditional probabilities to
+adjustment formula to convert the reported unconditional probabilities to
 realistic ones, and classify using them.
 
+## Appendix: derivation of the adjustment formula
 

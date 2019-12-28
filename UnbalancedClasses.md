@@ -7,24 +7,23 @@ offered remedies appear in numerous parts of the ML literature, ranging
 from [Web tutorials](https://www.datacamp.com/community/tutorials/diving-deep-imbalanced-data)
 to [the research literature](https://link.springer.com/article/10.1186/s40537-018-0151-6#Sec2).  Major packages, such as
 [caret](https://cran.r-project.org/package=caret) and
-[mlr3](https://cran.r-project.org/package=mlr3) also offer remedies.
+[mlr3](https://cran.r-project.org/package=mlr3), also offer remedies.
 In almost all cases, the prescribed antidotes involve
 changing the data via resampling, so that the new
 data is balanced. 
 
 Upon closer inspection, though, one sees that **use of resampling methods
-is generally inadvisable, indeed harmful, for several reasons:**
+is generally inadvisable, indeed harmful,** for several reasons:
 
-* Undersampling is clearly problematic:  Why throw away data?  Unless
-  the number of cases is quite large (and much larger than the number of
-features), **discarding data weakens our ability to predict new cases.**
+* Undersampling is clearly problematic:  Why throw away data?
+  **Discarding data weakens our ability to predict new cases.**
 
 * The data may be unbalanced *for a reason*.  Thus the imbalance itself
   is useful information, again resulting in reduced predictive power if
 it is ignored.
 
-* For most ML methods, **a principled alternative to resampling, an
-  adjustment formula, is available,** to be presented here.  (See also
+* For most ML methods, there is **a principled alternative to
+  resampling,**  an adjustment formula,to be presented here.  (See also
 [my regression and classification
 book](https://books.google.com/books?id=IHs2DwAAQBAJ&printsec=frontcover&dq=matloff&hl=en&newbks=1&newbks_redir=0&sa=X&ved=2ahUKEwje9LbA5dLmAhVJsZ4KHTvdADIQ6AEwAHoECAQQAg#v=onepage&q=matloff&f=false).)
 
@@ -33,7 +32,7 @@ In other words, resampling methods **are both harmful and unnecessay**.
 ## Motivating example:  Credit card fraud
 
 This is a 
-(Kaggle dataset)[https://www.kaggle.com/mlg-ulb/creditcardfraud].
+[Kaggle dataset](https://www.kaggle.com/mlg-ulb/creditcardfraud).
 Quoting from the Kaggle site,
 
 > The datasets contains transactions made by credit cards in September
@@ -67,7 +66,7 @@ times.
 
 - The fraud data is *imbalanced*, but *naturally so*.  Assuming the
   two-day data collection period was typical, the population class
-probability for fraud is about what we see in the data, about 0.172%.
+probability for fraud will be about what we see in the data, about 0.172%.
 
 - The letters data is *balanced*, but only *artificially so*.  The
   curator of the dataset wanted the data to have about the same number
@@ -97,6 +96,22 @@ with quite different frequencies:
 >   Z           0.07
 
 ([source](http://www.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html)).
+
+## What the algorithm is thinking
+
+ML algorithms take your data literally.  Say you have a two-class
+setting, for Classes 0 and 1.  If about 1/2 your data is Class 1, then
+the algorithm, whether directly or indirectly, operate under the
+assumption that the true population class probabilities are each about 0.5.
+
+In the letter data, since the sampling was performed with the intention
+of having about the same number of instances for each letter, the
+algorithm you use will then assume the true probabilities of the letters
+are about 1/26 each.  We know that is false, as the above table shows.
+
+So, if you do resampling to make your data balanced, you are fooling
+your algorithm.  Though that conceivably could be done responsibly, it
+may actually undermine your ability to predict new cases well.
 
 ## Goals and perceptions of problems
 
@@ -129,31 +144,32 @@ still use the correct class probabilities even if the data is balanced.
 In the credit card fraud data, the perceived problem is that, if we use
 the data to classify new cases, the extreme imbalance in the data wll
 mean that we will always (or maybe nearly always, depending on what ML
-method we use) will guess that the new case is not fraudulent.
+method we use) guess that the new case is not fraudulent.
 
 With this approach, we'd miss all the fraudulent cases.  There aren't
 many of them, but even the small number of cases can cause big damage.
-But **the solution is not to force the data to be balanced** (by
+Yet **the solution is not to force the data to be balanced** (by
 resampling).
 
 Instead, we could formally assign loss values to the two kinds of error,
-i.e. false positives and false negatives from the fraud point of view.
+i.e. false positives and false negatives, from the fraud point of view.
 But it's much easier to take an informal approach:  We simply calculate
 the conditional probabilities of the classes, given the features, and
 have our code flag any that are above a threshhold we specify.  
 
-In the credit card fraud case, we may decide to flag any transaction
+In the credit card fraud case, we may decide, say, to flag any transaction
  with at least a 25% chance of being fraudulent.
 
 In order to do this, we need to set up our code to extract the
 probabilities, shown below.
 
-*Note on terminology:* As seen above, we refer to the class
-probabilities for known feature values as *conditional probabilities*.
-The overall class probabilities, e.g. the 0.000172 value above, are
-*unconditional probabilities*.
+## Note on terminology 
 
-## Extracting class probabilities from various ML methods  
+As seen above, we refer to the class probabilities for given feature
+values as *conditional probabilities*.  The overall class probabilities,
+e.g. the 0.000172 value above, are *unconditional probabilities*.
+
+## Extracting conditional probabilities from various ML methods  
 
 Here's how to do this with various ML methods in R.
 
@@ -217,7 +233,12 @@ that we can do.  In essence, the result is a maximum-likelihood kind of
 situation.  The class with highest (nominal) conditional probability
 will be the one that makes our feature data most likely. 
 
+## Examples
+
 ## Summary
+
+- There's really no need to artificially balance your data, and doing so
+  could be harmful.
 
 - Please don't throw away data.
 

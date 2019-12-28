@@ -8,12 +8,14 @@ from [Web tutorials](https://www.datacamp.com/community/tutorials/diving-deep-im
 to [the research literature](https://link.springer.com/article/10.1186/s40537-018-0151-6#Sec2).  Major packages, such as
 [caret](https://cran.r-project.org/package=caret) and
 [mlr3](https://cran.r-project.org/package=mlr3), also offer remedies.
-In almost all cases, the prescribed antidotes involve
-changing the data via resampling, so that the new
-data is balanced. 
 
-Upon closer inspection, though, one sees that **use of resampling methods
-is generally inadvisable, indeed harmful,** for several reasons:
+
+> All of these sources recommend that you artificially equalize the class
+> counts in your data, via resampling.
+> Upon closer inspection, though, one sees that **this
+> is generally inadvisable, indeed harmful,** for several reasons:
+
+</blockquote>
 
 * Undersampling is clearly problematic:  Why throw away data?
   **Discarding data weakens our ability to predict new cases.**
@@ -22,12 +24,13 @@ is generally inadvisable, indeed harmful,** for several reasons:
   is useful information, again resulting in reduced predictive power if
 it is ignored.
 
-* For most ML methods, there is **a principled alternative to
-  resampling,**  an adjustment formula,to be presented here.  (See also
-[my regression and classification
-book](https://books.google.com/books?id=IHs2DwAAQBAJ&printsec=frontcover&dq=matloff&hl=en&newbks=1&newbks_redir=0&sa=X&ved=2ahUKEwje9LbA5dLmAhVJsZ4KHTvdADIQ6AEwAHoECAQQAg#v=onepage&q=matloff&f=false).)
+* There are **principled alternatives to
+  resampling,** including an adjustment formula to be presented here.  (See also
+[my book on regression, classification and ML](https://books.google.com/books?id=IHs2DwAAQBAJ&printsec=frontcover&dq=matloff&hl=en&newbks=1&newbks_redir=0&sa=X&ved=2ahUKEwje9LbA5dLmAhVJsZ4KHTvdADIQ6AEwAHoECAQQAg#v=onepage&q=matloff&f=false).)
 
-In other words, resampling methods **are both harmful and unnecessay**.
+In other words: 
+
+> Resampling methods **are both harmful and unnecessay**.
 
 ## Motivating example:  Credit card fraud
 
@@ -97,7 +100,7 @@ with quite different frequencies:
 
 ([source](http://www.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html)).
 
-## What the algorithm is thinking
+## What the ML algorithm is thinking
 
 ML algorithms take your data literally.  Say you have a two-class
 setting, for Classes 0 and 1.  If about 1/2 your data is Class 1, then
@@ -110,7 +113,7 @@ algorithm you use will then assume the true probabilities of the letters
 are about 1/26 each.  We know that is false, as the above table shows.
 
 So, if you do resampling to make your data balanced, you are fooling
-your algorithm.  Though that conceivably could be done responsibly, it
+your ML algorithm.  Though that conceivably could be done responsibly, it
 may actually undermine your ability to predict new cases well.
 
 ## Goals and perceptions of problems
@@ -155,7 +158,9 @@ Instead, we could formally assign loss values to the two kinds of error,
 i.e. false positives and false negatives, from the fraud point of view.
 But it's much easier to take an informal approach:  We simply calculate
 the conditional probabilities of the classes, given the features, and
-have our code flag any that are above a threshhold we specify.  
+have our code flag any that are above a threshhold we specify.
+(Actually, `mlr3` does list something similar to this as an alternative
+to artificially balancing the data.)
 
 In the credit card fraud case, we may decide, say, to flag any transaction
  with at least a 25% chance of being fraudulent.
@@ -256,4 +261,73 @@ adjustment formula to convert the reported unconditional probabilities to
 realistic ones, and classify using them.
 
 ## Appendix: derivation of the adjustment formula
+
+(For ease of notation etc., no distinction will be made here between
+sample and population quantities.)
+
+Say there are two classes, labeled 1 and 0.  Let Y denote the lable and
+X denote the features, and say we have a new case with X = t.  Then
+
+P(Y = 1 | X = t) = p f<sub>1</sub>(t) / [p f<sub>1</sub>t) + (1-p)
+f<sub>0</sub>(t)]  (Eqn. 1)
+
+where p is P(Y = 1), the unconditional probability of Class 1, and
+f<sub>i</sub>(t) is the conditional density of X within Class i.
+
+Rewrite the above as
+
+P(Y = 1 | X = t) = 1 / [1 + {(1-p)/p} f<sub>0</sub>(t) / f<sub>1</sub>(t)]
+ (Eqn. 2)
+
+Now suppose the analyst artificially changes the class counts in the
+data (or, as in the letters example, the data is artificially sampled by
+design), with proportions q and 1-q for the two classes.  In the case of
+artificially equalizing the class proportions, we have q = 0.5.  Then
+the above becomes
+
+P(Y = 1 | X = t) = 1 / [1 + {(1-q)/q} f<sub>0</sub>(t) / f<sub>1</sub>(t)]
+ (Eqn. 3)
+
+As noted earlier, what the ML algorithm is computing, directly or
+indirectly, is P(Y = 1 | X = t).  Moreover, as also noted earlier,
+even `caret` and `mlr3` do make these quantities available.  
+
+So we can solve for f<sub>0</sub>(t) / f<sub>1</sub>(t):
+
+f<sub>0</sub>(t) / f<sub>1</sub>(t) = (g - 1) q/(1-q)  (Eqn. 4)
+
+where
+
+g = 1/P(Y = 1 | X = t)
+
+We can now substitute in (Eqn. 2) from (Eqn. 4) to get the proper
+conditional probability.
+
+In the general m-class case. classes 0,1,...,m-1, the equations become
+complicated.  A simpler solution is to use AVA, the All vs. All approach
+to multiclass prediction, which many analysts prefer over OVA, One vs.
+All, anyway.  (Again, see my book, or for example 
+[these MIT class
+notes](https://www.mit.edu/~9.520/spring09/Classes/multiclass.pdf).)
+
+AVA solves an m-class problem via a series of 2-class problems.  For
+each pair of classes i and j, we pit i against j, running our ML
+algorithm on the reduced dataset of cases involving only those two
+classes.  In each such pitting, we record which class "won," i.e. was
+predicted for X = t.  We then predict this case to be whichever class
+garnered the most "votes."
+
+The `regtools` package offers such analysis for the logit and k-NN
+methods.  The code is easily modifiable for other algorithms.
+
+(Computationally AVA runs the analysis more times than OVA, but on
+smaller datasets.
+
+
+
+## Appendix:  What is really happening if you use equal class probabilities?
+
+
+
+
 

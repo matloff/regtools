@@ -1,8 +1,13 @@
 # Clearing the Confusion on Unbalanced Class Data 
 
-In discussions of machine learning (ML) classification problems, 
-the issue of *unbalanced data* -- having an unequal number of cases in
-each class -- arises frequently.  Illustration of the (perceived) problem and
+Many resources on machine learning (ML) classification problems
+recommend that if one's dataset has unbalanced class sizes, one
+should change the data to have equal class counts.  Yet it is shown here
+that this is both unnecessary and often harmful.
+
+## Overview
+
+Illustration of the (perceived) problem and
 offered remedies appear in numerous parts of the ML literature, ranging
 from [Web tutorials](https://www.datacamp.com/community/tutorials/diving-deep-imbalanced-data)
 to [the research literature](https://link.springer.com/article/10.1186/s40537-018-0151-6#Sec2).  Major packages, such as
@@ -14,8 +19,6 @@ to [the research literature](https://link.springer.com/article/10.1186/s40537-01
 > counts in your data, via resampling.
 > Upon closer inspection, though, one sees that **this
 > is generally inadvisable, indeed harmful,** for several reasons:
-
-</blockquote>
 
 * Undersampling is clearly problematic:  Why throw away data?
   **Discarding data weakens our ability to predict new cases.**
@@ -236,9 +239,9 @@ probabilities are unknown?  Other than creating various scenarios
 involving the true values and exploring the results, there is not much
 that we can do.  In essence, the result is a maximum-likelihood kind of
 situation.  The class with highest (nominal) conditional probability
-will be the one that makes our feature data most likely. 
-
-## Examples
+will be the one that makes our feature data most likely (see Appendix
+below), which is very different from the question we want to ask, Which
+class is most likely given the feature set. 
 
 ## Summary
 
@@ -340,8 +343,10 @@ sizes, we are finding the Maximum Likelihood Estimate of j, **if the
 p<sub>i</sub> are unknown.**
 
 If we really don't know the true class probabilities p<sub>i</sub>, and
-artificially equalize the class sizes, we are at least getting an MLE.
-However, what then is the practical meaning?  
+artificially equalize the class sizes, we are at least getting a kind of MLE.
+However, what then is the practical meaning?  Unless you are a
+subjective Bayesian (I am not), setting a flat prior, there is not much
+here.
 
 
 

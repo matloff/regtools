@@ -321,12 +321,27 @@ The `regtools` package offers such analysis for the logit and k-NN
 methods.  The code is easily modifiable for other algorithms.
 
 (Computationally AVA runs the analysis more times than OVA, but on
-smaller datasets.
-
-
+smaller datasets.  Moreover, if the computational cost for the algorithm
+is larger than O(n), AVA may actually be a computational win.)
 
 ## Appendix:  What is really happening if you use equal class probabilities?
 
+Say we have balanced data, so the q<sub>i</sub> = 1/m for each i.  Then
+in predicting the class of a new case having X = t, the above analysis
+shows that our guessed class is
+
+j = arg max<sub>i</sub> f<sub>i</sub>(t)
+
+In other words, you are in effect asking, "Under which class j would our
+data X = t be most likely?"  That's completely different from the
+question we really are interested in, "Which class j is most likely,
+given X = t?"  But it shows that if we artificially equalize the class
+sizes, we are finding the Maximum Likelihood Estimate of j, **if the
+p<sub>i</sub> are unknown.**
+
+If we really don't know the true class probabilities p<sub>i</sub>, and
+artificially equalize the class sizes, we are at least getting an MLE.
+However, what then is the practical meaning?  
 
 
 

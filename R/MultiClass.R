@@ -11,19 +11,12 @@
 #    trnxy:  X, Y training set; Y in last column; Y coded 0,1,...,m-1
 #            for the m classes
 #    predx:  X values from which to predict Y values
-#    truepriors:  true class probabilities, typically from external source
-
-# arguments:
-
-#    m:  as above
-#    trnxy:  as above
-#    truepriors:  as above
 
 # value:
 
-#    matrix of the betahat vectors, one per column
+#    matrix of the betahat vectors, one class per column
 
-ovalogtrn <- function(m,trnxy,truepriors=NULL) {
+ovalogtrn <- function(m,trnxy) {
    p <- ncol(trnxy) 
    x <- as.matrix(trnxy[,1:(p-1)])
    y <- trnxy[,p]
@@ -32,12 +25,6 @@ ovalogtrn <- function(m,trnxy,truepriors=NULL) {
       ym <- as.integer(y == i)
       betahat <- coef(glm(ym ~ x,family=binomial))
       outmat <- cbind(outmat,betahat)
-   }
-   if (!is.null(truepriors)) {
-      tmp <- table(y)
-      wrongpriors <- tmp / sum(tmp)
-      outmat[1,] <- outmat[1,] 
-         - log((1-truepriors)/truepriors) + log((1-wrongpriors)/wrongpriors)
    }
    colnames(outmat) <- as.character(0:(m-1))
    outmat
@@ -110,16 +97,20 @@ ovalogloom <- function(m,trnxy) {
 # value:
 
 #    matrix of the betahat vectors, one per column, in the order of
-#    combin()
+#    combin(); also the proportions of each class, as attr()
 
 avalogtrn <- function(m,trnxy) {
    p <- ncol(trnxy) 
    n <- nrow(trnxy)
    x <- as.matrix(trnxy[,1:(p-1)])
    y <- trnxy[,p]
+   classcounts <- table(y)
+   if (length(classcounts) < m)
+      stop('not all classes appear in the data')
    outmat <- NULL
    ijs <- combn(m,2) 
-   doreg <- function(ij) {
+   doreg <- function(ij)  # does a regression for one pair of classes
+   {
       i <- ij[1] - 1
       j <- ij[2] - 1
       tmp <- rep(-1,n)
@@ -127,6 +118,7 @@ avalogtrn <- function(m,trnxy) {
       tmp[y == j] <- 0
       yij <- tmp[tmp != -1]
       xij <- x[tmp != -1,]
+      browser()
       coef(glm(yij ~ xij,family=binomial))
    }
    coefmat <- NULL
@@ -135,9 +127,12 @@ avalogtrn <- function(m,trnxy) {
       coefmat <- cbind(coefmat,doreg(ij))
       colnames(coefmat)[k] <- paste(ij,collapse=',')
    }
+   empirclassprobs <- classcounts/sum(classcounts)
+   attr(coefmat,empirclassprobs) <- empirclassprobs
    coefmat
 }
-################################################################## # avalogpred: predict Ys from new Xs
+################################################################## 
+# avalogpred: predict Ys from new Xs
 ##################################################################
 
 # arguments:  
@@ -151,8 +146,7 @@ avalogtrn <- function(m,trnxy) {
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predx
 
-avalogpred <- function(m,coefmat,predx) {
-   ijs <- combn(m,2)  # as in avalogtrn()
+avalogpred <- function(m,coefmat,predx,trueclassprobs=NULL) {
    n <- nrow(predx)
    ypred <- vector(length = n)
    for (r in 1:n) {
@@ -160,13 +154,26 @@ avalogpred <- function(m,coefmat,predx) {
       xrow <- c(1,unlist(predx[r,]))
       # wins[i] tells how many times class i-1 has won
       wins <- rep(0,m)  
+      ijs <- combn(m,2)  # as in avalogtrn()
       for (k in 1:ncol(ijs)) {
+         # i,j play the role of Class 1,0
          i <- ijs[1,k]  # class i-1
          j <- ijs[2,k]  # class j-1
          bhat <- coefmat[,k]
-         mhat <- logit(bhat %*% xrow)
-         if (mhat >= 0.5) wins[i] <- wins[i] + 1 else
-         wins[j] <- wins[j] + 1
+         mhat <- logit(bhat %*% xrow)  # prob of Class i
+         if (!is.null(trueclassprobs)) {
+            empirclassprobs <- attr(coefmat,'empirclassprobs')
+            ecp <- empirclassprobs
+            if (m > 2) {
+               # need to normalize the m-class probs to 2-class
+               epc <- epc[c(i,j)]
+               s <- sum(epc)
+               epc[1] <- epc[1] / s
+               epc[2] <- epc[2] / s
+            }
+            mhat <- classadjust(mhat,epc,trueclassprobs)
+         }
+         if (mhat >= 0.5) wins[i] <- wins[i] + 1 else wins[j] <- wins[j] + 1
       }
       ypred[r] <- which.max(wins) - 1
    }
@@ -219,7 +226,7 @@ matrixtolist <- function (rc,m)
 #            predictor data
 #    m:  number of classes
 #    k:  number of nearest neighbors
-#    truepriors:  true class probabilities, typically from external source
+#    trueclassprobs:  true class probabilities, typically from external source
 
 # value:
 
@@ -230,7 +237,7 @@ matrixtolist <- function (rc,m)
 #               that Y = j given that X = row i in the X data, 
 #               estimated from the training set
 
-knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL)
+knntrn <- function(y,xdata,m=length(levels(y)),k,trueclassprobs=NULL)
 {
    if (m < 3) stop('m must be at least 3; use knnest() instead')  
    if (class(y) == 'factor') {
@@ -244,7 +251,7 @@ knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL)
    outmat <- knnout$regest
    outmat <- cbind(outmat,1-apply(outmat,1,sum))
    colnames(outmat)[m] <- sprintf('y%d',m-1)
-   if (!is.null(truepriors)) {
+   if (!is.null(trueclassprobs)) {
       tmp <- table(y)
       if (length(tmp) != m) 
          stop('some classes missing in Y data')
@@ -254,7 +261,7 @@ knntrn <- function(y,xdata,m=length(levels(y)),k,truepriors=NULL)
       for (i in 0:(m-1)) {
          wrongp <- tmp[i]
          wrongratio <- (1-wrongp) / wrongp
-         truep <- truepriors[i]
+         truep <- trueclassprobs[i]
          trueratio <- (1-truep) / truep
          outmat[,i] <- classadjust(outmat[,i],wrongratio,trueratio)
       }
@@ -295,7 +302,16 @@ predict.ovaknn <- function(object,...) {
    list(regest=regest,predy=predy)
 }
 
-classadjust <- function(econdprobs,wrongratio,trueratio) {
+# 2-class case
+
+# adjust a vector of estimated condit. class probabilities econdprobs of
+# class 1 (vs. class 0)
+
+# wrongprob1 and trueprob1 are the uncond. probabilities of class 1, 0
+
+classadjust <- function(econdprobs,wrongprobs1,trueprobs1) {
+   if (length(wrongprobs1) != 2 || length(trueprobs1) != 2) 
+      stop('handles 2-class case, need 2 probs')
    fratios <- (1 / econdprobs - 1) * (1 / wrongratio)
    1 / (1 + trueratio * fratios)
 }

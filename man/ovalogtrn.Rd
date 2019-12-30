@@ -16,13 +16,13 @@ and nonparametric.
 }
 
 \usage{
-ovalogtrn(m,trnxy,truepriors=NULL)
+ovalogtrn(m,trnxy,)
 ovalogpred(coefmat,predx,probs=FALSE)
-avalogtrn(m,trnxy)
+avalogtrn(m,trnxy,trueclassprobs)
 avalogpred(m,coefmat,predx)
-knntrn(y,xdata,m,k,truepriors=NULL) 
+knntrn(y,xdata,m,k,trueclassprobs=NULL) 
 \method{predict}{ovaknn}(object,...) 
-classadjust(econdprobs,wrongratio,trueratio) 
+classadjust(econdprobs,wrongprobs1,trueprobs1) 
 pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) 
 }
 
@@ -51,7 +51,7 @@ predictors.}
 the unconditional probability of a certain class.}
 \item{trueratio}{Same as \code{wrongratio}, but with the correct
 value.}
-\item{truepriors}{True unconditional class probabilities, typically
+\item{trueclassprobs}{True unconditional class probabilities, typically
 obtained externally.}
 \item{probs}{If TRUE, return the estimated conditional probabilities of class
 membership.}

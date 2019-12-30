@@ -100,13 +100,15 @@ ovalogloom <- function(m,trnxy) {
 #    combin(); also the proportions of each class, as attr()
 
 avalogtrn <- function(m,trnxy) {
+   if (class(trnxy) != 'matrix') stop('trnxy must be a matrix')
    p <- ncol(trnxy) 
    n <- nrow(trnxy)
    x <- as.matrix(trnxy[,1:(p-1)])
    y <- trnxy[,p]
    classcounts <- table(y)
-   if (length(classcounts) < m)
-      stop('not all classes appear in the data')
+   yvals <- as.numeric(names(classcounts))
+   if (!(identical(as.integer(yvals),0:(m-1))))
+      stop('Y values must be 0,1,...,m-1; some missing?')
    outmat <- NULL
    ijs <- combn(m,2) 
    doreg <- function(ij)  # does a regression for one pair of classes
@@ -118,17 +120,18 @@ avalogtrn <- function(m,trnxy) {
       tmp[y == j] <- 0
       yij <- tmp[tmp != -1]
       xij <- x[tmp != -1,]
-      browser()
       coef(glm(yij ~ xij,family=binomial))
    }
    coefmat <- NULL
    for (k in 1:ncol(ijs)) {
       ij <- ijs[,k]
       coefmat <- cbind(coefmat,doreg(ij))
+      if (any(is.na(coefmat))) 
+         stop('glm() failed for ij = ',ij)
       colnames(coefmat)[k] <- paste(ij,collapse=',')
    }
    empirclassprobs <- classcounts/sum(classcounts)
-   attr(coefmat,empirclassprobs) <- empirclassprobs
+   attr(coefmat,'empirclassprobs') <- empirclassprobs
    coefmat
 }
 ################################################################## 
@@ -157,22 +160,23 @@ avalogpred <- function(m,coefmat,predx,trueclassprobs=NULL) {
       ijs <- combn(m,2)  # as in avalogtrn()
       for (k in 1:ncol(ijs)) {
          # i,j play the role of Class 1,0
-         i <- ijs[1,k]  # class i-1
-         j <- ijs[2,k]  # class j-1
+         i <- ijs[1,k]  # class i
+         j <- ijs[2,k]  # class j
          bhat <- coefmat[,k]
          mhat <- logit(bhat %*% xrow)  # prob of Class i
          if (!is.null(trueclassprobs)) {
             empirclassprobs <- attr(coefmat,'empirclassprobs')
-            ecp <- empirclassprobs
             if (m > 2) {
+               normal2 <- function(probs) {
+                  z <- probs[c(i,j)]; z/sum(z)
+               }
                # need to normalize the m-class probs to 2-class
-               epc <- epc[c(i,j)]
-               s <- sum(epc)
-               epc[1] <- epc[1] / s
-               epc[2] <- epc[2] / s
+               ecp <- normal2(empirclassprobs)
+               tcp <- normal2(trueclassprobs)
             }
-            mhat <- classadjust(mhat,epc,trueclassprobs)
+            mhat <- classadjust(mhat,ecp[1],tcp[1])
          }
+         if (i == 1) print(mhat)
          if (mhat >= 0.5) wins[i] <- wins[i] + 1 else wins[j] <- wins[j] + 1
       }
       ypred[r] <- which.max(wins) - 1
@@ -239,10 +243,9 @@ matrixtolist <- function (rc,m)
 
 knntrn <- function(y,xdata,m=length(levels(y)),k,trueclassprobs=NULL)
 {
+   stop('under construction')
    if (m < 3) stop('m must be at least 3; use knnest() instead')  
-   if (class(y) == 'factor') {
-      y <- as.numeric(y) - 1
-   }
+   if (class(y) == 'factor') y <- as.numeric(y) - 1
    x <- xdata$x
    # replace y with m-1 dummies
    ds <- dummies::dummy(y)[,-m]
@@ -309,10 +312,10 @@ predict.ovaknn <- function(object,...) {
 
 # wrongprob1 and trueprob1 are the uncond. probabilities of class 1, 0
 
-classadjust <- function(econdprobs,wrongprobs1,trueprobs1) {
-   if (length(wrongprobs1) != 2 || length(trueprobs1) != 2) 
-      stop('handles 2-class case, need 2 probs')
+classadjust <- function(econdprobs,wrongprob1,trueprob1) {
+   wrongratio <- (1-wrongprob1) / wrongprob1
    fratios <- (1 / econdprobs - 1) * (1 / wrongratio)
+   trueratio <- (1-trueprob1) / trueprob1
    1 / (1 + trueratio * fratios)
 }
 

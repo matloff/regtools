@@ -18,8 +18,8 @@ and nonparametric.
 \usage{
 ovalogtrn(m,trnxy,)
 ovalogpred(coefmat,predx,probs=FALSE)
-avalogtrn(m,trnxy,trueclassprobs)
-avalogpred(m,coefmat,predx)
+avalogtrn(m,trnxy)
+avalogpred(m,coefmat,predx,trueclassprobs=NULL)
 knntrn(y,xdata,m,k,trueclassprobs=NULL) 
 \method{predict}{ovaknn}(object,...) 
 classadjust(econdprobs,wrongprobs1,trueprobs1) 

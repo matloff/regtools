@@ -25,13 +25,10 @@ ovalogtrn <- function(m,trnxy,trueclassprobs=NULL) {
       betahat <- coef(glm(ym ~ x,family=binomial))
       outmat <- cbind(outmat,betahat)
    }
-   if (!is.null(trueclassprobs)) {
-      tmp <- table(y)
-      wrongpriors <- tmp / sum(tmp)
-      outmat[1,] <- outmat[1,]
-         - log((1-trueclassprobs)/trueclassprobs) + log((1-wrongpriors)/wrongpriors)
-   }
    colnames(outmat) <- as.character(0:(m-1))
+   classcounts <- table(y)
+   empirclassprobs <- classcounts/sum(classcounts)
+   attr(outmat,'empirclassprobs') <- empirclassprobs
    outmat
 }
 
@@ -53,7 +50,8 @@ ovalogtrn <- function(m,trnxy,trueclassprobs=NULL) {
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predx
 
-ovalogpred <- function(coefmat,predx,trueclassprobs) {
+ovalogpred <- function(coefmat,predx,trueclassprobs) 
+{
    stop('under construction')
    # get est reg ftn values for each row of predx and each col of
    # coefmat; vals from coefmat[,i] in tmp[,i]; 
@@ -236,56 +234,58 @@ matrixtolist <- function (rc,m)
 
 # uses One-vs.-All approach
 
-# knntrn: generate estimated regression function values
+# ovaknntrn: generate estimated regression function values
 
 # arguments
 
 #    y:  training set class data; either an R factor, or numeric
 #        coded 0,1,...,m-1
-#    xdata:  output of preprocessx() applied to the training set
-#            predictor data
+#    x:  either numeric matrix of predictor/feature data, or  
+#        output of preprocessx() applied to the training set
+#        predictor data
 #    m:  number of classes
 #    k:  number of nearest neighbors
-#    trueclassprobs:  true class probabilities, typically from external source
+#    xval:  if true, "leave 1 out," ie don't count a data point as its
+#        own neighbor
 
 # value:
 
-#    xdata from input, plus a new list componens regest: 
+#    xdata from input, plus new list components: 
 #
 #       regest: the matrix of estimated regression function values; 
 #               the element in row i, column j, is the probability 
 #               that Y = j given that X = row i in the X data, 
 #               estimated from the training set
+#
+#       k: number of nearest neighbors
+#
+#       empirclassprobs: proportions of cases in classes 0,1,...,m
 
-knntrn <- function(y,xdata,m=length(levels(y)),k,trueclassprobs=NULL)
+knntrn <- function() stop('use ovaknntrn')
+
+ovaknntrn <- function(y,x,m=length(levels(y)),k,xval=FALSE,trueclassprobs=NULL)
 {
-   stop('under construction')
-   if (m < 3) stop('m must be at least 3; use knnest() instead')  
+   if (m < 3) stop('m must be at least 3; use knnest() or knn() instead')  
+   if (class(y) ! = 'factor') {
+      uy <- unique(y)
+      if (length(uy) != m || min(uy) != 0) 
+         stop('y must either be a factor or have values 0,1,2,...,m-1')
+      y <- as.factor(y)
+   }
    if (class(y) == 'factor') y <- as.numeric(y) - 1
-   x <- xdata$x
-   # replace y with m-1 dummies
-   ds <- dummies::dummy(y)[,-m]
-   for (i in 1:(m-1)) colnames(ds)[i] <- sprintf('y%d',i-1)
+   if (class(x) == 'knn') {
+      xdata <- x$x
+   } else {
+      xdata <- preprocessx(x,k,xval=xval)$x
+   }
+   empirclassprobs <- table(y) / length(y)
+   # replace y with m dummies
+   y <- factorToDummies(y,'y',FALSE)
    knnout <- knnest(ds,xdata,k)
    outmat <- knnout$regest
-   outmat <- cbind(outmat,1-apply(outmat,1,sum))
-   colnames(outmat)[m] <- sprintf('y%d',m-1)
-   if (!is.null(trueclassprobs)) {
-      tmp <- table(y)
-      if (length(tmp) != m) 
-         stop('some classes missing in Y data')
-      tmp <- tmp / sum(tmp)
-      # tmp now contains the estimated unconditional 
-      # class probabilities
-      for (i in 0:(m-1)) {
-         wrongp <- tmp[i]
-         wrongratio <- (1-wrongp) / wrongp
-         truep <- trueclassprobs[i]
-         trueratio <- (1-truep) / truep
-         outmat[,i] <- classadjust(outmat[,i],wrongratio,trueratio)
-      }
-   }
    xdata$regest <- outmat
+   xdata$k <- k
+   xdata$empirclassprobs <- empirclassprobs
    class(xdata) <- c('ovaknn')
    xdata
 }
@@ -305,7 +305,11 @@ knntrn <- function(y,xdata,m=length(levels(y)),k,trueclassprobs=NULL)
 #       predy: predicted class labels for predpts    
 
 predict.ovaknn <- function(object,...) {
-   predpts <- unlist(...)
+   dts <- list(...)
+   predpts <- dts$predpts
+   trueclassprobs <- dts$trueclassprobs
+   # could get k too, but not used; we simply take the 1-nearest, as the
+   # prep data averaged k-nearest
    if (!is.matrix(predpts))
       stop('prediction points must be a matrix')
    x <- object$x
@@ -317,6 +321,12 @@ predict.ovaknn <- function(object,...) {
    tmp <- FNN::get.knnx(x,predpts,1)
    idx <- tmp$nn.index
    regest <- object$regest[idx,,drop=FALSE]
+   if (!is.null(trueclassprobs)) {
+      for (i in 1:ncol(regest)) {
+         regest[,i] <- classadjust(regest[,i],
+            empirclassprobs[i],trueclassprobs[i])
+      }
+   }
    predy <- apply(regest,1,which.max) - 1
    list(regest=regest,predy=predy)
 }

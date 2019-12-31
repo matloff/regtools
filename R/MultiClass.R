@@ -10,13 +10,12 @@
 #    m:  number of classes
 #    trnxy:  X, Y training set; Y in last column; Y coded 0,1,...,m-1
 #            for the m classes
-#    predx:  X values from which to predict Y values
 
 # value:
 
 #    matrix of the betahat vectors, one class per column
 
-ovalogtrn <- function(m,trnxy) {
+ovalogtrn <- function(m,trnxy,trueclassprobs=NULL) {
    p <- ncol(trnxy) 
    x <- as.matrix(trnxy[,1:(p-1)])
    y <- trnxy[,p]
@@ -25,6 +24,12 @@ ovalogtrn <- function(m,trnxy) {
       ym <- as.integer(y == i)
       betahat <- coef(glm(ym ~ x,family=binomial))
       outmat <- cbind(outmat,betahat)
+   }
+   if (!is.null(trueclassprobs)) {
+      tmp <- table(y)
+      wrongpriors <- tmp / sum(tmp)
+      outmat[1,] <- outmat[1,]
+         - log((1-trueclassprobs)/trueclassprobs) + log((1-wrongpriors)/wrongpriors)
    }
    colnames(outmat) <- as.character(0:(m-1))
    outmat
@@ -35,28 +40,38 @@ ovalogtrn <- function(m,trnxy) {
 ##################################################################
 
 # arguments:  
-# 
+
 #    coefmat:  coefficient matrix, output from ovalogtrn()
 #    predx:  as above
 #    probs:  in addition to predicted classes, return the condtional
 #            class probabilities as an attribute, 'probs'
-# 
+#    trueclassprobs:  known correct (or estimated correct) unconditional
+#                     class probabilities
+ 
 # value:
-# 
+ 
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predx
 
-ovalogpred <- function(coefmat,predx,probs=FALSE) {
+ovalogpred <- function(coefmat,predx,trueclassprobs) {
+   stop('under construction')
    # get est reg ftn values for each row of predx and each col of
-   # coefmat; vals from coefmat[,] in tmp[,i]
-   #
-   # let m = number of classes, np = number of obs to be predicted
+   # coefmat; vals from coefmat[,i] in tmp[,i]; 
+   # say np rows in predx, i.e. np new cases to predict, and let m be
+   # the number of classes; then tmp is np x m
    tmp <- as.matrix(cbind(1,predx)) %*% coefmat  # np x m 
-   tmp <- logit(tmp)
+   tmp <- logitftn(tmp)
+   # separate logits for the m classes will not necessrily sum to 1, so
+   # normalize
+   sumtmp <- apply(tmp,1,sum)  # length np
+   normalized <- diag(1/sumtmp) %*% tmp
+   if (!is.null(trueclassprobs)) {
+      for (i in 1:ncol(tmp)) {
+         # tmp[,i] <- classadjust(tmp[,i],em0w
+      }
+   }
    preds <- apply(tmp,1,which.max) - 1
    if (probs) {
-      sumtmp <- apply(tmp,1,sum)  # length np
-      normalized <- diag(1/sumtmp) %*% tmp
       attr(preds,'probs') <- normalized
    }
    preds
@@ -143,6 +158,7 @@ avalogtrn <- function(m,trnxy) {
 #    m: as above
 #    coefmat:  coefficient matrix, output from avalogtrn()
 #    predx:  as above
+#    trueclassprobs: as in ovalogtrn() above
 # 
 # value:
 # 
@@ -163,7 +179,7 @@ avalogpred <- function(m,coefmat,predx,trueclassprobs=NULL) {
          i <- ijs[1,k]  # class i
          j <- ijs[2,k]  # class j
          bhat <- coefmat[,k]
-         mhat <- logit(bhat %*% xrow)  # prob of Class i
+         mhat <- logitftn(bhat %*% xrow)  # prob of Class i
          if (!is.null(trueclassprobs)) {
             empirclassprobs <- attr(coefmat,'empirclassprobs')
             if (m > 2) {
@@ -206,7 +222,7 @@ avalogloom <- function(m,trnxy) {
    mean(correctprobs)
 }
 
-logit <- function(t) 1 / (1+exp(-t))
+logitftn <- function(t) 1 / (1+exp(-t))
 
 matrixtolist <- function (rc,m) 
 {
@@ -305,12 +321,34 @@ predict.ovaknn <- function(object,...) {
    list(regest=regest,predy=predy)
 }
 
-# 2-class case
+# adjust a vector of estimated condit. class probabilities to reflect
+# actual uncondit. class probabilities
 
-# adjust a vector of estimated condit. class probabilities econdprobs of
-# class 1 (vs. class 0)
+# NOTE:  the below assumes just 2 classes, class 1 and class 0; however,
+# it applies to the general m-class case, because P(Y = i | X = t) can
+# be viewed as 1 - P(Y != i | X = t), i.e. class i vs. all others
 
-# wrongprob1 and trueprob1 are the uncond. probabilities of class 1, 0
+# arguments:
+ 
+#    econdprobs: probs. for class 1, for various t, reported by the ML alg.
+#    wrongprob1: proportion of class 1 in the training data
+#    trueprob1: true proportion of class 1 
+ 
+# value:
+ 
+#     adjusted version of econdprobs
+
+# why: say we wish to predict Y = 1,0 given X = t 
+# P(Y=1 | X=t) = pf_1(t) / [pf_1(t) + (1-p)f_0(t)]
+# where p = P(Y = 1); and f_i is the density of X within class i; so
+# P(Y=1 | X=t) = 1 / [1 + {f_0(t)/f_(t)} (1-p)/p]
+# and thus
+# f_0(t)/f_1(t) = [1/P(Y=1 | X=t) - 1] p/(1-p)
+
+# let q the actual proportion in class 1 (whether by sampling design or
+# from a post-sampling artificial balancing of the classes); the ML
+# algorith has, directly or indirectly, taken p to be q; so substitute
+# and work back to the correct P(Y=1 | X=t)
 
 classadjust <- function(econdprobs,wrongprob1,trueprob1) {
    wrongratio <- (1-wrongprob1) / wrongprob1

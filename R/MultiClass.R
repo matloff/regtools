@@ -113,16 +113,17 @@ ovalogloom <- function(m,trnxy) {
 #    matrix of the betahat vectors, one per column, in the order of
 #    combin(); also the proportions of each class, as attr()
 
-avalogtrn <- function(m,trnxy) {
-   if (class(trnxy) != 'matrix') stop('trnxy must be a matrix')
+avalogtrn <- function(m,trnxy) 
+{
    p <- ncol(trnxy) 
    n <- nrow(trnxy)
+   x <- trnxy[,1:(p-1)]
+   if (hasFactors(x)) 
+      stop('predictors must be numeric; convert to dummies')
    x <- as.matrix(trnxy[,1:(p-1)])
    y <- trnxy[,p]
    classcounts <- table(y)
-   yvals <- as.numeric(names(classcounts))
-   if (!(identical(as.integer(yvals),0:(m-1))))
-      stop('Y values must be 0,1,...,m-1; some missing?')
+   if (is.factor(y)) y <- as.numeric(y) - 1
    outmat <- NULL
    ijs <- combn(m,2) 
    doreg <- function(ij)  # does a regression for one pair of classes

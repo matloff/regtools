@@ -268,7 +268,7 @@ realistic ones, and classify using them.
 (For ease of notation etc., no distinction will be made here between
 sample and population quantities.)
 
-Say there are two classes, labeled 1 and 0.  Let Y denote the lable and
+Say there are two classes, labeled 1 and 0.  Let Y denote the label and
 X denote the features, and say we have a new case with X = t.  Then
 
 P(Y = 1 | X = t) = p f<sub>1</sub>(t) / [p f<sub>1</sub>t) + (1-p)
@@ -286,16 +286,16 @@ Now suppose the analyst artificially changes the class counts in the
 data (or, as in the letters example, the data is artificially sampled by
 design), with proportions q and 1-q for the two classes.  In the case of
 artificially equalizing the class proportions, we have q = 0.5.  Then
-the above becomes
+the above becomes, in the eyes of your ML algorithm,
 
 P(Y = 1 | X = t) = 1 / [1 + {(1-q)/q} f<sub>0</sub>(t) / f<sub>1</sub>(t)]
  (Eqn. 3)
 
 As noted earlier, what the ML algorithm is computing, directly or
-indirectly, is P(Y = 1 | X = t).  Moreover, as also noted earlier,
-even `caret` and `mlr3` do make these quantities available.  
-
-So we can solve for f<sub>0</sub>(t) / f<sub>1</sub>(t):
+indirectly, is P(Y = 1 | X = t).  Moreover, as also noted earlier, even
+`caret` and `mlr3` do make these quantities available for the various t
+(again, as it sees them), so we can solve for f<sub>0</sub>(t) /
+f<sub>1</sub>(t):
 
 f<sub>0</sub>(t) / f<sub>1</sub>(t) = (g - 1) q/(1-q)  (Eqn. 4)
 

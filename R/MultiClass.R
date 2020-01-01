@@ -15,10 +15,12 @@
 
 #    matrix of the betahat vectors, one class per column
 
-ovalogtrn <- function(m,trnxy,trueclassprobs=NULL) {
+ovalogtrn <- function(m,trnxy) {
    p <- ncol(trnxy) 
    x <- as.matrix(trnxy[,1:(p-1)])
    y <- trnxy[,p]
+   if (class(y) == 'factor') 
+      y <- as.numeric(y) - 1
    outmat <- NULL
    for (i in 0:(m-1)) {
       ym <- as.integer(y == i)
@@ -50,28 +52,27 @@ ovalogtrn <- function(m,trnxy,trueclassprobs=NULL) {
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predx
 
-ovalogpred <- function(coefmat,predx,trueclassprobs) 
+ovalogpred <- function(coefmat,predx,trueclassprobs=NULL) 
 {
-   stop('under construction')
    # get est reg ftn values for each row of predx and each col of
    # coefmat; vals from coefmat[,i] in tmp[,i]; 
    # say np rows in predx, i.e. np new cases to predict, and let m be
    # the number of classes; then tmp is np x m
    tmp <- as.matrix(cbind(1,predx)) %*% coefmat  # np x m 
    tmp <- logitftn(tmp)
+   if (!is.null(trueclassprobs)) {
+      empirprobs <- attr(coefmat,'empirclassprobs')
+      trueprobs <- trueclassprobs
+      for (i in 1:ncol(tmp)) {
+         tmp[,i] <- classadjust(tmp[,i],empirprobs[i],trueprobs[i])
+      }
+   }
    # separate logits for the m classes will not necessrily sum to 1, so
    # normalize
    sumtmp <- apply(tmp,1,sum)  # length np
    normalized <- diag(1/sumtmp) %*% tmp
-   if (!is.null(trueclassprobs)) {
-      for (i in 1:ncol(tmp)) {
-         # tmp[,i] <- classadjust(tmp[,i],em0w
-      }
-   }
    preds <- apply(tmp,1,which.max) - 1
-   if (probs) {
-      attr(preds,'probs') <- normalized
-   }
+   attr(preds,'probs') <- normalized
    preds
 }
 
@@ -266,7 +267,7 @@ knntrn <- function() stop('use ovaknntrn')
 ovaknntrn <- function(y,x,m=length(levels(y)),k,xval=FALSE,trueclassprobs=NULL)
 {
    if (m < 3) stop('m must be at least 3; use knnest() or knn() instead')  
-   if (class(y) ! = 'factor') {
+   if (class(y) != 'factor') {
       uy <- unique(y)
       if (length(uy) != m || min(uy) != 0) 
          stop('y must either be a factor or have values 0,1,2,...,m-1')

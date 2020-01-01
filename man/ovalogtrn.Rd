@@ -16,8 +16,8 @@ and nonparametric.
 }
 
 \usage{
-ovalogtrn(m,trnxy,)
-ovalogpred(coefmat,predx,probs=FALSE)
+ovalogtrn(m,trnxy)
+ovalogpred(coefmat,predx,trueclassprobs=NULL)
 avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx,trueclassprobs=NULL)
 knntrn(y,xdata,m,k,trueclassprobs=NULL) 

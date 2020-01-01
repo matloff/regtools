@@ -265,7 +265,7 @@ matrixtolist <- function (rc,m)
 
 knntrn <- function() stop('use ovaknntrn')
 
-ovaknntrn <- function(y,x,m=length(levels(y)),k,xval=FALSE,trueclassprobs=NULL)
+ovaknntrn <- function(y,x,m,k,xval=FALSE,trueclassprobs=NULL)
 {
    if (m < 3) stop('m must be at least 3; use knnest() or knn() instead')  
    if (class(y) != 'factor') {
@@ -274,18 +274,16 @@ ovaknntrn <- function(y,x,m=length(levels(y)),k,xval=FALSE,trueclassprobs=NULL)
          stop('y must either be a factor or have values 0,1,2,...,m-1')
       y <- as.factor(y)
    }
-   if (class(y) == 'factor') y <- as.numeric(y) - 1
    if (class(x) == 'knn') {
-      xdata <- x$x
+      xdata <- x
    } else {
-      xdata <- preprocessx(x,k,xval=xval)$x
+      xdata <- preprocessx(x,k,xval=xval)
    }
-   empirclassprobs <- table(y) / length(y)
+   empirclassprobs <- table(y) / sum(table(y))
    # replace y with m dummies
    y <- factorToDummies(y,'y',FALSE)
-   knnout <- knnest(ds,xdata,k)
-   outmat <- knnout$regest
-   xdata$regest <- outmat
+   knnout <- knnest(y,xdata,k)
+   xdata$regest <- knnout$regest
    xdata$k <- k
    xdata$empirclassprobs <- empirclassprobs
    class(xdata) <- c('ovaknn')
@@ -330,7 +328,8 @@ predict.ovaknn <- function(object,...) {
       }
    }
    predy <- apply(regest,1,which.max) - 1
-   list(regest=regest,predy=predy)
+   attr(predy,'probs') <- regest
+   predy
 }
 
 # adjust a vector of estimated condit. class probabilities to reflect

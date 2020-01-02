@@ -1,4 +1,4 @@
-#  Clearing the Confusion on Unbalanced Class Data 
+#  Clearing the Confusion on Unbalanced Class Data  
 
 Many resources on machine learning (ML) classification problems
 recommend that if one's dataset has unbalanced class sizes, one

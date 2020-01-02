@@ -274,7 +274,7 @@ ovaknntrn <- function(y,x,m,k,xval=FALSE,trueclassprobs=NULL)
          stop('y must either be a factor or have values 0,1,2,...,m-1')
       y <- as.factor(y)
    }
-   if (class(x) == 'knn') {
+   if (class(x) == 'preknn') {
       xdata <- x
    } else {
       xdata <- preprocessx(x,k,xval=xval)
@@ -307,6 +307,7 @@ ovaknntrn <- function(y,x,m,k,xval=FALSE,trueclassprobs=NULL)
 predict.ovaknn <- function(object,...) {
    dts <- list(...)
    predpts <- dts$predpts
+   if (is.null(predpts)) stop('predpts must be a named argument')
    trueclassprobs <- dts$trueclassprobs
    # could get k too, but not used; we simply take the 1-nearest, as the
    # prep data averaged k-nearest

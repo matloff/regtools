@@ -44,10 +44,8 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
 {  
    # type checks etc.
    # checks on x
-   if (is.vector(x)) {
-      x <- matrix(x,ncol=1)
-   }
-   if (is.factor(x)) stop('factor converions not implemented yet')
+   if (is.vector(x)) x <- matrix(x,ncol=1)
+   if (is.factor(x)) stop('factor conversions not implemented yet')
    if (hasFactors(x)) stop('factor conversion not implemented yet')
    if (is.data.frame(x)) 
       x <- as.matrix(x)
@@ -59,7 +57,7 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
       stop('for now, in multiclass case, allK must be FALSE')
    if (is.vector(y)) y <- matrix(y,ncol=1)
    # checks on newx
-   if (is.vector(newx)) newx <- matrix(newx,nrow=1)
+   if (is.vector(newx)) newx <- matrix(newx,ncol=ncol(x))
    if (is.data.frame(newx)) {
       newx <- as.matrix(newx)
    }
@@ -104,7 +102,8 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
               rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
       }
    }
-   list(whichClosest=closestIdxs,regests=regests)
+   ypreds <- if (ncol(y) > 1) apply(regests,1,which.max) - 1 else NULL
+   list(whichClosest=closestIdxs,regests=regests,ypreds=ypreds)
 }
 
 # n-fold cross validation for kNN(); instead of applying "leave 1 out"
@@ -255,6 +254,11 @@ knnest <- function(y,xdata,k,nearf=meany)
 
 preprocessx <- function(x,kmax,xval=FALSE) {
    xval <- as.numeric(xval)
+   if (is.data.frame(x)) {
+      if (hasFactors(x)) stop('features must be numeric')
+      if (ncol(x) == 1) x <- matrix(x,ncol=1)
+   } 
+   if (is.vector(x)) x <- matrix(x,ncol=1)
    x <- scale(x)
    tmp <- cbind(attr(x,'scaled:center'),attr(x,'scaled:scale'))
    result <- list(scaling = tmp)
@@ -289,7 +293,8 @@ preprocessx <- function(x,kmax,xval=FALSE) {
 # estimated regression function value for the closest point in the
 # training data is used as our est. reg. ftn. value at that predpts row
 
-predict.knn <- function(object,...) {
+predict.knn <- function(object,...) 
+{
    if (class(object) != 'knn')
       stop('must be called on object of class "knn"')
    x <- object$x
@@ -304,8 +309,8 @@ predict.knn <- function(object,...) {
    }
    if (!is.matrix(predpts)) 
       stop('prediction points must be in a matrix')
-   needtoscale <- arglist[[2]]
-   if (needtoscale) {
+   # needtoscale <- arglist[[2]]
+   if (!is.null(object$scaling)) {
       # scale predpts with the same values that had been used in
       # the training set
       ctr <- object$scaling[,1]
@@ -407,7 +412,8 @@ plot.kmin <- function(x,y,...) {
 # here as mean()
 
 # find mean of Y on the data z, Y in last column, and predict at xnew
-meany <- function(predpt,nearxy) {
+meany <- function(predpt,nearxy) 
+{
    # predpt not directly used (but see loclin() below)
    nxcol <- 
       if(is.vector(predpt)) length(predpt) else ncol(predpt)

@@ -94,6 +94,8 @@ is intended to be helpful in exploring a relation between Y and X.  For
 non-NULL \code{band}, a contour-like plot is made, showing where X12
 changes from making Y = 1 less likely to more likely.
 
+The function \code{knntrn} is deprecated; use \code{ovaknn}.
+
 }
 
 \value{
@@ -118,14 +120,41 @@ the probability that Y = j given that X = row i in the X data.
 \examples{
 
 \dontrun{
-# toy example, kNN
+# toy example
 set.seed(9999)
 x <- runif(25)
 y <- sample(0:2,25,replace=TRUE)
-xd <- preprocessx(x,2,xval=TRUE)
-kout <- knntrn(y,xd,m=3,k=2)
+xd <- preprocessx(x,2,xval=FALSE)
+# kout <- knntrn(y,xd,m=3,k=2)
+kout <- ovaknntrn(y,xd,m=3,k=2)
 kout$regest  # row 2:  0.0,0.5,0.5
-predict(kout,matrix(c(0.81,0.55,0.15),ncol=1))  # 0,1,2
+predict(kout,predpts=matrix(c(0.81,0.55,0.15),ncol=1))  # 0,2,0or2
+yd <- factorToDummies(as.factor(y),'y',FALSE)
+kNN(x,yd,c(0.81,0.55,0.15),2)  # predicts 0, 1or2, 2
+
+data(peDumms)  # prog/engr data 
+ped <- peDumms[,-33] 
+x <- as.matrix(ped[,-31])
+y <- ped[,31]
+knnout <- kNN(x,y,x,25,leave1out=TRUE) 
+MAPE(knnout$regests,y)  # about $26.2K
+xd <- preprocessx(x,25,xval=TRUE)
+kout <- knnest(y,xd,25)
+preds <- predict(kout,predpts=x)
+MAPE(preds,y)  # about $26.2K
+ped <- as.matrix(ped)
+x <- ped[,-(23:28)]
+y <- ped[,23:28]
+knnout <- kNN(x,y,x,25,leave1out=TRUE) 
+truey <- apply(y,1,which.max) - 1
+mean(knnout$ypreds == truey)  # about 0.37
+xd <- preprocessx(x,25,xval=TRUE)
+kout <- knnest(y,xd,25)
+preds <- predict(kout,predpts=x)
+hats <- apply(preds,1,which.max) - 1
+mean(yhats == truey)  # about 0.37
+
+
 
 # sim data, kNN
 set.seed(9999)
@@ -135,12 +164,12 @@ cv <- rbind(c(1,0.2),c(0.2,1))
 xy <- NULL  
 for (i in 1:3)  
    xy <- rbind(xy,rmvnorm(n,mean=rep(i*2.0,2),sigma=cv))  
-y <- rep(0:2,each=n) 
+y <- rep(0:2,each=n))
 xy <- cbind(xy,y) 
 xdata <- preprocessx(xy[,-3],20) 
-oo <- knntrn(y,xdata,m=3,k=20) 
-predout <- predict(oo,xy[,-3])
-mean(predout$predy == y)  # about 0.87
+kout <- ovaknntrn(y,xdata,m=3,k=20) 
+predout <- predict(kout,predpts=xy[,-3])
+mean(predout == y)  # about 0.88
 
 library(mlbench)
 data(Vehicle)

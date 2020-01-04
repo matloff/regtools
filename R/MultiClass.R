@@ -9,7 +9,7 @@
 
 #    m:  number of classes
 #    trnxy:  X, Y training set; Y in last column; Y coded 0,1,...,m-1
-#            for the m classes
+#            for the m classes, or Y as R factor
 
 # value:
 
@@ -17,20 +17,25 @@
 
 ovalogtrn <- function(m,trnxy) {
    p <- ncol(trnxy) 
-   x <- as.matrix(trnxy[,1:(p-1)])
    y <- trnxy[,p]
-   if (class(y) == 'factor') 
-      y <- as.numeric(y) - 1
+   if (length(table(y)) != m)
+      stop('check Y data -- numeric 0,1,...,m-1 or R factor')
+   # convert to data frame if not already one
+   if (!is.data.frame(trnxy)) trnxy <- as.data.frame(trnxy)
+   if (!is.factor(y)) trnxy[,p] <- as.factor(y)
    outmat <- NULL
    for (i in 0:(m-1)) {
       ym <- as.integer(y == i)
-      betahat <- coef(glm(ym ~ x,family=binomial))
+      xy <- cbind(trnxy[,-p],ym)
+      names(xy)[p] <- 'ym'
+      betahat <- coef(glm(ym ~ .,data=xy,family=binomial))
       outmat <- cbind(outmat,betahat)
    }
    colnames(outmat) <- as.character(0:(m-1))
    classcounts <- table(y)
    empirclassprobs <- classcounts/sum(classcounts)
    attr(outmat,'empirclassprobs') <- empirclassprobs
+   class(outmat) <- c('ovalog','matrix')
    outmat
 }
 
@@ -52,13 +57,18 @@ ovalogtrn <- function(m,trnxy) {
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predx
 
-ovalogpred <- function(coefmat,predx,trueclassprobs=NULL) 
+ovalogpred <- function() stop('user predict.ovalog()')
+predict.ovalog <- function(object,...) 
 {
-   # get est reg ftn values for each row of predx and each col of
+   dts <- list(...)
+   predpts <- dts$predpts
+   if (is.null(predpts)) stop('predpts must be a named argument')
+   trueclassprobs <- dts$trueclassprobs
+   # get est reg ftn values for each row of predpts and each col of
    # coefmat; vals from coefmat[,i] in tmp[,i]; 
-   # say np rows in predx, i.e. np new cases to predict, and let m be
+   # say np rows in predpts, i.e. np new cases to predict, and let m be
    # the number of classes; then tmp is np x m
-   tmp <- as.matrix(cbind(1,predx)) %*% coefmat  # np x m 
+   tmp <- as.matrix(cbind(1,predpts)) %*% coefmat  # np x m 
    tmp <- logitftn(tmp)
    if (!is.null(trueclassprobs)) {
       empirprobs <- attr(coefmat,'empirclassprobs')

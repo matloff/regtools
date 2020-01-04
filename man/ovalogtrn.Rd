@@ -117,14 +117,6 @@ kNN(x,yd,c(0.81,0.55,0.15),2)  # predicts 0, 1or2, 2
 
 data(peDumms)  # prog/engr data 
 ped <- peDumms[,-33] 
-x <- as.matrix(ped[,-31])
-y <- ped[,31]
-knnout <- kNN(x,y,x,25,leave1out=TRUE) 
-MAPE(knnout$regests,y)  # about $26.2K
-xd <- preprocessx(x,25,xval=TRUE)
-kout <- knnest(y,xd,25)
-preds <- predict(kout,predpts=x)
-MAPE(preds,y)  # about $26.2K
 ped <- as.matrix(ped)
 x <- ped[,-(23:28)]
 y <- ped[,23:28]
@@ -136,6 +128,11 @@ kout <- knnest(y,xd,25)
 preds <- predict(kout,predpts=x)
 hats <- apply(preds,1,which.max) - 1
 mean(yhats == truey)  # about 0.37
+
+data(peFactors)  # prog/engr data 
+pef <- peFactors
+pef1 <- pef[,c(1,3,6,7,8,9,5)]
+ovaout <- ovalogtrn(6,pef1)
 
 }
 

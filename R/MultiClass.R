@@ -30,6 +30,7 @@ ovalogtrn <- function(m,trnxy) {
    empirclassprobs <- colMeans(y)
    attr(outmat,'empirclassprobs') <- empirclassprobs
    class(outmat) <- c('ovalog','matrix')
+print('add code to check for NAs, issue warning()')
    outmat
 }
 
@@ -54,6 +55,7 @@ ovalogtrn <- function(m,trnxy) {
 ovalogpred <- function() stop('user predict.ovalog()')
 predict.ovalog <- function(object,...) 
 {
+print('add code to require colnames in trnxy and predpts, that match')
    dts <- list(...)
    predpts <- dts$predpts
    if (is.null(predpts)) stop('predpts must be a named argument')

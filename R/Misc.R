@@ -48,7 +48,7 @@ hasFactors <- function(x)
 # else just copy column; if omitLast, then dummy for last level of
 # factor is not included in output
 
-factorsToDummies <- function(dfr,omitLast=TRUE) 
+factorsToDummies <- function(dfr,omitLast=FALSE) 
 {
    outDF <- data.frame(rep(0,nrow((dfr))))  # filler start
    for (i in 1:ncol(dfr)) {
@@ -62,7 +62,7 @@ factorsToDummies <- function(dfr,omitLast=TRUE)
                warning(msg)
                next
             }
-         dumms <- factorToDummies(dfi,names(dfr)[i],omitLast)
+         dumms <- factorToDummies(dfi,names(dfr)[i],omitLast=omitLast)
          outDF <- cbind(outDF,dumms)
       }
    }
@@ -99,4 +99,16 @@ dummiesToFactor <- function(dms,inclLast=FALSE) {
    as.factor(f)
 }
 
+# inputs a data frame intended for regression/classification, with X in
+# the first cols and Y in the last; converts all factors to dummies, and
+# outputs a matrix; in creating dummies, r-1 are retained for r levels,
+# except for Y
 
+xyDataframeToMatrix <- function(xy) {
+   p <- ncol(xy)
+   x <- xy[,1:(p-1)]
+   y <- xy[,p]
+   xd <- factorsToDummies(xy,omitLast=TRUE)
+   yd <- factorsToDummies(y,omitLast=FALSE)
+   as.matrix(cbind(xd,yd))
+}

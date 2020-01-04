@@ -8,32 +8,26 @@
 # arguments:
 
 #    m:  number of classes
-#    trnxy:  X, Y training set; Y in last column; Y coded 0,1,...,m-1
-#            for the m classes, or Y as R factor
+#    trnxy:  matrix, X, Y training set; Y in last m columns 
 
 # value:
 
 #    matrix of the betahat vectors, one class per column
 
 ovalogtrn <- function(m,trnxy) {
+   if (!is.matrix(trnxy))
+      stop('trnxy must be a matrix, with dummy Y cols')
    p <- ncol(trnxy) 
-   y <- trnxy[,p]
-   if (length(table(y)) != m)
-      stop('check Y data -- numeric 0,1,...,m-1 or R factor')
-   # convert to data frame if not already one
-   if (!is.data.frame(trnxy)) trnxy <- as.data.frame(trnxy)
-   if (!is.factor(y)) trnxy[,p] <- as.factor(y)
-   outmat <- NULL
-   for (i in 0:(m-1)) {
-      ym <- as.integer(y == i)
-      xy <- cbind(trnxy[,-p],ym)
-      names(xy)[p] <- 'ym'
-      betahat <- coef(glm(ym ~ .,data=xy,family=binomial))
-      outmat <- cbind(outmat,betahat)
+   x <- trnxy[,1:(p-m)]
+   y <- trnxy[,(p-m+1):p]
+   # 1 col for each of the m sets of coefficients
+   outmat <- matrix(nrow=ncol(x)+1,ncol=m)
+   for (i in 1:m) {
+      betahat <- coef(glm(y[,i] ~ x,family=binomial))
+      outmat[,i] <- betahat
    }
    colnames(outmat) <- as.character(0:(m-1))
-   classcounts <- table(y)
-   empirclassprobs <- classcounts/sum(classcounts)
+   empirclassprobs <- colMeans(y)
    attr(outmat,'empirclassprobs') <- empirclassprobs
    class(outmat) <- c('ovalog','matrix')
    outmat
@@ -68,7 +62,7 @@ predict.ovalog <- function(object,...)
    # coefmat; vals from coefmat[,i] in tmp[,i]; 
    # say np rows in predpts, i.e. np new cases to predict, and let m be
    # the number of classes; then tmp is np x m
-   tmp <- as.matrix(cbind(1,predpts)) %*% coefmat  # np x m 
+   tmp <- cbind(1,predpts) %*% object  # np x m 
    tmp <- logitftn(tmp)
    if (!is.null(trueclassprobs)) {
       empirprobs <- attr(coefmat,'empirclassprobs')
@@ -80,9 +74,9 @@ predict.ovalog <- function(object,...)
    # separate logits for the m classes will not necessrily sum to 1, so
    # normalize
    sumtmp <- apply(tmp,1,sum)  # length np
-   normalized <- diag(1/sumtmp) %*% tmp
+   tmp <- (1/sumtmp) * tmp
    preds <- apply(tmp,1,which.max) - 1
-   attr(preds,'probs') <- normalized
+   attr(preds,'probs') <- tmp
    preds
 }
 

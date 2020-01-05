@@ -1,14 +1,6 @@
 
 
 
-#########################  confusion()  #################################
-
-# generates the confusion matrix
-
-confusion <- function(actual,pred) {
-   table(actual,pred)
-}
-
 #########################  unscale()  #################################
 
 # undoes 'scale()'
@@ -109,6 +101,6 @@ xyDataframeToMatrix <- function(xy) {
    x <- xy[,1:(p-1)]
    y <- xy[,p]
    xd <- factorsToDummies(xy,omitLast=TRUE)
-   yd <- factorsToDummies(y,omitLast=FALSE)
+   yd <- factorToDummies(y,'y',omitLast=FALSE)
    as.matrix(cbind(xd,yd))
 }

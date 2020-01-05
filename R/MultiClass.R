@@ -19,6 +19,8 @@ ovalogtrn <- function(m,trnxy) {
       stop('trnxy must be a matrix, with dummy Y cols')
    p <- ncol(trnxy) 
    x <- trnxy[,1:(p-m)]
+   if (is.null(colnames(x)))
+      stop('trnxy must have column names')
    y <- trnxy[,(p-m+1):p]
    # 1 col for each of the m sets of coefficients
    outmat <- matrix(nrow=ncol(x)+1,ncol=m)
@@ -26,11 +28,12 @@ ovalogtrn <- function(m,trnxy) {
       betahat <- coef(glm(y[,i] ~ x,family=binomial))
       outmat[,i] <- betahat
    }
+   if (any(is.na(outmat))) warning('some NA coefficient')
    colnames(outmat) <- as.character(0:(m-1))
    empirclassprobs <- colMeans(y)
    attr(outmat,'empirclassprobs') <- empirclassprobs
+   attr(outmat,'Xcolnames') <- colnames(trnxy)[1:(p-m)]
    class(outmat) <- c('ovalog','matrix')
-print('add code to check for NAs, issue warning()')
    outmat
 }
 
@@ -55,10 +58,11 @@ print('add code to check for NAs, issue warning()')
 ovalogpred <- function() stop('user predict.ovalog()')
 predict.ovalog <- function(object,...) 
 {
-print('add code to require colnames in trnxy and predpts, that match')
    dts <- list(...)
    predpts <- dts$predpts
    if (is.null(predpts)) stop('predpts must be a named argument')
+   if (!identical(colnames(predpts),attr(object,'Xcolnames')))
+      stop('column name mismatch between original, new X variables')
    trueclassprobs <- dts$trueclassprobs
    # get est reg ftn values for each row of predpts and each col of
    # coefmat; vals from coefmat[,i] in tmp[,i]; 
@@ -456,6 +460,14 @@ predict.mvrlm <- function(mvrlmObj,newx) {
    preds <- predict(mvrlmObj,newx)
    tmp <- apply(preds,1,which.max)
    colnames(preds)[tmp]
+}
+
+#########################  confusion matrix  #################################
+
+# generates the confusion matrix
+
+confusion <- function(actual,pred) {
+   table(actual,pred)
 }
 
 

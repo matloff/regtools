@@ -34,7 +34,8 @@ pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL)
 \item{band}{If \code{band} is non-NULL, only points within \code{band}, 
    say 0.1, of est. P(Y = 1) are displayed, for a contour-like effect.}
 \item{trnxy}{Data matrix (not a data frame), one data point 
-   per row, Y in the last column.  Y must be numeric, 0,1,2,... \code{m-1}.}
+   per row, Y in the last \code{m} column as dummiess. Must have column
+   names.}
 \item{object}{Needed for consistency with generic.}
 \item{...}{Needed for consistency with generic.}
 \item{y}{Vector or factor of response variable data in the training set, with
@@ -43,7 +44,9 @@ pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL)
   \code{preprocessx}.} 
 \item{coefmat}{Output from \code{ovalogtrn} or \code{avalogtrn}.}
 \item{k}{Number of nearest neighbors.} 
-\item{predx}{One data point to be predicted.} 
+\item{predx}{Data points to be predicted.} 
+\item{predpts}{Data points to be predicted. Must be specified by
+   argument name.} 
 \item{m}{Number of classes in multiclass setting.}
 \item{econdprobs}{Estimated conditional class probabilities, given the
 predictors.}
@@ -128,11 +131,13 @@ kout <- knnest(y,xd,25)
 preds <- predict(kout,predpts=x)
 hats <- apply(preds,1,which.max) - 1
 mean(yhats == truey)  # about 0.37
-
-data(peFactors)  # prog/engr data 
-pef <- peFactors
-pef1 <- pef[,c(1,3,6,7,8,9,5)]
-ovaout <- ovalogtrn(6,pef1)
+ped <- ped[,c(1,20:22,29,31,32,23:28)]
+ped <- as.matrix(ped)
+ovaout <- ovalogtrn(6,ped)
+preds <- predict(ovaout,predpts=ped[,1:7])
+# need ftns!
+y <- apply(ped[,-(1:7)],1,which.max) - 1
+mean(preds == y)  # about 0.37
 
 }
 

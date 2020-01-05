@@ -14,6 +14,7 @@ S3method(plot,rlm)
 S3method(predict,knn)
 S3method(plot,kmin)
 S3method(predict,ovaknn)
+S3method(predict,ovalog)
 
 export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    kmin,
@@ -21,14 +22,13 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    ovalogtrn,ovalogpred,avalogtrn,avalogpred,
    knntrn,ovaknntrn,predict.ovaknn,classadjust,
    kNN,findOverallLoss,MAPE,probIncorrectClass,kNNxv,
-   parvsnonparplot,nonparvsxplot, 
-   nonparvarplot,
-   ridgelm,plot.rlm,
+   parvsnonparplot,nonparvsxplot,nonparvarplot,
+   ridgelm,plot.rlm, pwplot,
    l2,l1,
    mm, 
    unscale,
    factorsToDummies,factorToDummies,dummiesToFactor,hasFactors,
-   pwplot,
+   xyDataframeToMatrix,
    imgTo2D,
    mvrlm,
    TStoX,TStoMat)

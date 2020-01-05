@@ -100,7 +100,7 @@ xyDataframeToMatrix <- function(xy) {
    p <- ncol(xy)
    x <- xy[,1:(p-1)]
    y <- xy[,p]
-   xd <- factorsToDummies(xy,omitLast=TRUE)
+   xd <- factorsToDummies(x,omitLast=TRUE)
    yd <- factorToDummies(y,'y',omitLast=FALSE)
    as.matrix(cbind(xd,yd))
 }

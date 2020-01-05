@@ -17,7 +17,8 @@ and nonparametric.
 
 \usage{
 ovalogtrn(m,trnxy)
-ovalogpred(coefmat,predx,trueclassprobs=NULL)
+ovalogpred()
+\method{predict}{ovalog}(object,...) 
 avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx,trueclassprobs=NULL)
 knntrn() 
@@ -86,9 +87,10 @@ The function \code{knntrn} is deprecated; use \code{ovaknn}.
 
 \value{
 
-The prediction functions, \code{ovalogpred}, \code{avalogpred} and
+The prediction functions, \code{predict.ovalog}, \code{predict.avalog} and
 \code{predict.ovaknn}, return the predicted classes for the points in
-\code{predx} or \code{predpts}.
+\code{predx} or \code{predpts}.  The corresponding conditional
+class probabilities are included as an attribute, accessible via \code{probs}
 
 The functions \code{ovalogtrn} and \code{avalogtrn} return the
 estimated logit coefficent vectors, one per column. There are
@@ -138,6 +140,16 @@ preds <- predict(ovaout,predpts=ped[,1:7])
 # need ftns!
 y <- apply(ped[,-(1:7)],1,which.max) - 1
 mean(preds == y)  # about 0.37
+
+data(oliveoils)
+oo <- oliveoils
+oo <- oo[,c(3:10,2)]
+oo1 <- xyDataframeToMatrix(oo)
+knnout <- ovaknntrn(oo1[,9:11],oo1[,1:8],3,10)
+# predict a new case that is like oo1[1,] but with palmitic = 950
+newx <- oo1[1,1:8,drop=FALSE]
+newx[,1] <- 950
+predict(knnout,predpts=newx)  # predicts class 2, South
 
 }
 

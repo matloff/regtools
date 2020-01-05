@@ -21,7 +21,7 @@ ovalogtrn <- function(m,trnxy) {
    x <- trnxy[,1:(p-m)]
    if (is.null(colnames(x)))
       stop('trnxy must have column names')
-   y <- trnxy[,(p-m+1):p]
+   y <- trnxy[,(p-m+1):p,drop=FALSE]
    # 1 col for each of the m sets of coefficients
    outmat <- matrix(nrow=ncol(x)+1,ncol=m)
    for (i in 1:m) {
@@ -125,15 +125,16 @@ ovalogloom <- function(m,trnxy) {
 
 avalogtrn <- function(m,trnxy) 
 {
+   if (!is.matrix(trnxy))
+      stop('trnxy must be a matrix, with dummy Y cols')
    p <- ncol(trnxy) 
    n <- nrow(trnxy)
-   x <- trnxy[,1:(p-1)]
-   if (hasFactors(x)) 
-      stop('predictors must be numeric; convert to dummies')
-   x <- as.matrix(trnxy[,1:(p-1)])
-   y <- trnxy[,p]
-   classcounts <- table(y)
-   if (is.factor(y)) y <- as.numeric(y) - 1
+   x <- trnxy[,1:(p-m)]
+   if (is.null(colnames(x)))
+      stop('trnxy must have column names')
+   y <- trnxy[,(p-m+1):p,drop=FALSE]
+   classIDs <- apply(y,1,which.max) - 1
+   classcounts <- table(classIDs)
    outmat <- NULL
    ijs <- combn(m,2) 
    doreg <- function(ij)  # does a regression for one pair of classes
@@ -141,8 +142,8 @@ avalogtrn <- function(m,trnxy)
       i <- ij[1] - 1
       j <- ij[2] - 1
       tmp <- rep(-1,n)
-      tmp[y == i] <- 1
-      tmp[y == j] <- 0
+      tmp[classIDs == i] <- 1
+      tmp[classIDs == j] <- 0
       yij <- tmp[tmp != -1]
       xij <- x[tmp != -1,]
       coef(glm(yij ~ xij,family=binomial))
@@ -157,6 +158,7 @@ avalogtrn <- function(m,trnxy)
    }
    empirclassprobs <- classcounts/sum(classcounts)
    attr(coefmat,'empirclassprobs') <- empirclassprobs
+   attr(outmat,'Xcolnames') <- colnames(trnxy)[1:(p-m)]
    coefmat
 }
 ################################################################## 

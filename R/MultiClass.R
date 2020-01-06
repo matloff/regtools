@@ -7,38 +7,41 @@
 
 # arguments:
 
-#    m:  number of classes
-#    trnxy:  matrix, X, Y training set; Y in last m columns 
+#    trnxy:  matrix or dataframe, training set; Y col is a factor 
+#    yname:  name of the Y column
 
 # value:
 
-#    matrix of the betahat vectors, one class per column
+#    matrix of the betahat vectors, one class per column; via attr(),
+#    also empirical class probabilities, column names
 
-ovalogtrn <- function(m,trnxy) {
-   if (!is.matrix(trnxy))
-      stop('trnxy must be a matrix, with dummy Y cols')
-   p <- ncol(trnxy) 
-   x <- trnxy[,1:(p-m)]
-   if (is.null(colnames(x)))
+ovalogtrn <- function(trnxy,yname) {
+   if (is.null(colnames(trnxy))) 
       stop('trnxy must have column names')
-   y <- trnxy[,(p-m+1):p,drop=FALSE]
+   ycol <- which(names(trnxy) == yname)
+   y <- trnxy[,ycol]
+   if (!is.factor(y)) stop('Y must be a factor')
+   x <- trnxy[,-ycol,drop=FALSE]
+   xd <- factorsToDummies(x,omitLast=TRUE)
+   yd <- factorToDummies(y,'y',omitLast=FALSE)
+   m <- ncol(yd)
+   outmat <- matrix(nrow=ncol(xd)+1,ncol=m)
+   attr(outmat,'Xcolnames') <- colnames(xd)
    # 1 col for each of the m sets of coefficients
-   outmat <- matrix(nrow=ncol(x)+1,ncol=m)
    for (i in 1:m) {
-      betahat <- coef(glm(y[,i] ~ x,family=binomial))
+      betahat <- coef(glm(yd[,i] ~ xd,family=binomial))
       outmat[,i] <- betahat
    }
    if (any(is.na(outmat))) warning('some NA coefficient')
    colnames(outmat) <- as.character(0:(m-1))
-   empirclassprobs <- colMeans(y)
+   empirclassprobs <- colMeans(yd)
    attr(outmat,'empirclassprobs') <- empirclassprobs
-   attr(outmat,'Xcolnames') <- colnames(trnxy)[1:(p-m)]
    class(outmat) <- c('ovalog','matrix')
    outmat
 }
 
 ##################################################################
-# ovalogpred: predict Ys from new Xs
+# predict.ovalog: predict Ys from new Xs
 ##################################################################
 
 # arguments:  
@@ -61,6 +64,7 @@ predict.ovalog <- function(object,...)
    dts <- list(...)
    predpts <- dts$predpts
    if (is.null(predpts)) stop('predpts must be a named argument')
+   predpts <- factorsToDummies(predpts,omitLast=TRUE)
    if (!identical(colnames(predpts),attr(object,'Xcolnames')))
       stop('column name mismatch between original, new X variables')
    trueclassprobs <- dts$trueclassprobs
@@ -161,6 +165,7 @@ avalogtrn <- function(m,trnxy)
    attr(outmat,'Xcolnames') <- colnames(trnxy)[1:(p-m)]
    coefmat
 }
+
 ################################################################## 
 # avalogpred: predict Ys from new Xs
 ##################################################################
@@ -177,7 +182,8 @@ avalogtrn <- function(m,trnxy)
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predx
 
-avalogpred <- function(m,coefmat,predx,trueclassprobs=NULL) {
+avalogpred <- function(m,coefmat,predx,trueclassprobs=NULL) 
+{
    n <- nrow(predx)
    ypred <- vector(length = n)
    for (r in 1:n) {
@@ -252,15 +258,14 @@ matrixtolist <- function (rc,m)
 
 # arguments
 
-#    y:  training set class data; either an R factor, or numeric
-#        coded 0,1,...,m-1
-#    x:  either numeric matrix of predictor/feature data, or  
-#        output of preprocessx() applied to the training set
-#        predictor data
 #    m:  number of classes
+#    trnxy:  training data, matrix or data frame, Y in last col;
+#            latter must be either an R factor, or numeric
+#            coded 0,1,...,m-1
 #    k:  number of nearest neighbors
 #    xval:  if true, "leave 1 out," ie don't count a data point as its
 #        own neighbor
+#    trueclassprobs:  known (or approx. known) true class probs
 
 # value:
 
@@ -270,25 +275,29 @@ matrixtolist <- function (rc,m)
 #               the element in row i, column j, is the probability 
 #               that Y = j given that X = row i in the X data, 
 #               estimated from the training set
-#
 #       k: number of nearest neighbors
-#
 #       empirclassprobs: proportions of cases in classes 0,1,...,m
 
 knntrn <- function() stop('use ovaknntrn')
 
-ovaknntrn <- function(y,x,m,k,xval=FALSE,trueclassprobs=NULL)
+ovaknntrn <- function(m,trnxy,k,xval=FALSE,trueclassprobs=NULL)
 {
    if (m < 3) stop('m must be at least 3; use knnest() or knn() instead')  
-   if (class(y) != 'factor') {
+   p <- ncol(trnxy)
+   x <- trnxy[,-p,drop=FALSE]
+   if (is.null(colnames(x)))
+      stop('trnxy must have column names')
+   y <- trnxy[,p]
+   if (!is.factor(y)) {
       uy <- unique(y)
-      if (length(uy) != m || min(uy) != 0) 
+      if (!identical((0:(m-1)),sort(uy)))
          stop('y must either be a factor or have values 0,1,2,...,m-1')
       y <- as.factor(y)
    }
    if (class(x) == 'preknn') {
       xdata <- x
    } else {
+      if (is.data.frame(x)) x <- factorsToDummies(x)
       xdata <- preprocessx(x,k,xval=xval)
    }
    empirclassprobs <- table(y) / sum(table(y))
@@ -463,6 +472,9 @@ predict.mvrlm <- function(mvrlmObj,newx) {
    tmp <- apply(preds,1,which.max)
    colnames(preds)[tmp]
 }
+
+# maps a factor to 0,1,2,...,m-1 where m is the number of levels of f
+factorTo012etc <- function(f) as.numeric(f)-1
 
 #########################  confusion matrix  #################################
 

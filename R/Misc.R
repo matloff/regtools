@@ -59,7 +59,7 @@ factorsToDummies <- function(dfr,omitLast=FALSE)
       }
    }
    outDF[,1] <- NULL  # delete filler
-   outDF
+   as.matrix(outDF)
 }
 
 # converts just a single factor; def of omitLast is in comments above;

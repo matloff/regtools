@@ -133,6 +133,11 @@ kout <- knnest(y,xd,25)
 preds <- predict(kout,predpts=x)
 hats <- apply(preds,1,which.max) - 1
 mean(yhats == truey)  # about 0.37
+
+data(peFactors)
+pef <- peFactors
+pef1 <- pef[,c(1,3,5,7:9)]
+
 ped <- ped[,c(1,20:22,29,31,32,23:28)]
 ped <- as.matrix(ped)
 ovaout <- ovalogtrn(6,ped)
@@ -144,8 +149,7 @@ mean(preds == y)  # about 0.37
 data(oliveoils)
 oo <- oliveoils
 oo <- oo[,c(3:10,2)]
-oo1 <- xyDataframeToMatrix(oo)
-knnout <- ovaknntrn(oo1[,9:11],oo1[,1:8],3,10)
+knnout <- ovaknntrn(3,oo)
 # predict a new case that is like oo1[1,] but with palmitic = 950
 newx <- oo1[1,1:8,drop=FALSE]
 newx[,1] <- 950

@@ -258,10 +258,8 @@ matrixtolist <- function (rc,m)
 
 # arguments
 
-#    m:  number of classes
-#    trnxy:  training data, matrix or data frame, Y in last col;
-#            latter must be either an R factor, or numeric
-#            coded 0,1,...,m-1
+#    trnxy:  matrix or dataframe, training set; Y col is a factor 
+#    yname:  name of the Y column
 #    k:  number of nearest neighbors
 #    xval:  if true, "leave 1 out," ie don't count a data point as its
 #        own neighbor
@@ -279,31 +277,20 @@ matrixtolist <- function (rc,m)
 #       empirclassprobs: proportions of cases in classes 0,1,...,m
 
 knntrn <- function() stop('use ovaknntrn')
-
-ovaknntrn <- function(m,trnxy,k,xval=FALSE,trueclassprobs=NULL)
+ovaknntrn <- function(trnxy,yname,k,xval=FALSE,trueclassprobs=NULL)
 {
-   if (m < 3) stop('m must be at least 3; use knnest() or knn() instead')  
-   p <- ncol(trnxy)
-   x <- trnxy[,-p,drop=FALSE]
-   if (is.null(colnames(x)))
+   if (is.null(colnames(trnxy))) 
       stop('trnxy must have column names')
-   y <- trnxy[,p]
-   if (!is.factor(y)) {
-      uy <- unique(y)
-      if (!identical((0:(m-1)),sort(uy)))
-         stop('y must either be a factor or have values 0,1,2,...,m-1')
-      y <- as.factor(y)
-   }
-   if (class(x) == 'preknn') {
-      xdata <- x
-   } else {
-      if (is.data.frame(x)) x <- factorsToDummies(x)
-      xdata <- preprocessx(x,k,xval=xval)
-   }
+   ycol <- which(names(trnxy) == yname)
+   y <- trnxy[,ycol]
+   if (!is.factor(y)) stop('Y must be a factor')
+   yd <- factorToDummies(y,'y',omitLast=FALSE)
+   m <- ncol(yd)
+   x <- trnxy[,-ycol,drop=FALSE]
+   xd <- factorsToDummies(x,omitLast=TRUE)
+   xdata <- preprocessx(xd,k,xval=xval)
    empirclassprobs <- table(y) / sum(table(y))
-   # replace y with m dummies
-   y <- factorToDummies(y,'y',FALSE)
-   knnout <- knnest(y,xdata,k)
+   knnout <- knnest(yd,xdata,k)
    xdata$regest <- knnout$regest
    xdata$k <- k
    xdata$empirclassprobs <- empirclassprobs
@@ -332,11 +319,13 @@ predict.ovaknn <- function(object,...) {
    trueclassprobs <- dts$trueclassprobs
    # could get k too, but not used; we simply take the 1-nearest, as the
    # prep data averaged k-nearest
-   if (!is.matrix(predpts))
-      stop('prediction points must be a matrix')
    x <- object$x
+   if (!is.data.frame(predpts))
+      stop('prediction points must be a data frame')
+   predpts <- factorsToDummies(predpts,omitLast=TRUE)
    # need to scale predpts with the same values that had been used in
    # the training set
+   browser()
    ctr <- object$scaling[,1]
    scl <- object$scaling[,2]
    predpts <- scale(predpts,center=ctr,scale=scl)

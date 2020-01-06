@@ -144,13 +144,16 @@ pef1 <- pef[,c(1,3,5,7:9)]
 ovaout <- ovalogtrn(pef1,"occ")
 preds <- predict(ovaout,predpts=pef1[,-3])
 mean(preds == factorTo012etc(pef1$occ))  # about 0.39
+knnout <- ovalogtrn(pef1,"occ",25)
+preds <- predict(knnout,predpts=pef1[,-3])
+mean(preds == factorTo012etc(pef1$occ))  # about 0.43
 
 data(oliveoils)
 oo <- oliveoils
-oo <- oo[,c(3:10,2)]
-knnout <- ovaknntrn(3,oo)
+oo <- oo[,-1]
+knnout <- ovaknntrn(oo,'Region',10)
 # predict a new case that is like oo1[1,] but with palmitic = 950
-newx <- oo1[1,1:8,drop=FALSE]
+newx <- oo[1,2:9,drop=FALSE]
 newx[,1] <- 950
 predict(knnout,predpts=newx)  # predicts class 2, South
 

@@ -6,6 +6,9 @@
 \alias{knntrn}
 \alias{predict.ovaknn}
 \alias{classadjust}
+\alias{confusion}
+\alias{factorTo012ec}
+\alias{classadjust}
 \alias{pwplot}
 
 \title{Classification with More Than 2 Classes}
@@ -16,7 +19,7 @@ and nonparametric.
 }
 
 \usage{
-ovalogtrn(m,trnxy)
+ovalogtrn(,trnxy,yname)
 ovalogpred()
 \method{predict}{ovalog}(object,...) 
 avalogtrn(m,trnxy)
@@ -37,6 +40,7 @@ pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL)
 \item{trnxy}{Data matrix (not a data frame), one data point 
    per row, Y in the last \code{m} column as dummiess. Must have column
    names.}
+\item{yname}{Name of the Y column.}
 \item{object}{Needed for consistency with generic.}
 \item{...}{Needed for consistency with generic.}
 \item{y}{Vector or factor of response variable data in the training set, with
@@ -137,14 +141,9 @@ mean(yhats == truey)  # about 0.37
 data(peFactors)
 pef <- peFactors
 pef1 <- pef[,c(1,3,5,7:9)]
-
-ped <- ped[,c(1,20:22,29,31,32,23:28)]
-ped <- as.matrix(ped)
-ovaout <- ovalogtrn(6,ped)
-preds <- predict(ovaout,predpts=ped[,1:7])
-# need ftns!
-y <- apply(ped[,-(1:7)],1,which.max) - 1
-mean(preds == y)  # about 0.37
+ovaout <- ovalogtrn(pef1,"occ")
+preds <- predict(ovaout,predpts=pef1[,-3])
+mean(preds == factorTo012etc(pef1$occ))  # about 0.39
 
 data(oliveoils)
 oo <- oliveoils

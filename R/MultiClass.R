@@ -129,7 +129,6 @@ ovalogloom <- function() stop('deprecated')
 
 avalogtrn <- function(trnxy,yname) 
 {
-stop('under construction')
    if (is.null(colnames(trnxy))) 
       stop('trnxy must have column names')
    ycol <- which(names(trnxy) == yname)
@@ -140,12 +139,12 @@ stop('under construction')
    yd <- factorToDummies(y,'y',omitLast=FALSE)
    m <- ncol(yd)
    n <- nrow(trnxy)
-   outmat <- matrix(nrow=ncol(xd)+1,ncol=m)
-   attr(outmat,'Xcolnames') <- colnames(xd)
-
    classIDs <- apply(yd,1,which.max) - 1
    classcounts <- table(classIDs)
    ijs <- combn(m,2) 
+   outmat <- matrix(nrow=ncol(xd)+1,ncol=ncol(ijs))
+   colnames(outmat) <- rep(' ',ncol(ijs))
+   attr(outmat,'Xcolnames') <- colnames(xd)
    doreg <- function(ij)  # does a regression for one pair of classes
    {
       i <- ij[1] - 1
@@ -159,7 +158,6 @@ stop('under construction')
    }
    for (k in 1:ncol(ijs)) {
       ij <- ijs[,k]
-      browser()
       outmat[,k] <- doreg(ij)
       colnames(outmat)[k] <- paste(ij,collapse=',')
    }

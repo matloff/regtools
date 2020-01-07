@@ -32,7 +32,7 @@ ovalogtrn <- function(trnxy,yname) {
       betahat <- coef(glm(yd[,i] ~ xd,family=binomial))
       outmat[,i] <- betahat
    }
-   if (any(is.na(outmat))) warning('some NA coefficient')
+   if (any(is.na(outmat))) warning('some NA coefficients')
    colnames(outmat) <- as.character(0:(m-1))
    empirclassprobs <- colMeans(yd)
    attr(outmat,'empirclassprobs') <- empirclassprobs
@@ -94,23 +94,25 @@ predict.ovalog <- function(object,...)
 # ovalogloom: LOOM predict Ys from Xs
 ##################################################################
 
+ovalogloom <- function() stop('deprecated')
+
 # arguments: as with ovalogtrn()
 
 # value: LOOM-estimated probability of correct classification\
 
-ovalogloom <- function(m,trnxy) {
-   n <- nrow(trnxy)
-   p <- ncol(trnxy) 
-   i <- 0
-   correctprobs <- replicate(n,
-      {
-         i <- i + 1
-         ovout <- ovalogtrn(m,trnxy[-i,])
-         predy <- ovalogpred(ovout,trnxy[-i,-p])
-         mean(predy == trnxy[-i,p])
-      })
-   mean(correctprobs)
-}
+# ovalogloom <- function(m,trnxy) {
+#    n <- nrow(trnxy)
+#    p <- ncol(trnxy) 
+#    i <- 0
+#    correctprobs <- replicate(n,
+#       {
+#          i <- i + 1
+#          ovout <- ovalogtrn(m,trnxy[-i,])
+#          predy <- ovalogpred(ovout,trnxy[-i,-p])
+#          mean(predy == trnxy[-i,p])
+#       })
+#    mean(correctprobs)
+# }
 
 
 ##################################################################
@@ -119,27 +121,30 @@ ovalogloom <- function(m,trnxy) {
 
 # arguments:
 
-#    m:  as above in ovalogtrn()
-#    trnxy:  as above in ovalogtrn()
+#    as in ovalogtrn() above
 
 # value:
 
-#    matrix of the betahat vectors, one per column, in the order of
-#    combin(); also the proportions of each class, as attr()
+#    as in ovalogtrn() above
 
-avalogtrn <- function(m,trnxy) 
+avalogtrn <- function(trnxy,yname) 
 {
-   if (!is.matrix(trnxy))
-      stop('trnxy must be a matrix, with dummy Y cols')
-   p <- ncol(trnxy) 
-   n <- nrow(trnxy)
-   x <- trnxy[,1:(p-m)]
-   if (is.null(colnames(x)))
+stop('under construction')
+   if (is.null(colnames(trnxy))) 
       stop('trnxy must have column names')
-   y <- trnxy[,(p-m+1):p,drop=FALSE]
-   classIDs <- apply(y,1,which.max) - 1
+   ycol <- which(names(trnxy) == yname)
+   y <- trnxy[,ycol]
+   if (!is.factor(y)) stop('Y must be a factor')
+   x <- trnxy[,-ycol,drop=FALSE]
+   xd <- factorsToDummies(x,omitLast=TRUE)
+   yd <- factorToDummies(y,'y',omitLast=FALSE)
+   m <- ncol(yd)
+   n <- nrow(trnxy)
+   outmat <- matrix(nrow=ncol(xd)+1,ncol=m)
+   attr(outmat,'Xcolnames') <- colnames(xd)
+
+   classIDs <- apply(yd,1,which.max) - 1
    classcounts <- table(classIDs)
-   outmat <- NULL
    ijs <- combn(m,2) 
    doreg <- function(ij)  # does a regression for one pair of classes
    {
@@ -149,21 +154,20 @@ avalogtrn <- function(m,trnxy)
       tmp[classIDs == i] <- 1
       tmp[classIDs == j] <- 0
       yij <- tmp[tmp != -1]
-      xij <- x[tmp != -1,]
+      xij <- xd[tmp != -1,]
       coef(glm(yij ~ xij,family=binomial))
    }
-   coefmat <- NULL
    for (k in 1:ncol(ijs)) {
       ij <- ijs[,k]
-      coefmat <- cbind(coefmat,doreg(ij))
-      if (any(is.na(coefmat))) 
-         stop('glm() failed for ij = ',ij)
-      colnames(coefmat)[k] <- paste(ij,collapse=',')
+      browser()
+      outmat[,k] <- doreg(ij)
+      colnames(outmat)[k] <- paste(ij,collapse=',')
    }
+   if (any(is.na(outmat))) warning('some NA coefficients')
    empirclassprobs <- classcounts/sum(classcounts)
-   attr(coefmat,'empirclassprobs') <- empirclassprobs
-   attr(outmat,'Xcolnames') <- colnames(trnxy)[1:(p-m)]
-   coefmat
+   attr(outmat,'empirclassprobs') <- empirclassprobs
+   class(outmat) <- c('avalog','matrix')
+   outmat
 }
 
 ################################################################## 

@@ -139,11 +139,28 @@ hats <- apply(preds,1,which.max) - 1
 mean(yhats == truey)  # about 0.37
 
 data(peFactors)
-pef <- peFactors
+# discard the lower educ-level casess, which are rare
+edu <- peFactors$educ 
+numedu <- as.numeric(edu) 
+idxs <- numedu >= 12 
+pef <- peFactors[idxs,]
+numedu <- numedu[idxs]
+pef$educ <- as.factor(numedu)
 pef1 <- pef[,c(1,3,5,7:9)]
+
+# ovalog
 ovaout <- ovalogtrn(pef1,"occ")
 preds <- predict(ovaout,predpts=pef1[,-3])
 mean(preds == factorTo012etc(pef1$occ))  # about 0.39
+
+# avalog
+
+avaout <- avalogtrn(pef1,"occ")  
+preds <- predict(avaout,predpts=pef1[,-3]) 
+mean(preds == factorTo012etc(pef1$occ))  # about 0.39 
+
+# knn
+
 knnout <- ovalogtrn(pef1,"occ",25)
 preds <- predict(knnout,predpts=pef1[,-3])
 mean(preds == factorTo012etc(pef1$occ))  # about 0.43

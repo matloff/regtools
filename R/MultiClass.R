@@ -46,12 +46,10 @@ ovalogtrn <- function(trnxy,yname) {
 
 # arguments:  
 
-#    coefmat:  coefficient matrix, output from ovalogtrn()
-#    predx:  as above
-#    probs:  in addition to predicted classes, return the condtional
-#            class probabilities as an attribute, 'probs'
+#    object:  coefficient matrix, output from ovalogtrn()
+#    predpts:  points to be predicted; named argument
 #    trueclassprobs:  known correct (or estimated correct) unconditional
-#                     class probabilities
+#                     class probabilities; named argument
  
 # value:
  
@@ -164,17 +162,17 @@ avalogtrn <- function(trnxy,yname)
    if (any(is.na(outmat))) warning('some NA coefficients')
    empirclassprobs <- classcounts/sum(classcounts)
    attr(outmat,'empirclassprobs') <- empirclassprobs
+   attr(outmat,'nclasses') <- m
    class(outmat) <- c('avalog','matrix')
    outmat
 }
 
 ################################################################## 
-# avalogpred: predict Ys from new Xs
+# predict.avalog: predict Ys from new Xs
 ##################################################################
 
 # arguments:  
 # 
-#    m: as above
 #    coefmat:  coefficient matrix, output from avalogtrn()
 #    predx:  as above
 #    trueclassprobs: as in ovalogtrn() above
@@ -184,24 +182,33 @@ avalogtrn <- function(trnxy,yname)
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predx
 
-avalogpred <- function(m,coefmat,predx,trueclassprobs=NULL) 
+avalogpred <- function() stop('user predict.avalog()')
+predict.avalog <- function(object,...) 
 {
-   n <- nrow(predx)
+   dts <- list(...)
+   predpts <- dts$predpts
+   if (is.null(predpts)) stop('predpts must be a named argument')
+   n <- nrow(predpts)
+   predpts <- factorsToDummies(predpts,omitLast=TRUE)
+   if (!identical(colnames(predpts),attr(object,'Xcolnames')))
+      stop('column name mismatch between original, new X variables')
+   trueclassprobs <- dts$trueclassprobs
    ypred <- vector(length = n)
+   m <- attr(object,'nclasses')
    for (r in 1:n) {
       # predict the rth new observation
-      xrow <- c(1,unlist(predx[r,]))
+      xrow <- c(1,predpts[r,])
       # wins[i] tells how many times class i-1 has won
       wins <- rep(0,m)  
       ijs <- combn(m,2)  # as in avalogtrn()
       for (k in 1:ncol(ijs)) {
          # i,j play the role of Class 1,0
-         i <- ijs[1,k]  # class i
-         j <- ijs[2,k]  # class j
-         bhat <- coefmat[,k]
+         i <- ijs[1,k]  # class i-1
+         j <- ijs[2,k]  # class j-1
+         bhat <- object[,k]
          mhat <- logitftn(bhat %*% xrow)  # prob of Class i
          if (!is.null(trueclassprobs)) {
-            empirclassprobs <- attr(coefmat,'empirclassprobs')
+            empirclassprobs <- attr(object,'empirclassprobs')
             if (m > 2) {
                normal2 <- function(probs) {
                   z <- probs[c(i,j)]; z/sum(z)
@@ -212,7 +219,6 @@ avalogpred <- function(m,coefmat,predx,trueclassprobs=NULL)
             }
             mhat <- classadjust(mhat,ecp[1],tcp[1])
          }
-         if (i == 1) print(mhat)
          if (mhat >= 0.5) wins[i] <- wins[i] + 1 else wins[j] <- wins[j] + 1
       }
       ypred[r] <- which.max(wins) - 1

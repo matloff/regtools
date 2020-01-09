@@ -9,15 +9,16 @@ usually obtaining by one of various kinds of partitioning of one's
 original data.  This process is known as *cross-validation* (CV).
 
 The most commonly used form of this is *K-fold cross-validation*.  Here
-K is the number of "folds," to be explained below.  Note that K must be
-chosen by the user. 
+K is the number of "folds," the number of partitioned subsets.  Note
+that K must be chosen by the user. 
 
 We also note in passing that in machine learning circles, it's common to
-partition one's data into *three* sets:  One choose one's model,
-often meaning choosing values of several tuning parameters, finally
-selecting the one with the best performance on the test set.  The third
-set, the *validation* set, is then used to get a realistic evaluation 
-of the performance of the final model.
+partition one's data into *three* sets:  One choose one's model on the
+training set, often meaning choosing values of several tuning
+parameters, finally selecting the one with the best performance on the
+test set.  The third set, the *validation* set, is then used to get a
+realistic evaluation of the performance of the final model, as even that
+test set stage will induce optimistic bias.
 
 ## Goals of this document
 
@@ -26,7 +27,8 @@ of the performance of the final model.
 
 2.  Explain the severe limitations of the related theoretical work.
 
-3.  Make a recommendation for a practical alternative to CV.
+3.  There is no really good solution, but we will make suggestions for
+    practical alternative to CV.  
 
 ## Notation
 
@@ -101,28 +103,58 @@ Anirban DasGupta (2008).
 Though such work is impressive math, it is of rather little value in
 practice.  Here's why:
 
-1.  Consider a linear regression setting, so we have p+1 parameters. The
-    theory typically assumes that some of the true regression
-coefficients are 0, with model selection amounting to determining which
-are non-0.  This is not how things work in the real world.  Even if
-coefficients are not 0 are nearly so, using all our variables may result
-in overfitting.  We thus must eliminate some, even with non-0 values.
+-  The conditions assumed by the theorems are impossible to verify in
+   practice, and indeed rather meaningless.
 
-2.  The conditions assumed by the theorems are impossible to verify in
-    practice, and indeed rather meaningless.
+-  Even worse, consider a linear regression setting, so we have p+1
+   parameters. The theory typically assumes that some of the true
+regression coefficients are 0, with model selection amounting to
+determining which are non-0.  This is not how things work in the real
+world.  Even if coefficients are not 0 are nearly so, using all our
+variables may result in overfitting.  We thus must eliminate some, even
+with non-0 values.
 
 ## So, what CAN be done?
 
-Unfortunately, there is no magic solution here.  But a reasonable
-approach is to limit model complexity in the first place.  A good
-(though conservative) rule of thumb is to keep p < sqrt(n).  This too is
-based on theory, but at least with rather minimal assumptions.
+Unfortunately, **there is no magic solution here**.  But a reasonable
+approach is to limit model complexity (measured by p) in the first place.  
 
-In this manner, we do not need to split the sample at all, because
-predicting on the same data that we fit on is not an issue when 
-p << n.
+Here is the central issue:  We do CV because of the optimistic bias that
+occurs when we assess a model by fitting and predicting on the same
+dataset.  This is the motivation for partitioning.  But if p << n, the
+amount of bias is negligible.  In such situations, there is no need for
+CV.
 
-We then can, for instance, do forward selection in linear regression,
-analysis, limiting the number of steps to sqrt(n).  Again, not a fully
-satisfying solution, but a reasonable one.
+A good (though conservative) rule of thumb is to keep p < sqrt(n).  This
+too is based on theory, but at least with rather minimal assumptions.
+
+But the old saying, "Easier said than done," does apply.  If our number
+of candidate features is large relative to n, we still must do some kind
+of preliminary dimension reduction before we begin model fitting.  Here
+are a few possible approaches:
+
+- Apply PCA to the original candidate features, then choose the first
+  sqrt(n) principal components.  
+
+- In LASSO, pre-select sqrt(n) values of the shrinkage parameter
+  &lambda;.
+
+- Do some kind of forward selection in linear regression, analysis,
+  limiting the number of steps to sqrt(n).  
+
+Again, none of these is a fully satisfying solution, but they 
+are reasonable solutions worth trying.
+
+## References
+
+Jun Shao. Linear model selection by cross-validation. *Journal of the
+American statisticalAssociation *, 88(422):486–494, 1993
+
+Jing Lei.  Cross-Validation with Confidence, arXiv:1703.07904, 2017
+
+Bertrand Clarke, Ernest Fokoue, Hao Helen Zhang.  *Principles and Theory
+for Data Mining and Machine Learning*, Springer, 2009.
+
+Anirban DasGupta.  *Asymptotic Theory of Statistics and Probability*,
+Springer, 2008
 

@@ -28,7 +28,7 @@ test set stage will induce optimistic bias.
 2.  Explain the severe limitations of the related theoretical work.
 
 3.  There is no really good solution, but we will make suggestions for
-    practical alternative to CV.  
+    practical alternatives to CV.  
 
 ## Notation
 
@@ -137,7 +137,8 @@ are a few possible approaches:
   sqrt(n) principal components.  
 
 - In LASSO, pre-select sqrt(n) values of the shrinkage parameter
-  &lambda;.
+  &lambda;.  The same might be tried in selecting tuning parameters for
+other methods.
 
 - Do some kind of forward selection in linear regression, analysis,
   limiting the number of steps to sqrt(n).  

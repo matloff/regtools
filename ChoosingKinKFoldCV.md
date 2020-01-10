@@ -150,10 +150,6 @@ approaches:
 - Apply PCA to the original candidate features, then use the first
   sqrt(n) principal components.  
 
-- In LASSO, pre-select sqrt(n) candidate values of the shrinkage parameter
-  &lambda;.  The same might be tried in selecting tuning parameters for
-other methods.
-
 - Do some kind of forward selection in linear regression, analysis,
   limiting the number of steps to sqrt(n).  
 

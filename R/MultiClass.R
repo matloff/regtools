@@ -477,7 +477,14 @@ factorTo012etc <- function(f) as.numeric(f)-1
 
 # generates the confusion matrix
 
+# for an m-class problem, 'pred' are the predicted class IDs,
+# taking values in 0,1,2,...,m-1; if 'actual' is numeric, then the same
+# condition holds, but 'actual' can be a factor, which when
+# "numericized" uses the same ID scheme (must be consistent with
+# 'actual')
+
 confusion <- function(actual,pred) {
+   if (is.factor(actual)) actual <- as.numeric(actual) - 1
    table(actual,pred)
 }
 

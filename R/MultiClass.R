@@ -329,13 +329,16 @@ predict.ovaknn <- function(object,...) {
 
 # arguments:
  
-#    econdprobs: probs. for class 1, for various t, reported by the ML alg.
-#    wrongprob1: proportion of class 1 in the training data
+#    econdprobs: estimated conditional probs. for class 1, for various t, 
+#       reported by the ML alg.
+#    wrongprob1: proportion of class 1 in the training data; returned as
+#       attr() in, e.g. ovalogtrn()
 #    trueprob1: true proportion of class 1 
  
 # value:
  
-#     adjusted version of econdprobs
+#     adjusted versions of econdprobs, estimated conditional class
+#     probabilities for predicted cases
 
 # why: say we wish to predict Y = 1,0 given X = t 
 # P(Y=1 | X=t) = pf_1(t) / [pf_1(t) + (1-p)f_0(t)]
@@ -344,16 +347,16 @@ predict.ovaknn <- function(object,...) {
 # and thus
 # f_0(t)/f_1(t) = [1/P(Y=1 | X=t) - 1] p/(1-p)
 
-# let q the actual proportion in class 1 (whether by sampling design or
-# from a post-sampling artificial balancing of the classes); the ML
-# algorith has, directly or indirectly, taken p to be q; so substitute
-# and work back to the correct P(Y=1 | X=t)
+# let q the actual sample proportion in class 1 (whether by sampling
+# design or from a post-sampling artificial balancing of the classes);
+# the ML algorith has, directly or indirectly, taken p to be q; so
+# substitute and work back to the correct P(Y=1 | X=t)
 
 classadjust <- function(econdprobs,wrongprob1,trueprob1) {
    wrongratio <- (1-wrongprob1) / wrongprob1
    fratios <- (1 / econdprobs - 1) * (1 / wrongratio)
-   trueratio <- (1-trueprob1) / trueprob1
-   1 / (1 + trueratio * fratios)
+   trueratios <- (1-trueprob1) / trueprob1
+   1 / (1 + trueratios * fratios)
 }
 
 # plot estimated regression/probability function of a univariate, 

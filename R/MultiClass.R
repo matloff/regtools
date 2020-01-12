@@ -271,7 +271,6 @@ matrixtolist <- function (rc,m)
 #    k:  number of nearest neighbors
 #    xval:  if true, "leave 1 out," ie don't count a data point as its
 #        own neighbor
-#    trueclassprobs:  known (or approx. known) true class probs
 
 # value:
 
@@ -285,7 +284,7 @@ matrixtolist <- function (rc,m)
 #       empirclassprobs: proportions of cases in classes 0,1,...,m
 
 knntrn <- function() stop('use ovaknntrn')
-ovaknntrn <- function(trnxy,yname,k,xval=FALSE,trueclassprobs=NULL)
+ovaknntrn <- function(trnxy,yname,k,xval=FALSE)
 {
    if (is.null(colnames(trnxy))) 
       stop('trnxy must have column names')
@@ -312,6 +311,7 @@ ovaknntrn <- function(trnxy,yname,k,xval=FALSE,trueclassprobs=NULL)
 # 
 #    object:  output of knntrn()
 #    predpts:  matrix of X values at which prediction is to be done
+#    trueclassprobs:  known (or approx. known) true class probs
 # 
 # value:
 # 
@@ -333,7 +333,6 @@ predict.ovaknn <- function(object,...) {
    predpts <- factorsToDummies(predpts,omitLast=TRUE)
    # need to scale predpts with the same values that had been used in
    # the training set
-   browser()
    ctr <- object$scaling[,1]
    scl <- object$scaling[,2]
    predpts <- scale(predpts,center=ctr,scale=scl)

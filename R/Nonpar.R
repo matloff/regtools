@@ -94,9 +94,7 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
       fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs,])
       if (!allK) {
          regests <- apply(closestIdxs,1,fyh)
-         if (ncol(y) > 1) {
-            regests <- t(regests)
-         } else regests <- matrix(regests,ncol=1)
+         if (ncol(y) > 1) regests <- t(regests)
       } else {
          regests <- NULL
          for (k in 1:kmax) 
@@ -104,7 +102,9 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
               rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
       }
    }
-   ypreds <- apply(regests,1,which.max) - 1 
+   ypreds <- if (ncol(y) > 1) {
+      apply(regests, 1, which.max) - 1
+   } else round(regests)
    list(whichClosest=closestIdxs,regests=regests,ypreds=ypreds)
 }
 

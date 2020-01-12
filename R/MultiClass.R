@@ -48,8 +48,6 @@ ovalogtrn <- function(trnxy,yname) {
 
 #    object:  coefficient matrix, output from ovalogtrn()
 #    predpts:  points to be predicted; named argument
-#    trueclassprobs:  known correct (or estimated correct) unconditional
-#                     class probabilities; named argument
  
 # value:
  
@@ -65,20 +63,12 @@ predict.ovalog <- function(object,...)
    predpts <- factorsToDummies(predpts,omitLast=TRUE)
    if (!identical(colnames(predpts),attr(object,'Xcolnames')))
       stop('column name mismatch between original, new X variables')
-   trueclassprobs <- dts$trueclassprobs
    # get est reg ftn values for each row of predpts and each col of
    # coefmat; vals from coefmat[,i] in tmp[,i]; 
    # say np rows in predpts, i.e. np new cases to predict, and let m be
    # the number of classes; then tmp is np x m
    tmp <- cbind(1,predpts) %*% object  # np x m 
    tmp <- logitftn(tmp)
-   if (!is.null(trueclassprobs)) {
-      empirprobs <- attr(coefmat,'empirclassprobs')
-      trueprobs <- trueclassprobs
-      for (i in 1:ncol(tmp)) {
-         tmp[,i] <- classadjust(tmp[,i],empirprobs[i],trueprobs[i])
-      }
-   }
    # separate logits for the m classes will not necessrily sum to 1, so
    # normalize
    sumtmp <- apply(tmp,1,sum)  # length np
@@ -175,7 +165,6 @@ avalogtrn <- function(trnxy,yname)
 # 
 #    coefmat:  coefficient matrix, output from avalogtrn()
 #    predx:  as above
-#    trueclassprobs: as in ovalogtrn() above
 # 
 # value:
 # 
@@ -192,7 +181,6 @@ predict.avalog <- function(object,...)
    predpts <- factorsToDummies(predpts,omitLast=TRUE)
    if (!identical(colnames(predpts),attr(object,'Xcolnames')))
       stop('column name mismatch between original, new X variables')
-   trueclassprobs <- dts$trueclassprobs
    ypred <- vector(length = n)
    m <- attr(object,'nclasses')
    for (r in 1:n) {
@@ -207,18 +195,6 @@ predict.avalog <- function(object,...)
          j <- ijs[2,k]  # class j-1
          bhat <- object[,k]
          mhat <- logitftn(bhat %*% xrow)  # prob of Class i
-         if (!is.null(trueclassprobs)) {
-            empirclassprobs <- attr(object,'empirclassprobs')
-            if (m > 2) {
-               normal2 <- function(probs) {
-                  z <- probs[c(i,j)]; z/sum(z)
-               }
-               # need to normalize the m-class probs to 2-class
-               ecp <- normal2(empirclassprobs)
-               tcp <- normal2(trueclassprobs)
-            }
-            mhat <- classadjust(mhat,ecp[1],tcp[1])
-         }
          if (mhat >= 0.5) wins[i] <- wins[i] + 1 else wins[j] <- wins[j] + 1
       }
       ypred[r] <- which.max(wins) - 1
@@ -226,27 +202,29 @@ predict.avalog <- function(object,...)
    ypred
 }
 
-##################################################################
-# avalogloom: LOOM predict Ys from Xs
-##################################################################
-
-# arguments: as with avalogtrn()
-
-# value: LOOM-estimated probability of correct classification\
-
-avalogloom <- function(m,trnxy) {
-   n <- nrow(trnxy)
-   p <- ncol(trnxy) 
-   i <- 0
-   correctprobs <- replicate(n,
-      {
-         i <- i + 1
-         avout <- avalogtrn(m,trnxy[-i,])
-         predy <- avalogpred(m,avout,trnxy[-i,-p])
-         mean(predy == trnxy[-i,p])
-      })
-   mean(correctprobs)
-}
+# deprecated
+avalogloom <- function(m,trnxy) stop('deprecated')
+## ##################################################################
+## # avalogloom: LOOM predict Ys from Xs
+## ##################################################################
+## 
+## # arguments: as with avalogtrn()
+## 
+## # value: LOOM-estimated probability of correct classification\
+## 
+## avalogloom <- function(m,trnxy) {
+##    n <- nrow(trnxy)
+##    p <- ncol(trnxy) 
+##    i <- 0
+##    correctprobs <- replicate(n,
+##       {
+##          i <- i + 1
+##          avout <- avalogtrn(m,trnxy[-i,])
+##          predy <- avalogpred(m,avout,trnxy[-i,-p])
+##          mean(predy == trnxy[-i,p])
+##       })
+##    mean(correctprobs)
+## }
 
 logitftn <- function(t) 1 / (1+exp(-t))
 
@@ -311,7 +289,6 @@ ovaknntrn <- function(trnxy,yname,k,xval=FALSE)
 # 
 #    object:  output of knntrn()
 #    predpts:  matrix of X values at which prediction is to be done
-#    trueclassprobs:  known (or approx. known) true class probs
 # 
 # value:
 # 
@@ -324,7 +301,6 @@ predict.ovaknn <- function(object,...) {
    dts <- list(...)
    predpts <- dts$predpts
    if (is.null(predpts)) stop('predpts must be a named argument')
-   trueclassprobs <- dts$trueclassprobs
    # could get k too, but not used; we simply take the 1-nearest, as the
    # prep data averaged k-nearest
    x <- object$x
@@ -339,12 +315,6 @@ predict.ovaknn <- function(object,...) {
    tmp <- FNN::get.knnx(x,predpts,1)
    idx <- tmp$nn.index
    regest <- object$regest[idx,,drop=FALSE]
-   if (!is.null(trueclassprobs)) {
-      for (i in 1:ncol(regest)) {
-         regest[,i] <- classadjust(regest[,i],
-            empirclassprobs[i],trueclassprobs[i])
-      }
-   }
    predy <- apply(regest,1,which.max) - 1
    attr(predy,'probs') <- regest
    predy

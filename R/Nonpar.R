@@ -28,7 +28,7 @@
 
 # smoothingFtn could be, e.g., median
 
-basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,expand = NULL,expandVars = NULL,
+basicKNN <- function(x,y,newx,kmax,scaleX=TRUE,expand=NULL,expandVars=NULL,
   smoothingFtn=mean,allK=FALSE,leave1out=FALSE)
 {  
    require(pdist)
@@ -61,21 +61,22 @@ basicKNN <- function(x,y,newx,kmax,scaleX = TRUE,expand = NULL,expandVars = NULL
       
       # expand and expandVars should only be used
       # when scaleX == TRUE
-      if(xor(is.null(expand), is.null(expandVars)))
+      if(xor(is.null(expand), is.null(expandVars))) {
         stop('expand and expandVars must be used together')
+      }
       
       if(!is.null(expand) && !is.null(expandVars)) {
-        if(!is.vector(expand) || !is.vector(expandVars))
+        if(!is.vector(expand) || !is.vector(expandVars)) {
           stop('Both expand and expandVars must be vectors')
-        if(length(expand) != length(expandVars))
+        }
+        if(length(expand) != length(expandVars)) {
           stop('expand and expandVars should have the same length')
+        }
         x[,expand] <- t(t(x[,expand])*expandVars)
         newx[,expand] <- t(t(newx[,expand])*expandVars)
       }
-      #test code
-      #print(x);
-      #print(newx);
    }
+   
    pdOut <- as.matrix(pdist(newx,x))
    # row i of pdOut is dists from newx[i,] to x
    # now find out which rows in x are closest

@@ -352,6 +352,10 @@ predict.ovaknn <- function(object,...) {
 # the ML algorith has, directly or indirectly, taken p to be q; so
 # substitute and work back to the correct P(Y=1 | X=t)
 
+# WARNING: adjusted probabilities may be larger than 1.0; they can be
+# truncated, or in a multiclass setting compared (which class has the
+# highest untruncated probability?)
+
 classadjust <- function(econdprobs,wrongprob1,trueprob1) {
    wrongratio <- (1-wrongprob1) / wrongprob1
    fratios <- (1 / econdprobs - 1) * (1 / wrongratio)

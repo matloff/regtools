@@ -29,6 +29,8 @@
 #      say, median instead of mean
 #   allK: report kNN estimates for all k = 1,...,kmax; otherwise just kmax
 #   leave1out: delete the 1-nearest neighbor (cross-validation
+#   classif: if TRUE, consider this a classification problem, meaning
+#      that  'ypreds' will be included in the return value
 
 # value:
 
@@ -40,7 +42,8 @@
 #    apply(    ,1,which.max) for multiclass
 
 kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
-          smoothingFtn=mean,allK=FALSE,leave1out=FALSE)
+          smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
+          classif=FALSE)
 {  
    # type checks etc.
    # checks on x
@@ -102,10 +105,15 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
               rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
       }
    }
-   ypreds <- if (ncol(y) > 1) {
-      apply(regests, 1, which.max) - 1
-   } else round(regests)
-   list(whichClosest=closestIdxs,regests=regests,ypreds=ypreds)
+   tmplist <- list(whichClosest=closestIdxs,regests=regests)
+   if (ncol(y) > 1) classif <- TRUE
+   if (classif) {
+      ypreds <- if (ncol(y) > 1) {
+         apply(regests, 1, which.max) - 1
+      } else round(regests)
+      tmplist$ypreds <- ypreds
+   }
+   tmplist
 }
 
 # n-fold cross validation for kNN(); instead of applying "leave 1 out"

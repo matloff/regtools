@@ -59,6 +59,9 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
    if (is.matrix(y) && allK)
       stop('for now, in multiclass case, allK must be FALSE')
    if (is.vector(y)) y <- matrix(y,ncol=1)
+   if (classif && allK)
+      stop('classif=TRUE can be set only if allK is FALSE')
+   if (ncol(y) > 1 && !allK) classif <- TRUE
    # checks on newx
    if (is.vector(newx)) newx <- matrix(newx,ncol=ncol(x))
    if (is.data.frame(newx)) {
@@ -106,7 +109,6 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
       }
    }
    tmplist <- list(whichClosest=closestIdxs,regests=regests)
-   if (ncol(y) > 1) classif <- TRUE
    if (classif) {
       ypreds <- if (ncol(y) > 1) {
          apply(regests, 1, which.max) - 1

@@ -151,7 +151,7 @@ probIncorrectClass <- function(y,yhat)
 {
    if (is.vector(y)) {
       yhat <- round(yhat)
-      return(mean(yhat == y))
+      return(mean(yhat != y))
    }
    classPred <- apply(yhat,1,which.max) 
    classActual <- apply(y,1,which.max)

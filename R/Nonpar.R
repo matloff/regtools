@@ -14,96 +14,131 @@
 # the training set, then call knnest() on the output; then to predict a
 # new point, call predict.knn(), for the generic function predict()
 
-######################  basicKNN()  ###############################
+######################  kNN()  ###############################
 
-# newx is a vector/matrix, and x is a matrix, one row per data point;
-# y is the vector of Y values corrsponding to x, except for multiclass (> 2
-# classes) case, y is matrix of dummies, one column per class
-# expand is a vector containing indexes of variables that need to be expanded
-# expandVar is a vector indicating how many times those variables should be expanded
-# expand and expandVar will be used when scaleX == TRUE, their length must be the same
+# arguments:
 
-# return value is a vector of nearest-neighbor indices and a vector of
-# predicted Y values
+#   x: matrix (df or vec will be converted), "X" of training set
+#   y: vector or matrix, "Y" of training set; matrix in multiclass (> 2) case
+#   newx: vector or matrix; "X" values to be predicted
+#   kmax: maximum value of k requested
+#   scaleX: "X" in x and newx to be scaled
+#   expand: vector containing indexes of variables that need to be expanded
+#   expandVar: vector indicating how many times those variables should be expanded
+#   PCAcomps: apply PCA (after scaling, if any) to x, newx, using this
+#      this many components; 0 means no PCA
+#   smoothingFtn: op applied to the "Y"s of nearest neighbors; could be,
+#      say, median instead of mean
+#   allK: report kNN estimates for all k = 1,...,kmax; otherwise just kmax
+#   leave1out: delete the 1-nearest neighbor (cross-validation
+#   classif: if TRUE, consider this a classification problem, meaning
+#      that  'ypreds' will be included in the return value
 
-# smoothingFtn could be, e.g., median
+# value:
 
-basicKNN <- function(x,y,newx,kmax,scaleX=TRUE,expand=NULL,expandVars=NULL,
-  smoothingFtn=mean,allK=FALSE,leave1out=FALSE)
+#    R list, containing vector of nearest-neighbor indices and a
+#    vector/matrix of estimated regression function values at the rows
+#    of newx; these are conditional means, used directly as predicted Y values
+#    in the continuous "Y" case; in classification case, 2 classes, do
+#    something like round(regest) to get 0,1 prediction, or 
+#    apply(    ,1,which.max) for multiclass
+
+kNN <- function(x,y,newx,kmax,scaleX=TRUE,expand=NULL,expandVars=NULL,
+                PCAcomps=0,smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
+                classif=FALSE)
 {  
-   require(pdist)
-
-   if (is.matrix(y) && identical(smoothingFtn,mean)) 
-      smoothingFtn <- colMeans
-
-   if (is.vector(x)) x <- matrix(x,ncol=1)
-   if (is.data.frame(x)) {
-      x <- as.matrix(x)
-   }
-   if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
-   # for now, not covering this complex case
-   if (is.matrix(y) && allK)
-      stop('in multiclass case, allK must be FALSE')
-   # but now that we've excluded it, easier to make y a matrix
-   if (is.vector(y)) y <- matrix(y,ncol=1)
-   if (is.vector(newx)) newx <- matrix(newx,nrow=1)
-   if (is.data.frame(newx)) {
-      newx <- as.matrix(newx)
-   }
-
-   kmax1 <- kmax + leave1out
-
-   if (scaleX) {
-      x <- scale(x)
-      xcntr <- attr(x,'scaled:center')
-      xscl <- attr(x,'scaled:scale')
-      newx <- scale(newx,center=xcntr,scale=xscl)
-      
-      # expand and expandVars should only be used
-      # when scaleX == TRUE
-      if(xor(is.null(expand), is.null(expandVars))) {
-        stop('expand and expandVars must be used together')
+  # type checks etc.
+  # checks on x
+  if (is.vector(x)) x <- matrix(x,ncol=1)
+  if (is.factor(x)) stop('factor conversions not implemented yet')
+  if (hasFactors(x)) stop('factor conversion not implemented yet')
+  if (is.data.frame(x)) 
+    x <- as.matrix(x)
+  # checks on y
+  if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
+  if (is.matrix(y) && identical(smoothingFtn,mean)) 
+    smoothingFtn <- colMeans
+  if (is.matrix(y) && allK)
+    stop('for now, in multiclass case, allK must be FALSE')
+  if (is.vector(y)) y <- matrix(y,ncol=1)
+  if (classif && allK)
+    stop('classif=TRUE can be set only if allK is FALSE')
+  if (ncol(y) > 1 && !allK) classif <- TRUE
+  # checks on newx
+  if (is.vector(newx)) newx <- matrix(newx,ncol=ncol(x))
+  if (is.data.frame(newx)) {
+    newx <- as.matrix(newx)
+  }
+  # at this point, x, y and newx will all be matrices
+  
+  kmax1 <- kmax + leave1out
+  
+  # check on scaling
+  if(!scaleX && (!is.null(expand) || !is.null(expandVars)))
+    stop('expand and expandVars should not be used if scaleX is FALSE')
+  if (scaleX) {
+    x <- scale(x)
+    xcntr <- attr(x,'scaled:center')
+    xscl <- attr(x,'scaled:scale')
+    newx <- scale(newx,center=xcntr,scale=xscl)
+    
+    # expand and expandVars should only be used
+    # when scaleX == TRUE
+    if(xor(is.null(expand), is.null(expandVars))) {
+      stop('expand and expandVars must be used together')
+    }
+    
+    if(!is.null(expand) && !is.null(expandVars)) {
+      if(!is.vector(expand) || !is.vector(expandVars)) {
+        stop('Both expand and expandVars must be vectors')
       }
-      
-      if(!is.null(expand) && !is.null(expandVars)) {
-        if(!is.vector(expand) || !is.vector(expandVars)) {
-          stop('Both expand and expandVars must be vectors')
-        }
-        if(length(expand) != length(expandVars)) {
-          stop('expand and expandVars should have the same length')
-        }
-        x[,expand] <- t(t(x[,expand])*expandVars)
-        newx[,expand] <- t(t(newx[,expand])*expandVars)
+      if(length(expand) != length(expandVars)) {
+        stop('expand and expandVars should have the same length')
       }
-   }
-   
-   pdOut <- as.matrix(pdist(newx,x))
-   # row i of pdOut is dists from newx[i,] to x
-   # now find out which rows in x are closest
-   findClosest <- function(pdOutRow) {
-      whichClose <- order(pdOutRow)
-      whichClose[1:kmax1]
-   }
-   closestIdxs <- t(apply(pdOut,1,findClosest))
-   if (leave1out) closestIdxs <- closestIdxs[,-1,drop=FALSE]
-   # closestIdxs is a matrix; row i gives the indices of the closest
-   # rows in x to newx[i,]; there will be kmax columns
-
-   # but we might want to try various values of k (allK = T), up through
-   # kmax; e.g.  for k = 2 would just use the first 2 columns; 
-   
-   # in fyh(), closeIdxs is a row in pdOut, with the first k columns
-   fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs,])
-
-   if (!allK) {
-      regests <- apply(closestIdxs[,1:kmax,drop=FALSE],1,fyh)
-   } else {
+      x[,expand] <- t(t(x[,expand])*expandVars)
+      newx[,expand] <- t(t(newx[,expand])*expandVars)
+    }
+  }
+  
+  if (PCAcomps > 0) {
+    colnames(newx) <- colnames(x)
+    pcaout <- prcomp(x,center=FALSE,scale.=FALSE)
+    x <- predict(pcaout,x)
+    newx <- predict(pcaout,newx)
+  }
+  tmp <- FNN::get.knnx(data=x, query=newx, k=kmax1)
+  closestIdxs <- tmp$nn.index
+  if (leave1out) closestIdxs <- closestIdxs[,-1,drop=FALSE]
+  # closestIdxs is a matrix; row i gives the indices of the kmax 
+  # closest rows in x to newx[i,]
+  
+  # we might want to try various values of k (allK = T), up through
+  # kmax; e.g.  for k = 2 would just use the first 2 columns; 
+  
+  # treat this specially, as otherwise get 1x1 matrix issues
+  if (kmax1 == 1) {
+    regests <- y[closestIdxs,]
+  } else {
+    # in fyh(), closeIdxs is a row in closestIdxs, with the first k columns
+    fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs,])
+    if (!allK) {
+      regests <- apply(closestIdxs,1,fyh)
+      if (ncol(y) > 1) regests <- t(regests)
+    } else {
       regests <- NULL
       for (k in 1:kmax) 
-         regests <- 
-           rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
-   }
-   list(whichClosest=closestIdxs,regests=regests)
+        regests <- 
+          rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
+    }
+  }
+  tmplist <- list(whichClosest=closestIdxs,regests=regests)
+  if (classif) {
+    ypreds <- if (ncol(y) > 1) {
+      apply(regests, 1, which.max) - 1
+    } else round(regests)
+    tmplist$ypreds <- ypreds
+  }
+  tmplist
 }
 
 # mean absolute prediction error

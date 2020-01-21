@@ -1,10 +1,13 @@
-\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,knntrn,predict.ovaknn,pwplot}
+\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,ovaknntrn,predict.ovaknn,pwplot}
 \alias{ovalogtrn}
 \alias{ovalogpred}
 \alias{avalogtrn}
 \alias{avalogpred}
 \alias{knntrn}
 \alias{predict.ovaknn}
+\alias{classadjust}
+\alias{confusion}
+\alias{factorTo012ec}
 \alias{classadjust}
 \alias{pwplot}
 
@@ -16,76 +19,64 @@ and nonparametric.
 }
 
 \usage{
-ovalogtrn(m,trnxy,truepriors=NULL)
-ovalogpred(coefmat,predx,probs=FALSE)
+ovalogtrn(,trnxy,yname)
+ovalogpred()
+\method{predict}{ovalog}(object,...) 
 avalogtrn(m,trnxy)
-avalogpred(m,coefmat,predx)
-knntrn(y,xdata,m,k,truepriors=NULL) 
+avalogpred(m,coefmat,predx,trueclassprobs=NULL)
+knntrn() 
 \method{predict}{ovaknn}(object,...) 
-classadjust(econdprobs,wrongratio,trueratio) 
+classadjust(econdprobs,wrongprob1,trueprob1) 
 pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) 
 }
 
 \arguments{
 \item{x}{X data matrix or data frame.}
-\item{pairs}{Two-row matrix, column i of which is pair i of predictor
+\item{pairs}{Two-row matrix, column i of which is a pair of predictor
    variables to graph.}
 \item{cexval}{Symbol size for plotting.}
 \item{band}{If \code{band} is non-NULL, only points within \code{band}, 
    say 0.1, of est. P(Y = 1) are displayed, for a contour-like effect.}
 \item{trnxy}{Data matrix (not a data frame), one data point 
-   per row, Y in the last column.  Y must be numeric, 0,1,2,... \code{m-1}.}
+   per row, Y in the last \code{m} column as dummiess. Must have column
+   names.}
+\item{yname}{Name of the Y column.}
 \item{object}{Needed for consistency with generic.}
 \item{...}{Needed for consistency with generic.}
-\item{y}{Vector of response variable data in the training set, with
+\item{y}{Vector or factor of response variable data in the training set, with
    codes 0,1,...\code{m}-1.}
 \item{xdata}{X and associated neighbor indices. Output of
   \code{preprocessx}.} 
-\item{coefmat}{Output from \code{ovalogtrn}.}
+\item{coefmat}{Output from \code{ovalogtrn} or \code{avalogtrn}.}
 \item{k}{Number of nearest neighbors.} 
-\item{predx}{One data point to be predicted.} 
+\item{predx}{Data points to be predicted.} 
+\item{predpts}{Data points to be predicted. Must be specified by
+   argument name.} 
 \item{m}{Number of classes in multiclass setting.}
 \item{econdprobs}{Estimated conditional class probabilities, given the
 predictors.}
-\item{wrongratio}{Incorrect, data-provenanced, p/(1-p), with p being
-the unconditional probability of a certain class.}
-\item{trueratio}{Same as \code{wrongratio}, but with the correct
-value.}
-\item{truepriors}{True unconditional class probabilities, typically
+\item{wrongprob1}{Incorrect, data-provenanced, unconditional P(Y = 1).}
+\item{trueprob1}{Correct unconditional P(Y = 1).}
+\item{trueclassprobs}{True unconditional class probabilities, typically
 obtained externally.}
-\item{probs}{If TRUE, return the estimated conditional probabilities of class
-membership.}
 }
 
 \details{
 
 These functions do classification in the multiclass setting.  During
 training, the \code{ova*} functions use the One vs. All method:  For
-each class i, \code{as.integer(Y == i)} is regressed against the
-predictors, yielding a vector of beta coefficients for each class.  For
-prediction, the new X is used with each such vector in the logit
-function, producing a conditional probability for Y == i over all
-classes i.  The predicted value is then the i with maximal probability.
+each class i, Y=i is regressed against the predictors.  Subsequent
+prediction is done by arg max of the resulting conditional
+probabilities.
 
-The \code{ava*} functions use the All vs. All method:  During training,
-for each pair of classes i and j, i less than j, the data are restricted
-to cases having those classes.  \code{as.integer(Y == i)} is regressed
-against the predictors, yielding a vector of beta coefficients for each
-pair.  In prediction, the new X is used with each such vector in the
-logit function, producing a conditional probability for Y == i over all
-classes i and j, resulting in a "winner" between i and j.  The
-predicted value is then the class with the most "wins."
+The \code{avalog*} functions use the All vs. All method:  For
+each pair of classes i and j, data is restricted to those classes, and a
+1-class regression is done with "Y" being Y=i.  Subsequent prediction is
+done for a given new case by calculating the value of i that yields the
+most "wins" for i.
 
-In addition to logit, the k-Nearest Neighbor method is available.  For
-this, \code{preprocessx} must first be called.  In the logit case, All
-vs. All is also offered.  
-
-The functions \code{ovalogtrn}, \code{avalogtrn} and \code{knntrn} are
-used on the training set, and then fed into the prediction functions,
-\code{ovalogpred}, \code{avalogpred} and \code{predict.ovaknn}.  The
-arguments for the latter are the output of \code{knntrn} and a matrix of
-prediction points (internally referred to as \code{predpts} in the
-code), one per row.
+In addition to logit, the k-Nearest Neighbor method is available,
+via \code{ovaknntrn}.  Note too \code{kNN}.  
 
 In \code{pwplot}, \code{y} must be a column of 0s and 1s.  For each pair
 of predictor columns X12 in \code{x}, we compute estimated P(Y = 1) and P(Y
@@ -94,13 +85,16 @@ is intended to be helpful in exploring a relation between Y and X.  For
 non-NULL \code{band}, a contour-like plot is made, showing where X12
 changes from making Y = 1 less likely to more likely.
 
+The function \code{knntrn} is deprecated; use \code{ovaknn}.
+
 }
 
 \value{
 
-The prediction functions, \code{ovalogpred}, \code{avalogpred} and
+The prediction functions, \code{predict.ovalog}, \code{predict.avalog} and
 \code{predict.ovaknn}, return the predicted classes for the points in
-\code{predx} or \code{predpts}.
+\code{predx} or \code{predpts}.  The corresponding conditional
+class probabilities are included as an attribute, accessible via \code{probs}
 
 The functions \code{ovalogtrn} and \code{avalogtrn} return the
 estimated logit coefficent vectors, one per column. There are
@@ -118,69 +112,67 @@ the probability that Y = j given that X = row i in the X data.
 \examples{
 
 \dontrun{
-# toy example, kNN
+# toy example
 set.seed(9999)
 x <- runif(25)
 y <- sample(0:2,25,replace=TRUE)
-xd <- preprocessx(x,2,xval=TRUE)
-kout <- knntrn(y,xd,m=3,k=2)
+xd <- preprocessx(x,2,xval=FALSE)
+# kout <- knntrn(y,xd,m=3,k=2)
+kout <- ovaknntrn(y,xd,m=3,k=2)
 kout$regest  # row 2:  0.0,0.5,0.5
-predict(kout,matrix(c(0.81,0.55,0.15),ncol=1))  # 0,1,2
+predict(kout,predpts=matrix(c(0.81,0.55,0.15),ncol=1))  # 0,2,0or2
+yd <- factorToDummies(as.factor(y),'y',FALSE)
+kNN(x,yd,c(0.81,0.55,0.15),2)  # predicts 0, 1or2, 2
 
-# sim data, kNN
-set.seed(9999)
-n <- 1500  
-# within-grp cov matrix 
-cv <- rbind(c(1,0.2),c(0.2,1))  
-xy <- NULL  
-for (i in 1:3)  
-   xy <- rbind(xy,rmvnorm(n,mean=rep(i*2.0,2),sigma=cv))  
-y <- rep(0:2,each=n) 
-xy <- cbind(xy,y) 
-xdata <- preprocessx(xy[,-3],20) 
-oo <- knntrn(y,xdata,m=3,k=20) 
-predout <- predict(oo,xy[,-3])
-mean(predout$predy == y)  # about 0.87
+data(peDumms)  # prog/engr data 
+ped <- peDumms[,-33] 
+ped <- as.matrix(ped)
+x <- ped[,-(23:28)]
+y <- ped[,23:28]
+knnout <- kNN(x,y,x,25,leave1out=TRUE) 
+truey <- apply(y,1,which.max) - 1
+mean(knnout$ypreds == truey)  # about 0.37
+xd <- preprocessx(x,25,xval=TRUE)
+kout <- knnest(y,xd,25)
+preds <- predict(kout,predpts=x)
+hats <- apply(preds,1,which.max) - 1
+mean(yhats == truey)  # about 0.37
 
-library(mlbench)
-data(Vehicle)
-xdata <- preprocessx(Vehicle[,-19],25)
-kout <- knntrn(Vehicle$Class,xdata,k=25)
-predict(kout,as.matrix(Vehicle[1,-19])) # predicted Y is 3
+data(peFactors)
+# discard the lower educ-level casess, which are rare
+edu <- peFactors$educ 
+numedu <- as.numeric(edu) 
+idxs <- numedu >= 12 
+pef <- peFactors[idxs,]
+numedu <- numedu[idxs]
+pef$educ <- as.factor(numedu)
+pef1 <- pef[,c(1,3,5,7:9)]
 
-# UCI Letter Recognition data
-data(LetterRecognition)
-# prep data
-lr <- LetterRecognition
-# code Y values
-lr[,1] <- as.numeric(lr[,1]) - 1
-# training and test sets
-lrtrn <- lr[1:14000,]
-lrtest <- lr[14001:20000,]
-# kNN
-xdata <- preprocessx(lrtrn[,-1],50)
-# without setting priors
-trnout <- knntrn(lrtrn[,1],xdata,26,50)
-ypred <- predict(trnout,as.matrix(lrtest[,-1]))
-# how well did it work?
-mean(ypred$predy == lrtest[,1])  # 0.86
-# logit
-ologout <- ovalogtrn(26,lr[,c(2:17,1)])
-ypred <- ovalogpred(ologout,lr[,-1])
-mean(ypred == lr[,1])  # only 0.73
-# try quadratic terms
-for (i in 2:17)
-   lr <- cbind(lr,lr[,i]^2)
-ologout1 <- ovalogtrn(26,lr[,c(2:33,1)])
-ypred <- ovalogpred(ologout1,lr[,-1])
-mean(ypred == lr[,1])  # increased to 0.81
+# ovalog
+ovaout <- ovalogtrn(pef1,"occ")
+preds <- predict(ovaout,predpts=pef1[,-3])
+mean(preds == factorTo012etc(pef1$occ))  # about 0.39
 
-library(mlbench)
-data(PimaIndiansDiabetes) 
-pima <- PimaIndiansDiabetes 
-pima$diabetes <- as.integer(pima$diabetes == 'pos')
-pwplot(pima$diabetes,pima[,1:8],25,pairs=cbind(c(2,3),c(2,6),c(6,8)),cex=0.8)
-pwplot(pima$diabetes,pima[,1:8],25,pairs=cbind(c(2,3),c(2,6),c(6,8)),cex=0.8,band=0.05)
+# avalog
+
+avaout <- avalogtrn(pef1,"occ")  
+preds <- predict(avaout,predpts=pef1[,-3]) 
+mean(preds == factorTo012etc(pef1$occ))  # about 0.39 
+
+# knn
+
+knnout <- ovalogtrn(pef1,"occ",25)
+preds <- predict(knnout,predpts=pef1[,-3])
+mean(preds == factorTo012etc(pef1$occ))  # about 0.43
+
+data(oliveoils)
+oo <- oliveoils
+oo <- oo[,-1]
+knnout <- ovaknntrn(oo,'Region',10)
+# predict a new case that is like oo1[1,] but with palmitic = 950
+newx <- oo[1,2:9,drop=FALSE]
+newx[,1] <- 950
+predict(knnout,predpts=newx)  # predicts class 2, South
 
 }
 

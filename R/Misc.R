@@ -1,4 +1,6 @@
 
+
+
 #########################  unscale()  #################################
 
 # undoes 'scale()'
@@ -20,6 +22,15 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
    origx
 }
 
+# x is a data frame; returns TRUE if at least one column is a factor
+hasFactors <- function(x) 
+{
+   for (i in 1:ncol(x)) {
+      if (is.factor(x[,i])) return(TRUE)
+   }
+   FALSE
+}
+
 #################  convert between factors and dummies  ##################
 
 # these routines are useful in that some regression packages insist that
@@ -29,7 +40,7 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
 # else just copy column; if omitLast, then dummy for last level of
 # factor is not included in output
 
-factorsToDummies <- function(dfr,omitLast=TRUE) 
+factorsToDummies <- function(dfr,omitLast=FALSE) 
 {
    outDF <- data.frame(rep(0,nrow((dfr))))  # filler start
    for (i in 1:ncol(dfr)) {
@@ -43,12 +54,12 @@ factorsToDummies <- function(dfr,omitLast=TRUE)
                warning(msg)
                next
             }
-         dumms <- factorToDummies(dfi,names(dfr)[i],omitLast)
+         dumms <- factorToDummies(dfi,names(dfr)[i],omitLast=omitLast)
          outDF <- cbind(outDF,dumms)
       }
    }
    outDF[,1] <- NULL  # delete filler
-   outDF
+   as.matrix(outDF)
 }
 
 # converts just a single factor; def of omitLast is in comments above;
@@ -80,4 +91,16 @@ dummiesToFactor <- function(dms,inclLast=FALSE) {
    as.factor(f)
 }
 
+# inputs a data frame intended for regression/classification, with X in
+# the first cols and Y in the last; converts all factors to dummies, and
+# outputs a matrix; in creating dummies, r-1 are retained for r levels,
+# except for Y
 
+xyDataframeToMatrix <- function(xy) {
+   p <- ncol(xy)
+   x <- xy[,1:(p-1)]
+   y <- xy[,p]
+   xd <- factorsToDummies(x,omitLast=TRUE)
+   yd <- factorToDummies(y,'y',omitLast=FALSE)
+   as.matrix(cbind(xd,yd))
+}

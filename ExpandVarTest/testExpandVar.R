@@ -15,7 +15,7 @@ testSingleExpandVar <- function(x, y, kmax, expandCol, expandMaxVal, interval = 
 {
   res <- NULL
   for(i in seq(1, expandMaxVal, interval)){
-    knnout <- basicKNN(x,y,x,kmax,scaleX = TRUE, expand = expandCol, expandVars = i, allK = all, leave1out = TRUE)
+    knnout <- kNN(x,y,x,kmax,scaleX = TRUE, expand = expandCol, expandVars = i, allK = all, leave1out = TRUE)
     # when @all == FALSE, regests is not matrix and cannot be used in findOverallLoss
     if(!is.matrix(knnout$regests)) {
       dim(knnout$regests) <- c(1,length(knnout$regests))
@@ -67,7 +67,7 @@ testMultipleExpandVar <- function(x, y, kmax, expandCols, expandVals, all = TRUE
       # get their position
       # it works fine because expandCols should not have repeated values
       logicalVec <- expandCols %in% combCases[, j]
-      knnout <- basicKNN(x,y,x,kmax, scaleX = TRUE, expand = combCases[, j],
+      knnout <- kNN(x,y,x,kmax, scaleX = TRUE, expand = combCases[, j],
                          expandVars = expandVals[logicalVec], allK = all, leave1out = TRUE)
 
       if(!is.matrix(knnout$regests)) {

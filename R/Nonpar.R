@@ -1,14 +1,14 @@
 
 ######################  k-NN routines  #############################
 
-# basicKNN() does a straightforward k-NN, but is not computationally
+# kNN() does a straightforward k-NN, but is not computationally
 # efficient
 
-# use knnest() for greater speed, though with a "shortcut":  the
-# preprocessing steps will fit k-NN estimates of the regression function
-# at all the training set points; then to predict a new point, we find
-# the closest point to it in the training set, and use the k-NN
-# estimates at THAT point
+# use knnest() for greater speed for continuing prediction activity,
+# though with a "shortcut":  the preprocessing steps will fit k-NN
+# estimates of the regression function at all the training set points;
+# then to predict a new point, we find the closest point to it in the
+# training set, and use the k-NN estimates at THAT point
 
 # under this latter scheme, we call preprocessx() on the "X" portion of
 # the training set, then call knnest() on the output; then to predict a
@@ -139,6 +139,30 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,expand=NULL,expandVars=NULL,
     tmplist$ypreds <- ypreds
   }
   tmplist
+}
+
+# n-fold cross validation for kNN(); instead of applying "leave 1 out"
+# to all possible singletons, we do so for a random nSubSam of them;
+# return matrix of estimated regression ftn values, one row for each
+# leave-1-out op; number of columns will be 1 in the regression case,
+# and number of classes in the classification case; other than nSubSam,
+# args are as in kNN()
+kNNxv <- function(x,y,k,scaleX=TRUE,PCAcomps=0,
+                  smoothingFtn=mean,nSubSam=500)
+{
+  if (!is.matrix(x) && !is.vector(x)) stop('x must be a matrix or vector')
+  if (is.vector(x)) x <- matrix(x,ncol=1)
+  if (is.factor(y)) stop('y must not be a factor')
+  if (is.vector(y)) y <- matrix(y,ncol=1)
+  n <- nrow(x)
+  regests <- matrix(nrow=nSubSam,ncol=ncol(y))
+  for (i in 1:nSubSam) {
+    leftOutIdx <- sample(1:n,1)
+    tmp <- kNN(x[-leftOutIdx,],y[-leftOutIdx,],x[leftOutIdx,],k,
+               scaleX,PCAcomps,smoothingFtn)
+    regests[i,] <- tmp$regests
+  }
+  regests
 }
 
 # mean absolute prediction error

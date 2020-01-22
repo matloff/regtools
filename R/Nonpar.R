@@ -23,8 +23,11 @@
 #   newx: vector or matrix; "X" values to be predicted
 #   kmax: maximum value of k requested
 #   scaleX: "X" in x and newx to be scaled
-#   expand: vector containing indexes of variables that need to be expanded
-#   expandVar: vector indicating how many times those variables should be expanded
+#   expandVars: a logical vector or an index vector indicating which
+#      variables need to be expanded
+#   expandVals: a numeric vector indicating how much each variable should
+#      be expanded. Note that it must have the same length as expandVars does.
+#      It reflects the "weight" users want to give to some variables.
 #   PCAcomps: apply PCA (after scaling, if any) to x, newx, using this
 #      this many components; 0 means no PCA
 #   smoothingFtn: op applied to the "Y"s of nearest neighbors; could be,
@@ -43,7 +46,7 @@
 #    something like round(regest) to get 0,1 prediction, or 
 #    apply(    ,1,which.max) for multiclass
 
-kNN <- function(x,y,newx,kmax,scaleX=TRUE,expand=NULL,expandVars=NULL,
+kNN <- function(x,y,newx,kmax,scaleX=TRUE,expandVars=NULL,expandVals=NULL,
                 PCAcomps=0,smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
                 classif=FALSE)
 {  
@@ -73,9 +76,6 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,expand=NULL,expandVars=NULL,
   
   kmax1 <- kmax + leave1out
   
-  # check on scaling
-  if(!scaleX && (!is.null(expand) || !is.null(expandVars)))
-    stop('expand and expandVars should not be used if scaleX is FALSE')
   if (scaleX) {
     x <- scale(x)
     xcntr <- attr(x,'scaled:center')
@@ -84,20 +84,22 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,expand=NULL,expandVars=NULL,
     
     # expand and expandVars should only be used
     # when scaleX == TRUE
-    if(xor(is.null(expand), is.null(expandVars))) {
-      stop('expand and expandVars must be used together')
+    if(xor(is.null(expandVars), is.null(expandVals))) {
+      stop('expandVars and expandVals must be used together')
     }
     
-    if(!is.null(expand) && !is.null(expandVars)) {
-      if(!is.vector(expand) || !is.vector(expandVars)) {
-        stop('Both expand and expandVars must be vectors')
+    if(!is.null(expandVars) && !is.null(expandVals)) {
+      if(!is.vector(expandVars) || !is.vector(expandVals)) {
+        stop('Both expandVars and expandVals must be vectors')
       }
-      if(length(expand) != length(expandVars)) {
-        stop('expand and expandVars should have the same length')
+      if(length(expandVars) != length(expandVals)) {
+        stop('expandVars and expandVals should have the same length')
       }
-      x[,expand] <- t(t(x[,expand])*expandVars)
-      newx[,expand] <- t(t(newx[,expand])*expandVars)
+      x[,expandVars] <- t(t(x[,expandVars])*expandVals)
+      newx[,expandVars] <- t(t(newx[,expandVars])*expandVals)
     }
+  } else if(!is.null(expandVars) || !is.null(expandVals)) {
+    stop('expandVars and expandVals should not be used if scaleX is FALSE')
   }
   
   if (PCAcomps > 0) {

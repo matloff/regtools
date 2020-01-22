@@ -26,7 +26,8 @@ variance.
   response variables, using k-Nearest Neighbors (k-NN).  Local-linear
 option to deal with edge aliasing.  Allows for user-specified smoothing
 method.  Allows for accelerated exploration of multiple values of **k**
-at once.  Tool to aid in choosing **k**.
+at once.  Allows for enlargement of numeric variables after scaling.
+Tool to aid in choosing **k**.
 
 * Extension to nonlinear parametric regression of Eicker-White
 technique to handle heteroscedasticity.
@@ -356,6 +357,59 @@ knnout <- kNN(day1,tot,c(1,12.0,11.8,0.23,5),5)
 The output shows which rows in the training set were closest to the
 point to be predicted --- rows 459, 481 and so on --- and the prediction
 itself.  Our prediction would then be about 5320 riders. 
+
+## EXAMPLE: USING kNN() WITH EXPANDED NUMERIC VARIABLES AFTER SCALING
+
+By default, kNN() will standardize numeric variables before doing the real
+work. By doing so, we assume that all numeric variables have the same influence
+on the response variable. But that's not always the case. Sometimes giving different
+"weight" to different variables might produce better result.
+
+In order to comply with such demand, kNN() allows users to select numeric
+variables and expand them using user-specified values.
+
+In the above bike sharing dataset example, let's say we want to pay more attentions
+to **temp**, because **temp** will have more influence on total ridership.
+
+We could call kNN() like this
+``` r
+data(day1)
+day1x <- day1[,c(8,10:13)]
+tot <- day1$tot
+knnout <- kNN(day1x,tot,day1x,5,expandVars=2,expandVals=5)
+```
+The new arguments are:
+* **expandVars:** It can be a logical vector or an index vector indicating which
+numeric variables need to be expanded. Here, we only mean to expand **temp**
+variables, which is the second column of **day1x**.
+
+* **expandVals:** It is a numeric vector containing values that are used to expand
+variables. Here, we want to expand **temp** variables to 5 times of its original value.
+
+Will that improve our prediction result? We could compare results obtaining in two 
+different ways and see what happens.
+
+The first way(with no expanded variables):
+``` r
+knnout <- kNN(day1x,day1$tot,day1x,5,allK=TRUE,leave1out=TRUE)
+mape <- findOverallLoss(knnout$regests, day1$tot)
+# prints
+# mape
+# [1] 1362.696 1181.111 1121.280 1071.653 1085.303
+```
+
+The second way(with the expanded variable **temp**):
+``` r
+knnout <- kNN(day1x,day1$tot,day1x,5,expandVars=2,expandVals=5,allK=TRUE,leave1out=TRUE)
+mape <- findOverallLoss(knnout$regests, day1$tot)
+# prints
+# mape
+# [1] 1340.476 1156.527 1098.390 1079.962 1061.510
+```
+
+Here, variable **mape** represents Mean Absolute Prediction Error(MAPE). We can clearly
+see that MAPE of the second method is smaller than that of the first method. Our expanded
+variable does help us improve the result.
 
 ## EXAMPLE: USING kNN() IN MULTICLASS PROBLEMS
 

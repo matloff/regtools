@@ -15,7 +15,7 @@ testSingleExpandVar <- function(x, y, kmax, expandCol, expandMaxVal, interval = 
 {
   res <- NULL
   for(i in seq(1, expandMaxVal, interval)){
-    knnout <- kNN(x,y,x,kmax,scaleX = TRUE, expand = expandCol, expandVars = i, allK = all, leave1out = TRUE)
+    knnout <- kNN(x,y,x,kmax,scaleX = TRUE, expandVars = expandCol, expandVals = i, allK = all, leave1out = TRUE)
     # when @all == FALSE, regests is not matrix and cannot be used in findOverallLoss
     if(!is.matrix(knnout$regests)) {
       dim(knnout$regests) <- c(1,length(knnout$regests))
@@ -67,8 +67,8 @@ testMultipleExpandVar <- function(x, y, kmax, expandCols, expandVals, all = TRUE
       # get their position
       # it works fine because expandCols should not have repeated values
       logicalVec <- expandCols %in% combCases[, j]
-      knnout <- kNN(x,y,x,kmax, scaleX = TRUE, expand = combCases[, j],
-                         expandVars = expandVals[logicalVec], allK = all, leave1out = TRUE)
+      knnout <- kNN(x,y,x,kmax, scaleX = TRUE, expandVars = combCases[, j],
+                         expandVals = expandVals[logicalVec], allK = all, leave1out = TRUE)
 
       if(!is.matrix(knnout$regests)) {
         dim(knnout$regests) <- c(1,length(knnout$regests))
@@ -96,7 +96,7 @@ day1x <- day1[,c(1, 3:7, 8, 10:13)]
 
 if(FALSE) {
   # expand single predictor
-  # expand @tot
+  # expand @instant
   testSingleExpandVar(day1x, day1$tot, 25, 1, 100)
   # expand @temp
   testSingleExpandVar(day1x, day1$tot, 25, 8, 100)
@@ -108,7 +108,7 @@ if(FALSE) {
   testSingleExpandVar(day1x, day1$tot, 25, 11, 100)
   
   # expand multiple variables
-  testMultipleExpandVar(day1x, day1$tot, 25, 1:11, rep(2,11))
+  testMultipleExpandVar(day1x,day1$tot,25,c(1,8:11),c(10,5,5,0.5,0.5))
 }
 
 

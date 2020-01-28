@@ -20,17 +20,23 @@
 
 #   x: matrix (df or vec will be converted), "X" of training set
 #   y: vector or matrix, "Y" of training set; matrix in multiclass (> 2) case
-#   newx: vector or matrix; "X" values to be predicted
+#   newx: vector or matrix; "X" values to be predicted, if any; if NULL,
+#      set to x
 #   kmax: maximum value of k requested
-#   scaleX: "X" in x and newx to be scaled
+#   scaleX: x and newx will be scaled
 #   PCAcomps: apply PCA (after scaling, if any) to x, newx, using this
 #      this many components; 0 means no PCA
 #   smoothingFtn: op applied to the "Y"s of nearest neighbors; could be,
-#      say, median instead of mean
-#   allK: report kNN estimates for all k = 1,...,kmax; otherwise just kmax
-#   leave1out: delete the 1-nearest neighbor (cross-validation
+#      say, median instead of mean, even variance
+#   allK: report kNN estimates for all k = 1,...,kmax; otherwise just k = kmax
+#   leave1out: delete the 1-nearest neighbor (n-fold cross-validation)
 #   classif: if TRUE, consider this a classification problem, meaning
 #      that  'ypreds' will be included in the return value
+#   noPreds: if TRUE, sets up for predictions in the future; newx will 
+#      be set to x and regests etc. computed accordingly; return value
+#      will include components for x and PCAout (if PCAcomps > ), and 
+#      predict.kNN can be called for future predictions (1-NN on
+#      regests)
 
 # value:
 
@@ -39,16 +45,16 @@
 #    of newx; these are conditional means, used directly as predicted Y values
 #    in the continuous "Y" case; in classification case, 2 classes, do
 #    something like round(regest) to get 0,1 prediction, or 
-#    apply(    ,1,which.max) for multiclass
+#    apply(    ,1,which.max) for multiclass; if noPreds, see above for
+#    extra components
 
 kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
           smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
-          classif=FALSE)
+          classif=FALSE,noPreds=FALSE)
 {  
    # type checks etc.
    # checks on x
    if (is.vector(x)) x <- matrix(x,ncol=1)
-   if (is.factor(x)) stop('factor conversions not implemented yet')
    if (hasFactors(x)) stop('factor conversion not implemented yet')
    if (is.data.frame(x)) 
       x <- as.matrix(x)
@@ -69,6 +75,8 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
    }
    # at this point, x, y and newx will all be matrices
 
+   if (noPreds) newx <- x
+
    kmax1 <- kmax + leave1out
 
    if (scaleX) {
@@ -79,9 +87,9 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
    }
    if (PCAcomps > 0) {
       colnames(newx) <- colnames(x)
-      pcaout <- prcomp(x,center=FALSE,scale.=FALSE)
-      x <- predict(pcaout,x)
-      newx <- predict(pcaout,newx)
+      PCAout <- prcomp(x,center=FALSE,scale.=FALSE)
+      x <- predict(PCAout,x)
+      newx <- predict(PCAout,newx)
    }
    tmp <- FNN::get.knnx(data=x, query=newx, k=kmax1)
    closestIdxs <- tmp$nn.index
@@ -109,14 +117,20 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
       }
    }
    tmplist <- list(whichClosest=closestIdxs,regests=regests)
-   if (classif) {
+   if (classif && !noPreds) {
       ypreds <- if (ncol(y) > 1) {
          apply(regests, 1, which.max) - 1
       } else round(regests)
       tmplist$ypreds <- ypreds
    }
+   if (noPreds) {
+      tmplist$x <- x
+      if (PCAcomps > 0) tmplist$PCAout <- PCAout
+   }
+   class(tmplist) <- 'kNN'
    tmplist
 }
+
 
 # n-fold cross validation for kNN(); instead of applying "leave 1 out"
 # to all possible singletons, we do so for a random nSubSam of them;
@@ -158,14 +172,14 @@ probIncorrectClass <- function(y,yhat)
    mean(classPred != classActual)
 }
 
-findOverallLoss <- function(regests,y,lossFtn=MAPE) 
+# included lossFtn choices are MAPE and probIncorrectClass; user may
+# supply others
+findOverallLoss <- function (regests, y, lossFtn = MAPE) 
 {
-   if (!identical(lossFtn,probIncorrectClass)) {
-      loss1row <- function(regestsRow) lossFtn(y,regestsRow)
-      return(apply(regests,1,loss1row))
-   }
-   probIncorrectClass(y,regests)
+   loss1row <- function(regestsRow) lossFtn(y, regestsRow)
+   apply(regests, 1, loss1row)
 }
+
 
 ######################  knnest()  ###############################
 

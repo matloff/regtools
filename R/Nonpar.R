@@ -48,7 +48,7 @@
 #    apply(    ,1,which.max) for multiclass; if noPreds, see above for
 #    extra components
 
-kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
+kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
           smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
           classif=FALSE,noPreds=FALSE)
 {  
@@ -90,7 +90,7 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
       PCAout <- prcomp(x,center=FALSE,scale.=FALSE)
       x <- predict(PCAout,x)
       newx <- predict(PCAout,newx)
-   }
+   } else PCAout <- NULL
    tmp <- FNN::get.knnx(data=x, query=newx, k=kmax1)
    closestIdxs <- tmp$nn.index
    if (leave1out) closestIdxs <- closestIdxs[,-1,drop=FALSE]
@@ -123,14 +123,43 @@ kNN <- function(x,y,newx,kmax,scaleX=TRUE,PCAcomps=0,
       } else round(regests)
       tmplist$ypreds <- ypreds
    }
+   tmplist$PCAout <- PCAout
+   tmplist$scaleX <- scaleX
+   if (scaleX) {
+      tmplist$xcntr <- xcntr
+      tmplist$xscl <- xscl
+   }
    if (noPreds) {
       tmplist$x <- x
-      if (PCAcomps > 0) tmplist$PCAout <- PCAout
+   } else {
+      tmplist$x <- NULL
    }
+   tmplist$leave1out <- leave1out
    class(tmplist) <- 'kNN'
    tmplist
 }
 
+predict.kNN <- function(object,...)
+{
+   x <- object$x
+   PCAout <- object$PCAout
+   regests <- object$regests
+   arglist <- list(...)
+   newx <- arglist[[1]]
+   if (is.vector(newx)) newx <- matrix(newx,ncol=ncol(x))
+   if (is.data.frame(newx)) {
+      newx <- as.matrix(newx)
+   }
+   if (object$scaleX)  newx <- scale(newx,center=object$xcntr,scale=object$xscl)
+   if (!is.null(PCAout)) newx <- predict(PCAout,newx)
+   k <- 1 + object$leave1out
+   tmp <- FNN::get.knnx(data=x, query=newx, k=k)
+   if (k == 1) {
+      closestIdxs <- tmp$nn.index
+   } else closestIdxs <- tmp$nn.index[,-1]
+   if (is.vector(regests)) return(regests[closestIdxs])
+   return(regests[closestIdxs,])
+}
 
 # n-fold cross validation for kNN(); instead of applying "leave 1 out"
 # to all possible singletons, we do so for a random nSubSam of them;

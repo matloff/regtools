@@ -75,7 +75,10 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    }
    # at this point, x, y and newx will all be matrices
 
-   if (noPreds) newx <- x
+   if (noPreds) {
+      newx <- x
+      leave1out <- TRUE
+   }
 
    kmax1 <- kmax + leave1out
 
@@ -155,6 +158,7 @@ predict.kNN <- function(object,...)
    k <- 1 + object$leave1out
    tmp <- FNN::get.knnx(data=x, query=newx, k=k)
    if (k == 1) {
+      # note: if k = 1, closestIdxs will be a 1-column matrix
       closestIdxs <- tmp$nn.index
    } else closestIdxs <- tmp$nn.index[,-1]
    if (is.vector(regests)) return(regests[closestIdxs])

@@ -1,8 +1,8 @@
 
 ######################  k-NN routines  #############################
 
-# kNN() does a straightforward k-NN, but is not computationally
-# efficient
+# kNN() is now the main k-NN routine in the package; knnest() is
+# deprecated
 
 # use knnest() for greater speed for continuing prediction activity,
 # though with a "shortcut":  the preprocessing steps will fit k-NN
@@ -21,7 +21,8 @@
 #   x: matrix (df or vec will be converted), "X" of training set
 #   y: vector or matrix, "Y" of training set; matrix in multiclass (> 2) case
 #   newx: vector or matrix; "X" values to be predicted, if any; if NULL,
-#      set to x
+#      compute regests values at each "X", and saving for later
+#      prediction using predict.kNN()
 #   kmax: maximum value of k requested
 #   scaleX: x and newx will be scaled
 #   PCAcomps: apply PCA (after scaling, if any) to x, newx, using this
@@ -32,28 +33,27 @@
 #   leave1out: delete the 1-nearest neighbor (n-fold cross-validation)
 #   classif: if TRUE, consider this a classification problem, meaning
 #      that  'ypreds' will be included in the return value
-#   noPreds: if TRUE, sets up for predictions in the future; newx will 
-#      be set to x and regests etc. computed accordingly; return value
-#      will include components for x and PCAout (if PCAcomps > ), and 
-#      predict.kNN can be called for future predictions (1-NN on
-#      regests)
 
 # value:
 
-#    R list, containing vector of nearest-neighbor indices and a
-#    vector/matrix of estimated regression function values at the rows
-#    of newx; these are conditional means, used directly as predicted Y values
-#    in the continuous "Y" case; in classification case, 2 classes, do
-#    something like round(regest) to get 0,1 prediction, or 
-#    apply(    ,1,which.max) for multiclass; if noPreds, see above for
-#    extra components
+#    R object of class 'kNN', containing vector of nearest-neighbor
+#    indices and a vector/matrix of estimated regression function values
+#    at the rows of newx; these are conditional means, used directly as
+#    predicted Y values in the continuous "Y" case; in classification
+#    case, 2 classes, do something like round(regest) to get 0,1
+#    prediction, or apply(    ,1,which.max) for multiclass 
+
+#    if newx is NULL, then return closest "X" to each "X" (accounting
+#    for leave1out), regests, scaleX, x, leave1out
 
 kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
           smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
-          classif=FALSE,noPreds=FALSE)
+          classif=FALSE)
 {  
+   noPreds <- is.null(newx)  # don't predict, just save for future predict
    # type checks etc.
    # checks on x
+   if (is.null(newx)) newx <- x  # won't be used
    if (is.vector(x)) x <- matrix(x,ncol=1)
    if (hasFactors(x)) stop('factor conversion not implemented yet')
    if (is.data.frame(x)) 
@@ -142,6 +142,9 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    tmplist
 }
 
+# actual call is predict(kNNoutput,newx); for each row in newx, the
+# 1-nearest row in kNNoutput$x is found, and the corresponding
+# kNNoutput$regests value returned 
 predict.kNN <- function(object,...)
 {
    x <- object$x
@@ -155,7 +158,8 @@ predict.kNN <- function(object,...)
    }
    if (object$scaleX)  newx <- scale(newx,center=object$xcntr,scale=object$xscl)
    if (!is.null(PCAout)) newx <- predict(PCAout,newx)
-   k <- 1 + object$leave1out
+   # k <- 1 + object$leave1out
+   k <- 1
    tmp <- FNN::get.knnx(data=x, query=newx, k=k)
    if (k == 1) {
       # note: if k = 1, closestIdxs will be a 1-column matrix

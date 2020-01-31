@@ -1,5 +1,5 @@
-\name{knnest,meany,vary,loclin,predict.knn,preprocessx,kmin,parvsnonparplot,nonparvsxplot,l1,l2,basicKNN}
-\alias{basicKNN}
+\name{knnest,meany,vary,loclin,predict.knn,preprocessx,kmin,parvsnonparplot,nonparvsxplot,l1,l2,kNN}
+\alias{kNN}
 \alias{knnest}
 \alias{predict.knn}
 % \alias{parget.knnx}
@@ -23,7 +23,7 @@ models.
 }
 
 \usage{
-basicKNN(x,y,newx,k,scaleX=TRUE,smoothingFtn=mean,allK=FALSE)
+kNN(x,y,newx,k,scaleX=TRUE,smoothingFtn=mean,allK=FALSE)
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
 meany(predpt,nearxy) 
@@ -70,7 +70,7 @@ l1(y,muhat)
 
 \details{
 
-   The \code{basicKNN} function is convenient for small- to medium-sized
+   The \code{kNN} function is convenient for small- to medium-sized
    problems, and is simpler to use.  For larger problems, use the
    combination \code{preprocessx}, \code{knnest} and \code{predict.knn}.
    
@@ -199,41 +199,77 @@ function values and \code{ks} containing the corresponding values of
 
 \examples{
 
-set.seed(9999)
-x <- matrix(sample(1:10,16,replace=TRUE),ncol=2)
-y <- sample(1:10,8,replace=TRUE)
-basicKNN(x,y,c(3,4),2,scaleX=FALSE)  # 4,6; 6.5
-basicKNN(x,y,c(3,4),2,scaleX=FALSE,allK=T)  # 4,6; 7.0, 6.5
-y <- matrix(nrow=8,ncol=2)
-set.seed(9999)
-for (i in 1:8) {
-   j <- sample(1:2,1)
-   y[i,j] <- 1
-   y[i,3-j] <- 0
-}
-basicKNN(x,y,c(5,6),2,scaleX=FALSE)  # 4,8; 0.5,0.5
+x <- rbind(c(1,0),c(2,5),c(0,5),c(3,3),c(6,3))
+y <- c(8,3,10,11,4)
+newx <- c(0,0)
 
-set.seed(9999)
-x <- matrix(sample(1:100,30),ncol=3)
-xd <- preprocessx(x[,1],2,TRUE)  # just 1 predictor
-ko <- knnest(x[,2],xd,2)  # Y is x[,2]
-ko$regest # 1st element = 74.5
-predict(ko,matrix(76),TRUE)  # 47.5
-ko <- knnest(x[,-1],xd,2)  # Y bivar
-ko$regest # 1st row = (74.5,31.5)
-predict(ko,matrix(76),TRUE)  # 47.5, 65.0
+kNN(x,y,newx,scaleX=FALSE,2)
+# $whichClosest
+#      [,1] [,2]
+# [1,]    1    4
+# $regests
+# [1] 9.5
 
-set.seed(9999)
-xe <- matrix(rnorm(30000),ncol=3) 
-xe[,-3] <- xe[,-3] + 2 
-# xe is 2 predictors and epsilon 
-y <- xe \%*\% c(1,0.5,0.2)  # Y
-x <- xe[,-3]  # X
-xdata <- preprocessx(x,500)  # k as high as 500
-zout <- knnest(y,xdata,200) 
-predict(zout,matrix(c(1,1),nrow=1),TRUE)  # about 1.55
-predict(zout,rbind(c(1,1),c(2,1.2)),TRUE)  # about 1.55, 2.58
-predict(zout,rbind(c(0,0)),TRUE)  # about 0.63
+knnout <- kNN(x,y,NULL,scaleX=FALSE,2)
+# $whichClosest
+#      [,1] [,2]
+# [1,]    4    3
+# [2,]    3    4
+# [3,]    2    4
+# [4,]    2    5
+# [5,]    4    2
+# $regests
+# [1] 10.5 10.5  7.0  3.5  7.0
+
+predict(knnout,c(5,2))  # 7
+y <- c(1,1,0,0,1)
+kNN(x,y,newx,scaleX=FALSE,2)
+# $whichClosest
+#      [,1] [,2]
+# [1,]    1    4
+#
+# $regests
+# [1] 0.5
+> kNN(x,y,c(5,6),scaleX=FALSE,2,classif=TRUE)
+$whichClosest
+  [,1] [,2]
+[1,]    5    2
+$regests
+[1] 1
+$ypreds
+[1] 1
+knnout <- kNN(x,y,NULL,scaleX=FALSE,2)
+# $whichClosest
+#      [,1] [,2]
+# [1,]    4    3
+# [2,]    3    4
+# [3,]    2    4
+# [4,]    2    5
+# [5,]    4    2
+# $regests
+# [1] 0.0 0.0 0.5 1.0 0.5
+predict(knnout,c(3,3))  # 1
+
+x <- rbind(x,c(4,1))
+y <- rbind(y,c(0,1))
+kNN(x,y,rbind(c(5,6),c(1,0),c(2,3)),scaleX=FALSE,2,classif=TRUE)
+# $whichClosest
+#      [,1] [,2]
+# [1,]    5    2
+# [2,]    1    6
+# [3,]    6    4
+# $regests
+#      [,1] [,2]
+# [1,]  1.0  0.0
+# [2,]  0.5  0.5
+# [3,]  0.0  1.0
+# $ypreds
+
+predict(knnout,rbind(c(5,6),c(1,0),c(3,1)))
+#      [,1] [,2]
+# [1,]  0.0  1.0
+# [2,]  0.0  1.0
+# [3,]  0.5  0.5
 
 \dontrun{
 data(prgeng)

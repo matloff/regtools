@@ -23,7 +23,8 @@ models.
 }
 
 \usage{
-kNN(x,y,newx,k,scaleX=TRUE,smoothingFtn=mean,allK=FALSE)
+kNN(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,expandVars=NULL,expandVals=NULL,
+   smoothingFtn=mean,allK=FALSE,leave1out=FALSE, classif=FALSE)
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
 meany(predpt,nearxy) 
@@ -40,7 +41,9 @@ l1(y,muhat)
 }
 
 \arguments{
-  \item{newx}{New data point to be predicted.}
+  \item{newx}{New data points to be predicted.  If NULL in \code{kNN},
+     compute regression functions estimates on \code{x} and save for
+     future prediction with \code{predict.kNN}}
   \item{y}{Response variable data in the training set. Vector or matrix,
      the latter case for vector-valued response, e.g. multiclass
      classification.}  
@@ -50,6 +53,15 @@ l1(y,muhat)
      `arguments.}
   \item{xdata}{X and associated neighbor indices. Output of
      \code{preprocessx}.} 
+  \item{scaleX}{If TRUE, call \code{scale} on \code{x} and \code{newx}}
+  \item{PCAcomps}{If positive, transform \code{x} and \code{newx} by
+     PCA, using the top \code{PCAcomps} principal components}
+  \item{smoothingFtn}{Function to apply to the set of nearest neighbors}
+  \item{allK}{If TRUE, find regression estimates for all \code{k}
+     through \code{kmax}}
+  \item{leave1out}{If TRUE, omit the 1-nearest neighbor from analysis}
+  \item{classif}{If TRUE, compute the predicted class labels, not just
+     the regression function values}
   \item{k}{Number of nearest neighbors} 
   \item{object}{Output of \code{knnest}.}
   \item{predpt}{One point on which to predict, as a vector.}
@@ -70,9 +82,38 @@ l1(y,muhat)
 
 \details{
 
-   The \code{kNN} function is convenient for small- to medium-sized
-   problems, and is simpler to use.  For larger problems, use the
-   combination \code{preprocessx}, \code{knnest} and \code{predict.knn}.
+   The \code{kNN} function is the main tool here; \code{knnest} is being
+   deprecated.  Here are the capabilities:
+
+   In its most basic form, the function will input training data and
+   output predictions for new cases \code{newx}.  By default this is
+   done for a single value of the number \code{k} of nearest neighbors,
+   but the user can request that it be done for all \code{k} through the
+   specified maximum.
+
+   In the second form, \code{newx} is set to NULL.  No predictions are
+   made; instead, the regression function is estimated on all data
+   points in \code{x}, and saved in the return value.  Future new cases
+   can then be predicted from this saved object.  Note that in
+   predicting a new case, say \code{z}, a 1-nearest neighbor scheme is
+   used:  The closest point in \code{x} is determined, and the estimated
+   regression function there is then used as the estimate at \code{z}.
+   In this manner, there is almost no computational cost in the
+   prediction stage.  The approximation should work well in moderately
+   large datasets.
+
+   In both forms of \code{kNN}, the user has the option of performing
+   PCA on the training data, retaining a specified number of principal
+   components, and then applying the same transformation to the new
+   cases to be predicted.
+
+   In addition, a novel feature allows the user to weight some
+   predictors more than others.  This is done by scaling the given
+   predictor up or down, according to a specified value.  Normally, this
+   should be done with \code{scaleX = TRUE}, which applies
+   \code{scale()} to the data.  In other words, first we create a "level
+   playing field" in which all predictors have standard deviation 1.0,
+   then scale some of them up or down.
    
    The \code{knnest} function does k-nearest neighbor regression
    function estimation, in any dimension, i.e. any number of predictor

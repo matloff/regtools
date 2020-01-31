@@ -101,7 +101,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
           stop('expandVars and expandVals should have the same length')
       }
       x <- multCols(x,expandVars,expandVals)
-      newx <- multCols(newx,expandVars,expandVals)
+      newx <- multCols(newx,expandVars,expandVals)  
    }
 
    if (PCAcomps > 0) {

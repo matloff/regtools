@@ -91,6 +91,9 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    if (PCAcomps > 0) {
       colnames(newx) <- colnames(x)
       PCAout <- prcomp(x,center=FALSE,scale.=FALSE)
+      rot <- PCAout$rotation
+      rot <- rot[,1:PCAcomps,drop=FALSE]
+      PCAout$rotation <- rot
       x <- predict(PCAout,x)
       newx <- predict(PCAout,newx)
    } else PCAout <- NULL

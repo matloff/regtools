@@ -47,6 +47,7 @@
 #    for leave1out), regests, scaleX, x, leave1out
 
 kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
+          expandVars=NULL,expandVals=NULL,
           smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
           classif=FALSE)
 {  
@@ -88,6 +89,21 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       xscl <- attr(x,'scaled:scale')
       newx <- scale(newx,center=xcntr,scale=xscl)
    }
+
+  # expand any variables?
+   eVars <- !is.null(expandVars)
+   eVals <- !is.null(expandVals)
+   if (eVars || eVals) {
+      if(xor(eVars,eVals)) {
+        stop('expandVars and expandVals must be used together')
+      }
+      if (length(expandVars) != length(expandVals)) {
+          stop('expandVars and expandVals should have the same length')
+      }
+      x <- multCols(x,expandVars,expandVals)
+      newx <- multCols(newx,expandVars,expandVals)
+   }
+
    if (PCAcomps > 0) {
       colnames(newx) <- colnames(x)
       PCAout <- prcomp(x,center=FALSE,scale.=FALSE)

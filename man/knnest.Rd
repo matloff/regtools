@@ -307,6 +307,24 @@ kNN(x,y,rbind(c(5,6),c(1,0),c(2,3)),2,scaleX=FALSE,classif=TRUE)
 # [3,]  0.0  0.5  0.5
 # $ypreds
 # [1] 0 0 1
+kNN(x,y,rbind(c(5,6),c(1,0),c(2,3)),2,scaleX=FALSE,classif=TRUE,allK=TRUE)
+# $whichClosest
+#      [,1] [,2]
+# [1,]    5    2
+# [2,]    1    6
+# [3,]    4    2
+# $regests
+#      [,1] [,2] [,3]
+# [1,]  1.0  0.0  0.0
+# [2,]  1.0  0.0  0.0
+# [3,]  0.0  1.0  0.0
+# [4,]  0.5  0.0  0.5
+# [5,]  0.5  0.5  0.0
+# [6,]  0.0  0.5  0.5
+# $ypreds
+#      [,1] [,2] [,3]
+# [1,]    0    0    1
+# [2,]    0    0    1
 
 \dontrun{
 data(prgeng)

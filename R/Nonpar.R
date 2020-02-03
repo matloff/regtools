@@ -63,11 +63,11 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
    if (is.matrix(y) && identical(smoothingFtn,mean)) 
       smoothingFtn <- colMeans
-   if (is.matrix(y) && allK)
-      stop('for now, in multiclass case, allK must be FALSE')
+   # if (is.matrix(y) && allK)  print('stub')
+   #    stop('for now, in multiclass case, allK must be FALSE')
    if (is.vector(y)) y <- matrix(y,ncol=1)
-   if (classif && allK)
-      stop('classif=TRUE can be set only if allK is FALSE')
+   # if (classif && allK) print('stub')
+   #    stop('classif=TRUE can be set only if allK is FALSE')
    if (ncol(y) > 1 && !allK) classif <- TRUE
    # checks on newx
    if (is.vector(newx)) newx <- matrix(newx,ncol=ncol(x))
@@ -135,13 +135,19 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
          regests <- NULL
          for (k in 1:kmax) 
             regests <- 
-              rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
+               if (ncol(y) == 1)
+                 rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
+               else 
+                 rbind(regests,t(apply(closestIdxs[,1:k,drop=FALSE],1,fyh)))
       }
    }
    tmplist <- list(whichClosest=closestIdxs,regests=regests)
    if (classif && !noPreds) {
-      ypreds <- if (ncol(y) > 1) {
-         apply(regests, 1, which.max) - 1
+      if (ncol(y) > 1) {
+         yp <- apply(regests,1,which.max)-1
+         if (!allK) {
+           ypreds <- yp
+         } else ypreds <- matrix(yp,nrow=kmax,byrow=TRUE)
       } else round(regests)
       tmplist$ypreds <- ypreds
    }

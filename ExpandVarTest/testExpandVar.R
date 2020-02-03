@@ -11,24 +11,28 @@
 # all indicates whether we want to test all different k values
 
 # we compare the result we get before expanding the variable and the result after expand the variable
-testSingleExpandVar <- function(x, y, kmax, expandCol, expandMaxVal, interval = 1, all = TRUE)
+testSingleExpandVar <- function(x, y, kmax, expandCol, expandMaxVal, interval = 1, all = FALSE)
 {
+  require(ggplot2)
   res <- NULL
-  for(i in seq(1, expandMaxVal, interval)){
+  allExpandVals <- seq(0, expandMaxVal, interval)
+  for(i in allExpandVals){
     knnout <- kNN(x,y,x,kmax,scaleX = TRUE, expandVars = expandCol, expandVals = i, allK = all, leave1out = TRUE)
     # when @all == FALSE, regests is not matrix and cannot be used in findOverallLoss
     if(!is.matrix(knnout$regests)) {
       dim(knnout$regests) <- c(1,length(knnout$regests))
     }
     mape <- findOverallLoss(knnout$regests, y)
-    #print(mape)
     res <- c(res, min(mape))
   }
-  #print(res)
-  plot(seq(1, expandMaxVal, interval), res,
-  main = "MAPE-ExpandVar Value",
-  xlab = "Expand variable's value",
-  ylab = "MAPE")
+  
+  dat <- as.data.frame(cbind(allExpandVals, res))
+  total_pts <- length(allExpandVals)
+  # using 3 percent of points to do local regression
+  span_pts <- 0.03*total_pts
+  ggplot(dat, aes(x=allExpandVals,y=res)) + geom_smooth(method=loess, span=span_pts, colour = "black") +
+    labs(title = "MAPE vs. Expanded Variable's Value") +  ylab("MAPE") + xlab("Expanded Variable's Value") +
+    theme(plot.title = element_text(hjust = 0.5))
 }
 
 
@@ -94,21 +98,26 @@ testMultipleExpandVar <- function(x, y, kmax, expandCols, expandVals, all = TRUE
 data(day1)
 day1x <- day1[,c(1, 3:7, 8, 10:13)]
 
+# using k = 25
 if(FALSE) {
   # expand single predictor
   # expand @instant
-  testSingleExpandVar(day1x, day1$tot, 25, 1, 100)
+  testSingleExpandVar(day1x, day1$tot, 25, 1, 10, 0.01)
+  testSingleExpandVar(day1x, day1$tot, 25, 1, 100, 0.1)
+  testSingleExpandVar(day1x, day1$tot, 25, 1, 1000, 0.1)
   # expand @temp
-  testSingleExpandVar(day1x, day1$tot, 25, 8, 100)
-  # expand @atemp
-  testSingleExpandVar(day1x, day1$tot, 25, 9, 100)
+  testSingleExpandVar(day1x, day1$tot, 25, 8, 10, 0.01)
+  testSingleExpandVar(day1x, day1$tot, 25, 8, 100, 0.1)
+  testSingleExpandVar(day1x, day1$tot, 25, 8, 1000, 0.1)
   # expand @hum
-  testSingleExpandVar(day1x, day1$tot, 25, 10, 100)
+  testSingleExpandVar(day1x, day1$tot, 25, 10, 10, 0.01)
+  testSingleExpandVar(day1x, day1$tot, 25, 10, 100, 0.1)
+  testSingleExpandVar(day1x, day1$tot, 25, 10, 1000, 0.1)
   # expand @windspeed
-  testSingleExpandVar(day1x, day1$tot, 25, 11, 100)
-  
-  # expand multiple variables
-  testMultipleExpandVar(day1x,day1$tot,25,c(1,8:11),c(10,5,5,0.5,0.5))
+  testSingleExpandVar(day1x, day1$tot, 25, 11, 10, 0.01)
+  testSingleExpandVar(day1x, day1$tot, 25, 11, 100, 0.1)
+  testSingleExpandVar(day1x, day1$tot, 25, 11, 1000, 0.1)
+  # TODO: expand multiple variables
 }
 
 
@@ -133,26 +142,23 @@ if(FALSE) {
 # @age, @cit.2-5, @educ.2-16, @occ.101/102/106/140/141, @sex1, @wrkswrkd
 data(peDumms)
 # we filter out rows whose wageinc is 0
-peDumms <- peDumms[-(peDumms$wageinc == 0), ]
-x <- peDumms[, c(1, 3:6, 8:22, 24:29, 32)]
-y <- peDumms$wageinc
+peDummsX <- peDumms[, c(1, 3:6, 8:22, 24:29, 32)]
+peDummsY <- peDumms$wageinc
 
+# using k = 30
 if(FALSE) {
   # expand single predictor
+  # expand @age
+  testSingleExpandVar(peDummsX, peDummsY, 30, 1, 10, 0.01)
+  testSingleExpandVar(peDummsX, peDummsY, 30, 1, 5, 0.01)
+  testSingleExpandVar(peDummsX, peDummsY, 30, 1, 100, 0.1)
+  testSingleExpandVar(peDummsX, peDummsY, 30, 1, 1000, 0.1)
   # expand @wkswrkd
-  testSingleExpandVar(x, y, 30, 27, 50, interval = 5)
-  # expand @sex
-  testSingleExpandVar(x, y, 30, 26, 10)
-  testSingleExpandVar(x, y, 30, 26, 50, interval = 5)
-  # expand @cit.5
-  testSingleExpandVar(x, y, 30, 5, 10)
-  testSingleExpandVar(x, y, 30, 5, 50, interval = 5)
+  testSingleExpandVar(peDummsX, peDummsY, 30, 27, 10, 0.01)
+  testSingleExpandVar(peDummsX, peDummsY, 30, 27, 100, 0.1)
+  testSingleExpandVar(peDummsX, peDummsY, 30, 27, 1000, 0.1)
   
-  # expand multiple variables
-  # expand @cit.2-5
-  testMultipleExpandVar(x, y, 30, 2:5, rep(2, 4))
-  # expand @occ.101-141
-  testMultipleExpandVar(x, y, 30, 21:25, rep(5, 5))
+  # TODO: expand multiple variables
 }
 
 
@@ -223,10 +229,32 @@ if(FALSE) {
   testSingleExpandVar(x,y,)
 }
 
+# Fifth test dataset: forest cover dataset
+# Download dataset
+if(FALSE){
+  temp <- tempfile()
+  download.file("http://archive.ics.uci.edu/ml/machine-learning-databases/covtype/covtype.data.gz", temp)
+  forestCoverType <- read.table(gzfile(temp, "covtype.data"), header = FALSE, sep = ",")
+  unlink(temp)
+}
 
-
-
-
-
-
-
+# Dataset description
+# Elevation                               quantitative    meters                       Elevation in meters
+# Aspect                                  quantitative    azimuth                      Aspect in degrees azimuth
+# Slope                                   quantitative    degrees                      Slope in degrees
+# Horizontal_Distance_To_Hydrology        quantitative    meters                       Horz Dist to nearest surface water features
+# Vertical_Distance_To_Hydrology          quantitative    meters                       Vert Dist to nearest surface water features
+# Horizontal_Distance_To_Roadways         quantitative    meters                       Horz Dist to nearest roadway
+# Hillshade_9am                           quantitative    0 to 255 index               Hillshade index at 9am, summer solstice
+# Hillshade_Noon                          quantitative    0 to 255 index               Hillshade index at noon, summer soltice
+# Hillshade_3pm                           quantitative    0 to 255 index               Hillshade index at 3pm, summer solstice
+# Horizontal_Distance_To_Fire_Points      quantitative    meters                       Horz Dist to nearest wildfire ignition points
+# Wilderness_Area (4 binary columns)      qualitative     0 (absence) or 1 (presence)  Wilderness area designation
+# Soil_Type (40 binary columns)           qualitative     0 (absence) or 1 (presence)  Soil Type designation
+# Cover_Type (7 types)                    integer         1 to 7                       Forest Cover Type designation
+forestCoverTypeX <- forestCoverType[,-55]
+forestCoverTypeY <- forestCoverType[,55]
+# using k =
+if(FALSE){
+  
+}

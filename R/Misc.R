@@ -104,3 +104,12 @@ xyDataframeToMatrix <- function(xy) {
    yd <- factorToDummies(y,'y',omitLast=FALSE)
    as.matrix(cbind(xd,yd))
 }
+
+# multiply x[,cols] by vals, e.g. x[,cols[1]] * vals[1]
+# code by Bochao Xin
+multCols <- function(x,cols,vals) {
+   tx <- t(x[,cols])
+   x[,cols] <- t(tx*vals)
+   x
+}
+

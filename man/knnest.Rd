@@ -252,6 +252,7 @@ kNN(x,y,newx,scaleX=FALSE,2)
 # [1] 9.5
 
 knnout <- kNN(x,y,NULL,scaleX=FALSE,2)
+knnout
 # $whichClosest
 #      [,1] [,2]
 # [1,]    4    3
@@ -271,15 +272,16 @@ kNN(x,y,newx,scaleX=FALSE,2)
 #
 # $regests
 # [1] 0.5
-> kNN(x,y,c(5,6),scaleX=FALSE,2,classif=TRUE)
-$whichClosest
-  [,1] [,2]
-[1,]    5    2
-$regests
-[1] 1
-$ypreds
-[1] 1
+kNN(x,y,c(5,6),scaleX=FALSE,2,classif=TRUE)
+# $whichClosest
+#   [,1] [,2]
+# [1,]    5    2
+# $regests
+# [1] 1
+# $ypreds
+# [1] 1
 knnout <- kNN(x,y,NULL,scaleX=FALSE,2)
+knnout
 # $whichClosest
 #      [,1] [,2]
 # [1,]    4    3

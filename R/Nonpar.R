@@ -148,7 +148,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
          if (!allK) {
            ypreds <- yp
          } else ypreds <- matrix(yp,nrow=kmax,byrow=TRUE)
-      } else round(regests)
+      } else ypreds <- round(regests)
       tmplist$ypreds <- ypreds
    }
    tmplist$PCAout <- PCAout

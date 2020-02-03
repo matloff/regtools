@@ -127,7 +127,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       regests <- y[closestIdxs,]
    } else {
       # in fyh(), closeIdxs is a row in closestIdxs, with the first k columns
-      fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs,])
+      fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs,,drop=FALSE])
       if (!allK) {
          regests <- apply(closestIdxs,1,fyh)
          if (ncol(y) > 1) regests <- t(regests)

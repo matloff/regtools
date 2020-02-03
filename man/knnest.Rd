@@ -291,26 +291,22 @@ knnout <- kNN(x,y,NULL,scaleX=FALSE,2)
 # [1] 0.0 0.0 0.5 1.0 0.5
 predict(knnout,c(3,3))  # 1
 
-x <- rbind(x,c(4,1))
-y <- rbind(y,c(0,1))
-kNN(x,y,rbind(c(5,6),c(1,0),c(2,3)),scaleX=FALSE,2,classif=TRUE)
+x <- rbind(c(1,0),c(2,5),c(0,5),c(3,3),c(6,3),c(4,1))
+y <- rbind( c(1,0,0), c(0,0,1), c(0,1,0), c(0,1,0), c(1,0,0),
+   c(0,1,0))
+kNN(x,y,rbind(c(5,6),c(1,0),c(2,3)),2,scaleX=FALSE,classif=TRUE)
 # $whichClosest
 #      [,1] [,2]
 # [1,]    5    2
 # [2,]    1    6
-# [3,]    6    4
+# [3,]    4    2
 # $regests
-#      [,1] [,2]
-# [1,]  1.0  0.0
-# [2,]  0.5  0.5
-# [3,]  0.0  1.0
+#      [,1] [,2] [,3]
+# [1,]  0.5  0.0  0.5
+# [2,]  0.5  0.5  0.0
+# [3,]  0.0  0.5  0.5
 # $ypreds
-
-predict(knnout,rbind(c(5,6),c(1,0),c(3,1)))
-#      [,1] [,2]
-# [1,]  0.0  1.0
-# [2,]  0.0  1.0
-# [3,]  0.5  0.5
+# [1] 0 0 1
 
 \dontrun{
 data(prgeng)

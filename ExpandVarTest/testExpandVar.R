@@ -231,4 +231,11 @@ if(FALSE){
   # Expand Slope
   testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 3, 10, 0.01)
   testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 3, 1000, 0.5)
+  
+  # Expand Horizontal_Distance_To_Hydrology
+  testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 4, 10, 0.01)
+  testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 4, 1000, 0.5)
+  
+  # Expand Vertical_Distance_To_Hydrology
+  testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 5, 10, 0.01)
 }

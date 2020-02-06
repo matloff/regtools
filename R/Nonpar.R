@@ -78,7 +78,6 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 
    if (noPreds) {
       newx <- x
-      leave1out <- TRUE
    }
 
    kmax1 <- kmax + leave1out

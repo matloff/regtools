@@ -238,4 +238,15 @@ if(FALSE){
   
   # Expand Vertical_Distance_To_Hydrology
   testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 5, 10, 0.01)
-}
+  testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 5, 1000, 0.5)
+
+  # Expand Horizontal_Distance_To_Roadways
+  testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 6, 10, 0.01)
+  testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 6, 100, 0.1)
+  testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 6, 1000, 0.5)
+  
+  # Expand Distance_To_Fire_Points
+  testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 10, 10, 0.01)
+  testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 10, 100, 0.1)
+  testSingleExpandVar_class(forestCoverTypeX, forestCoverTypeY, 10, forestCoverTypeNewX, forestCoverTypeNewY, 10, 1000, 0.5)
+  }

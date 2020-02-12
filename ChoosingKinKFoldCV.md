@@ -79,7 +79,7 @@ is not really providing what we need.
 2.  Now consider the other extreme, K = n.  During CV, we will be
     fitting models to data subsets of size n-1.  But since the best model for
     n-1 amount of data will essentially be the same as for n amount
-(though possibly not the case of p is large), this choice of K seems best.  But 
+(though possibly not the case if p is large), this choice of K seems best.  But 
 there are two problems.
 
 - Now we are facing a seriously large amount of computation -- for each
@@ -100,7 +100,7 @@ how one should choose K, beginning with Shao in 1993.  A nice, updated
 account is in the book by Clark, Fokoue and Zhang (2009).  See also the
 recent paper by Lei (2019).  
 
-There has has been related theoretical work aimed at deciding how large
+There has has been theoretical work aimed at deciding how large
 p can be, relative to n, for statistical estimators to have desired
 properties.  The major work on this issue continues to be that of
 Portnoy (1988); see for instance Anirban DasGupta (2008).
@@ -111,14 +111,16 @@ practice.  Here's why:
 -  The mathematical conditions assumed by the theorems are impossible to
    verify in practice, and indeed rather meaningless.
 
--  Even more important, consider a linear regression setting, so we have p+1
-   parameters. The theory typically assumes that most of the true
+-  Even more important, consider a linear regression setting, so we have
+   p+1 parameters. The theory typically assumes that most of the true
 regression coefficients are 0, with model selection amounting to
 determining which are non-0.  This is not how things work in the real
-world.  Even if coefficients are not 0 or nearly so, using all our
-variables may result in overfitting.  We thus must eliminate some, even
-with non-0 values, a very different setting than what is covered by the
-theory.
+world.  First, some true coefficients may be non-0 but small.  Second,
+it is not necesarily true that we should use all variables with non-0
+coefficients, even if we knew which ones they are; there still may be
+too many of them to avoid overfitting.  variables may result in
+overfitting.  We thus may need to eliminate some, even with non-0
+values, a very different setting than what is covered by the theory.
 
 ## So, what CAN be done?
 

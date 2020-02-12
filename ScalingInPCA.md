@@ -65,9 +65,9 @@ kilometers be given more weight than one measured in miles?
 
 ## Motivating counterexample
 
-Consider a setting with two variables, A and B, with Var(A) = 500 and
-Var(B) = 2.  Let A' and B' denote these variables after centering and
-scaling.
+Consider a setting with two independent variables, A and B, with Var(A)
+= 500 and Var(B) = 2.  Let A' and B' denote these variables after
+centering and scaling.
 
 PCA is all about removing variables with small variance, as they are
 essentially constant.  If we work with A and B, we would of course use

@@ -57,7 +57,7 @@ fineTuning <-
          tstIdxs <- sample(1:nrow(dataset),nTst)
          dtrn <- dataset[-tstIdxs,]
          dtst <- dataset[tstIdxs,]
-         cmbi <- outdf[combI,]
+         cmbi <- outdf[combI,,drop=FALSE]
          losses[xv] <- regCall(dtrn,dtst,cmbi)
       }
       meanAcc[combI] <- mean(losses)

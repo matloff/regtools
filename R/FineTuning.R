@@ -25,48 +25,78 @@
 #   data frame, one column for each element of 'pars', plus 2*'nTst'
 #   columns for the (smoothed) results
 
-# example of 'theCall':
+# example of 'regCall':
 
-# function() {
-#    rfout <- randomForest(dtrn[,1:5],dtrn[,6],
-#       nodesize=comb[1],maxnodes=comb[2])
-#    preds <- predict(rfout,dtst)
-#    mean(abs(preds - dtst[,6]))
+# theCall <- function(dtrn,dtst,cmbi) {
+#    getNamedArgs(cmbi)
+#    ctout <- ctree(status ~ .,dtrn,
+#       control=ctree_control(
+#          minsplit=minsplit,
+#          minprob=minprob,
+#          maxdepth=maxdepth,
+#          alpha=alpha))
+#    preds <- predict(ctout,dtst)
+#    mean(preds == dtst$status)
 # }
 
-# example
+# fineTuning(dataset=wpbc,pars=pars,regCall=theCall,nCombs=50,nTst=50,nXval=1,k=3)
 
-fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval,k=NULL) {
+fineTuning <- 
+   function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval,k=NULL,up=TRUE) 
+{
    # generate the basic output data frame
    outdf <- expand.grid(pars)
    if (!is.null(nCombs)) {
       idxsToKeep <- sample(1:nrow(outdf),nCombs)
       outdf <- outdf[idxsToKeep,]
-   }
-   meanLoss <- rep(NA,nCombs)
+   } else nCombs <- nrow(outdf)
+   meanAcc <- rep(NA,nCombs)
    losses <- vector(length=nXval)
    for (combI in 1:nCombs) {
       for (xv in 1:nXval) {
          tstIdxs <- sample(1:nrow(dataset),nTst)
          dtrn <- dataset[-tstIdxs,]
          dtst <- dataset[tstIdxs,]
-         cmbi <- as.numeric(outdf[combI,])
+         cmbi <- outdf[combI,]
          losses[xv] <- regCall(dtrn,dtst,cmbi)
       }
-      meanLoss[combI] <- mean(losses)
+      meanAcc[combI] <- mean(losses)
    }
-   outdf$meanLoss <- meanLoss
-   outdf <- outdf[order(meanLoss),]
+   outdf$meanAcc <- meanAcc
+   outdf <- outdf[order(meanAcc,decreasing=!up),]
    if (!is.null(k)) {
       x <- outdf[,1:length(pars)]
-      kout <- kNN(x,meanLoss,x,k)
+      kout <- kNN(x,meanAcc,x,k)
       smoothed <- kout$regests
       outdf$smoothed <- smoothed
       outdf <- outdf[order(smoothed),]
-   } else outdf <- outdf[order(meanLoss),]
+   } else outdf <- outdf[order(meanAcc),]
    row.names(outdf) <- NULL
    output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k)
    class(output) <- 'tuner'
    output
+}
+
+# argVec is a row from the grid data frame in fineTuning(), with
+# parameter names; converts the values in argVec to variables of those
+# names
+getNamedArgs <- function(argVec) 
+{
+   for (nm in names(argVec)) {
+      assign(nm,argVec[[nm]],envir=parent.frame())
+   }
+}
+
+# parallel coordinates plot to visualize the grid
+plot.tuner <- function(tunerObject,topProp=NULL) {
+   require(lattice)
+   outdf <- tunerObject$outdf
+   nr <- nrow(outdf)
+   if (!is.null(topProp)) {
+      m <- floor(nrow(outdf))
+      outdf <- outdf[(nr-m+1):nr,]
+   }
+   parallelplot(outdf)
+
 }
 

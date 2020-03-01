@@ -16,6 +16,7 @@ S3method(predict,kNN)
 S3method(plot,kmin)
 S3method(predict,ovaknn)
 S3method(predict,ovalog)
+S3method(plot,tuner)
 
 export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    kmin,
@@ -33,4 +34,5 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    xyDataframeToMatrix,
    imgTo2D,
    mvrlm,
+   fineTuning,getNamedArgs,
    TStoX,TStoMat)

@@ -1,0 +1,14 @@
+
+RedSurroundsBlack.png:
+
+Predict gender from various, then plot predicted values against 2
+features, age and income.  Female spots surrounded!
+
+data(peDumms)
+pe <- peDumms
+pe <- pe[,c(1,20:29,31,32)]
+kout <- kNN(pe[,-11],pe[,11],kmax=25,classif=T)
+plot(pe$age,pe$wageinc,col=preds,pch=16)
+preds <- kout$ypreds + 1
+plot(pe$age,pe$wageinc,col=preds,pch=16)
+

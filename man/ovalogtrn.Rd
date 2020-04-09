@@ -50,7 +50,7 @@ pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL)
 \item{k}{Number of nearest neighbors.} 
 \item{predx}{Data points to be predicted.} 
 \item{predpts}{Data points to be predicted. Must be specified by
-   argument name.} 
+   argument name, i.e. 'predpts = '.} 
 \item{m}{Number of classes in multiclass setting.}
 \item{econdprobs}{Estimated conditional class probabilities, given the
 predictors.}

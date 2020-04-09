@@ -19,7 +19,7 @@ and nonparametric.
 }
 
 \usage{
-ovalogtrn(,trnxy,yname)
+ovalogtrn(trnxy,yname)
 ovalogpred()
 \method{predict}{ovalog}(object,...) 
 avalogtrn(m,trnxy)
@@ -38,9 +38,9 @@ pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL)
 \item{band}{If \code{band} is non-NULL, only points within \code{band}, 
    say 0.1, of est. P(Y = 1) are displayed, for a contour-like effect.}
 \item{trnxy}{Data matrix (not a data frame), one data point 
-   per row, Y in the last \code{m} column as dummiess. Must have column
+   per row, Y in the last \code{m} column as dummies. Must have column
    names.}
-\item{yname}{Name of the Y column.}
+\item{yname}{Name of the Y columns (same for all classes).}
 \item{object}{Needed for consistency with generic.}
 \item{...}{Needed for consistency with generic.}
 \item{y}{Vector or factor of response variable data in the training set, with

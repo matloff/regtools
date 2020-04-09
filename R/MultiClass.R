@@ -54,7 +54,8 @@ ovalogtrn <- function(trnxy,yname) {
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predx
 
-ovalogpred <- function() stop('user predict.ovalog()')
+ovalogpred <- function() stop('use predict.ovalog()')  # deprecated
+
 predict.ovalog <- function(object,...) 
 {
    dts <- list(...)
@@ -445,9 +446,6 @@ predict.mvrlm <- function(mvrlmObj,newx) {
    tmp <- apply(preds,1,which.max)
    colnames(preds)[tmp]
 }
-
-# maps a factor to 0,1,2,...,m-1 where m is the number of levels of f
-factorTo012etc <- function(f) as.numeric(f)-1
 
 #########################  confusion matrix  #################################
 

@@ -68,6 +68,9 @@ each class i, Y=i is regressed against the predictors.  Subsequent
 prediction is done by arg max of the resulting conditional
 probabilities.
 
+Note:  In calling \code{predict.ovalog}, make sure to NOT include the "Y"
+column in \code{predpts}.
+
 The \code{avalog*} functions use the All vs. All method:  For
 each pair of classes i and j, data is restricted to those classes, and a
 1-class regression is done with "Y" being Y=i.  Subsequent prediction is

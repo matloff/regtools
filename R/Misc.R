@@ -120,9 +120,9 @@ multCols <- function(x,cols,vals) {
 
 # computes the standard error of the predicted Y for X = xnew
 
-stdErrPred <- function(lmobj,xnew) {
+stdErrPred <- function(regObj,xnew) {
    xx <- c(1,xnew)  # the 1 accounts for the intercept term
    xx <- as.numeric(xx)  # in case xnew was a row in a data frame
-   sqrt(xx %*% vcov(lmobj) %*% xx)
+   as.numeric(sqrt(xx %*% vcov(regObj) %*% xx))
 }
 

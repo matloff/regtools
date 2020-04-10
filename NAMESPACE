@@ -33,6 +33,6 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    factorsToDummies,factorToDummies,dummiesToFactor,hasFactors,
    xyDataframeToMatrix,
    imgTo2D,
-   mvrlm,
+   mvrlm,stdErrPred,
    fineTuning,getNamedArgs,
    TStoX,TStoMat)

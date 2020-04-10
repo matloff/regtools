@@ -113,3 +113,13 @@ multCols <- function(x,cols,vals) {
    x
 }
 
+######################  misc. lm() routines  #######################
+
+# computes the standard error of the predicted Y for X = xnew
+
+stdErrPred <- function(lmobj,xnew) {
+   xx <- c(1,xnew)  # the 1 accounts for the intercept term
+   xx <- as.numeric(xx)  # in case xnew was a row in a data frame
+   sqrt(xx %*% vcov(lmobj) %*% xx)
+}
+

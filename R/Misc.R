@@ -91,6 +91,9 @@ dummiesToFactor <- function(dms,inclLast=FALSE) {
    as.factor(f)
 }
 
+# maps a factor to 0,1,2,...,m-1 where m is the number of levels of f
+factorTo012etc <- function(f) as.numeric(f)-1
+
 # inputs a data frame intended for regression/classification, with X in
 # the first cols and Y in the last; converts all factors to dummies, and
 # outputs a matrix; in creating dummies, r-1 are retained for r levels,

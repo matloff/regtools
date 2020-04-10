@@ -19,8 +19,7 @@ and nonparametric.
 }
 
 \usage{
-ovalogtrn(,trnxy,yname)
-ovalogpred()
+ovalogtrn(otrnxy,yname)
 \method{predict}{ovalog}(object,...) 
 avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx,trueclassprobs=NULL)
@@ -37,8 +36,8 @@ pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL)
 \item{cexval}{Symbol size for plotting.}
 \item{band}{If \code{band} is non-NULL, only points within \code{band}, 
    say 0.1, of est. P(Y = 1) are displayed, for a contour-like effect.}
-\item{trnxy}{Data matrix (not a data frame), one data point 
-   per row, Y in the last \code{m} column as dummiess. Must have column
+\item{otrnxy}{Data frame, one data point 
+   per row, Y in some column as a factor. Must have column
    names.}
 \item{yname}{Name of the Y column.}
 \item{object}{Needed for consistency with generic.}
@@ -51,7 +50,7 @@ pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL)
 \item{k}{Number of nearest neighbors.} 
 \item{predx}{Data points to be predicted.} 
 \item{predpts}{Data points to be predicted. Must be specified by
-   argument name.} 
+   argument name, i.e. 'predpts = '.} 
 \item{m}{Number of classes in multiclass setting.}
 \item{econdprobs}{Estimated conditional class probabilities, given the
 predictors.}
@@ -69,11 +68,14 @@ each class i, Y=i is regressed against the predictors.  Subsequent
 prediction is done by arg max of the resulting conditional
 probabilities.
 
+Note:  In calling \code{predict.ovalog}, make sure to NOT include the "Y"
+column in \code{predpts}.
+
 The \code{avalog*} functions use the All vs. All method:  For
 each pair of classes i and j, data is restricted to those classes, and a
 1-class regression is done with "Y" being Y=i.  Subsequent prediction is
 done for a given new case by calculating the value of i that yields the
-most "wins" for i.
+most "wins.".
 
 In addition to logit, the k-Nearest Neighbor method is available,
 via \code{ovaknntrn}.  Note too \code{kNN}.  
@@ -91,16 +93,17 @@ The function \code{knntrn} is deprecated; use \code{ovaknn}.
 
 \value{
 
-The prediction functions, \code{predict.ovalog}, \code{predict.avalog} and
-\code{predict.ovaknn}, return the predicted classes for the points in
-\code{predx} or \code{predpts}.  The corresponding conditional
-class probabilities are included as an attribute, accessible via \code{probs}
-
 The functions \code{ovalogtrn} and \code{avalogtrn} return the
 estimated logit coefficent vectors, one per column. There are
 \code{m} of them in the former case, \code{m}\code{m-1}/2 in the
 latter, in which case the order of the R function \code{combin} is
 used.
+
+The prediction functions, \code{predict.ovalog}, \code{predict.avalog} and
+\code{predict.ovaknn}, return the predicted class codes (integers
+0,1,...) for the points in \code{predx} or \code{predpts}.  The 
+corresponding conditional class probabilities are included as an attribute, 
+accessible via \code{probs}.
 
 The function \code{knntrn} returns a copy of the \code{xdata} input,
 but with an extra component added.  The latter is the matrix of
@@ -139,7 +142,7 @@ hats <- apply(preds,1,which.max) - 1
 mean(yhats == truey)  # about 0.37
 
 data(peFactors)
-# discard the lower educ-level casess, which are rare
+# discard the lower educ-level cases, which are rare
 edu <- peFactors$educ 
 numedu <- as.numeric(edu) 
 idxs <- numedu >= 12 

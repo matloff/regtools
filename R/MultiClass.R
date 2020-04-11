@@ -364,11 +364,18 @@ classadjust <- function(econdprobs,wrongprob1,trueprob1) {
    1 / (1 + trueratios * fratios)
 }
 
-# plot estimated regression/probability function of a univariate, 
-# binary y against each specified pair of predictors in x 
+#######################  pwplot()  #####################################
+
+# plot k-NN estimated regression/probability function of a univariate, 
+# Y against each specified pair of predictors in X 
 
 # for each point t, we ask whether est. P(Y = 1 | X = t) > P(Y = 1); if
-# yes, plot '1', else '0'
+# yes, plot plus, else circle
+
+# purpose: assess whether each pair of predictor variables predicts Y
+# well; e.g. if the pluses and circles are rather randomly distributed,
+# then this pair of predictor variables seems to be largely unrelated to
+# Y
  
 # cexval is the value of cex in 'plot' 
 
@@ -395,10 +402,55 @@ pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) {
          x2 <- x2[contourpts,]
       }
       xnames <- names(x2)
-      plot(x2[pred1,1],x2[pred1,2],pch='1',cex=cexval,
+      plot(x2[pred1,1],x2[pred1,2],pch=3,cex=cexval,
          xlab=xnames[1],ylab=xnames[2])
-      graphics::points(x2[-pred1,1],x2[-pred1,2],pch='0',cex=cexval)
+      graphics::points(x2[-pred1,1],x2[-pred1,2],pch=1,cex=cexval)
       readline("next plot")
+   }
+}
+
+#######################  boundaryPlot()  ################################
+
+# for binary Y setting, drawing boundary between predicted Y = 1 and
+# predicted Y = 0, as determined by the argument regests
+
+# boundary is taken to be b(t) = P(Y = 1 | X = t) = 0.5
+
+# purpose: visually assess goodness of fit, typically running this
+# function twice, one for glm() then for say kNN() or e1071::svm(); if
+# there is much discrepancy and the analyst wishes to still use glm(),
+# he/she may wish to add polynomial terms or use the polyreg package
+
+# arguments:
+
+#   y,x: y vector (1s and 0s), x matrix (data frames will be converted)
+#   regests: estimated regression function values
+#   pairs: matrix of predictor pairs to be plotted, one pair per column
+#   cex: plotting symbol size
+#   band: max distance from 0.5 for a point to be included in the contour 
+
+boundaryPlot <- function(y,x,regests,pairs=combn(ncol(x),2),
+   pchvals=2+y,cex=0.5,band=0.10) 
+{
+   # e.g. fitted.values output of glm() may be shorter than an X column,
+   # due to na.omit default
+   if(length(regests) != length(y))
+      stop('y and regests of different lengths')
+
+   p <- ncol(x)
+   for (m in 1:ncol(pairs)) {
+
+      i <- pairs[1,m]
+      j <- pairs[2,m]
+      x2 <- x[,c(i,j)]
+
+      # plot X points, symbols for Y
+      plot(x2,pch=pchvals,cex=cex)  
+
+      # add contour
+      near05 <- which(abs(regests - 0.5) < band)
+      points(x2[near05,],pch=21,cex=2.5*cex,bg='red')
+      if (m < ncol(pairs)) readline("next plot")
    }
 }
 

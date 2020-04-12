@@ -423,7 +423,7 @@ classadjust <- function(econdprobs,wrongprob1,trueprob1) {
 
 # arguments:
 
-#   y01,x: Y vector (1s and 0s), X matrix 
+#   y01,x: Y vector (1s and 0s), X matrix or numerical data frame 
 #   regests: estimated regression function values
 #   pairs: matrix of predictor pairs to be plotted, one pair per column
 #   cex: plotting symbol size
@@ -437,6 +437,17 @@ boundaryplot <- function(y01,x,regests,pairs=combn(ncol(x),2),
    if(length(regests) != length(y01))
       stop('y01 and regests of different lengths')
 
+   # need X numeric for plotting
+   if (is.data.frame(x)) {
+      if (hasFactors(x)) stop('x must be numeric')
+      x <- as.matrix(x)
+      if (mode(x) != 'numeric') stop('x has character data')
+   }
+
+   # Y must be 0s,1s or equiv
+   if (length(table(y01)) != 2) stop('y01 must have only 2 values')
+   if (is.factor(y01)) y01 <- as.numeric(y01) - 1
+   
    p <- ncol(x)
    for (m in 1:ncol(pairs)) {
 
@@ -449,7 +460,7 @@ boundaryplot <- function(y01,x,regests,pairs=combn(ncol(x),2),
 
       # add contour
       near05 <- which(abs(regests - 0.5) < band)
-      points(x2[near05,],pch=21,cex=2.5*cex,bg='red')
+      points(x2[near05,],pch=21,cex=1.5*cex,bg='red')
       if (m < ncol(pairs)) readline("next plot")
    }
 }

@@ -364,52 +364,52 @@ classadjust <- function(econdprobs,wrongprob1,trueprob1) {
    1 / (1 + trueratios * fratios)
 }
 
-#######################  pwplot()  #####################################
+## #######################  pwplot()  #####################################
+## 
+## # plot k-NN estimated regression/probability function of a univariate, 
+## # Y against each specified pair of predictors in X 
+## 
+## # for each point t, we ask whether est. P(Y = 1 | X = t) > P(Y = 1); if
+## # yes, plot plus, else circle
+## 
+## # purpose: assess whether each pair of predictor variables predicts Y
+## # well; e.g. if the pluses and circles are rather randomly distributed,
+## # then this pair of predictor variables seems to be largely unrelated to
+## # Y
+##  
+## # cexval is the value of cex in 'plot' 
+## 
+## # if user specifies 'pairs', the format is one pair per column in the
+## # provided matrix
+## 
+## # if band is non-NULL, only points within band, say 0.1, of est. P(Y =
+## # 1) are displayed, for a contour-like effect
+## 
+## pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) {
+##    p <- ncol(x)
+##    meanyval <- mean(y)
+##    ny <- length(y)
+##    for (m in 1:ncol(pairs)) {
+##       i <- pairs[1,m]
+##       j <- pairs[2,m]
+##       x2 <- x[,c(i,j)]
+##       xd <- preprocessx(x2,k)
+##       kout <- knnest(y,xd,k)
+##       regest <- kout$regest
+##       pred1 <- which(regest >= meanyval)
+##       if (!is.null(band))  {
+##          contourpts <- which(abs(regest - meanyval) < band)
+##          x2 <- x2[contourpts,]
+##       }
+##       xnames <- names(x2)
+##       plot(x2[pred1,1],x2[pred1,2],pch=3,cex=cexval,
+##          xlab=xnames[1],ylab=xnames[2])
+##       graphics::points(x2[-pred1,1],x2[-pred1,2],pch=1,cex=cexval)
+##       readline("next plot")
+##    }
+## }
 
-# plot k-NN estimated regression/probability function of a univariate, 
-# Y against each specified pair of predictors in X 
-
-# for each point t, we ask whether est. P(Y = 1 | X = t) > P(Y = 1); if
-# yes, plot plus, else circle
-
-# purpose: assess whether each pair of predictor variables predicts Y
-# well; e.g. if the pluses and circles are rather randomly distributed,
-# then this pair of predictor variables seems to be largely unrelated to
-# Y
- 
-# cexval is the value of cex in 'plot' 
-
-# if user specifies 'pairs', the format is one pair per column in the
-# provided matrix
-
-# if band is non-NULL, only points within band, say 0.1, of est. P(Y =
-# 1) are displayed, for a contour-like effect
-
-pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) {
-   p <- ncol(x)
-   meanyval <- mean(y)
-   ny <- length(y)
-   for (m in 1:ncol(pairs)) {
-      i <- pairs[1,m]
-      j <- pairs[2,m]
-      x2 <- x[,c(i,j)]
-      xd <- preprocessx(x2,k)
-      kout <- knnest(y,xd,k)
-      regest <- kout$regest
-      pred1 <- which(regest >= meanyval)
-      if (!is.null(band))  {
-         contourpts <- which(abs(regest - meanyval) < band)
-         x2 <- x2[contourpts,]
-      }
-      xnames <- names(x2)
-      plot(x2[pred1,1],x2[pred1,2],pch=3,cex=cexval,
-         xlab=xnames[1],ylab=xnames[2])
-      graphics::points(x2[-pred1,1],x2[-pred1,2],pch=1,cex=cexval)
-      readline("next plot")
-   }
-}
-
-#######################  boundaryPlot()  ################################
+#######################  boundaryplot()  ################################
 
 # for binary Y setting, drawing boundary between predicted Y = 1 and
 # predicted Y = 0, as determined by the argument regests
@@ -423,19 +423,19 @@ pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) {
 
 # arguments:
 
-#   y,x: y vector (1s and 0s), x matrix (data frames will be converted)
+#   y01,x: Y vector (1s and 0s), X matrix 
 #   regests: estimated regression function values
 #   pairs: matrix of predictor pairs to be plotted, one pair per column
 #   cex: plotting symbol size
 #   band: max distance from 0.5 for a point to be included in the contour 
 
-boundaryPlot <- function(y,x,regests,pairs=combn(ncol(x),2),
-   pchvals=2+y,cex=0.5,band=0.10) 
+boundaryplot <- function(y01,x,regests,pairs=combn(ncol(x),2),
+   pchvals=2+y01,cex=0.5,band=0.10) 
 {
    # e.g. fitted.values output of glm() may be shorter than an X column,
    # due to na.omit default
-   if(length(regests) != length(y))
-      stop('y and regests of different lengths')
+   if(length(regests) != length(y01))
+      stop('y01 and regests of different lengths')
 
    p <- ncol(x)
    for (m in 1:ncol(pairs)) {

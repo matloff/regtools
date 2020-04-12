@@ -1,4 +1,4 @@
-\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,ovaknntrn,predict.ovaknn,pwplot}
+\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,ovaknntrn,predict.ovaknn,boundaryplot}
 \alias{ovalogtrn}
 \alias{ovalogpred}
 \alias{avalogtrn}
@@ -9,13 +9,12 @@
 \alias{confusion}
 \alias{factorTo012ec}
 \alias{classadjust}
-\alias{pwplot}
+\alias{boundaryplot}
 
 \title{Classification with More Than 2 Classes}
 
 \description{
-One vs. All, All vs. All tools for multiclass classification, parametric
-and nonparametric.
+Tools for multiclass classification, parametric and nonparametric.
 }
 
 \usage{
@@ -26,14 +25,14 @@ avalogpred(m,coefmat,predx,trueclassprobs=NULL)
 knntrn() 
 \method{predict}{ovaknn}(object,...) 
 classadjust(econdprobs,wrongprob1,trueprob1) 
-pwplot(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) 
+boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
 }
 
 \arguments{
-\item{x}{X data matrix or data frame.}
+\item{x}{X data matrix.}
 \item{pairs}{Two-row matrix, column i of which is a pair of predictor
    variables to graph.}
-\item{cexval}{Symbol size for plotting.}
+\item{cex}{Symbol size for plotting.}
 \item{band}{If \code{band} is non-NULL, only points within \code{band}, 
    say 0.1, of est. P(Y = 1) are displayed, for a contour-like effect.}
 \item{otrnxy}{Data frame, one data point 
@@ -79,13 +78,6 @@ most "wins.".
 
 In addition to logit, the k-Nearest Neighbor method is available,
 via \code{ovaknntrn}.  Note too \code{kNN}.  
-
-In \code{pwplot}, \code{y} must be a column of 0s and 1s.  For each pair
-of predictor columns X12 in \code{x}, we compute estimated P(Y = 1) and P(Y
-= 1 | X12).  If the latter is larger, plot a '1', else a '0'. The plot
-is intended to be helpful in exploring a relation between Y and X.  For
-non-NULL \code{band}, a contour-like plot is made, showing where X12
-changes from making Y = 1 less likely to more likely.
 
 The function \code{knntrn} is deprecated; use \code{ovaknn}.
 

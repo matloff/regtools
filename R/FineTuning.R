@@ -72,6 +72,10 @@ fineTuning <-
       outdf <- outdf[order(smoothed),]
    } else outdf <- outdf[order(meanAcc),]
    row.names(outdf) <- NULL
+   outdf$meanAcc <- NULL
+   # change order so 'smoothed' is plotted at the bottom
+   nc <- ncol(outdf)
+   outdf <- outdf[,c(nc,1:(nc-1))]
    output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k)
    class(output) <- 'tuner'
    output

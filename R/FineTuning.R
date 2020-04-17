@@ -6,19 +6,20 @@
 
 #   dataset: data frame or equivalent, containing the "X" and "Y"
 #      columns; will be split by the function to 'dtrn' and 'dtst',
-#      same level as the call
-#   pars: named R list, one component for each parameter; component 'x'
-#      is the set of desired values for the parameter 'x'
+#      located on same level as the call
+#   pars: named R list, one component for each grid parameter; component 
+#      'x' is the set of desired values for the parameter 'x'
 #   theCall: call for given regression/classification method, together with 
 #      the associated prediction function and loss evaluation; the 
 #      elements of names(pars) will appear; args are
 #      'dtrn', 'dtst' and 'comb', the latter being a given 
 #      combinaton of parameter values; see example below
 #   nCombs: number of possible combinations of 'pars'to evaluate; NULL
-#      means all
+#      means all, otherwise randomly chosen
 #   nTst: desired size of holdout set
 #   nXval: number of cross-validation runs to perform
 #   k: k-NN smoothing parameter for the results
+#   up: if TRUE, results table will be printed in increasing order of 'smoothed'
 
 # value:
 
@@ -42,7 +43,7 @@
 # fineTuning(dataset=wpbc,pars=pars,regCall=theCall,nCombs=50,nTst=50,nXval=1,k=3)
 
 fineTuning <- 
-   function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval,k=NULL,up=TRUE) 
+   function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,up=TRUE) 
 {
    # generate the basic output data frame
    outdf <- expand.grid(pars)
@@ -91,14 +92,17 @@ getNamedArgs <- function(argVec)
    }
 }
 
-# parallel coordinates plot to visualize the grid
-plot.tuner <- function(tunerObject,topProp=NULL) {
+# parallel coordinates plot to visualize the grid; tunerObject is output
+# of fineTuning(); disp is number to display, with 0, -m and +m meaning
+# cases with the m smallest 'smoothed' value, all cases and the m
+# largest values of 'smoothed', respectively
+plot.tuner <- function(tunerObject,disp=0) {
    require(lattice)
    outdf <- tunerObject$outdf
-   nr <- nrow(outdf)
-   if (!is.null(topProp)) {
-      m <- floor(nrow(outdf))
-      outdf <- outdf[(nr-m+1):nr,]
+   if (disp != 0) {
+      if (abs(disp) < ncol(outdf) - 1) stop('disp too small')
+      ord <- order(outdf[,1],decreasing=(disp > 0))
+      outdf <- outdf[ord[1:abs(disp)],]
    }
    parallelplot(outdf)
 

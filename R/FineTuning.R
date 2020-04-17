@@ -74,7 +74,8 @@ fineTuning <-
    } else outdf <- outdf[order(meanAcc),]
    row.names(outdf) <- NULL
    outdf$meanAcc <- NULL
-   # change order so 'smoothed' is plotted at the bottom
+   # change order so 'smoothed' is plotted at the bottom; outdated now,
+   # 4/17/2020
    nc <- ncol(outdf)
    outdf <- outdf[,c(nc,1:(nc-1))]
    output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k)
@@ -97,14 +98,17 @@ getNamedArgs <- function(argVec)
 # cases with the m smallest 'smoothed' value, all cases and the m
 # largest values of 'smoothed', respectively
 plot.tuner <- function(tunerObject,disp=0) {
-   require(lattice)
+   # require(lattice)
+   require(cdparcoord)
    outdf <- tunerObject$outdf
    if (disp != 0) {
       if (abs(disp) < ncol(outdf) - 1) stop('disp too small')
       ord <- order(outdf[,1],decreasing=(disp > 0))
       outdf <- outdf[ord[1:abs(disp)],]
    }
-   parallelplot(outdf)
-
+   # parallelplot(outdf)
+   nc <- ncol(outdf)
+   nr <- nrow(outdf)
+   discparcoord(outdf[,c(2:nc,1)],k=nr)
 }
 

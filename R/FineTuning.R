@@ -109,6 +109,6 @@ plot.tuner <- function(tunerObject,disp=0) {
    # parallelplot(outdf)
    nc <- ncol(outdf)
    nr <- nrow(outdf)
-   discparcoord(outdf[,c(2:nc,1)],k=nr)
+   discparcoord(outdf[,c(2:nc,1)],k=nr,differentiate=TRUE)
 }
 

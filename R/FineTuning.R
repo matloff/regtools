@@ -43,7 +43,7 @@
 # fineTuning(dataset=wpbc,pars=pars,regCall=theCall,nCombs=50,nTst=50,nXval=1,k=3)
 
 fineTuning <- 
-   function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,up=TRUE) 
+   function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=3,up=TRUE) 
 {
    # generate the basic output data frame
    outdf <- expand.grid(pars)
@@ -73,11 +73,6 @@ fineTuning <-
       outdf <- outdf[order(smoothed),]
    } else outdf <- outdf[order(meanAcc),]
    row.names(outdf) <- NULL
-   outdf$meanAcc <- NULL
-   # change order so 'smoothed' is plotted at the bottom; outdated now,
-   # 4/17/2020
-   nc <- ncol(outdf)
-   outdf <- outdf[,c(nc,1:(nc-1))]
    output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k)
    class(output) <- 'tuner'
    output
@@ -101,14 +96,13 @@ plot.tuner <- function(tunerObject,disp=0) {
    # require(lattice)
    require(cdparcoord)
    outdf <- tunerObject$outdf
+   outdf$meanAcc <- NULL
    if (disp != 0) {
       if (abs(disp) < ncol(outdf) - 1) stop('disp too small')
       ord <- order(outdf[,1],decreasing=(disp > 0))
       outdf <- outdf[ord[1:abs(disp)],]
    }
-   # parallelplot(outdf)
-   nc <- ncol(outdf)
    nr <- nrow(outdf)
-   discparcoord(outdf[,c(2:nc,1)],k=nr,differentiate=TRUE)
+   discparcoord(outdf,k=nr,differentiate=TRUE)
 }
 

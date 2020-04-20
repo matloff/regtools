@@ -66,6 +66,10 @@ fineTuning <-
    outdf$meanAcc <- meanAcc
    outdf <- outdf[order(meanAcc,decreasing=!up),]
    if (!is.null(k)) {
+      if (k > nrow(outdf)) {
+         warning('reducing k')
+         k <- nrow(outdf)
+      }
       x <- outdf[,1:length(pars)]
       kout <- kNN(x,meanAcc,x,k)
       smoothed <- kout$regests

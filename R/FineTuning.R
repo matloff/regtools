@@ -42,8 +42,8 @@
 
 # fineTuning(dataset=wpbc,pars=pars,regCall=theCall,nCombs=50,nTst=50,nXval=1,k=3)
 
-fineTuning <- 
-   function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=3,up=TRUE) 
+fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=3,
+   up=TRUE,dispOrderSmoothed=TRUE) 
 {
    # generate the basic output data frame
    outdf <- expand.grid(pars)
@@ -74,10 +74,11 @@ fineTuning <-
       kout <- kNN(x,meanAcc,x,k)
       smoothed <- kout$regests
       outdf$smoothed <- smoothed
-      outdf <- outdf[order(smoothed),]
+      if (dispOrderSmoothed) outdf <- outdf[order(smoothed),]
    } else outdf <- outdf[order(meanAcc),]
    row.names(outdf) <- NULL
-   output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k)
+   output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k,
+      up=up,dispOrderSmoothed=dispOrderSmoothed)
    class(output) <- 'tuner'
    output
 }
@@ -110,3 +111,18 @@ plot.tuner <- function(tunerObject,disp=0) {
    discparcoord(outdf,k=nr,differentiate=TRUE)
 }
 
+# change the display order, between meanAcc and smoothed; ftout is
+# output of fineTuning(); returns the full 'tuner' object, updated
+reorder.tuner <- function(ftout) {
+   dispOrderSmoothed <- ftout$dispOrderSmoothed
+   up <- ftout$up
+   outdf <- ftout$outdf
+   if (dispOrderSmoothed) {
+      outdf <- outdf[order(outdf$meanAcc,decreasing=!up),]
+   } else {
+      outdf <- outdf[order(outdf$smoothed,decreasing=!up),]
+   }
+   ftout$outdf <- outdf
+   ftout$dispOrderSmoothed <- !ftout$dispOrderSmoothed
+   ftout
+}

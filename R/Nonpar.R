@@ -53,6 +53,9 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 {  
    noPreds <- is.null(newx)  # don't predict, just save for future predict
    # type checks etc.
+   if (identical(smoothingFtn,loclin)) {
+      if (allK) stop('cannot use loclin() yet with allK = TRUE')
+   }
    # checks on x
    if (is.null(newx)) newx <- x  # won't be used
    if (is.vector(x)) x <- matrix(x,ncol=1)
@@ -128,8 +131,12 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       # in fyh(), closeIdxs is a row in closestIdxs, with the first k columns
       fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs,,drop=FALSE])
       if (!allK) {
-         regests <- apply(closestIdxs,1,fyh)
-         if (ncol(y) > 1) regests <- t(regests)
+         if (identical(smoothingFtn,loclin)) {
+            regests <- loclin(newx,cbind(x,y)[closestIdxs,])
+         } else {
+            regests <- apply(closestIdxs,1,fyh)
+            if (ncol(y) > 1) regests <- t(regests)
+         }
       } else {
          regests <- NULL
          for (k in 1:kmax) 
@@ -520,12 +527,13 @@ vary <- function(predpt,nearxy) {
 }
 
 # fit linear model to the data z, Y in last column, and predict at xnew
-loclin <- function(predpt,nearxy) {
-   nycol <- ncol(nearxy) - length(predpt)
+loclin <- function(predpts,nearxy) {
+   if (is.vector(predpts)) predpts <- matrix(predpts,nrow=1)
+   nycol <- ncol(nearxy) - ncol(predpts)
    if (nycol > 1) stop('not capable of vector y yet')
    ycol <- ncol(nearxy)
    bhat <- coef(lm(nearxy[,ycol] ~ nearxy[,-ycol]))
-   c(1,predpt) %*% bhat
+   cbind(1,predpts) %*% bhat
 }
 
 ######################  parvsnonparplot(), etc. ###############################

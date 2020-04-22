@@ -18,8 +18,11 @@
 #      means all, otherwise randomly chosen
 #   nTst: desired size of holdout set
 #   nXval: number of cross-validation runs to perform
-#   k: k-NN smoothing parameter for the results
+#   k: k-NN smoothing parameter for the results; if NULL, then no #   smoothing
 #   up: if TRUE, results table will be printed in increasing order of 'smoothed'
+#   dispOrderSmoothed: if TRUE and k is non-null, then output will be
+#      arranged in order of the 'smoothed' column; otherwise in order of
+#      the meanAcc column
 
 # value:
 
@@ -71,11 +74,14 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=3,
          k <- nrow(outdf)
       }
       x <- outdf[,1:length(pars)]
-      kout <- kNN(x,meanAcc,x,k)
+      kout <- kNN(x,meanAcc,x,k,smoothingFtn=loclin)
       smoothed <- kout$regests
       outdf$smoothed <- smoothed
       if (dispOrderSmoothed) outdf <- outdf[order(smoothed),]
-   } else outdf <- outdf[order(meanAcc),]
+   } else {
+      outdf <- outdf[order(meanAcc),]
+      dispOrderSmoothed <- FALSE
+   }
    row.names(outdf) <- NULL
    output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k,
       up=up,dispOrderSmoothed=dispOrderSmoothed)

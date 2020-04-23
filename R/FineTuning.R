@@ -103,11 +103,12 @@ getNamedArgs <- function(argVec)
 # of fineTuning(); disp is number to display, with 0, -m and +m meaning
 # cases with the m smallest 'smoothed' value, all cases and the m
 # largest values of 'smoothed', respectively
-plot.tuner <- function(tunerObject,disp=0) {
+plot.tuner <- function(tunerObject,col='meanAcc',disp=0) {
    # require(lattice)
    require(cdparcoord)
    outdf <- tunerObject$outdf
-   outdf$meanAcc <- NULL
+   if (col == 'smoothed') outdf$meanAcc <- NULL
+   else outdf$smoothed <- NULL
    if (disp != 0) {
       if (abs(disp) < ncol(outdf) - 1) stop('disp too small')
       ord <- order(outdf[,1],decreasing=(disp > 0))

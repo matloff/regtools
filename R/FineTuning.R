@@ -29,25 +29,11 @@
 #   data frame, one column for each element of 'pars', plus 2*'nTst'
 #   columns for the (smoothed) results
 
-# example of 'regCall':
-
-# theCall <- function(dtrn,dtst,cmbi) {
-#    getNamedArgs(cmbi)
-#    ctout <- ctree(status ~ .,dtrn,
-#       control=ctree_control(
-#          minsplit=minsplit,
-#          minprob=minprob,
-#          maxdepth=maxdepth,
-#          alpha=alpha))
-#    preds <- predict(ctout,dtst)
-#    mean(preds == dtst$status)
-# }
-
-# fineTuning(dataset=wpbc,pars=pars,regCall=theCall,nCombs=50,nTst=50,nXval=1,k=3)
-
-fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=3,
-   up=TRUE,dispOrderSmoothed=TRUE) 
+fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
+   up=TRUE,dispOrderSmoothed=FALSE) 
 {
+   # holding off for now on smoothing
+   if (!is.null(k)) warning('smoothing is experimental for now')
    # generate the basic output data frame
    outdf <- expand.grid(pars)
    if (!is.null(nCombs)) {
@@ -104,7 +90,6 @@ getNamedArgs <- function(argVec)
 # cases with the m smallest 'smoothed' value, all cases and the m
 # largest values of 'smoothed', respectively
 plot.tuner <- function(tunerObject,col='meanAcc',disp=0) {
-   # require(lattice)
    require(cdparcoord)
    outdf <- tunerObject$outdf
    if (col == 'smoothed') outdf$meanAcc <- NULL

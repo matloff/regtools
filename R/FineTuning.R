@@ -97,8 +97,9 @@ plot.tuner <- function(tunerObject,col='meanAcc',disp=0) {
    if (col == 'smoothed') outdf$meanAcc <- NULL
    else outdf$smoothed <- NULL
    if (disp != 0) {
-      if (abs(disp) < ncol(outdf) - 1) stop('disp too small')
-      ord <- order(outdf[,1],decreasing=(disp > 0))
+      nc <- ncol(outdf)
+      if (abs(disp) < nc - 1) stop('disp too small')
+      ord <- order(outdf[,nc],decreasing=(disp > 0))
       outdf <- outdf[ord[1:abs(disp)],]
    }
    nr <- nrow(outdf)

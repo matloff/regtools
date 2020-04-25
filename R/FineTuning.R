@@ -33,7 +33,8 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
    up=TRUE,dispOrderSmoothed=FALSE) 
 {
    # holding off for now on smoothing
-   if (!is.null(k)) warning('smoothing is experimental for now')
+   if (!is.null(k) && length(pars) > 1) 
+      stop('smoothing is currently recommended only for 1 parameter')
    # generate the basic output data frame
    outdf <- expand.grid(pars)
    if (!is.null(nCombs)) {
@@ -60,7 +61,8 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
          k <- nrow(outdf)
       }
       x <- outdf[,1:length(pars)]
-      kout <- kNN(x,meanAcc,x,k,smoothingFtn=loclin)
+      x <- mmscale(x)
+      kout <- kNN(x,meanAcc,x,k,scaleX=FALSE,smoothingFtn=loclin)
       smoothed <- kout$regests
       outdf$smoothed <- smoothed
       if (dispOrderSmoothed) outdf <- outdf[order(smoothed),]
@@ -118,3 +120,18 @@ reorder.tuner <- function(ftout) {
    ftout$dispOrderSmoothed <- !ftout$dispOrderSmoothed
    ftout
 }
+
+mmscale <- function (m)
+{
+   rngs <- apply(m,2,range)
+   mins <- rngs[1,]
+   maxs <- rngs[2,]
+   ranges <- maxs - mins
+   tmm <- function(i) m[,] <- (m[,i] - mins[i]) / ranges[i]
+   m <- sapply(1:ncol(m),tmm)
+   attr(m,'minmax') <- rngs
+   m
+}
+
+
+

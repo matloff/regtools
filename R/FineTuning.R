@@ -42,6 +42,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
       outdf <- outdf[idxsToKeep,]
    } else nCombs <- nrow(outdf)
    meanAcc <- rep(NA,nCombs)
+   seAcc <- rep(NA,nCombs)
    losses <- vector(length=nXval)
    for (combI in 1:nCombs) {
       for (xv in 1:nXval) {
@@ -52,8 +53,10 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
          losses[xv] <- regCall(dtrn,dtst,cmbi)
       }
       meanAcc[combI] <- mean(losses)
+      seAcc[combI] <- sd(losses) / sqrt(nXval)
    }
    outdf$meanAcc <- meanAcc
+   outdf$seAcc <- seAcc
    outdf <- outdf[order(meanAcc,decreasing=!up),]
    if (!is.null(k)) {
       if (k > nrow(outdf)) {
@@ -66,11 +69,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
       smoothed <- kout$regests
       outdf$smoothed <- smoothed
       if (dispOrderSmoothed) outdf <- outdf[order(smoothed),]
-   } else {
-      outdf <- outdf[order(meanAcc),]
-      dispOrderSmoothed <- FALSE
-   }
-   row.names(outdf) <- NULL
+   } 
    output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k,
       up=up,dispOrderSmoothed=dispOrderSmoothed)
    class(output) <- 'tuner'
@@ -94,6 +93,7 @@ getNamedArgs <- function(argVec)
 plot.tuner <- function(tunerObject,col='meanAcc',disp=0) {
    require(cdparcoord)
    outdf <- tunerObject$outdf
+   outdf$seAcc <- NULL
    if (col == 'smoothed') outdf$meanAcc <- NULL
    else outdf$smoothed <- NULL
    if (disp != 0) {

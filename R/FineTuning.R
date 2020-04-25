@@ -1,6 +1,8 @@
 
-# grid search for good values of tuning parameters; key aspect is
-# smoothing of the results
+# grid search for good values of tuning parameters
+
+# name is a pun on the old radio days of getting to the exact frequency
+# of a station, fine tuning
 
 # arguments:
 
@@ -26,8 +28,10 @@
 
 # value:
 
-#   data frame, one column for each element of 'pars', plus 2*'nTst'
-#   columns for the (smoothed) results
+#   data frame, one column for each element of 'pars', followed by a
+#   meanAcc ("mean accuracy") column; then columns for standard errors,
+#   Bonferroni CI radii and (if k is non-NULL) smoothed versions of
+#   meanAcc
 
 fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
    up=TRUE,dispOrderSmoothed=FALSE) 
@@ -56,7 +60,9 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
       seAcc[combI] <- sd(losses) / sqrt(nXval)
    }
    outdf$meanAcc <- meanAcc
-   outdf$seAcc <- seAcc
+   outdf$seAcc <- seAcc 
+   zval <- -qnorm(0.025/nrow(outdf))
+   outdf$bonfAcc <- zval * seAcc
    outdf <- outdf[order(meanAcc,decreasing=!up),]
    if (!is.null(k)) {
       if (k > nrow(outdf)) {
@@ -72,6 +78,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
    } 
    output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k,
       up=up,dispOrderSmoothed=dispOrderSmoothed)
+   row.names(output) <- NULL
    class(output) <- 'tuner'
    output
 }
@@ -94,6 +101,7 @@ plot.tuner <- function(tunerObject,col='meanAcc',disp=0) {
    require(cdparcoord)
    outdf <- tunerObject$outdf
    outdf$seAcc <- NULL
+   outdf$bonfAcc <- NULL
    if (col == 'smoothed') outdf$meanAcc <- NULL
    else outdf$smoothed <- NULL
    if (disp != 0) {
@@ -109,6 +117,7 @@ plot.tuner <- function(tunerObject,col='meanAcc',disp=0) {
 # change the display order, between meanAcc and smoothed; ftout is
 # output of fineTuning(); returns the full 'tuner' object, updated
 reorder.tuner <- function(ftout) {
+   if (is.null(ftout$outdf$smoothed)) stop('no smoothing column')
    dispOrderSmoothed <- ftout$dispOrderSmoothed
    up <- ftout$up
    outdf <- ftout$outdf

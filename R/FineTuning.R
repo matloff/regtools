@@ -1,9 +1,6 @@
 
 # grid search for good values of tuning parameters
 
-# name is a pun on the old radio days of getting to the exact frequency
-# of a station, fine tuning
-
 # arguments:
 
 #   dataset: data frame or equivalent, containing the "X" and "Y"
@@ -76,9 +73,9 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
       outdf$smoothed <- smoothed
       if (dispOrderSmoothed) outdf <- outdf[order(smoothed),]
    } 
+   row.names(outdf) <- NULL
    output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k,
       up=up,dispOrderSmoothed=dispOrderSmoothed)
-   row.names(output) <- NULL
    class(output) <- 'tuner'
    output
 }

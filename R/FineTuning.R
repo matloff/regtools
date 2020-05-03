@@ -128,17 +128,3 @@ reorder.tuner <- function(ftout) {
    ftout
 }
 
-mmscale <- function (m)
-{
-   rngs <- apply(m,2,range)
-   mins <- rngs[1,]
-   maxs <- rngs[2,]
-   ranges <- maxs - mins
-   tmm <- function(i) m[,] <- (m[,i] - mins[i]) / ranges[i]
-   m <- sapply(1:ncol(m),tmm)
-   attr(m,'minmax') <- rngs
-   m
-}
-
-
-

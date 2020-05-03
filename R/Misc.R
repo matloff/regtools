@@ -3,7 +3,7 @@
 
 #########################  unscale()  #################################
 
-# undoes 'scale()'
+# undoes R 'scale()'
 
 # reverses scaling on scaledx, dividing its columns by sds and adding
 # ctrs; if either of the latter 2 is NULL, it is obtained via attr(), on
@@ -29,6 +29,39 @@ hasFactors <- function(x)
       if (is.factor(x[,i])) return(TRUE)
    }
    FALSE
+}
+
+#########################  mmscale()  #################################
+
+# scale to [0,1]
+
+# arguments:
+
+#    m: a vector or matrix
+#    scalePars: if not NULL, a 2-row matrix, with column storing
+#       the min and max values to be used in scaling column i of m
+
+# value: a matrix, with column i consisting of the scaled version
+#    of column i of m, and attribute as in scalePars (either copied from
+#    the latter or if null, generated fresh
+
+mmscale <- function (m,scalePars=NULL)
+{
+   if (is.vector(m)) m <- matrix(m,ncol=1)
+   if (is.null(scalePars)) {
+      rngs <- apply(m,2,range)
+      mins <- rngs[1,]
+      maxs <- rngs[2,]
+   } else {
+      mins <- scalePars[1,]
+      maxs <- scalePars[2,]
+      rngs <- scalePars
+   }
+   ranges <- maxs - mins
+   tmm <- function(i) m[,] <- (m[,i] - mins[i]) / ranges[i]
+   m <- sapply(1:ncol(m),tmm)
+   attr(m,'minmax') <- rngs
+   m
 }
 
 #################  convert between factors and dummies  ##################

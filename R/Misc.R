@@ -75,6 +75,7 @@ mmscale <- function (m,scalePars=NULL)
 
 factorsToDummies <- function(dfr,omitLast=FALSE) 
 {
+   if (is.factor(dfr)) dfr <- as.data.frame(dfr)
    outDF <- data.frame(rep(0,nrow((dfr))))  # filler start
    for (i in 1:ncol(dfr)) {
       dfi <- dfr[,i]

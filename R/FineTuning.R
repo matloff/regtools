@@ -31,7 +31,7 @@
 #   meanAcc
 
 fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
-   up=TRUE,dispOrderSmoothed=FALSE) 
+   up=TRUE,dispOrderSmoothed=FALSE,initSeed=9999) 
 {
    # holding off for now on smoothing
    if (!is.null(k) && length(pars) > 1) 
@@ -47,9 +47,12 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
    losses <- vector(length=nXval)
    for (combI in 1:nCombs) {
       for (xv in 1:nXval) {
-         tstIdxs <- sample(1:nrow(dataset),nTst)
-         dtrn <- dataset[-tstIdxs,]
-         dtst <- dataset[tstIdxs,]
+         ## tstIdxs <- sample(1:nrow(dataset),nTst)
+         ## dtrn <- dataset[-tstIdxs,]
+         ## dtst <- dataset[tstIdxs,]
+         tmp <- partTrnTst(dataset,nTest=nTst,initSeed=initSeed)
+         dtrn <- tmp$trn
+         dtst <- tmp$tst
          cmbi <- outdf[combI,,drop=FALSE]
          losses[xv] <- regCall(dtrn,dtst,cmbi)
       }
@@ -128,3 +131,24 @@ reorder.tuner <- function(ftout) {
    ftout
 }
 
+# partition into training, test sets; if desire training, validation,
+# test, use twice
+
+# arguments:
+
+#    fullData:  matrix or data frame, one data point per row
+#    nTest:  number of data points for the test set
+#    initSeed:  if non-null, set.seed() will be called
+
+# value:
+
+#    R list, consisting of the training and test sets, and initSeed
+
+partTrnTst <- function(fullData,nTest=min(1000,round(0.2*nrow(fullData))),
+   initSeed=9999) {
+   if (!is.null(initSeed)) set.seed(initSeed)
+   idxs <- sample(1:nrow(fullData),nTest)
+   trn <- fullData[-idxs,]
+   tst <- fullData[idxs,]
+   list(trn=trn,tst=tst,initSeed=initSeed)
+}

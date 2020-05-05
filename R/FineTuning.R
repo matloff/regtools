@@ -50,7 +50,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
          ## tstIdxs <- sample(1:nrow(dataset),nTst)
          ## dtrn <- dataset[-tstIdxs,]
          ## dtst <- dataset[tstIdxs,]
-         tmp <- partTrnTst(dataset,nTest=nTst,initSeed=initSeed)
+         tmp <- partTrnTst(dataset,nTest=nTst)
          dtrn <- tmp$trn
          dtst <- tmp$tst
          cmbi <- outdf[combI,,drop=FALSE]
@@ -138,17 +138,14 @@ reorder.tuner <- function(ftout) {
 
 #    fullData:  matrix or data frame, one data point per row
 #    nTest:  number of data points for the test set
-#    initSeed:  if non-null, set.seed() will be called
 
 # value:
 
-#    R list, consisting of the training and test sets, and initSeed
+#    R list, consisting of the training and test sets
 
-partTrnTst <- function(fullData,nTest=min(1000,round(0.2*nrow(fullData))),
-   initSeed=9999) {
-   if (!is.null(initSeed)) set.seed(initSeed)
+partTrnTst <- function(fullData,nTest=min(1000,round(0.2*nrow(fullData)))) {
    idxs <- sample(1:nrow(fullData),nTest)
    trn <- fullData[-idxs,]
    tst <- fullData[idxs,]
-   list(trn=trn,tst=tst,initSeed=initSeed)
+   list(trn=trn,tst=tst)
 }

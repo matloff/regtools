@@ -54,7 +54,14 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
          dtrn <- tmp$trn
          dtst <- tmp$tst
          cmbi <- outdf[combI,,drop=FALSE]
-         losses[xv] <- regCall(dtrn,dtst,cmbi)
+         loss <- try(regCall(dtrn,dtst,cmbi))
+         if (inherits(loss,'try-error')) {
+         browser()
+            cmb1 <- cmbi[1,]
+            cat('error in comb ')
+            cat(cmb1,'\n')
+            stop()
+         } else losses[xv] <- loss
       }
       meanAcc[combI] <- mean(losses)
       seAcc[combI] <- sd(losses) / sqrt(nXval)

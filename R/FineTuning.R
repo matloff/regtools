@@ -56,7 +56,6 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
          cmbi <- outdf[combI,,drop=FALSE]
          loss <- try(regCall(dtrn,dtst,cmbi))
          if (inherits(loss,'try-error')) {
-         browser()
             cmb1 <- cmbi[1,]
             cat('error in comb ')
             cat(cmb1,'\n')

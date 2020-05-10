@@ -31,7 +31,7 @@
 #   meanAcc
 
 fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
-   up=TRUE,dispOrderSmoothed=FALSE,initSeed=9999) 
+   up=TRUE,dispOrderSmoothed=FALSE) 
 {
    # holding off for now on smoothing
    if (!is.null(k) && length(pars) > 1) 

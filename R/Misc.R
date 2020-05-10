@@ -110,15 +110,23 @@ factorToDummies <- function (f,fname,omitLast=TRUE,factorInfo=NULL)
 {
     n <- length(f)
     fl <- levels(f)
+    if (!is.null(factorInfo)) {
+       ol <- factorInfo$omitLast
+       if (ol != omitLast) warning('mismatched omitLast')
+       fLevelsOrig <- factorInfo$lvls
+       if (length(setdiff(fl,fLevelsOrig))) 
+          stop(paste('new factor level found'))
+    }
+    fl.orig <- fl
     lfl <- length(fl)
     if (omitLast) fl <- fl[-lfl]
     ndumms <- lfl - omitLast
     dms <- matrix(nrow = n, ncol = ndumms)
     for (i in 1:ndumms) dms[, i] <- as.integer(f == fl[i])
-    # if (omitLast) fl <-  fl[-(length(fl))]
     colnames(dms) <- paste(fname,'.', fl, sep = "")
     tmp <- list()
-    tmp[[fname]] <- fl
+    tmp$omitLast <- omitLast
+    tmp$lvls <- fl.orig
     attr(dms,'factorInfo') <- tmp
     dms
 }

@@ -73,7 +73,15 @@ mmscale <- function (m,scalePars=NULL)
 # else just copy column; if omitLast, then dummy for last level of
 # factor is not included in output
 
-factorsToDummies <- function(dfr,omitLast=FALSE) 
+# a key point is that, for later prediction after fitting a model, one
+# needs to use the same transformations; otherwise, the data to be
+# predicted may be missing a level of some factor; this of course is
+# especially true if one is predicting a single case
+
+# thus the factor names and levels are save in attributes, and can be
+# used as input, via factorsInfo
+
+factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL) 
 {
    if (is.factor(dfr)) dfr <- as.data.frame(dfr)
    outDF <- data.frame(rep(0,nrow((dfr))))  # filler start
@@ -98,15 +106,20 @@ factorsToDummies <- function(dfr,omitLast=FALSE)
 
 # converts just a single factor; def of omitLast is in comments above;
 # easier to have both f, fname required
-factorToDummies <- function (f,fname,omitLast=TRUE) 
+factorToDummies <- function (f,fname,omitLast=TRUE,factorInfo=NULL) 
 {
     n <- length(f)
     fl <- levels(f)
-    ndumms <- length(fl) - omitLast
+    lfl <- length(fl)
+    if (omitLast) fl <- fl[-lfl]
+    ndumms <- lfl - omitLast
     dms <- matrix(nrow = n, ncol = ndumms)
     for (i in 1:ndumms) dms[, i] <- as.integer(f == fl[i])
-    if (omitLast) fl <-  fl[-(length(fl))]
+    # if (omitLast) fl <-  fl[-(length(fl))]
     colnames(dms) <- paste(fname,'.', fl, sep = "")
+    tmp <- list()
+    tmp[[fname]] <- fl
+    attr(dms,'factorInfo') <- tmp
     dms
 }
 

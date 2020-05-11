@@ -1,13 +1,17 @@
 # regtools 
 
-## Novel tools tools for linear, nonlinear and machine learning in regression and classification
+## Novel tools tools for linear, nonlinear and machine learning methods in regression and classification
 
-Various tools for Prediction and/or Description goals in regression and
-classification.  Some of them are associated with my book, <i>From
+Various tools for Prediction and/or Description goals in regression,
+classification and machine learning.  
+
+Some of them are associated with my book, <i>From
 Linear Models to Machine Learning: Statistical Regression and
 Classification</i>, N. Matloff, CRC, 2017 (recipient of the
-*Technometrics* Eric Ziegel Award for Best Book Reviewed in 2017).  But
-the tools are useful in general, **independently of the book**.
+*Technometrics* Eric Ziegel Award for Best Book Reviewed in 2017), and
+with my forthcoming book, *The Art of Machine Learning: Algorithms+Data+R*,
+NSP, 2020 .  But **the tools are useful in general, ndependently of the
+books**.
 
 ## FEATURES:
 
@@ -16,11 +20,13 @@ the tools are useful in general, **independently of the book**.
 examination of quadratic effects, investigation of nonhomogeneity of
 variance.
 
+* Advanced tool for tuning parameter grid search, including plotting,
+  Bonferroni intervals and smoothing.
+
 * Tools for multiclass classification, parametric and k-NN, for
   any number of classes.  One vs. All and All vs. All paradigms.  
 
-* Novel adjustment for artificially balanced (or undesirably imbalanced)
-  data.
+* Novel adjustment for imbalanced data.
 
 * K-NN regression for general dimensions in predictor and
   response variables, using k-Nearest Neighbors (k-NN).  Local-linear

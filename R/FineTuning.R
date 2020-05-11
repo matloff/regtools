@@ -8,7 +8,7 @@
 #      located on same level as the call
 #   pars: named R list, one component for each grid parameter; component 
 #      'x' is the set of desired values for the parameter 'x'
-#   theCall: call for given regression/classification method, together with 
+#   regCall: call for given regression/classification method, together with 
 #      the associated prediction function and loss evaluation; the 
 #      elements of names(pars) will appear; args are
 #      'dtrn', 'dtst' and 'comb', the latter being a given 
@@ -17,8 +17,8 @@
 #      means all, otherwise randomly chosen
 #   nTst: desired size of holdout set
 #   nXval: number of cross-validation runs to perform
-#   k: k-NN smoothing parameter for the results; if NULL, then no #   smoothing
 #   up: if TRUE, results table will be printed in increasing order of 'smoothed'
+#   k: k-NN smoothing parameter for the results; if NULL, then no #   smoothing
 #   dispOrderSmoothed: if TRUE and k is non-null, then output will be
 #      arranged in order of the 'smoothed' column; otherwise in order of
 #      the meanAcc column
@@ -30,8 +30,8 @@
 #   Bonferroni CI radii and (if k is non-NULL) smoothed versions of
 #   meanAcc
 
-fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
-   up=TRUE,dispOrderSmoothed=FALSE) 
+fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
+   up=TRUE,k=NULL,dispOrderSmoothed=FALSE) 
 {
    # holding off for now on smoothing
    if (!is.null(k) && length(pars) > 1) 
@@ -47,9 +47,6 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,k=NULL,
    losses <- vector(length=nXval)
    for (combI in 1:nCombs) {
       for (xv in 1:nXval) {
-         ## tstIdxs <- sample(1:nrow(dataset),nTst)
-         ## dtrn <- dataset[-tstIdxs,]
-         ## dtst <- dataset[tstIdxs,]
          tmp <- partTrnTst(dataset,nTest=nTst)
          dtrn <- tmp$trn
          dtst <- tmp$tst

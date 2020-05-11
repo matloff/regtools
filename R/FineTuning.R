@@ -55,7 +55,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
          if (inherits(loss,'try-error')) {
             cmb1 <- cmbi[1,]
             cat('error in comb ')
-            cat(cmb1,'\n')
+            cat(unlist(cmb1),'\n')
             stop()
          } else losses[xv] <- loss
       }

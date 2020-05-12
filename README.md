@@ -15,16 +15,16 @@ books**.
 
 ## FEATURES:
 
+* Advanced tool for tuning-parameter grid search, including plotting,
+  Bonferroni intervals and smoothing.
+
 * Innovative graphical tools for assessing fit in linear and nonlinear
   parametric models, via nonparametric methods.  Model evaluation,
 examination of quadratic effects, investigation of nonhomogeneity of
 variance.
 
-* Advanced tool for tuning parameter grid search, including plotting,
-  Bonferroni intervals and smoothing.
-
-* Tools for multiclass classification, parametric and k-NN, for
-  any number of classes.  One vs. All and All vs. All paradigms.  
+* Tools for multiclass classification for functions that only handle the
+  binary case, e.g. *glm()*.  One vs. All and All vs. All paradigms.  
 
 * Novel adjustment for imbalanced data.
 

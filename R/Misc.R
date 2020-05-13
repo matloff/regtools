@@ -182,3 +182,15 @@ stdErrPred <- function(regObj,xnew) {
    as.numeric(sqrt(xx %*% vcov(regObj) %*% xx))
 }
 
+####################  check for constant cols  #######################
+
+# d is a matrix or data frame; returns empty vector (i.e. length == 0)
+# if no cols are constant, otherwise indices of those that are constant
+
+constCols <- function(d) {
+   if (is.matrix(d)) d <- as.data.frame(d)
+   nDistinct <- sapply(lapply(d,table),length)
+   return(which(nDistinct == 1))
+}
+
+

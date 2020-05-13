@@ -65,22 +65,42 @@ pef <- peFactors[,c(1,3,5,7:9)]
 library(kernlab)  # will do SVM
 # here is the user-written function to be called by fineTuning() at each
 # combination of tuning parameters
-polyCall <- function(dtrn,dtst,cmbi) {
-   kout <- ksvm(occ ~ .,data=dtrn,kernel='polydot',
-      kpar=list(d=cmbi$d),C=cmbi$C)
-   preds <- predict(kout,dtst)
+ctCall <- function(dtrn,dtst,cmbi) {
+   ctout <- ctree(occ ~ .,dtrn,
+      control=ctree_control(minsplit=cmbi$minsp,
+         maxdepth=cmbi$maxd,alpha=cmbi$alpha))
+   preds <- predict(ctout,dtst)
    mean(preds == dtst$occ)
 }
-ftout <- fineTuning(pef,pars=list(d=c(2:4),C=seq(0.2,1,0.2)),regCall=polyCall,
-   nTst=50,nXval=10)
-}
+pha=c(0.01,0.05,0.20)),ctCall,nCombs=NULL,nTst=50,nXval=5)
+ftout
+#  $outdf
+#     minsp maxd alpha meanAcc       seAcc    bonfAcc
+#  1     20    5  0.05   0.332 0.028705400 0.09176974                              2     50    2  0.05   0.344 0.018330303 0.05860107
+#  3     10    2  0.01   0.356 0.009797959 0.03132359
+#  4     50    8  0.20   0.356 0.021354157 0.06826818
+#  5     50    2  0.01   0.364 0.013266499 0.04241234
+#  6     10    2  0.05   0.364 0.040693980 0.13009663
+#  7     50    2  0.20   0.368 0.044988888 0.14382723
+#  8     20    8  0.01   0.372 0.034985711 0.11184758
+#  9     20    2  0.20   0.372 0.034409301 0.11000482
+#  10     5    2  0.01   0.376 0.014696938 0.04698538
+#  11    50    5  0.01   0.380 0.038987177 0.12464007
+#  12    20    8  0.20   0.380 0.033466401 0.1069904
+# ...
+# ...
 plot(ftout)  # overall plot
 plot(ftout,disp=5)  # plot the best 5
+}
 
 }
 
 \value{
+Object of class **''tuner'**.  Contains the grid results, including
+standard errors and Bonferroni confidence intervals (adjusted for the
+number of parameter combinations).
 }
+
 
 \author{
 Norm Matloff

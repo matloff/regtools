@@ -12,7 +12,7 @@
 #      the associated prediction function and loss evaluation; the 
 #      elements of names(pars) will appear; args are
 #      'dtrn', 'dtst' and 'comb', the latter being a given 
-#      combinaton of parameter values; see example below
+#      combination of parameter values; see example below
 #   nCombs: number of possible combinations of 'pars'to evaluate; NULL
 #      means all, otherwise randomly chosen
 #   nTst: desired size of holdout set
@@ -22,6 +22,8 @@
 #   dispOrderSmoothed: if TRUE and k is non-null, then output will be
 #      arranged in order of the 'smoothed' column; otherwise in order of
 #      the meanAcc column
+#   ...: application-specific values needed by regCall() but constant
+#      across combinations
 
 # value:
 
@@ -31,7 +33,7 @@
 #   meanAcc
 
 fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
-   up=TRUE,k=NULL,dispOrderSmoothed=FALSE) 
+   up=TRUE,k=NULL,dispOrderSmoothed=FALSE,...) 
 {
    # holding off for now on smoothing
    if (!is.null(k) && length(pars) > 1) 

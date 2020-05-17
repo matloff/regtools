@@ -33,7 +33,7 @@
 #   meanAcc
 
 fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
-   up=TRUE,k=NULL,dispOrderSmoothed=FALSE,...) 
+   up=TRUE,k=NULL,dispOrderSmoothed=FALSE,showProgress=TRUE,...) 
 {
    # holding off for now on smoothing
    if (!is.null(k) && length(pars) > 1) 
@@ -62,6 +62,10 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
          } else losses[xv] <- loss
       }
       meanAcc[combI] <- mean(losses)
+      if (showProgress) {
+         catDFRow(cmbi)
+         cat(' ',meanAcc[combI],'\n')
+      }
       seAcc[combI] <- sd(losses) / sqrt(nXval)
    }
    outdf$meanAcc <- meanAcc

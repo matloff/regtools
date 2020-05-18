@@ -189,6 +189,7 @@ stdErrPred <- function(regObj,xnew) {
 
 constCols <- function(d) {
    if (is.matrix(d)) d <- as.data.frame(d)
+   table1(x) <- function(x) table(x,useNA='always')
    nDistinct <- sapply(lapply(d,table),length)
    return(which(nDistinct == 1))
 }

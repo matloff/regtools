@@ -194,4 +194,11 @@ constCols <- function(d) {
    return(which(nDistinct == 1))
 }
 
+#######################  printing ##### #######################
+
+catDFRow <- function(dfRow) {
+  for (i in 1:ncol(dfRow)) {
+     cat(as.character(dfRow[1,i]),' ')
+  }
+}
 

@@ -58,7 +58,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
             cmb1 <- cmbi[1,]
             cat('error in comb ')
             cat(unlist(cmb1),'\n')
-            stop()
+            # stop()
          } else losses[xv] <- loss
       }
       meanAcc[combI] <- mean(losses)

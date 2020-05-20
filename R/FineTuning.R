@@ -47,6 +47,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
    meanAcc <- rep(NA,nCombs)
    seAcc <- rep(NA,nCombs)
    losses <- vector(length=nXval)
+   done <- FALSE
    for (combI in 1:nCombs) {
       for (xv in 1:nXval) {
          tmp <- partTrnTst(dataset,nTest=nTst)
@@ -58,10 +59,15 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
                regCall(dtrn,dtst,cmbi,...),
                timeout = 300.0)  # later, make it an arg
          )
-         if (inherits(loss,'try-error')) {
+         if (is.null(loss) || inherits(loss,'try-error')) {
             cmb1 <- cmbi[1,]
             cat('error in comb ')
             cat(unlist(cmb1),'\n')
+            resp <- readline('continue? ')
+            if (substr(resp,1,1) == 'n') {
+              done <- TRUE
+              break
+            }
             # stop()
          } else losses[xv] <- loss
       }
@@ -71,6 +77,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
          cat(' ',meanAcc[combI],'\n')
       }
       seAcc[combI] <- sd(losses) / sqrt(nXval)
+      if (done) break
    }
    outdf$meanAcc <- meanAcc
    outdf$seAcc <- seAcc 

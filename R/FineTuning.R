@@ -53,7 +53,11 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
          dtrn <- tmp$trn
          dtst <- tmp$tst
          cmbi <- outdf[combI,,drop=FALSE]
-         loss <- try(regCall(dtrn,dtst,cmbi,...))
+         loss <- try(
+            R.utils::withTimeout(
+               regCall(dtrn,dtst,cmbi,...),
+               timeout = 300.0)  # later, make it an arg
+         )
          if (inherits(loss,'try-error')) {
             cmb1 <- cmbi[1,]
             cat('error in comb ')

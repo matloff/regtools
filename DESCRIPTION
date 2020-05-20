@@ -5,7 +5,8 @@ Authors@R: c(person("Norm", "Matloff", email = "matloff@cs.ucdavis.edu", role = 
            person("Robin", "Yancey", email = "reyancey@ucdavis.edu", role = c("aut")),
            person("Bochao", "Xin", email = "xinbochao97@outlook.com", role = c("ctb")))
 Maintainer: Norm Matloff <matloff@cs.ucdavis.edu>
-Depends: R (>= 3.5.0),FNN,mvtnorm,dummies,sandwich
+Depends: R (>= 3.5.0),FNN,dummies
+Imports: R.utils,mvtnorm,sandwich
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 License: GPL (>= 2)

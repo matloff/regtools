@@ -65,6 +65,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
             cmb1 <- cmbi[1,]
             cat('error in comb ')
             cat(unlist(cmb1),'\n')
+            if (!interactive()) stop()
             resp <- readline('continue? ')
             if (substr(resp,1,1) == 'n') {
               done <- TRUE
@@ -137,12 +138,22 @@ getNamedArgs <- function(argVec)
 
 fineTuningPar <- function(cls,ftCall,export=NULL) 
 {
+   library(partools)
    if (is.numeric(cls)) {
       cls <- makeCluster(cls)
-   } else if (!inherits(cls,'cluster')) stope('invalid cls')
-   setclsinfo(cls)
-   if (!is.null(export)) clusterExport(cls,export,envir=environment())
-
+      setclsinfo(cls)
+   } else if (inherits(cls,'cluster')) {
+      resp <- try(
+         clusterEvalQ(cls,partoolsenv$ncls)
+      )
+      if (inherits(resp,'try-error')) {
+         stop('setclsinfo() not called')
+      }
+   } else stop('invalid cls')
+   if (is.null(export)) clusterExport(cls,export,envir=environment())
+   resp <- doclscmd(cls,ftCall)
+   adls <- function(ll1,ll2) addlists(ll1,ll2,rbind)
+   Reduce(adls,resp)
 
 }
 

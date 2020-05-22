@@ -22,6 +22,8 @@
 #   dispOrderSmoothed: if TRUE and k is non-null, then output will be
 #      arranged in order of the 'smoothed' column; otherwise in order of
 #      the meanAcc column
+#   showProgress: if TRUE, rows of the output will be printed as they
+#      become available
 #   ...: application-specific values needed by regCall() but constant
 #      across combinations
 
@@ -117,11 +119,28 @@ getNamedArgs <- function(argVec)
 # of fineTuning(); disp is number to display, with 0, -m and +m meaning
 # cases with the m smallest 'smoothed' value, all cases and the m
 # largest values of 'smoothed', respectively
-plot.tuner <- function(tunerObject,col='meanAcc',disp=0) {
+
+#  tunerObject: an object returned from fineTuning()
+#  col: column to be plotted
+#  disp: if non-0, number of lines to plot, largest or smallest values,
+#     depending on whether disp is positive or negative
+#  jit: avoids plotting coincident lines by adding jitter; amount is
+#     jit * range(x) * runif(n,-0.5,0.5)
+plot.tuner <- function(tunerObject,col='meanAcc',disp=0,jit=0.05) {
    require(cdparcoord)
    outdf <- tunerObject$outdf
    outdf$seAcc <- NULL
    outdf$bonfAcc <- NULL
+   if (jit > 0.0) {
+      nc <- ncol(outdf)
+      for (i in 1:(nc-3)) {
+         dfCol <- outdf[,i]
+         if (is.numeric(dfCol)) {
+            rng <- max(dfCol) - min(dfCol)
+            outdf[,i] <- dfCol + jit * rng * runif(length(dfCol),-0.5,0.5)
+         }
+      }
+   }
    if (col == 'smoothed') outdf$meanAcc <- NULL
    else outdf$smoothed <- NULL
    if (disp != 0) {

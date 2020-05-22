@@ -13,8 +13,9 @@ p-hacking.  An experimental smoothing facility is also included.
 
 \usage{
 fineTuning(dataset, pars, regCall, nCombs = NULL, nTst = 500, 
-    nXval = 1, k = NULL, up = TRUE, dispOrderSmoothed = FALSE) 
-plot.tuner(tunerObject,col='meanAcc',disp=0) 
+    nXval = 1, k = NULL, up = TRUE, dispOrderSmoothed = FALSE,
+    showProgress = TRUE) 
+plot.tuner(tunerObject,col='meanAcc',disp=0,jit=0.5) 
 }
 
 \arguments{
@@ -33,7 +34,9 @@ plot.tuner(tunerObject,col='meanAcc',disp=0)
    \item{dispOrderSmoothed}{Display in order of smoothed results.}
    \item{tunerObject}{An object output from \code{fineTuning}.}
    \item{col}{Column to be plotted.}
-   \item{disp}{Number of lines to be plotted.}
+   \item{disp}{Number of lines to be plotted, sign indicating max or min.}
+   \item{showProgress}{If TRUE, print each output line as it becomes ready.}
+   \item{ji}{Amount of jitter to add to plot.}
 }
 
 \details{

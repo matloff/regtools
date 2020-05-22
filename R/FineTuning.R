@@ -115,6 +115,37 @@ getNamedArgs <- function(argVec)
    }
 }
 
+# parallel interface to fineTuning(); will split the set of
+# hyperparameter combinations into chunks, have each worker node process
+# a chunk, then collect and combine the results into a single object of
+# class 'tuner'
+
+# arguments:
+
+# cls: parallel platform; if a positive integer, then a 'parallel' cluster
+# will be formed on the host machine, with the specified number of cores
+ 
+# ftCall: character string giving the fineTuning() call to be executed at
+# each worker
+ 
+# export: character vector specifying the objects at the manager node to
+# be exported to the worker nodes
+
+# value:
+
+#   'tuner' object that combines the ones produced by the worker nodes
+
+fineTuningPar <- function(cls,ftCall,export=NULL) 
+{
+   if (is.numeric(cls)) {
+      cls <- makeCluster(cls)
+   } else if (!inherits(cls,'cluster')) stope('invalid cls')
+   setclsinfo(cls)
+   if (!is.null(export)) clusterExport(cls,export,envir=environment())
+
+
+}
+
 # parallel coordinates plot to visualize the grid; tunerObject is output
 # of fineTuning(); disp is number to display, with 0, -m and +m meaning
 # cases with the m smallest 'smoothed' value, all cases and the m

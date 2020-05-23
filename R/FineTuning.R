@@ -24,6 +24,10 @@
 #      the meanAcc column
 #   showProgress: if TRUE, rows of the output will be printed as they
 #      become available
+#   specCombs: a data frame in which the user specifies which
+#      hyperparameter parameter combinations to evaluate; there both for
+#      completeness but also for use in fineTuningPar(); one labeled
+#      column for eah hyperparameter
 #   ...: application-specific values needed by regCall() but constant
 #      across combinations
 
@@ -34,14 +38,19 @@
 #   Bonferroni CI radii and (if k is non-NULL) smoothed versions of
 #   meanAcc
 
-fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
-   up=TRUE,k=NULL,dispOrderSmoothed=FALSE,showProgress=TRUE,...) 
+fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
+   nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
+   WshowProgress=TRUE,...) 
 {
-   # holding off for now on smoothing
+   # parameter checks
+   if (!interactive()) showProgress <- FALSE
+   if (!is.null(specCombs)) nCombs <- nrow(specCombs)
+   # holding off for now on general smoothing
    if (!is.null(k) && length(pars) > 1) 
       stop('smoothing is currently recommended only for 1 parameter')
-   # generate the basic output data frame
-   outdf <- expand.grid(pars)
+
+   # generate the basic output data frame 
+   outdf <- if (is.null(specCombs)) expand.grid(pars) else specCombs
    if (!is.null(nCombs)) {
       idxsToKeep <- sample(1:nrow(outdf),nCombs)
       outdf <- outdf[idxsToKeep,]
@@ -50,12 +59,16 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
    seAcc <- rep(NA,nCombs)
    losses <- vector(length=nXval)
    done <- FALSE
+
+   # OK, ready to loop through the combinations
    for (combI in 1:nCombs) {
       for (xv in 1:nXval) {
+         # create training and test sets
          tmp <- partTrnTst(dataset,nTest=nTst)
          dtrn <- tmp$trn
          dtst <- tmp$tst
          cmbi <- outdf[combI,,drop=FALSE]
+
          loss <- try(
             R.utils::withTimeout(
                regCall(dtrn,dtst,cmbi,...),
@@ -71,12 +84,11 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
               done <- TRUE
               break
             }
-            # stop()
          } else losses[xv] <- loss
       }
       meanAcc[combI] <- mean(losses)
       if (showProgress) {
-         catDFRow(cmbi)
+         regtools:::catDFRow(cmbi)
          cat(' ',meanAcc[combI],'\n')
       }
       seAcc[combI] <- sd(losses) / sqrt(nXval)
@@ -87,23 +99,27 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,nTst=500,nXval=1,
    zval <- -qnorm(0.025/nrow(outdf))
    outdf$bonfAcc <- zval * seAcc
    outdf <- outdf[order(meanAcc,decreasing=!up),]
-   if (!is.null(k)) {
-      if (k > nrow(outdf)) {
-         warning('reducing k')
-         k <- nrow(outdf)
-      }
-      x <- outdf[,1:length(pars)]
-      x <- mmscale(x)
-      kout <- kNN(x,meanAcc,x,k,scaleX=FALSE,smoothingFtn=loclin)
-      smoothed <- kout$regests
-      outdf$smoothed <- smoothed
-      if (dispOrderSmoothed) outdf <- outdf[order(smoothed),]
-   } 
+   if (!is.null(k)) 
+      outdf <- doSmoothing(outdf,k,pars,meanAcc,dispOrderSmoothed) 
    row.names(outdf) <- NULL
    output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k,
       up=up,dispOrderSmoothed=dispOrderSmoothed)
    class(output) <- 'tuner'
    output
+}
+
+doSmoothing <- function(outdf,k,pars,meanAcc,dispOrderSmoothed) {
+   if (k > nrow(outdf)) {
+      warning('reducing k')
+      k <- nrow(outdf)
+   }
+   x <- outdf[,1:length(pars)]
+   x <- mmscale(x)
+   kout <- kNN(x,meanAcc,x,k,scaleX=FALSE,smoothingFtn=loclin)
+   smoothed <- kout$regests
+   outdf$smoothed <- smoothed
+   if (dispOrderSmoothed) outdf <- outdf[order(smoothed),]
+   outdf
 }
 
 # argVec is a row from the grid data frame in fineTuning(), with
@@ -150,11 +166,17 @@ fineTuningPar <- function(cls,ftCall,export=NULL)
          stop('setclsinfo() not called')
       }
    } else stop('invalid cls')
-   if (is.null(export)) clusterExport(cls,export,envir=environment())
+   clusterEvalQ(cls,library(partools))
+   clusterEvalQ(cls,library(regtools))
+   if (!is.null(export)) clusterExport(cls,export,envir=environment())
    resp <- doclscmd(cls,ftCall)
    adls <- function(ll1,ll2) addlists(ll1,ll2,rbind)
-   Reduce(adls,resp)
-
+   combinedChunks <- Reduce(adls,resp)
+   outdf <- combinedChunks$outdf
+   zval <- -qnorm(0.025/nrow(outdf))
+   outdf$bonfAcc <- zval * outdf$seAcc
+   combinedChunks$outdf <- outdf
+   combinedChunks
 }
 
 # parallel coordinates plot to visualize the grid; tunerObject is output

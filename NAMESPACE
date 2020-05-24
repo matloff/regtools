@@ -35,5 +35,5 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    xyDataframeToMatrix,
    imgTo2D,
    mvrlm,stdErrPred,
-   fineTuning,getNamedArgs,partTrnTst,makeOutdf,
+   fineTuning,fineTuningPar,getNamedArgs,partTrnTst,makeOutdf,
    TStoX,TStoMat)

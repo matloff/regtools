@@ -40,7 +40,7 @@
 
 fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
-   WshowProgress=TRUE,...) 
+   showProgress=TRUE,...) 
 {
    # parameter checks
    if (!interactive()) showProgress <- FALSE
@@ -50,11 +50,14 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
       stop('smoothing is currently recommended only for 1 parameter')
 
    # generate the basic output data frame 
-   outdf <- if (is.null(specCombs)) expand.grid(pars) else specCombs
-   if (!is.null(nCombs)) {
-      idxsToKeep <- sample(1:nrow(outdf),nCombs)
-      outdf <- outdf[idxsToKeep,]
-   } else nCombs <- nrow(outdf)
+   outdf <- makeOutdf(pars,specCombs)
+   nCombs <- nrow(outdf)
+###     outdf <- if (is.null(specCombs)) expand.grid(pars) else specCombs
+###     if (!is.null(nCombs)) {
+###        idxsToKeep <- sample(1:nrow(outdf),nCombs)
+###        outdf <- outdf[idxsToKeep,]
+###     } else nCombs <- nrow(outdf)
+
    meanAcc <- rep(NA,nCombs)
    seAcc <- rep(NA,nCombs)
    losses <- vector(length=nXval)
@@ -108,6 +111,16 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    output
 }
 
+# creates the basic parameter grid
+makeOutdf <- function(pars,specCombs=NULL) {
+   outdf <- if (is.null(specCombs)) expand.grid(pars) else specCombs
+   if (!is.null(pars$nCombs)) {
+      idxsToKeep <- sample(1:nrow(outdf),pars$nCombs)
+      outdf <- outdf[idxsToKeep,]
+   } 
+   outdf
+}
+
 doSmoothing <- function(outdf,k,pars,meanAcc,dispOrderSmoothed) {
    if (k > nrow(outdf)) {
       warning('reducing k')
@@ -122,16 +135,6 @@ doSmoothing <- function(outdf,k,pars,meanAcc,dispOrderSmoothed) {
    outdf
 }
 
-# argVec is a row from the grid data frame in fineTuning(), with
-# parameter names; converts the values in argVec to variables of those
-# names
-getNamedArgs <- function(argVec) 
-{
-   for (nm in names(argVec)) {
-      assign(nm,argVec[[nm]],envir=parent.frame())
-   }
-}
-
 # parallel interface to fineTuning(); will split the set of
 # hyperparameter combinations into chunks, have each worker node process
 # a chunk, then collect and combine the results into a single object of
@@ -139,22 +142,23 @@ getNamedArgs <- function(argVec)
 
 # arguments:
 
-# cls: parallel platform; if a positive integer, then a 'parallel' cluster
-# will be formed on the host machine, with the specified number of cores
+#    cls: parallel platform; if a positive integer, then a 'parallel' cluster
+#    will be formed on the host machine, with the specified number of cores
  
-# ftCall: character string giving the fineTuning() call to be executed at
-# each worker
+#    ftCall: character string giving the fineTuning() call to be executed at
+#    each worker
  
-# export: character vector specifying the objects at the manager node to
-# be exported to the worker nodes
-
 # value:
 
 #   'tuner' object that combines the ones produced by the worker nodes
 
-fineTuningPar <- function(cls,ftCall,export=NULL) 
+fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
+   nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
+   showProgress=TRUE) 
 {
-   library(partools)
+   require(partools)
+
+   # set up cluster
    if (is.numeric(cls)) {
       cls <- makeCluster(cls)
       setclsinfo(cls)
@@ -168,7 +172,26 @@ fineTuningPar <- function(cls,ftCall,export=NULL)
    } else stop('invalid cls')
    clusterEvalQ(cls,library(partools))
    clusterEvalQ(cls,library(regtools))
-   if (!is.null(export)) clusterExport(cls,export,envir=environment())
+
+   # export all args to the cluster nodes
+   argNames <- clusterExportArgs(cls)
+
+   # create the full grid data frame, and parcel it out to the cluster
+   # nodes
+   specCombs <- makeOutdf(pars,specCombs)
+   distribsplit(cls,'specCombs')
+
+   # now create the fineTuning() call (in character form)
+   ftCall <- 'fineTuning('
+   for (i in 1:length(argNames)) {
+      nm <- argNames[i]
+      ftCall <- paste0(ftCall,nm,'=',nm)
+      nextChar <- if (i < length(argNames)) ',' else ')'
+      ftCall <- paste0(ftCall,nextChar)
+   }
+
+   # and now do the call, and combine the results
+   browser()
    resp <- doclscmd(cls,ftCall)
    adls <- function(ll1,ll2) addlists(ll1,ll2,rbind)
    combinedChunks <- Reduce(adls,resp)
@@ -251,4 +274,26 @@ partTrnTst <- function(fullData,nTest=min(1000,round(0.2*nrow(fullData)))) {
    trn <- fullData[-idxs,]
    tst <- fullData[idxs,]
    list(trn=trn,tst=tst)
+}
+
+# called from within a function f(), it will export all the arguments of
+# the latter, including defaults, to the nodes in cluster cls; it will
+# also return the names; ellipsis args are skipped
+
+clusterExportArgs <- function(cls) {
+   argNames <- names(formals(sys.function(sys.parent(1))))
+   argNames <- argNames[argNames != '...']
+   clusterExport(cls,argNames,envir=parent.frame())
+   argNames
+}
+
+# argVec is a row from the grid data frame in fineTuning(), with
+# parameter names; converts the values in argVec to variables of those
+# names; CURRENTLY NOT USED
+
+getNamedArgs <- function(argVec) 
+{
+   for (nm in names(argVec)) {
+      assign(nm,argVec[[nm]],envir=parent.frame())
+   }
 }

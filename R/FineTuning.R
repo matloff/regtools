@@ -203,7 +203,6 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    }
 
    # and now do the call, and combine the results
-   browser()
    resp <- doclscmd(cls,ftCall)
    adls <- function(ll1,ll2) addlists(ll1,ll2,rbind)
    combinedChunks <- Reduce(adls,resp)

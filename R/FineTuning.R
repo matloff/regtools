@@ -111,9 +111,15 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    output
 }
 
-# creates the basic parameter grid
+# creates the basic parameter grid; called by both fineTuning() and
+# fineTuningPar() 
+
+# if specCombs is given, it will be returned, with no further processing
+# wrt nCombs
+
 makeOutdf <- function(pars,specCombs=NULL) {
-   outdf <- if (is.null(specCombs)) expand.grid(pars) else specCombs
+   if (!is.null(specCombs)) return(specCombs)
+   outdf <- expand.grid(pars) 
    if (!is.null(pars$nCombs)) {
       idxsToKeep <- sample(1:nrow(outdf),pars$nCombs)
       outdf <- outdf[idxsToKeep,]
@@ -153,8 +159,7 @@ doSmoothing <- function(outdf,k,pars,meanAcc,dispOrderSmoothed) {
 #   'tuner' object that combines the ones produced by the worker nodes
 
 fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
-   nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
-   showProgress=TRUE) 
+   nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE)
 {
    require(partools)
 
@@ -172,9 +177,13 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    } else stop('invalid cls')
    clusterEvalQ(cls,library(partools))
    clusterEvalQ(cls,library(regtools))
+   clusterEvalQ(cls,library(R.utils))
+   clusterEvalQ(cls,library(h2o))
+   clusterEvalQ(cls,h2o.init())
 
    # export all args to the cluster nodes
    argNames <- clusterExportArgs(cls)
+   argNames <- argNames[argNames != 'cls']
 
    # create the full grid data frame, and parcel it out to the cluster
    # nodes
@@ -186,8 +195,11 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    for (i in 1:length(argNames)) {
       nm <- argNames[i]
       ftCall <- paste0(ftCall,nm,'=',nm)
-      nextChar <- if (i < length(argNames)) ',' else ')'
-      ftCall <- paste0(ftCall,nextChar)
+      if (i < length(argNames)) {
+         ftCall <- paste0(ftCall,',')
+      } else {
+         ftCall <- paste0(ftCall,',showProgress=FALSE)')
+      }
    }
 
    # and now do the call, and combine the results

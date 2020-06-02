@@ -607,22 +607,32 @@ matrixtolist <- function (rc, m)
     else Map(function(colnum) m[, colnum], 1:ncol(m))
 }
 
+######################  bestKperPoint()  ###############################
+
+# for each point in the training set, find which k would have produced
+# the best (MAPE) prediction
+
+# kNNout: output from kNN()
+# y: Y vector used in computing kNNout
+
+bestKperPoint <- function(kNNout,y) 
+{
+   whichClosest <- kNNout$whichClosest
+   if (!kNNout$leave1out) whichClosest <- whichClosest[,-1]
+   n <- nrow(whichClosest)
+   nc <- ncol(whichClosest)
+   bestK <- function(i) {
+      nearYs <- y[whichClosest[i,]]
+      nearYbars <- cumsum(nearYs) / 1:nc
+      which.min(abs(y[i] - nearYbars))
+   }
+   sapply(1:n,bestK)
+}
+
 ######################  knnstep() ###############################
 
 # stepwise variable selection, for classification problems; add/delete
 # predictor based on change in overall prediction error
 
 ######### experimental ###########
-
-# parget.knnx():
-
-# wrapper for use of 'parallel' package with get.knnx() of FNN package
-
-# arguments are same is for get.knnx(), except that 'algorithm' is set
-# and except for cls, a 'parallel' cluster; 'query' is distributed to
-# chunks at the cluster nodes, and 'data' is copied to all cluster
-# nodes; gen.knnx() is called at each node, then the results are
-# combined
-
-# value is the nn.index component of the list returned by get.knnx()
 

@@ -13,7 +13,7 @@ with my forthcoming book, *The Art of Machine Learning: Algorithms+Data+R*,
 NSP, 2020 .  But **the tools are useful in general, ndependently of the
 books**.
 
-## FEATURES:
+## FEATURES
 
 * Advanced tool for tuning-parameter grid search, including plotting,
   Bonferroni intervals and smoothing.
@@ -64,13 +64,16 @@ A number of examples of use follow below.
 ## EXAMPLE:  ADVANCED GRID SEARCH
 
 Many statistical/machine learning methods have a number of *tuning
-parameters*/*hyperparameters*  The idea of a *grid search* is to try
-many combinations of candidate values of the tuning parameters to find
-the "best" one, say highest rate of correct classification in a
-classification problem.
+parameters* (or *hyperparameters*).  The idea of a *grid search* is to
+try many combinations of candidate values of the tuning parameters to
+find the "best" combination, say in the sense of highest rate of correct
+classification in a classification problem.
+
+### Which one is really best? ###
 
 **But why the quotation marks around the word *best* above?**  The fact
-is that the data in a grid search is subject to sampling variation:
+is that, due to sampling variation, a naive grid search may not give you
+the best parameter combination:
 
 1. The full dataset is a sample from some target population.
 
@@ -79,24 +82,46 @@ is that the data in a grid search is subject to sampling variation:
 set.
 
 So the parameter combination that seems best in the grid search may not
-actually be best.  It may do well just by accident.  In other words:
+actually be best.  It may do well just by accident, depending on the
+dataset size, the number of cross-validation folds and the number of
+features.
+
+In other words:
 
 > Grid search is actually a form of  *p-hacking*.
+
+Thus one should not rely on the "best" combination found by a grid
+search. One should consider several combinations that did well.  A good
+rule is that if several combinations yield about the same result, one
+should choose a combination with less-extreme parameters.  Moreover, if
+the better combinations all have extreme parameter values, one should
+further search, in regions beyond these in the parameter space.  In
+other words, after an initial parameter search, one may need to do a
+second search, based on refining the first one.
+
+### The **regtools** approach ###
 
 The **regtools** grid search function **fineTuning()** is an advanced
 grid search tool, in two ways:
 
-1.  It aims to counter p-hacking, by forming Bonferoni confidence intervals.
+1.  It aims to counter p-hacking, by forming 
+[Bonferoni confidence intervals]([https://en.wikipedia.org/wiki/Bonferroni_correction).
 
 2.  It provides a plotting capability, so that the user can see at a
     glance which *several* combinations of parameters look promising,
 thereby providing guidance for further combinations to investigate.
 
-Here is an example using the famous Pima diabetes data, a binary problem
-in which we are predicting presence of the disease.  We'll to an SVM
-analysis, using the **ksvm()** function from the **kernlab** package,
-with a polynomial kernel.  Our parameters are **d**, the degree of the
-polynomial, and **C**, the penalty for each datapoint inside the margin.
+Here is an example using the famous Pima diabetes data (stored in a data
+frame **db** in the example below).  This is a binary problem
+in which we are predicting presence or absence of the disease.  We'll do
+an SVM analysis, using the **ksvm()** function from the **kernlab**
+package, with a polynomial kernel.  Our parameters are **d**, the degree
+of the polynomial, and **C**, the penalty for each datapoint inside the
+margin.
+
+The grid search function **fineTuning()** calls a user-defined function
+that fits the user's model on the training data and then predicts on the
+test data.
 
 ``` r
 # user provides a function stating the analysis to run on any parameter
@@ -112,8 +137,72 @@ pdCall <- function(dtrn,dtst,cmbi) {
    mean(preds == dtst$diabetes)
 }
 
+library(mlbench)
+data()
+data(PimaIndiansDiabetes2)
+db <- PimaIndiansDiabetes2
+library(kernlab)
 
+# below is the call; we'll use test data size of 50 in our
+# cross-validation, with 100 folds
+ft <- fineTuning(dataset=db,pars=list(d=c(2:6),C=seq(0.2,2,0.2)),
+   regCall=pdCall,nTst=50,nXval=100)
 ```
+
+And the output:
+
+``` r
+> ft$outdf
+   d   C meanAcc       seAcc    bonfAcc
+30 6 1.2  0.6838 0.006160775 0.02027220
+33 4 1.4  0.6874 0.005795540 0.01907038
+14 5 0.6  0.6876 0.005719222 0.01881925
+17 3 0.8  0.6878 0.005887120 0.01937173
+...
+4  5 0.2  0.7072 0.005245643 0.01726093
+20 6 0.8  0.7118 0.006513979 0.02143442
+31 2 1.4  0.7430 0.005396407 0.01775702
+41 2 1.8  0.7450 0.005573204 0.01833878
+16 2 0.8  0.7492 0.005758928 0.01894991
+46 2 2.0  0.7506 0.005351900 0.01761057
+26 2 1.2  0.7516 0.005997845 0.01973607
+21 2 1.0  0.7562 0.005161591 0.01698435
+6  2 0.4  0.7590 0.005666667 0.01864632
+36 2 1.6  0.7612 0.005865978 0.01930216
+11 2 0.6  0.7614 0.005615671 0.01847851
+1  2 0.2  0.7622 0.005123880 0.01686026
+```
+
+Technically the best combination is (2,0.2), but several gave similar
+results, as can be seen by the Bonferroni column, which gives radii of
+approximate 95% confidence intervals.
+
+It does seem that we should use degree 2 for the polynomial, but it
+the value of **C** seems to be of little consequence.  It 
+might be worth exploring other values, maybe smaller than 0.2 or larger
+than 2.0.
+
+The corresponding plot function, called simply as
+
+``` r
+plot(ft)
+```
+
+uses the notion of *parallel coordinates*.  Here is a plot of the above
+analysis:
+
+![result](inst/images/PimaPoly.png)
+
+The three vertical axes represent **d**, **C** and **meanAcc** from the
+above output.  Each polygonal line represents one row from **outdf**
+above, connecting the values of the three variables.
+
+One sees that high values of the polynomial degree **d** tend to be
+associated with lower values of the classification accuracy.  This can
+be made even clearer by dragging the **d** column to the right, past the
+**C** column (not shown here).  One can also plot the top-performing
+parameter combinations.
+
 
 ## EXAMPLE:  PARAMETRIC MODEL FIT ASSESSMENT
 
@@ -518,3 +607,61 @@ cfs %*% c(1,Nile[96:100])
 #          [,1]
 # [1,] 784.4925
 ```
+
+## FUNCTION LIST BY CATEGORY
+
+(under construction)
+
+### multiclass Y, machine learning
+
+``` r
+avalogpred          
+avalogtrn           
+classadjust         
+confusion    
+findOverallLoss       
+fineTuning
+fineTuningPar
+probIncorrectClass
+```
+
+### fitting, diagnostics for linear and nonlinear models
+
+``` r
+
+
+```
+
+### conversion between factors, dummies, misc. factors
+
+``` r
+constCols           
+dummiesToFactor
+factorTo012etc
+factorToDummies
+factorsToDummies
+hasFactors
+xyDataframeToMatrix
+```
+
+### image ops
+
+``` r
+imgTo2D
+```
+
+### time series
+
+``` r
+TStoMat
+TStoX
+
+```
+
+### misc.
+
+``` r
+
+
+```
+

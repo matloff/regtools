@@ -18,6 +18,7 @@ S3method(predict,ovaknn)
 S3method(predict,ovalog)
 S3method(plot,tuner)
 S3method(reorder,tuner)
+S3method(predict,krsFit)
 
 export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    kmin,
@@ -31,9 +32,10 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    mm, 
    unscale,multCols,mmscale,constCols,catDFRow,
    confusion,factorTo012etc,
-   factorsToDummies,factorToDummies,dummiesToFactor,hasFactors,
+   factorsToDummies,factorToDummies,dummiesToFactor,hasFactors,dummiesToInt,
    xyDataframeToMatrix,
    imgTo2D,
    mvrlm,stdErrPred,
    fineTuning,fineTuningPar,getNamedArgs,partTrnTst,makeOutdf,
+   krsFit,
    TStoX,TStoMat)

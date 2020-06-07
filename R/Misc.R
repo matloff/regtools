@@ -132,19 +132,25 @@ factorToDummies <- function (f,fname,omitLast=TRUE,factorInfo=NULL)
     dms
 }
 
-# makes a factor dms from a single related set of dummies; returns a
-# 1-col data frame; if the variable has k levels, inclLast = FALSE means
-# there are only k-1 dummies provided; dms will have either k-1 or k
-# columns
+# makes a factor from a single related set of dummies dms; if the
+# variable has k levels, inclLast = FALSE means there are only k-1
+# dummies provided, so the k-th must be generated
 
 dummiesToFactor <- function(dms,inclLast=FALSE) {
    dms <- as.matrix(dms)
-   lastCol <- 1 - apply(dms,1,sum)
-   dms <- cbind(dms,lastCol)
+   if (!inclLast) {
+      lastCol <- 1 - apply(dms,1,sum)
+      dms <- cbind(dms,lastCol)
+   }
    where1s <- apply(dms,1,function(rw) which(rw == 1))
+   colnames(dms) <- paste0('V',1:ncol(dms),sep='')
    nms <- colnames(dms)
    f <- nms[where1s]
    as.factor(f)
+}
+
+dummiesToInt <- function(dms,inclLast=FALSE) {
+  as.numeric(dummiesToFactor(dms=dms,inclLast=inclLast))
 }
 
 # maps a factor to 0,1,2,...,m-1 where m is the number of levels of f

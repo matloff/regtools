@@ -8,7 +8,7 @@
                                                                                 \description{ 
 
 This package provides a broad collection of functions useful for
-regression and classification analysis.
+regression and classification analysis, and machine learning.
 
 }
 
@@ -24,6 +24,9 @@ regression and classification analysis.
 
    \item ridge regression:  ridgelm, plot
 
+   \item missing values (also see our \pkg{toweranNA} package):
+   lmac,makeNA,coef.lmac,vcov.lmac,pcac
+
    }
 
 \bold{Diagnostic plots:}
@@ -33,7 +36,7 @@ regression and classification analysis.
    \item regression diagnostics:  parvsnonparplot, nonparvsxplot,
    nonparvarplot
 
-   \item other: boundaryplot
+   \item other: boundaryplot, pwplot, nonparvsxplot
 
    }
 
@@ -41,8 +44,10 @@ regression and classification analysis.
 
    \itemize{
 
-   \item classadjust, avalogtrn, avalogpred, ovalogtrn,
-   ovalogpred, knntrn, predict, pwplot, nonparvsxplot
+   \item unbalanced data: classadjust (see \bold{UnbalancedClasses.md})
+   
+   \item One vs. All, All vs. All: avalogtrn, avalogpred, ovalogtrn,
+   ovalogpred 
 
    }
 
@@ -55,7 +60,9 @@ regression and classification analysis.
 
    \item neural networks: krsFit,multCol
 
-   \item advanced grid search: fineTuning
+   \item advanced grid search: fineTuning, fineTuningPar, plot.tuner
+
+   \item loss: l1, l2, MAPE
 
    }
 
@@ -64,7 +71,8 @@ regression and classification analysis.
    \itemize{
 
    \item conversion between factors and dummies: dummiesToFactor,
-   factorsToDummies, factorToDummies
+   dummiesToInt, factorsToDummies, factorToDummies, factorTo012etc,
+   hasFactors
 
    }
 
@@ -80,10 +88,25 @@ regression and classification analysis.
 
    \itemize{
 
-   \item multCols
+   \item multCols, constCols
 
    }
 
+\bold{Time series:}
+
+   \itemize{
+
+   \item convert rectangular to TS: TStoMat, TStoX
+
+   }
+
+\bold{Image processing:} 
+
+   \itemize{
+
+   \item imgTo2D
+
+   }
 
 \bold{Misc.:}
 
@@ -92,6 +115,8 @@ regression and classification analysis.
    \item scaling:  mmscale, unscale
 
    \item data frames: catDFRow, tabletofakedf
+
+   \item R: getNamedArgs
 
    }
 

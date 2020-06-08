@@ -158,17 +158,26 @@ krsFitImg <- function(x,y,neurons,acts,nClass,nEpoch)
    list(model=model,fitOut=fitOut,x=x)
 }
 
-# fitOut: return value from krsFitImg()
-multCol <- function(fitOut) 
+##########################  multCol()  #################################
+
+# neural networks are closely related to polynomial regression, and it
+# is well known that such models tend to suffer from multicollinearity
+# at higher degrees; this function checks for multicollinearity at each
+# layer, by computing the condition number of X'X, where X, n x m, is
+# the set of "new features" created by this layer (here m is the number
+# of units in the layer)
+
+# fitOut: return value from krsFit()
+multCol <- function(krsFitOut) 
 {
-   model <- fitOut$model
+   model <- krsFitOut$model
    modLayers <- model$layers
-   modLayers[[length(modLayers)]] <- NULL  # output layer
+   modLayers[[length(modLayers)]] <- NULL  # delete output layer
    condNums <- NULL
    for (layer in modLayers) {
       layerOut <- keras_model(inputs = model$input, outputs = 
          layer$output)
-      output <- predict(layerOut,fitOut$x)
+      output <- predict(layerOut,krsFitOut$x)
       print(constCols(output))
       xpx <- t(output) %*% output
       eigs <- eigen(xpx)$values

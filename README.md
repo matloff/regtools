@@ -13,6 +13,11 @@ with my forthcoming book, *The Art of Machine Learning: Algorithms+Data+R*,
 NSP, 2020 .  But **the tools are useful in general, ndependently of the
 books**.
 
+See function list by typing
+
+``` r
+> ?regtools
+
 ## FEATURES
 
 * Advanced tool for tuning-parameter grid search, including plotting,
@@ -606,62 +611,5 @@ cfs <- coef(lmout)
 cfs %*% c(1,Nile[96:100])
 #          [,1]
 # [1,] 784.4925
-```
-
-## FUNCTION LIST BY CATEGORY
-
-(under construction)
-
-### multiclass Y, machine learning
-
-``` r
-avalogpred          
-avalogtrn           
-classadjust         
-confusion    
-findOverallLoss       
-fineTuning
-fineTuningPar
-probIncorrectClass
-```
-
-### fitting, diagnostics for linear and nonlinear models
-
-``` r
-
-
-```
-
-### conversion between factors, dummies, misc. factors
-
-``` r
-constCols           
-dummiesToFactor
-factorTo012etc
-factorToDummies
-factorsToDummies
-hasFactors
-xyDataframeToMatrix
-```
-
-### image ops
-
-``` r
-imgTo2D
-```
-
-### time series
-
-``` r
-TStoMat
-TStoX
-
-```
-
-### misc.
-
-``` r
-
-
 ```
 

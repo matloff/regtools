@@ -12,28 +12,89 @@ regression and classification analysis.
 
 }
 
-\details{
+\section{Function List}{
+
+(under construction)
+
+\bold{Parametric modeling:}
 
    \itemize{
-
-   \item k-NN: kmin, knnest, knntrn, preprocessx, meany, vary, loclin,
-   predict, kmin, pwplot
-
-   \item classification:  classadjust, avalogtrn, avalogpred, ovalogtrn,
-   ovalogpred, knntrn, predict, pwplot, nonparvsxplot
-
-   \item regression diagnostics:  parvsnonparplot, nonparvsxplot,
-   nonparvarplot
 
    \item nonlinear regression:  nlshc
 
    \item ridge regression:  ridgelm, plot
 
+   }
+
+\bold{Diagnostic plots:}
+
+   \itemize{
+
+   \item regression diagnostics:  parvsnonparplot, nonparvsxplot,
+   nonparvarplot
+
+   \item other: boundaryplot
+
+   }
+
+\bold{Classification:}
+
+   \itemize{
+
+   \item classadjust, avalogtrn, avalogpred, ovalogtrn,
+   ovalogpred, knntrn, predict, pwplot, nonparvsxplot
+
+   }
+
+\bold{Machine learning:}
+
+   \itemize{
+
+   \item k-NN: kNN, kmin, knnest, knntrn, preprocessx, meany, vary, loclin,
+   predict, kmin, pwplot, bestKperPoint
+
+   \item neural networks: krsFit,multCol
+
+   \item advanced grid search: fineTuning
+
+   }
+
+\bold{Dummies and R factors:}
+
+   \itemize{
+
    \item conversion between factors and dummies: dummiesToFactor,
    factorsToDummies, factorToDummies
 
-   \item misc.:  mm, tabletofakedf, unscale
    }
+
+\bold{Statistics:}
+
+   \itemize{
+
+   \item mm
+
+   }
+
+\bold{Matrix:}
+
+   \itemize{
+
+   \item multCols
+
+   }
+
+
+\bold{Misc.:}
+
+   \itemize{
+
+   \item scaling:  mmscale, unscale
+
+   \item data frames: catDFRow, tabletofakedf
+
+   }
+
 
 }
 

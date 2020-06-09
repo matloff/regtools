@@ -33,19 +33,24 @@ require(car)
 # both x and y will be internally scaled, then unscaled during predict()
 
 krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),
-             conv=NULL,classif=TRUE,nClass=NULL,nEpoch=30) 
+             conv=NULL,classif=TRUE,nClass=NULL,nEpoch=30,
+             scaleX=TRUE,scaleY=TRUE) 
 {
    if (!is.null(conv)) stop('convolutional layers not yet enabled')
 
    # scaling
-   x <- mmscale(x)
-   mmScaleX <- attr(x,'minmax')
+   if (scaleX) {
+      x <- mmscale(x)
+      mmScaleX <- attr(x,'minmax')
+   } else mmScaleX <- NULL
    if (classif) {
       y <- to_categorical(y,nClass)
       mmScaleY <- NULL
    } else {
-      y <- mmscale(y)
-      mmScaleY <- attr(y,'minmax')
+      if (scaleY) {
+         y <- mmscale(y)
+         mmScaleY <- attr(y,'minmax')
+      } else mmScaleY <- NULL
    }
    
    # build model
@@ -100,13 +105,14 @@ predict.krsFit <- function(krsFitOut,newx)
 {
    model <- krsFitOut$model
    mm <- krsFitOut$mmScaleX
-   newx <- mmscale(newx,mm)
+   if (!is.null(mm)) newx <- mmscale(newx,mm)
    preds <- predict(model,newx)
    if (krsFitOut$classif) {
       preds <- apply(preds,1,which.max) - 1
    } else {
       mm <- krsFitOut$mmScaleY
-      preds <- mm[1] + preds * (mm[2] - mm[1])
+      if (!is.null(mm))
+         preds <- mm[1] + preds * (mm[2] - mm[1])
    }
    preds
 }
@@ -124,39 +130,13 @@ predict.krsFit <- function(krsFitOut,newx)
 #       https://keras.io/api/layers/activations/
 #    nClass: number of classes
 
-krsFitImg <- function(x,y,neurons,acts,nClass,nEpoch) 
+krsFitImg <- function(x,y,hidden,acts=rep('relu',length(hidden)),
+                nClass,nEpoch=30) 
 {
-   y <- factorToDummies(as.factor(y),'pix',FALSE)
    x <- x / 255
-   model <- keras_model_sequential()
-   nrnc <- ncol(x)
-   # input and first hidden layer
-   layer_dense(model,units = neurons[1], activation = acts[1], 
-      input_shape = c(nrnc)) 
-   # further hidden layers
-   nHidden <- length(neurons)
-   if (nHidden > 1)
-      for (i in 2:nHidden) {
-         layer_dense(model,units = neurons[i], activation = acts[i])
-      }
-   # output layer
-   layer_dense(model,units = nClass, activation = "softmax")
-   # summary(model)
-
-   compile(model,
-     loss <- 'categorical_crossentropy',
-     optimizer <- optimizer_rmsprop(),
-     metrics <- c('accuracy')
-   )
-
-   # history <- model %>% fit(
-   fitOut <- fit(model,
-     x, y,
-     epochs <- nEpoch, batch_size = 128,
-     validation_split <- 0.2
-   )
-
-   list(model=model,fitOut=fitOut,x=x)
+   krsFit(x=x,y=y,hidden=hidden,classif=TRUE,nClass=nClass,
+      nEpoch=nEpoch,conv=NULL,
+      scaleX=FALSE,scaleY=FALSE)
 }
 
 ##########################  diagNeural()  #################################

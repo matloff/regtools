@@ -45,7 +45,7 @@ ped <- peDumms[,c(1,20,22:27,29,32,31)]
 # predict wage income
 x <- ped[,-11] 
 y <- ped[,11] 
-z <- krsFit(x,y,c(50,50,50),classif=FALSE,nEpoch=175) 
+z <- krsFit(x,y,c(50,50,50),classif=FALSE,nEpoch=25) 
 preds <- predict(z,x) 
 mean(abs(preds-y))  # something like 25000
 

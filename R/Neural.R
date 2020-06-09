@@ -2,7 +2,8 @@
 
 # wrappers and other routines for Keras analysis of image data
 
-library(keras)
+require(keras)
+require(car)
 
 ########################  krsFit()  ###################################
 
@@ -89,7 +90,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),
      validation_split = 0.2
    )
 
-   res <- list(model=model,fitOut=fitOut,classif=classif,
+   res <- list(model=model,fitOut=fitOut,classif=classif,x=x,
              mmScaleX=mmScaleX,mmScaleY=mmScaleY)
    class(res) <- 'krsFit'
    res
@@ -158,7 +159,7 @@ krsFitImg <- function(x,y,neurons,acts,nClass,nEpoch)
    list(model=model,fitOut=fitOut,x=x)
 }
 
-##########################  multCol()  #################################
+##########################  diagNeural()  #################################
 
 # neural networks are closely related to polynomial regression, and it
 # is well known that such models tend to suffer from multicollinearity
@@ -167,30 +168,45 @@ krsFitImg <- function(x,y,neurons,acts,nClass,nEpoch)
 # the set of "new features" created by this layer (here m is the number
 # of units in the layer)
 
-# fitOut: return value from krsFit()
-multCol <- function(krsFitOut) 
+# arguments:
+
+#    fitOut: return value from krsFit()
+
+diagNeural <- function(krsFitOut) 
 {
    model <- krsFitOut$model
    modLayers <- model$layers
    modLayers[[length(modLayers)]] <- NULL  # delete output layer
-   condNums <- NULL
-   for (layer in modLayers) {
+   nLayers <- length(modLayers)
+   condNums <- rep(NA,nLayers)
+   n0Cols <- rep(0,nLayers)
+   nConstCols <- rep(0,nLayers)
+   vif10 <- rep(NA,nLayers)
+   for (i in 1:nLayers) {
+      layer <- modLayers[[i]]
       layerOut <- keras_model(inputs = model$input, outputs = 
          layer$output)
+      # compute "new features"
       output <- predict(layerOut,krsFitOut$x)
-      print(constCols(output))
+      # 0 or other constant columns
+      cco <- constCols(output)
+      nConstCols[i] <- length(cco)
+      if (length(cco) > 0) {
+         tmp <- apply(output[,cco,drop=FALSE],2,function(w) all(w == 0))
+         n0Cols[i] <- sum(tmp)
+      }
+      # condition numbers
       xpx <- t(output) %*% output
       eigs <- eigen(xpx)$values
-      cN <- sqrt(eigs[1] / eigs[length(eigs)])
-      condNums <- c(condNums,cN)
-      print(sqrt(eigs[1] / eigs[length(eigs)]))
+      condNums[i] <- sqrt(eigs[1] / eigs[length(eigs)])
       # VIF comp
       z <- runif(nrow(output))
       zz <- cbind(z,output)
       zz <- as.data.frame(zz)
       lmout <- lm(z ~ .,data=zz)
-      try(print(vif(lmout)))
+      v <- try(vif(lmout))
+      if (!inherits(v, "try-error")) vif10[i] <- mean(v >= 10)
    }
-   condNums
+   list(condNums=condNums,n0Cols=n0Cols,nConstCols=nConstCols,vif10=vif10)
 }
 

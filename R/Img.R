@@ -1,5 +1,7 @@
 
-# ops dealing with image
+# ops dealing with images
+
+############################  imgTo2D()  ##################################
 
 # converts a vector storing an image into a 2-D point cloud, with rows
 # of the form (i,j,x), where x is the intensity at pixel (i,j)
@@ -40,3 +42,14 @@ imgTo2D <- function(img,nr,hasClassID=FALSE)
    output
 }
 
+############################  imgToMatrix()  ##############################
+
+# inputs a directory containing image files in, e.g., JPG format,
+# converts to a matrix; pixel values only, no labels
+
+imgToMatrix <- function(imgDir,fmt) 
+{
+   setwd(imgDir)
+   imgFiles <- dir(pattern=fmt)
+   dims <- dim(imgFiles[1])
+}

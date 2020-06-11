@@ -44,13 +44,17 @@ imgTo2D <- function(img,nr,hasClassID=FALSE)
 
 ############################  imgToMatrix()  ##############################
 
-# assumes that the current directory contains image files in, e.g., JPG format;
-# converts them to a matrix; pixel values only, no labels
+# assumes that the specified directory contains image files in, e.g.,
+# JPG format; converts them to a matrix; pixel values only, no labels
 
 imgToMatrix <- function(imgDir,fmt) 
 {
-   imgFiles <- dir(pattern=fmt)
+   require(magick)
+   imgFiles <- dir(imgDir,pattern=fmt,full.names=TRUE)
    dims <- dim(imgFiles[1])
+   fileToMatrix <- function(fl) {
+      as.vector(image_read(fl))
+   }
    res <- sapply(imgFiles,as.vector)
    attr(res,'dims') <- dims
    res

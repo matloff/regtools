@@ -106,6 +106,8 @@ regression and classification analysis, and machine learning.
 
    \item imgTo2D
 
+   \item imgFilesToMatrix,imgFileToVector,
+
    }
 
 \bold{Misc.:}

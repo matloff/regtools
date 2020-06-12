@@ -45,17 +45,32 @@ imgTo2D <- function(img,nr,hasClassID=FALSE)
 ############################  imgToMatrix()  ##############################
 
 # assumes that the specified directory contains image files in, e.g.,
-# JPG format; converts them to a matrix; pixel values only, no labels
+# JPG format; converts them to a matrix; pixel values only, no labels;
+# matrix has one row per image
 
-imgToMatrix <- function(imgDir,fmt) 
+imgFilesToMatrix <- function(imgDir,fmt) 
+{
+   imgFiles <- dir(imgDir,pattern=fmt,full.names=TRUE)
+   res <- lapply(imgFiles,imgFileToVector)
+   # check for unequal sizes
+   tmp <- t(sapply(res,function(fl) attr(fl,'dims')))
+   if (nrow(unique(tmp)) > 1) 
+      stop('images are of different sizes')
+   res <- do.call(rbind,res)
+   attr(res,'dims') <- tmp[1,]
+   res
+}
+
+imgFileToVector <- function(fl) 
 {
    require(magick)
-   imgFiles <- dir(imgDir,pattern=fmt,full.names=TRUE)
-   dims <- dim(imgFiles[1])
-   fileToMatrix <- function(fl) {
-      as.vector(image_read(fl))
-   }
-   res <- sapply(imgFiles,as.vector)
-   attr(res,'dims') <- dims
-   res
+   tmp <- image_read(fl)
+   ii <- image_info(tmp)
+   dims <- c(ii[[2]],ii[[3]])
+   v <- as.numeric(as.vector(tmp[[1]])) * 255
+   channels <- length(v) / prod(dims)
+   dims <- c(dims,channels)
+   names(dims) <- c('width','height','channels')
+   attr(v,'dims') <- dims
+   v
 }

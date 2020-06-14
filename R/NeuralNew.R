@@ -45,6 +45,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
              xShape=NULL,classif=TRUE,nClass=NULL,nEpoch=30,
              scaleX=TRUE,scaleY=TRUE) 
 {
+   if (!inherits(x,'matrix')) x <- as.matrix(x)
    # scaling
    if (scaleX) {
       x <- mmscale(x)
@@ -68,8 +69,8 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
       layer <- conv[[1]]
       if (layer$type != 'conv2d') stop('invalid first layer')
       # convert x to tensor
-      xShape <- conv$xShape
       x <- matrixToTensor3(x,xShape) 
+      xShape <- attr(x,'xShape')
       layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
          activation='relu',input_shape=xShape)
       for (i in seq(2,length(conv),1)) {
@@ -151,9 +152,9 @@ predict.krsFit <- function(krsFitOut,newx)
    preds
 }
 
-# takes image in vector form and converts to 3D tensor; xShape is the
+# takes image in vector form and converts to tensor; xShape is the
 # number of rows, number of columns and optionally number of channels
-matrixToTensor3 <- function(x,xShape) 
+matrixToTensor <- function(x,xShape) 
 {
    nrw <- xShape[1]
    ncl <- xShape[2]
@@ -161,8 +162,11 @@ matrixToTensor3 <- function(x,xShape)
       nch <- xShape[3]
    } else {
       nch <- ncol(x) / (nrw*ncl)
+      xShape <- c(xShape,nch)
    }
-   array_reshape(x, c(nrow(x),nrw,ncl,nch))
+   res <- array_reshape(x, c(nrow(x),nrw,ncl,nch))
+   attr(res,'xShape') <- xShape
+   res
 }
 
 ########################  krsFitImg()  ###################################

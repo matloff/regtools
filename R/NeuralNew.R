@@ -75,7 +75,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
       for (i in seq(2,length(conv),1)) {
          layer <- conv[[i]]
          if (layer$type == 'pool') {
-            layer_max_pooling_2d(model,pool_size = layer$kernn)
+            layer_max_pooling_2d(model,pool_size = layer$kern)
          } else if (layer$type == 'conv2d') {
             layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
                activation='relu')

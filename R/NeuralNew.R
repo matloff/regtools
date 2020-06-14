@@ -36,10 +36,13 @@ require(car)
 
 # examples of 'conv' elements
 
-# list(type = 'conv2d',shape = c(28,28,3),kern = 5)
+# list(type = 'conv2d',xShape = c(28,28,3),kern = 5)
+
+# the only pooling offered is max pool; ReLU is used for the activation
+# function at each conv2d layer
 
 krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
-             classif=TRUE,nClass=NULL,nEpoch=30,
+             xShape=NULL,classif=TRUE,nClass=NULL,nEpoch=30,
              scaleX=TRUE,scaleY=TRUE) 
 {
    # scaling
@@ -60,30 +63,45 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
    # build model
    model <- keras_model_sequential()
 
-   # convolutional layers first, if any
+   # convolutional layers, if any
    if (!is.null(conv)) {
       layer <- conv[[1]]
       if (layer$type != 'conv2d') stop('invalid first layer')
-
-
-
-      
-
+      # convert x to tensor
+      xShape <- conv$xShape
+      x <- matrixToTensor3(x,xShape) 
+      layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
+         activation='relu',input_shape=xShape)
+      for (i in seq(2,length(conv),1)) {
+         layer <- conv[[i]]
+         if (layer$type == 'pool') {
+            layer_max_pooling_2d(model,pool_size = layer$kernn)
+         } else if (layer$type == 'conv2d') {
+            layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
+               activation='relu')
+         } else if (layer$type == 'drop') {
+            layer_dropout(model,layer$drop)
+         } else stop('invalid layer type')
+      }
+      layer_flatten(model)
    }
-   # first hidden layer
+
+   # hidden layers
    if (is.null(conv)) {
-      layer_dense(model,units = hidden[1], activation = acts[1],input_shape = ncol(x)) 
+      layer_dense(model,units = hidden[1], activation = acts[1],
+         input_shape = ncol(x)) 
       firstHidden <- 2
    } else firstHidden <- 1
    nHidden <- length(hidden)
-      for (i in seq(firstHidden:nHidden,1) {
-         hi <- hidden[i]
-         if (hi >= 1) {
-            layer_dense(model,units = hidden[i], activation = acts[i])
-         }
-         else {
-            layer_dropout(model,hi)
-         }
+   for (i in seq(firstHidden,nHidden,1)) {
+      hi <- hidden[i]
+      if (hi >= 1) {
+         layer_dense(model,units = hidden[i], activation = acts[i])
+      }
+      else {
+         layer_dropout(model,hi)
+      }
+   }
    # output layer and determine loss ftn etc.
    if (classif) {
       layer_dense(model,units = nClass, activation = "softmax")
@@ -109,7 +127,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
    )
 
    res <- list(model=model,fitOut=fitOut,classif=classif,x=x,
-             mmScaleX=mmScaleX,mmScaleY=mmScaleY)
+             xShape=xShape,mmScaleX=mmScaleX,mmScaleY=mmScaleY)
    class(res) <- 'krsFit'
    res
 }
@@ -119,6 +137,9 @@ predict.krsFit <- function(krsFitOut,newx)
    model <- krsFitOut$model
    mm <- krsFitOut$mmScaleX
    if (!is.null(mm)) newx <- mmscale(newx,mm)
+   if (!is.null(krsFitOut$xShape)) {
+      newx <- matrixToTensor3(newx,krsFitOut$xShape) 
+   }
    preds <- predict(model,newx)
    if (krsFitOut$classif) {
       preds <- apply(preds,1,which.max) - 1
@@ -128,6 +149,20 @@ predict.krsFit <- function(krsFitOut,newx)
          preds <- mm[1] + preds * (mm[2] - mm[1])
    }
    preds
+}
+
+# takes image in vector form and converts to 3D tensor; xShape is the
+# number of rows, number of columns and optionally number of channels
+matrixToTensor3 <- function(x,xShape) 
+{
+   nrw <- xShape[1]
+   ncl <- xShape[2]
+   if (length(xShape) == 3) {
+      nch <- xShape[3]
+   } else {
+      nch <- ncol(x) / (nrw*ncl)
+   }
+   array_reshape(x, c(nrow(x),nrw,ncl,nch))
 }
 
 ########################  krsFitImg()  ###################################

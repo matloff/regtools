@@ -71,7 +71,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
 
    }
    # first hidden layer
-   if (is.null(conv) {
+   if (is.null(conv)) {
       layer_dense(model,units = hidden[1], activation = acts[1],input_shape = ncol(x)) 
       firstHidden <- 2
    } else firstHidden <- 1

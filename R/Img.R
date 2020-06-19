@@ -44,18 +44,39 @@ imgTo2D <- function(img,nr,hasClassID=FALSE)
 
 ############################  imgToMatrix()  ##############################
 
-# assumes that the specified directory contains image files in, e.g.,
-# JPG format; converts them to a matrix; pixel values only, no labels;
-# matrix has one row per image
+# reads in a set of ordinary image files, say JPEGs, and converts the
+# entire data to an nxp matrix, for n images and p pixels per image
 
-imgFilesToMatrix <- function(imgDir,fmt) 
+# arguments:
+#    imgDir: character vector specifying where the image files reside
+#    fmt: image name suffix
+#    minSize: action to be taken if the files are found to be of 
+#       different sizes; if NULL, simply stop; if not, this must 
+#       be a 2-component vector, say (r,s), in which case the 
+#       middle rxs portion of each image will be selected
+
+# value:
+
+#   matrix as described above, plus an R attribute giving the number of
+#   rows and columns per image
+
+imgFilesToMatrix <- function(imgDirs='.',fmt='jpg',minSize=NULL) 
 {
    imgFiles <- dir(imgDir,pattern=fmt,full.names=TRUE)
    res <- lapply(imgFiles,imgFileToVector)
    # check for unequal sizes
    tmp <- t(sapply(res,function(fl) attr(fl,'dims')))
-   if (nrow(unique(tmp)) > 1) 
-      stop('images are of different sizes')
+   if (nrow(unique(tmp)) > 1) {
+      minxy <- apply(tmp,2,min)
+      if (is.null(minSize)) {
+         print('images are of different sizes')
+         print('smallest numbers of rows, cols:')
+         print(minxy)
+      }
+      for (img in imgFiles) {
+         # take the middle minxy of each image
+      }
+   }
    res <- do.call(rbind,res)
    attr(res,'dims') <- tmp[1,]
    res

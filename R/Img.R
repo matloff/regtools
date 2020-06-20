@@ -48,7 +48,7 @@ imgTo2D <- function(img,nr,hasClassID=FALSE)
 # entire data to an nxp matrix, for n images and p pixels per image
 
 # arguments:
-#    imgDir: character vector specifying where the image files reside
+#    imgDir: directory where the image files reside
 #    fmt: image name suffix
 #    minSize: action to be taken if the files are found to be of 
 #       different sizes; if NULL, simply stop; if not, this must 
@@ -60,20 +60,26 @@ imgTo2D <- function(img,nr,hasClassID=FALSE)
 #   matrix as described above, plus an R attribute giving the number of
 #   rows and columns per image
 
-imgFilesToMatrix <- function(imgDirs='.',fmt='jpg',minSize=NULL) 
+imgFilesToMatrix <- function(imgDir='.',fmt='jpg',minSize=NULL) 
 {
    imgFiles <- dir(imgDir,pattern=fmt,full.names=TRUE)
    res <- lapply(imgFiles,imgFileToVector)
-   # check for unequal sizes
+   # now element i of the R list res will be the vector version of image
+   # i, with the R attribute 'dims' to show the numbers of rows and
+   # columns in this image
+
+   # check for unequal image sizes
    tmp <- t(sapply(res,function(fl) attr(fl,'dims')))
-   if (nrow(unique(tmp)) > 1) {
-      minxy <- apply(tmp,2,min)
+   if (nrow(unique(tmp)) > 1) {  # unequal sizes
+      minxy <- apply(tmp,2,min)  # smallest numbers of rows and cols
       if (is.null(minSize)) {
          print('images are of different sizes')
          print('smallest numbers of rows, cols:')
          print(minxy)
+         stop()
       }
-      for (img in imgFiles) {
+      for (i in 1:length(imgFiles)) {
+         imgVec <- res[[i]]
          # take the middle minxy of each image
       }
    }
@@ -82,6 +88,9 @@ imgFilesToMatrix <- function(imgDirs='.',fmt='jpg',minSize=NULL)
    res
 }
 
+# reads in the specified image file (JPEG etc.), forms a vector of its
+# pixel intensities, returning the vector along with an R attribute
+# 'dims' showing the number of rows and columns in the image 
 imgFileToVector <- function(fl) 
 {
    require(magick)

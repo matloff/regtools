@@ -78,9 +78,23 @@ imgFilesToMatrix <- function(imgDir='.',fmt='jpg',minSize=NULL)
          print(minxy)
          stop()
       }
+
+      # for determining the center region of an image
+      centerX <- round((1+minxy[1])/2)
+      centerY <- round((1+minxy[2])/2)
+
+      # take the middle minxy of each image
       for (i in 1:length(imgFiles)) {
+         xPix <- tmp[i,1]
+         yPix <- tmp[i,2]
+         midX <- round((1+xPix)/2)
+         midY <- round((1+xYix)/2)
          imgVec <- res[[i]]
-         # take the middle minxy of each image
+         x1 <- midX - (centerX - 1)
+         x2 <- midX + minxy[1] - centerX
+         y1 <- midY - (centerY - 1)
+         y2 <- midY + minxy[2] - centerY
+         res[[i]] <- res[[i]][x1:x2,y1:y2]
       }
    }
    res <- do.call(rbind,res)

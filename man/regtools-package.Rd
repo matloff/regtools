@@ -62,6 +62,8 @@ regression and classification analysis, and machine learning.
 
    \item advanced grid search: fineTuning, fineTuningPar, plot.tuner
 
+   \item image data augmentation: augMatrix
+
    \item loss: l1, l2, MAPE
 
    }
@@ -106,7 +108,9 @@ regression and classification analysis, and machine learning.
 
    \item imgTo2D
 
-   \item imgFilesToMatrix,imgFileToVector,
+   \item imgFilesToMatrix,imgFileToVector
+
+   \item augMatrix
 
    }
 

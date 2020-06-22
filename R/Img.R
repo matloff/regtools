@@ -118,3 +118,21 @@ imgFileToVector <- function(fl)
    attr(v,'dims') <- dims
    v
 }
+
+# wrapper for OpenImageR::Augmentation(), applied to a set of images in
+# the matrix m, one per row of m
+
+augMatrix <- function(m,nr,nc,...) 
+{
+   require(OpenImageR)
+   # convert input matrix to an R list of matrices, one such matrix for
+   # each row in input matrix
+   mList <- lapply(1:nrow(m),function(mRow) matrix(m[mRow,],nrow=nc,ncol=nc))
+   # apply Augmentation() to each such created matrix, with your
+   # favorite Augmentation() arguments
+   augout <- lapply(mList,function(oneM) Augmentation(oneM,...))
+   # convert back to form of input matrix, now with each row being the
+   # transformed version of the original row
+   t(sapply(augout,function(augOutElt) as.vector(augOutElt)))
+}
+

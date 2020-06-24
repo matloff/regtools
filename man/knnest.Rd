@@ -13,6 +13,8 @@
 \alias{nonparvarplot}
 \alias{l2}
 \alias{l1}
+\alias{MAPE}
+\alias{bestKperPoint}
 
 \title{Nonparametric Regression and Classification}
 
@@ -38,6 +40,8 @@ nonparvsxplot(knnout,lmout=NULL)
 nonparvarplot(knnout,returnPts=FALSE)
 l2(y,muhat)
 l1(y,muhat)
+MAPE(y,yhat)
+bestKperPoint(kNNout,y)
 }
 
 \arguments{
@@ -77,7 +81,10 @@ l1(y,muhat)
   \item{knnout}{Output of \code{knnest}.}
   \item{cex}{R parameter to control dot size in plot.}
   \item{muhat}{Vector of estimated regression function values.}
+  \item{yhat}{Vector of estimated regression function values.}
   \item{returnPts}{If TRUE, return matrix of plotted points.}
+  \item{kNNout}{Object returned by \code{kNN}.}
+  
 }
 
 \details{

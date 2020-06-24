@@ -1,5 +1,6 @@
 \name{krsFit}
 \alias{krsFit}
+\alias{diagNeural}
 
 \title{Tools for Neural Networks}
 
@@ -13,7 +14,7 @@ krsFit(x, y, hidden, acts = rep("relu", length(hidden)), conv = NULL,
     xShape = NULL, classif = TRUE, nClass = NULL, nEpoch = 30, 
     scaleX = TRUE, scaleY = TRUE) 
 predict.krsFit(krsFitOut,newx) 
-
+diagNeural(krsFitOut)
 }
 
 \arguments{

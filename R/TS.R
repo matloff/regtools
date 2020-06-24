@@ -6,16 +6,16 @@
 
 ########################## TStoX() #####################################
 
-# inputs a time series, and transforms rectangular shape suitable for
+# inputs a time series, and transforms to rectangular shape suitable for
 # lm() or some other regression model, in which any current observation
 # is predicted from the last lg ones
 
 # arguments:
 # 
-#    x:  a time series of length; m is set to length(x)
-#    lg:  the code is intended to enable the fitting of a model
-#         in which observations at time t will be predicted
-#         from observations at times t-lg, t-lg+1,...,t-1
+#    x:  a univariate time series; m is set to length(x) below
+#    lg:  lag, for fitting of a model in which observations at 
+#         time t will be predicted from observations at times 
+#         t-lg, t-lg+1,...,t-1
 #    y:  if non-NULL, a time series to be predicted, vector of length m; 
 #        if y is NULL, y will be taken to be x
 
@@ -30,10 +30,6 @@
 #    x[2], x[3], ..., x[lg+1]
 #    ...
 #    x[m-lg], x[m-lg+1], ..., x[m-1]
-#    
-#    for matrix x, the first row will consist of all p observations for
-#    time 1, then all p observations for time 2 etc., through time lg;
-#    the second row is similar, but for times 2 through lg+1
 
 TStoX <- function(x,lg,y=NULL) 
 {
@@ -55,8 +51,17 @@ TStoX <- function(x,lg,y=NULL)
    tmp
 }
 
-# multivariate time series version
-# each row of xmat is a time series, y is a vector
+# m-variate time series version of TStoX (but y is not optional)
+
+# arguments:
+
+#    each row of xmat is a time series, y is a vector (separate from x)
+   
+# value:
+
+#    the first row will consist of all m observations for
+#    time 1, then all m observations for time 2 etc., through time lg;
+#    the second row is similar, but for times 2 through lg+1
 
 TStoMat <- function(xmat,lg,y) {
    m <- nrow(xmat)

@@ -4,6 +4,32 @@
 # then fit using lm() or whatever, predicting from the last lg
 # observations
 
+# the first function, TStoX(x,lg,y), inputs a univariate time series and
+# outputs an "X" matrix in the sense of lm(Y ~ X); here the "Y" vector
+# is either supplied as an argument, or by default x
+
+# consider for instance x = (5,12,13,8,88,6) and lg = 2, with y = x; we
+# want to redict x from itself, i.e.
+ 
+# predict the 13 from 5, 12
+# predict the 8 from 12, 13
+# predict the 88 from 13, 8
+ 
+# and
+ 
+# predict the 6 from 8, 88
+
+# our training set would then be
+# 
+# X =
+# 
+#    5 12
+#   12 13
+#   13  8
+#    8 88
+#  
+# Y = (13,8,88,6)
+
 ########################## TStoX() #####################################
 
 # inputs a time series, and transforms to rectangular shape suitable for
@@ -36,10 +62,12 @@ TStoX <- function(x,lg,y=NULL)
    lx <- length(x)
    if (lg >= lx) stop('lg must be < length(x)')
    origlg <- lg
-   lg <- lg + 1
-   lxl <- lx - lg + 1
-   lxl2 <- lxl + 1
-   mt <- cbind(x[-(lxl2:lx)],1:lxl)
+   nColX <- lg + 1  # number of columns in the output "X"
+   # the first lxl elements in x will be used in the output "X"
+   lxl <- lx - lg + 1    # these elements of x will be used in "X"
+   lxl2 <- lxl + 1  # these elements of x will not be used in "X"
+   mt <- cbind(x[-(lxl2:lx)],
+               1:lxl)
    onerow <- function(mtrow) {
       i <- mtrow[2]
       s <- i

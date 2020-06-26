@@ -6,7 +6,7 @@
 
 # the first function, TStoX(x,lg,y), inputs a univariate time series and
 # outputs an "X" matrix in the sense of lm(Y ~ X); here the "Y" vector
-# is either supplied as an argument, or by default x
+# is either supplied as an argument, or by default is x
 
 # consider for instance x = (5,12,13,8,88,6) and lg = 2, with y = x; we
 # want to redict x from itself, i.e.
@@ -19,7 +19,7 @@
  
 # predict the 6 from 8, 88
 
-# our training set would then be
+# our training set computed by TStoX() would then be
 # 
 # X =
 # 
@@ -93,8 +93,20 @@ TStoX <- function(x,lg,y=NULL)
 #    the lg-th k cols will be the k series at lag 1,
 
 TStoMat <- function(xmat,lg,y) {
-   stope('under construction')
-   k <- nrow(xmat)
+   stop('under construction')
+   k <- ncol(xmat)
+   # take one time series, transform to "X" form, delete the "Y" col
+   processOneTS <- function(xmatCol) TStoX(xmatCol,lg)[,1:lg]
+   tmp <- lapply(xmat,processOneTS)
+   # now piece everything together
+   rslt <- NULL
+   for (i in 1:lg) {
+      for (j in 1:k) {
+         rslt <- cbind(rslt,tmp[[j]][,i])
+      }
+   }
+
+
    rslt <- NULL
    for (i in 1:k) {
       tmp <- TStoX(xmat[i,],lg,y)[,1:lg]

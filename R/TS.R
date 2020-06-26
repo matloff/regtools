@@ -92,7 +92,7 @@ TStoX <- function(x,lg,y=NULL)
 #    ...
 #    the lg-th k cols will be the k series at lag 1,
 
-TStoMat <- function(xmat,lg,y) {
+TStoXmv <- function(xmat,lg,y) {
    k <- ncol(xmat)
    # take one time series, transform to "X" form, delete the "Y" col
    processOneTS <- function(xmatCol) TStoX(xmatCol,lg)[,1:lg]

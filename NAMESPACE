@@ -38,4 +38,4 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    mvrlm,stdErrPred,
    fineTuning,fineTuningPar,getNamedArgs,partTrnTst,makeOutdf,
    krsFit,krsFitImg,diagNeural,
-   TStoX,TStoMat)
+   TStoX,TStoXmv)

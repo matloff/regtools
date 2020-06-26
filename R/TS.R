@@ -64,9 +64,8 @@ TStoX <- function(x,lg,y=NULL)
    origlg <- lg
    nColX <- lg + 1  # number of columns in the output "X"
    # the first lxl elements in x will be used in the output "X"
-   lxl <- lx - lg + 1    # these elements of x will be used in "X"
-   lxl2 <- lxl + 1  # these elements of x will not be used in "X"
-   mt <- cbind(x[-(lxl2:lx)],
+   lxl <- lx - lg 
+   mt <- cbind(x[-((lxl+1):lx)],
                1:lxl)
    onerow <- function(mtrow) {
       i <- mtrow[2]
@@ -75,26 +74,29 @@ TStoX <- function(x,lg,y=NULL)
       x[s:e]
    }
    tmp <- t(apply(mt,1,onerow))
-   if (!is.null(y)) tmp[,lg] <- y[-(1:origlg)]
-   tmp
+   newCol <- if (is.null(y)) x else y
+   
+   cbind(tmp,newCol[-(1:lg)])
 }
 
-# m-variate time series version of TStoX (but y is not optional)
+# k-variate time series version of TStoX (but y is not optional)
 
 # arguments:
 
-#    each row of xmat is a time series, y is a vector (separate from x)
+#    each col of xmat is a time series, y is a vector (separate from x)
    
 # value:
 
-#    the first row will consist of all m observations for
-#    time 1, then all m observations for time 2 etc., through time lg;
-#    the second row is similar, but for times 2 through lg+1
+#    the first k cols will be the k series at lag lg,
+#    the second k cols will be the k series at lag lg-1,
+#    ...
+#    the lg-th k cols will be the k series at lag 1,
 
 TStoMat <- function(xmat,lg,y) {
-   m <- nrow(xmat)
+   stope('under construction')
+   k <- nrow(xmat)
    rslt <- NULL
-   for (i in 1:m) {
+   for (i in 1:k) {
       tmp <- TStoX(xmat[i,],lg,y)[,1:lg]
       rslt <- cbind(rslt,tmp)
    }

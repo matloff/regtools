@@ -93,25 +93,18 @@ TStoX <- function(x,lg,y=NULL)
 #    the lg-th k cols will be the k series at lag 1,
 
 TStoMat <- function(xmat,lg,y) {
-   stop('under construction')
    k <- ncol(xmat)
    # take one time series, transform to "X" form, delete the "Y" col
    processOneTS <- function(xmatCol) TStoX(xmatCol,lg)[,1:lg]
-   tmp <- lapply(xmat,processOneTS)
+   tmp <- lapply(as.data.frame(xmat),processOneTS)
    # now piece everything together
    rslt <- NULL
-   for (i in 1:lg) {
-      for (j in 1:k) {
-         rslt <- cbind(rslt,tmp[[j]][,i])
+   for (lag in 1:lg) {
+      for (tSer in 1:k) {
+         rslt <- cbind(rslt,tmp[[tSer]][,lag])
       }
    }
-
-
-   rslt <- NULL
-   for (i in 1:k) {
-      tmp <- TStoX(xmat[i,],lg,y)[,1:lg]
-      rslt <- cbind(rslt,tmp)
-   }
    cbind(rslt,y[-(1:lg)])
+
 }
 

@@ -105,8 +105,16 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL)
    as.matrix(outDF)
 }
 
-# converts just a single factor; def of omitLast is in comments above;
+# converts just a single factor 
+
+# def of omitLast is in comments above
+
+# factorInfo is used if we are converting a factor that we've already
+# converted on previous data; this argument is used to ensure that the
+# conversion on the new data is consistent with the old
+
 # easier to have both f, fname required
+
 factorToDummies <- function (f,fname,omitLast=TRUE,factorInfo=NULL) 
 {
     n <- length(f)
@@ -156,6 +164,13 @@ dummiesToInt <- function(dms,inclLast=FALSE) {
 # maps a factor to 0,1,2,...,m-1 where m is the number of levels of f
 factorTo012etc <- function(f) as.numeric(f)-1
 
+# inputs an integer vector x and creates
+intToDummies <- function(x,fname,omitLast=TRUE) 
+{
+   tmp <- as.factor(x)
+   factorToDummies(tmp,fname,omitLast=omitLast)
+}
+
 # inputs a data frame intended for regression/classification, with X in
 # the first cols and Y in the last; converts all factors to dummies, and
 # outputs a matrix; in creating dummies, r-1 are retained for r levels,
@@ -170,6 +185,10 @@ xyDataframeToMatrix <- function(xy) {
    as.matrix(cbind(xd,yd))
 }
 
+########################################################################
+###################  misc. data frame/matrix ops  ######################
+########################################################################
+
 # multiply x[,cols] by vals, e.g. x[,cols[1]] * vals[1]
 # code by Bochao Xin
 multCols <- function(x,cols,vals) {
@@ -178,17 +197,7 @@ multCols <- function(x,cols,vals) {
    x
 }
 
-######################  misc. lm() routines  #######################
-
-# computes the standard error of the predicted Y for X = xnew
-
-stdErrPred <- function(regObj,xnew) {
-   xx <- c(1,xnew)  # the 1 accounts for the intercept term
-   xx <- as.numeric(xx)  # in case xnew was a row in a data frame
-   as.numeric(sqrt(xx %*% vcov(regObj) %*% xx))
-}
-
-####################  check for constant cols  #######################
+# check for constant cols  
 
 # d is a matrix or data frame; returns empty vector (i.e. length == 0)
 # if no cols are constant, otherwise indices of those that are constant
@@ -205,5 +214,15 @@ catDFRow <- function(dfRow) {
   for (i in 1:ncol(dfRow)) {
      cat(as.character(dfRow[1,i]),' ')
   }
+}
+
+######################  misc. lm() routines  #######################
+
+# computes the standard error of the predicted Y for X = xnew
+
+stdErrPred <- function(regObj,xnew) {
+   xx <- c(1,xnew)  # the 1 accounts for the intercept term
+   xx <- as.numeric(xx)  # in case xnew was a row in a data frame
+   as.numeric(sqrt(xx %*% vcov(regObj) %*% xx))
 }
 

@@ -107,9 +107,9 @@ imgFilesToMatrix <- function(imgDir='.',fmt='jpg',minSize=NULL)
 # 'dims' showing the number of rows and columns in the image 
 imgFileToVector <- function(fl) 
 {
-   require(magick)
-   tmp <- image_read(fl)
-   ii <- image_info(tmp)
+   # require(magick)
+   tmp <- magick::image_read(fl)
+   ii <- magick::image_info(tmp)
    dims <- c(ii[[2]],ii[[3]])
    v <- as.numeric(as.vector(tmp[[1]])) * 255
    channels <- length(v) / prod(dims)
@@ -124,13 +124,13 @@ imgFileToVector <- function(fl)
 
 augMatrix <- function(m,nr,nc,...) 
 {
-   require(OpenImageR)
+   # require(OpenImageR)
    # convert input matrix to an R list of matrices, one such matrix for
    # each row in input matrix
    mList <- lapply(1:nrow(m),function(mRow) matrix(m[mRow,],nrow=nc,ncol=nc))
    # apply Augmentation() to each such created matrix, with your
    # favorite Augmentation() arguments
-   augout <- lapply(mList,function(oneM) Augmentation(oneM,...))
+   augout <- lapply(mList,function(oneM) OpenImageR::Augmentation(oneM,...))
    # convert back to form of input matrix, now with each row being the
    # transformed version of the original row
    t(sapply(augout,function(augOutElt) as.vector(augOutElt)))

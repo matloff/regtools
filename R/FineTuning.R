@@ -161,34 +161,34 @@ doSmoothing <- function(outdf,k,pars,meanAcc,dispOrderSmoothed) {
 fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE)
 {
-   require(partools)
+   # require(partools)
 
    # set up cluster
    if (is.numeric(cls)) {
       cls <- makeCluster(cls)
-      setclsinfo(cls)
+      partools::setclsinfo(cls)
    } else if (inherits(cls,'cluster')) {
       resp <- try(
-         clusterEvalQ(cls,partoolsenv$ncls)
+         partools::clusterEvalQ(cls,partoolsenv$ncls)
       )
       if (inherits(resp,'try-error')) {
          stop('setclsinfo() not called')
       }
    } else stop('invalid cls')
-   clusterEvalQ(cls,library(partools))
-   clusterEvalQ(cls,library(regtools))
-   clusterEvalQ(cls,library(R.utils))
-   clusterEvalQ(cls,library(h2o))
-   clusterEvalQ(cls,h2o.init())
+   partools::clusterEvalQ(cls,library(partools))
+   partools::clusterEvalQ(cls,library(regtools))
+   partools::clusterEvalQ(cls,library(R.utils))
+   partools::clusterEvalQ(cls,library(h2o))
+   partools::clusterEvalQ(cls,h2o.init())
 
    # export all args to the cluster nodes
-   argNames <- clusterExportArgs(cls)
+   argNames <- partools::clusterExportArgs(cls)
    argNames <- argNames[argNames != 'cls']
 
    # create the full grid data frame, and parcel it out to the cluster
    # nodes
-   specCombs <- makeOutdf(pars,specCombs)
-   distribsplit(cls,'specCombs')
+   specCombs <- partools::makeOutdf(pars,specCombs)
+   partools::distribsplit(cls,'specCombs')
 
    # now create the fineTuning() call (in character form)
    ftCall <- 'fineTuning('
@@ -225,7 +225,7 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 #  jit: avoids plotting coincident lines by adding jitter; amount is
 #     jit * range(x) * runif(n,-0.5,0.5)
 plot.tuner <- function(tunerObject,col='meanAcc',disp=0,jit=0.05) {
-   require(cdparcoord)
+   # require(cdparcoord)
    outdf <- tunerObject$outdf
    outdf$seAcc <- NULL
    outdf$bonfAcc <- NULL
@@ -248,7 +248,7 @@ plot.tuner <- function(tunerObject,col='meanAcc',disp=0,jit=0.05) {
       outdf <- outdf[ord[1:abs(disp)],]
    }
    nr <- nrow(outdf)
-   discparcoord(outdf,k=nr,differentiate=TRUE)
+   cdparcoord::discparcoord(outdf,k=nr,differentiate=TRUE)
 }
 
 # change the display order, between meanAcc and smoothed; ftout is

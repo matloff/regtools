@@ -2,8 +2,8 @@
 
 # wrappers and other routines for Keras analysis of image data
 
-require(keras)
-require(car)
+# require(keras)
+# require(car)
 
 ########################  krsFit()  ###################################
 
@@ -52,7 +52,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
       mmScaleX <- attr(x,'minmax')
    } else mmScaleX <- NULL
    if (classif) {
-      y <- to_categorical(y,nClass)
+      y <- keras::to_categorical(y,nClass)
       mmScaleY <- NULL
    } else {
       if (scaleY) {
@@ -62,7 +62,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
    }
    
    # build model
-   model <- keras_model_sequential()
+   model <- keras::keras_model_sequential()
 
    # convolutional layers, if any
    if (!is.null(conv)) {
@@ -71,26 +71,26 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
       # convert x to tensor
       x <- matrixToTensor(x,xShape) 
       xShape <- attr(x,'xShape')
-      layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
+      keras::layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
          activation='relu',input_shape=xShape)
       for (i in seq(2,length(conv),1)) {
          layer <- conv[[i]]
          if (layer$type == 'pool') {
-            layer_max_pooling_2d(model,pool_size = layer$kern)
+            keras::layer_max_pooling_2d(model,pool_size = layer$kern)
          } else if (layer$type == 'conv2d') {
-            layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
+            keras::layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
                activation='relu')
          } else if (layer$type == 'drop') {
-            layer_dropout(model,layer$drop)
+            keras::layer_dropout(model,layer$drop)
          } else stop('invalid layer type')
       }
-      layer_flatten(model)
+      keras::layer_flatten(model)
    }
 
    # hidden layers
    if (is.null(conv)) {
       xShape <- NULL
-      layer_dense(model,units = hidden[1], activation = acts[1],
+      keras::layer_dense(model,units = hidden[1], activation = acts[1],
          input_shape = ncol(x)) 
       firstHidden <- 2
    } else firstHidden <- 1
@@ -98,19 +98,19 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
    for (i in seq(firstHidden,nHidden,1)) {
       hi <- hidden[i]
       if (hi >= 1) {
-         layer_dense(model,units = hidden[i], activation = acts[i])
+         keras::layer_dense(model,units = hidden[i], activation = acts[i])
       }
       else {
-         layer_dropout(model,hi)
+         keras::layer_dropout(model,hi)
       }
    }
    # output layer and determine loss ftn etc.
    if (classif) {
-      layer_dense(model,units = nClass, activation = "softmax")
+      keras::layer_dense(model,units = nClass, activation = "softmax")
       lossFtn <- 'categorical_crossentropy'
       metrics <- 'accuracy'
    } else {
-      layer_dense(model,units = 1)
+      keras::layer_dense(model,units = 1)
       lossFtn <- 'mse'
       metrics <- 'mae'
    }
@@ -119,10 +119,10 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
    compile(model,
      loss = lossFtn, 
      # batch_size = batchSize,
-     optimizer = optimizer_rmsprop(),
+     optimizer = keras::optimizer_rmsprop(),
      metrics = metrics)
 
-   fitOut <- fit(model,
+   fitOut <- keras::fit(model,
      x, y,
      epochs = nEpoch, batch_size = 128,
      validation_split = 0.2
@@ -166,7 +166,7 @@ matrixToTensor <- function(x,xShape)
       nch <- ncol(x) / (nrw*ncl)
       xShape <- c(xShape,nch)
    }
-   res <- array_reshape(x, c(nrow(x),nrw,ncl,nch))
+   res <- keras::array_reshape(x, c(nrow(x),nrw,ncl,nch))
    attr(res,'xShape') <- xShape
    res
 }
@@ -219,7 +219,7 @@ diagNeural <- function(krsFitOut)
    vif10 <- rep(NA,nLayers)
    for (i in 1:nLayers) {
       layer <- modLayers[[i]]
-      layerOut <- keras_model(inputs = model$input, outputs = 
+      layerOut <- keras::keras_model(inputs = model$input, outputs = 
          layer$output)
       # compute "new features"
       output <- predict(layerOut,krsFitOut$x)

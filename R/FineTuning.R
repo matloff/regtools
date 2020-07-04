@@ -91,7 +91,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
       }
       meanAcc[combI] <- mean(losses)
       if (showProgress) {
-         regtools:::catDFRow(cmbi)
+         catDFRow(cmbi)
          cat(' ',meanAcc[combI],'\n')
       }
       seAcc[combI] <- sd(losses) / sqrt(nXval)

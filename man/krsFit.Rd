@@ -67,7 +67,9 @@ mean(preds == y)   # something like 0.39
 # obtain MNIST training and test sets; the following then uses the
 # example network of 
 
-# https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/2961012104553482/4462572393058129/1806228006848429/latest.html
+# https://databricks-prod-cloudfront.cloud.databricks.com/
+# public/4027ec902e239c93eaaa8714f173bcfc/2961012104553482/
+# 4462572393058129/1806228006848429/latest.html
 
 # converted to use the krsFit wrapper
 

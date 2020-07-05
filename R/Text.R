@@ -4,27 +4,37 @@
 
 # arguments:
 
-# src:  character string, either a directory name or file name; in the
-#    directory case, each subdirectory represents a class, with each file 
-#    within a subdirectory representing one document from 
-#    that class; in the file case, each record represents one 
-#    document
-# labelPos: if src is a file, position within line for the class label
-# textPos: if src is a file, position within line for the document text
+# src:  character string, either a directory name, a file name or a
+# character vector; cases
+
+#    'dir': each subdirectory represents a class, with each file 
+#    within a subdirectory representing one document from that class;
+#    must be called from the target directory; no other subdirectories
+#    are allowed
+# 
+#    'file': each record contains the text of one document; must be .csv
+# 
+#    'vector': each element contains the text of one document
+
+# labelPos: if src is a file or vector, index of the class label
+# textPos: if src is a file or vector, index of the document text
 # hdr: if src is a file, TRUE if file has a header
 
-textToXY <- function(src='.',labelPos=NULL,textPos=NULL,hdr=NULL) 
+textToXY <- function(src='dir',labelPos=NULL,textPos=NULL,hdr=TRUE) 
 {
-   dirCase <- file.info(src)$isdir
-   if (!dirCase) {
-      fl <- read.csv(src,header=hdr)
-      labels <- fl[,labelPos]
-      docs <- fl[,textPos]
-   } else {
-      dirs <- list.dirs(recursive=FALSE)
-      tmp <- lapply(dirs,getDocs)
+   if (src == 'dir') {
+      cps <- Corpus(DirSource('.')) 
+      labels <- as.factor(list.dirs(recursive=FALSE,no.=TRUE))
+   } else if (src == 'file' || src == 'vector') {
+      if (src == 'file') src <- read.csv(src,header=hdr)
+      cps <- Corpus(VectorSource(vec[,textPos]))
+      labels <- as.factor(vec[,labelPos])
    }
 
+   cps <- tm_map(cps,tolower)
+   cps <- tm_map(cps,removePunctuation)
+   cps <- tm_map(cps,removeNumbers)
+   cps <- tm_map(cps,removeWords, stopwords("english"))
 
 }
 

@@ -19,12 +19,13 @@
 # labelPos: if src is a file or vector, index of the class label
 # textPos: if src is a file or vector, index of the document text
 # hdr: if src is a file, TRUE if file has a header
+# kTop: retain records of only the kTop most-frequent words
 
-textToXY <- function(src='dir',labelPos=NULL,textPos=NULL,hdr=TRUE) 
+textToXY <- function(src='dir',labelPos=NULL,textPos=NULL,hdr=TRUE,kTop=50) 
 {
    if (src == 'dir') {
       cps <- Corpus(DirSource('.')) 
-      labels <- as.factor(list.dirs(recursive=FALSE,no.=TRUE))
+      labels <- as.factor(list.dirs(recursive=FALSE))
    } else if (src == 'file' || src == 'vector') {
       if (src == 'file') src <- read.csv(src,header=hdr)
       cps <- Corpus(VectorSource(vec[,textPos]))
@@ -35,6 +36,10 @@ textToXY <- function(src='dir',labelPos=NULL,textPos=NULL,hdr=TRUE)
    cps <- tm_map(cps,removePunctuation)
    cps <- tm_map(cps,removeNumbers)
    cps <- tm_map(cps,removeWords, stopwords("english"))
+
+   words <- paste(cps,collapse=' ')
+   w1 <- strsplit(words,' ')[[1]]
+   tw <- table(w1)
 
 }
 

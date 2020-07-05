@@ -11,9 +11,27 @@
 #    document
 # labelPos: if src is a file, position within line for the class label
 # textPos: if src is a file, position within line for the document text
+# hdr: if src is a file, TRUE if file has a header
 
-prepTextClass <- function(src='.',labelPos=NULL,textPos=NULL) 
+textToXY <- function(src='.',labelPos=NULL,textPos=NULL,hdr=NULL) 
 {
    dirCase <- file.info(src)$isdir
+   if (!dirCase) {
+      fl <- read.csv(src,header=hdr)
+      labels <- fl[,labelPos]
+      docs <- fl[,textPos]
+   } else {
+      dirs <- list.dirs(recursive=FALSE)
+      tmp <- lapply(dirs,getDocs)
+   }
+
+
+}
+
+getDocs <- function(dir) 
+{
+   currDir <- getwd()
+   on.exit(setwd(currdir))
+   list(label=dir)
 }
 

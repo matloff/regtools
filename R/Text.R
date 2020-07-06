@@ -28,7 +28,7 @@ textToXY <- function(src='dir',labelPos=NULL,textPos=NULL,hdr=TRUE,kTop=50)
       labels <- as.factor(list.dirs(recursive=FALSE))
    } else if (src == 'file' || src == 'vector') {
       if (src == 'file') src <- read.csv(src,header=hdr)
-      cps <- Corpus(VectorSource(vec[,textPos]))
+      cps <- Corpus(VectorSource(src[,textPos]))
       labels <- as.factor(vec[,labelPos])
    }
 
@@ -36,17 +36,23 @@ textToXY <- function(src='dir',labelPos=NULL,textPos=NULL,hdr=TRUE,kTop=50)
    cps <- tm_map(cps,removePunctuation)
    cps <- tm_map(cps,removeNumbers)
    cps <- tm_map(cps,removeWords, stopwords("english"))
+   cps <- lapply(cps,removeMorePunctuation)
 
    words <- paste(cps,collapse=' ')
    w1 <- strsplit(words,' ')[[1]]
+   w1 <- w1[w1 != '']
    tw <- table(w1)
 
 }
 
-getDocs <- function(dir) 
+# !"#$%&'()*+, \-./:;<=>?@[\\\]^_{|}~` removed by removePunctuation(),
+# according to Web
+removeMorePunctuation <- function(oneCorpusElt) 
 {
-   currDir <- getwd()
-   on.exit(setwd(currdir))
-   list(label=dir)
+   
+   tmp <- oneCorpusElt$content
+   tmp <- gsub('-',' ',tmp)
+   oneCorpusElt$content <- tmp
+   oneCorpusElt
 }
 

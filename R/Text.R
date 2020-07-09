@@ -1,7 +1,45 @@
 
 
-# preparation for text classification; inputs text data; outputs overall
-# document term matrix, labels factor etc.
+# preparation for text classification; inputs text, label data; outputs 
+# X matrix, Y vector
+
+############################  ttXY()  ##################################
+
+# wrapper for text2vec pkg
+
+# arguments:
+
+#   docs: character vector, one element per document
+#   labels: R factor, class labels corresponding to docs
+#   stopWords: character vector of stop words; suggest 
+#      stopWords <- tm::stopwords('english')
+#   kTop: number of most-frequent words to retain
+
+ttXY <- function(docs,labels,kTop=50,stopWords=NULL) 
+{
+   require(text2vec)
+   x <- data.frame(docs,labels,id=1:length(docs))
+   setDT(x)
+   setkey(x,id)
+   x <- x[J(x$id)]
+   prep_fun = tolower
+   tok_fun = word_tokenizer
+   prep_fun = tolower
+   tok_fun = word_tokenizer
+   itx <- itoken(x$labels,
+        preprocessor = prep_fun,
+        tokenizer = tok_fun,
+        ids = x$id,
+        progressbar = FALSE)
+   vocab <- create_vocabulary(itx)
+   vectorizer <- vocab_vectorizer(vocab)
+   dtm <- create_dtm(itx, vectorizer)
+   # remove stop words; could use their method, or just use intersect()
+   # on the dtm col names and stop words
+
+}
+
+##################  textToXY(), to be replaced  ########################
 
 # arguments:
 
@@ -21,7 +59,6 @@
 # labels: if src is a file or vector, then vector or factor of class labels
 # text: if src is a file or vector, then character string of document
 #    tests, one element per document
-# hdr: if src is a file, TRUE if file has a header
 # kTop: retain records of only the kTop most-frequent words
 
 textToXY <- function(src='dir',labels=NULL,kTop=50) 

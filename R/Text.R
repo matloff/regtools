@@ -18,10 +18,14 @@
 ttXY <- function(docs,labels,kTop=50,stopWords=NULL) 
 {
    require(text2vec)
+
+   # prep
    x <- data.frame(docs,labels,id=1:length(docs))
    setDT(x)
    setkey(x,id)
    x <- x[J(x$id)]
+
+   # compute vocab, doc term mat
    prep_fun = tolower
    tok_fun = word_tokenizer
    prep_fun = tolower
@@ -34,9 +38,12 @@ ttXY <- function(docs,labels,kTop=50,stopWords=NULL)
    vocab <- create_vocabulary(itx)
    vectorizer <- vocab_vectorizer(vocab)
    dtm <- create_dtm(itx, vectorizer)
-   # remove stop words; could use their method, or just use intersect()
-   # on the dtm col names and stop words
-
+   
+   # remove stop words
+   vocab <- create_vocabulary(itx, stopwords = stop_words)
+   vocab <- prune_vocabulary(vocab)
+   dtm <- create_dtm(itx, vectorizer)
+   dtmW
 }
 
 ##################  textToXY(), to be replaced  ########################

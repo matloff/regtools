@@ -43,6 +43,8 @@ ttXY <- function(docs,labels,kTop=50,stopWords='a')
    vocab <- create_vocabulary(itx, stopwords = stopWords)
    vocab <- prune_vocabulary(vocab)
    dtm <- create_dtm(itx, vectorizer)
+   nw <- ncol(dtm)
+   dtm <- dtm[,(nw-kTop+1):nw]
    browser()
    dtm <- as.matrix(dtm)
    list(x=dtm,y=labels)

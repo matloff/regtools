@@ -15,7 +15,7 @@
 #      stopWords <- tm::stopwords('english')
 #   kTop: number of most-frequent words to retain
 
-ttXY <- function(docs,labels,kTop=50,stopWords=NULL) 
+ttXY <- function(docs,labels,kTop=50,stopWords='a') 
 {
    require(text2vec)
 
@@ -30,7 +30,7 @@ ttXY <- function(docs,labels,kTop=50,stopWords=NULL)
    tok_fun = word_tokenizer
    prep_fun = tolower
    tok_fun = word_tokenizer
-   itx <- itoken(x$labels,
+   itx <- itoken(x$docs,
         preprocessor = prep_fun,
         tokenizer = tok_fun,
         ids = x$id,
@@ -40,9 +40,11 @@ ttXY <- function(docs,labels,kTop=50,stopWords=NULL)
    dtm <- create_dtm(itx, vectorizer)
    
    # remove stop words
-   vocab <- create_vocabulary(itx, stopwords = stop_words)
+   vocab <- create_vocabulary(itx, stopwords = stopWords)
    vocab <- prune_vocabulary(vocab)
    dtm <- create_dtm(itx, vectorizer)
+   browser()
+   dtm <- as.matrix(dtm)
    list(x=dtm,y=labels)
 }
 

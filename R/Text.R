@@ -43,7 +43,7 @@ ttXY <- function(docs,labels,kTop=50,stopWords=NULL)
    vocab <- create_vocabulary(itx, stopwords = stop_words)
    vocab <- prune_vocabulary(vocab)
    dtm <- create_dtm(itx, vectorizer)
-   dtmW
+   list(x=dtm,y=labels)
 }
 
 ##################  textToXY(), to be replaced  ########################

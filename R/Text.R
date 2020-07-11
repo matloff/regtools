@@ -42,7 +42,8 @@ textToXY <- function(docs,labels,kTop=50,stopWords='a')
    
    # remove stop words
    vocab <- create_vocabulary(itx, stopwords = stopWords)
-   vocab <- prune_vocabulary(vocab)
+   prunedVocab <- prune_vocabulary(vocab)
+   vectorizer <- vocab_vectorizer(prunedVocab)
    dtm <- create_dtm(itx, vectorizer)
    nw <- ncol(dtm)
    if (kTop > 0) dtm <- dtm[,(nw-kTop+1):nw]

@@ -21,10 +21,11 @@ textToXY <- function(docs,labels,kTop=50,stopWords='a')
    require(text2vec)
 
    # prep
+   if (is.null(labels)) labels <- rep(NA,length(docs))
    x <- data.frame(docs,labels,id=1:length(docs))
    setDT(x)
    setkey(x,id)
-   x <- x[J(x$id)]
+   # x <- x[J(x$id)]
 
    # compute vocab, doc term mat
    prep_fun = tolower

@@ -114,6 +114,14 @@ regression and classification analysis, and machine learning.
 
    }
 
+\bold{Text processing:}
+
+   \itemize{
+
+   \item textToXY
+
+   }
+
 \bold{Misc.:}
 
    \itemize{

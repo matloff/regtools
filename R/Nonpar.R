@@ -1,47 +1,45 @@
 
 ######################  k-NN routines  #############################
 
-# kNN() is now the main k-NN routine in the package; knnest() is
-# deprecated
+# kNN() is now the main k-NN routine in the package; knnest() was
+# deprecated and later removee
 
-# use knnest() for greater speed for continuing prediction activity,
-# though with a "shortcut":  the preprocessing steps will fit k-NN
-# estimates of the regression function at all the training set points;
-# then to predict a new point, we find the closest point to it in the
-# training set, and use the k-NN estimates at THAT point
-
-# under this latter scheme, we call preprocessx() on the "X" portion of
-# the training set, then call knnest() on the output; then to predict a
-# new point, call predict.knn(), for the generic function predict()
+# in its basic form, kNN() does both fitting and predicting; if the
+# latter will be done repeatedly over time, call kNN() with newx = NULL,
+# and use predict.kNN() for prediction
 
 ######################  kNN()  ###############################
 
 # arguments:
 
 #   x: matrix (df or vec will be converted), "X" of training set
-#   y: vector or matrix, "Y" of training set; matrix in multiclass (> 2) case
+#   y: vector or matrix, "Y" of training set; in multiclass (> 2) case,
+#      y can be specified either as a matrix of dummies or a vector of
+#      numeric class labels; in the latter case, if classif is TRUE,
+#      dummies will automatically be generated
 #   newx: vector or matrix; "X" values to be predicted, if any; if NULL,
-#      compute regests values at each "X", and saving for later
+#      compute regests values at each "X", saving for later
 #      prediction using predict.kNN()
-#   kmax: maximum value of k requested
+#   kmax: maximum value of k requested; see 'allK' below
 #   scaleX: x and newx will be scaled
 #   PCAcomps: apply PCA (after scaling, if any) to x, newx, using this
-#      this many components; 0 means no PCA
+#      many components; 0 means no PCA
 #   smoothingFtn: op applied to the "Y"s of nearest neighbors; could be,
 #      say, median instead of mean, even variance
 #   allK: report kNN estimates for all k = 1,...,kmax; otherwise just k = kmax
 #   leave1out: delete the 1-nearest neighbor (n-fold cross-validation)
-#   classif: if TRUE, consider this a classification problem, meaning
-#      that  'ypreds' will be included in the return value
+#   classif: if TRUE, consider this a classification problem. 
+#      Then 'ypreds' will be included in the return value.  See also the
+#      entry for 'y' above.
+#   startAt1: if classification case, labels 1,2,...; else 0,1,2,...
 
 # value:
 
 #    R object of class 'kNN', containing vector of nearest-neighbor
 #    indices and a vector/matrix of estimated regression function values
 #    at the rows of newx; these are conditional means, used directly as
-#    predicted Y values in the continuous "Y" case; in classification
-#    case, 2 classes, do something like round(regest) to get 0,1
-#    prediction, or apply(    ,1,which.max) for multiclass 
+#    predicted Y values in the continuous "Y" case; see also comments
+#    about 'y' and 'ypreds' above
 
 #    if newx is NULL, then return closest "X" to each "X" (accounting
 #    for leave1out), regests, scaleX, x, leave1out
@@ -49,39 +47,42 @@
 kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
           expandVars=NULL,expandVals=NULL,
           smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
-          classif=FALSE)
+          classif=FALSE,startAt1=TRUE)
 {  
    noPreds <- is.null(newx)  # don't predict, just save for future predict
-   # type checks etc.
+   startA1adjust <- if (startAt1) 0 else 1
+   # general checks 
    if (identical(smoothingFtn,loclin)) {
       if (allK) stop('cannot use loclin() yet with allK = TRUE')
    }
    # checks on x
-   if (is.null(newx)) newx <- x  # won't be used
    if (is.vector(x)) x <- matrix(x,ncol=1)
-   if (hasFactors(x)) stop('factor conversion not implemented yet')
+   if (hasFactors(x)) stop('use factorsToDummies() to create dummies')
    if (is.data.frame(x)) 
       x <- as.matrix(x)
    # checks on y
+   if (is.vector(y)) {
+      if (classif) y <- factorsToDummies(as.factor(y),omitLast=FALSE)
+      else y <- matrix(y,ncol=1)
+   }
    if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
    if (is.matrix(y) && identical(smoothingFtn,mean)) 
       smoothingFtn <- colMeans
    # if (is.matrix(y) && allK)  print('stub')
    #    stop('for now, in multiclass case, allK must be FALSE')
-   if (is.vector(y)) y <- matrix(y,ncol=1)
    # if (classif && allK) print('stub')
    #    stop('classif=TRUE can be set only if allK is FALSE')
    if (ncol(y) > 1 && !allK) classif <- TRUE
    # checks on newx
-   if (is.vector(newx)) newx <- matrix(newx,ncol=ncol(x))
+   if (is.factor(newx) || is.data.frame(newx) && hasFactors(newwx))
+      stop('change to dummies, factorsToDummies()')
+   if (is.vector(newx)) newx <- matrix(newx,ncol=1)
    if (is.data.frame(newx)) {
       newx <- as.matrix(newx)
    }
    # at this point, x, y and newx will all be matrices
 
-   if (noPreds) {
-      newx <- x
-   }
+   if (noPreds) newx <- x
 
    kmax1 <- kmax + leave1out
 
@@ -92,7 +93,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       newx <- scale(newx,center=xcntr,scale=xscl)
    }
 
-  # expand any variables?
+  # expand any specified variables
    eVars <- !is.null(expandVars)
    eVals <- !is.null(expandVals)
    if (eVars || eVals) {
@@ -106,30 +107,34 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       newx <- multCols(newx,expandVars,expandVals)  
    }
 
-   if (PCAcomps > 0) {
-      colnames(newx) <- colnames(x)
-      PCAout <- prcomp(x,center=FALSE,scale.=FALSE)
-      rot <- PCAout$rotation
-      rot <- rot[,1:PCAcomps,drop=FALSE]
-      PCAout$rotation <- rot
-      x <- predict(PCAout,x)
-      newx <- predict(PCAout,newx)
-   } else PCAout <- NULL
+   if (PCAcomps > 0) 
+      stop('PCA now must be done separately')
+#       colnames(newx) <- colnames(x)
+#       PCAout <- prcomp(x,center=FALSE,scale.=FALSE)
+#       rot <- PCAout$rotation
+#       rot <- rot[,1:PCAcomps,drop=FALSE]
+#       PCAout$rotation <- rot
+#       x <- predict(PCAout,x)
+#       newx <- predict(PCAout,newx)
+#    } else PCAout <- NULL
+
+   # find NNs
    tmp <- FNN::get.knnx(data=x, query=newx, k=kmax1)
    closestIdxs <- tmp$nn.index
    if (leave1out) closestIdxs <- closestIdxs[,-1,drop=FALSE]
+
    # closestIdxs is a matrix; row i gives the indices of the kmax 
    # closest rows in x to newx[i,]
 
    # we might want to try various values of k (allK = T), up through
    # kmax; e.g.  for k = 2 would just use the first 2 columns; 
 
-   # treat this specially, as otherwise get 1x1 matrix issues
+   # treat kmax1 = 1 specially, as otherwise get 1x1 matrix issues
    if (kmax1 == 1) {
       regests <- y[closestIdxs,]
    } else {
-      # in fyh(), closeIdxs is a row in closestIdxs, with the first k columns
-      fyh <- function(closeIdxs) smoothingFtn(y[closeIdxs,,drop=FALSE])
+      # in fyh(), closestIdxs is a row in closestIdxs, with the first k columns
+      fyh <- function(closestIdxsRow) smoothingFtn(y[closestIdxsRow,,drop=FALSE])
       if (!allK) {
          if (identical(smoothingFtn,loclin)) {
             regests <- loclin(newx,cbind(x,y)[closestIdxs,])
@@ -150,14 +155,13 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    tmplist <- list(whichClosest=closestIdxs,regests=regests)
    if (classif && !noPreds) {
       if (ncol(y) > 1) {
-         yp <- apply(regests,1,which.max)-1
+         yp <- apply(regests,1,which.max) - startA1adjust
          if (!allK) {
            ypreds <- yp
          } else ypreds <- matrix(yp,nrow=kmax,byrow=TRUE)
       } else ypreds <- round(regests)
       tmplist$ypreds <- ypreds
    }
-   tmplist$PCAout <- PCAout
    tmplist$scaleX <- scaleX
    if (scaleX) {
       tmplist$xcntr <- xcntr
@@ -169,20 +173,24 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       tmplist$x <- NULL
    }
    tmplist$leave1out <- leave1out
+   tmplist$startAt1adjust <- startA1adjust
+   tmplist$expandVars <- expandVars
    class(tmplist) <- 'kNN'
    tmplist
 }
 
-# actual call is predict(kNNoutput,newx); for each row in newx, the
+# actual call is predict(kNNoutput,newx,add1); for each row in newx, the
 # 1-nearest row in kNNoutput$x is found, and the corresponding
 # kNNoutput$regests value returned 
 predict.kNN <- function(object,...)
 {
    x <- object$x
-   PCAout <- object$PCAout
    regests <- object$regests
    arglist <- list(...)
    newx <- arglist[[1]]
+   expandVars <- object$expandVars
+   if (!is.null(expandVars)) 
+      stop('separate prediction with expandVars is not yet implemented')
    if (is.vector(newx)) newx <- matrix(newx,ncol=ncol(x))
    if (is.data.frame(newx)) {
       newx <- as.matrix(newx)

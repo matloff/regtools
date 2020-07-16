@@ -1,8 +1,8 @@
 
 ######################  k-NN routines  #############################
 
-# kNN() is now the main k-NN routine in the package; knnest() was
-# deprecated and later removee
+# kNN() is now the main k-NN routine in the package; knnest() is
+# deprecated 
 
 # in its basic form, kNN() does both fitting and predicting; if the
 # latter will be done repeatedly over time, call kNN() with newx = NULL,
@@ -76,7 +76,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    # checks on newx
    if (is.factor(newx) || is.data.frame(newx) && hasFactors(newwx))
       stop('change to dummies, factorsToDummies()')
-   if (is.vector(newx)) newx <- matrix(newx,ncol=1)
+   if (is.vector(newx)) newx <- matrix(newx,nrow=1)
    if (is.data.frame(newx)) {
       newx <- as.matrix(newx)
    }
@@ -127,7 +127,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    # closest rows in x to newx[i,]
 
    # we might want to try various values of k (allK = T), up through
-   # kmax; e.g.  for k = 2 would just use the first 2 columns; 
+   # kmax; e.g.  for k = 2 would just use the first 2 columns
 
    # treat kmax1 = 1 specially, as otherwise get 1x1 matrix issues
    if (kmax1 == 1) {
@@ -152,17 +152,23 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
                  rbind(regests,t(apply(closestIdxs[,1:k,drop=FALSE],1,fyh)))
       }
    }
+
+   # start building return value
+
    tmplist <- list(whichClosest=closestIdxs,regests=regests)
+
    if (classif && !noPreds) {
-      if (ncol(y) > 1) {
+      if (ncol(y) > 1) {  # multiclass (> 2) case
          yp <- apply(regests,1,which.max) - startA1adjust
          if (!allK) {
            ypreds <- yp
          } else ypreds <- matrix(yp,nrow=kmax,byrow=TRUE)
-      } else ypreds <- round(regests)
+      } else ypreds <- round(regests)  # 2-class case
       tmplist$ypreds <- ypreds
    }
+
    tmplist$scaleX <- scaleX
+
    if (scaleX) {
       tmplist$xcntr <- xcntr
       tmplist$xscl <- xscl
@@ -191,12 +197,11 @@ predict.kNN <- function(object,...)
    expandVars <- object$expandVars
    if (!is.null(expandVars)) 
       stop('separate prediction with expandVars is not yet implemented')
-   if (is.vector(newx)) newx <- matrix(newx,ncol=ncol(x))
+   if (is.vector(newx)) newx <- matrix(newx,nrow=1)
    if (is.data.frame(newx)) {
       newx <- as.matrix(newx)
    }
    if (object$scaleX)  newx <- scale(newx,center=object$xcntr,scale=object$xscl)
-   if (!is.null(PCAout)) newx <- predict(PCAout,newx)
    # k <- 1 + object$leave1out
    k <- 1
    tmp <- FNN::get.knnx(data=x, query=newx, k=k)

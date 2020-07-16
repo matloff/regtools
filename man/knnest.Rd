@@ -16,7 +16,7 @@
 \alias{MAPE}
 \alias{bestKperPoint}
 
-\title{Nonparametric Regression and Classification}
+\title{k-NN Nonparametric Regression and Classification}
 
 \description{
 Full set of tools for k-NN regression and classification, including both
@@ -26,7 +26,8 @@ models.
 
 \usage{
 kNN(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,expandVars=NULL,expandVals=NULL,
-   smoothingFtn=mean,allK=FALSE,leave1out=FALSE, classif=FALSE)
+   smoothingFtn=mean,allK=FALSE,leave1out=FALSE, classif=FALSE,
+   startAt1=TRUE)
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
 meany(predpt,nearxy) 
@@ -50,7 +51,9 @@ bestKperPoint(kNNout,y)
      future prediction with \code{predict.kNN}}
   \item{y}{Response variable data in the training set. Vector or matrix,
      the latter case for vector-valued response, e.g. multiclass
-     classification.}  
+     classification.  In that case, can be a vector, either (0,1,2,...,)
+     or (1,2,3,...), which automatically is converted into a matrix of
+     dummies.}  
   \item{x}{X data, predictors, one row per data point, in the training
      set.}
   \item{...}{Needed for consistency with generic.  See Details below for
@@ -84,6 +87,7 @@ bestKperPoint(kNNout,y)
   \item{yhat}{Vector of estimated regression function values.}
   \item{returnPts}{If TRUE, return matrix of plotted points.}
   \item{kNNout}{Object returned by \code{kNN}.}
+  \item{startAt1}{If TRUE, class labels start at 1, else 0.}
   
 }
 
@@ -108,11 +112,6 @@ bestKperPoint(kNNout,y)
    In this manner, there is almost no computational cost in the
    prediction stage.  The approximation should work well in moderately
    large datasets.
-
-   In both forms of \code{kNN}, the user has the option of performing
-   PCA on the training data, retaining a specified number of principal
-   components, and then applying the same transformation to the new
-   cases to be predicted.
 
    In addition, a novel feature allows the user to weight some
    predictors more than others.  This is done by scaling the given
@@ -260,17 +259,20 @@ kNN(x,y,newx,scaleX=FALSE,2)
 
 knnout <- kNN(x,y,NULL,scaleX=FALSE,2)
 knnout
+
 # $whichClosest
 #      [,1] [,2]
-# [1,]    4    3
-# [2,]    3    4
-# [3,]    2    4
-# [4,]    2    5
-# [5,]    4    2
-# $regests
-# [1] 10.5 10.5  7.0  3.5  7.0
+# [1,]    1    4
+# [2,]    2    3
+# [3,]    3    2
+# [4,]    4    2
+# [5,]    5    4
 
-predict(knnout,c(5,2))  # 7
+# $regests
+# [1] 9.5 6.5 6.5 7.0 7.5
+
+predict(knnout,c(5,2))  # 7.5
+
 y <- c(1,1,0,0,1)
 kNN(x,y,newx,scaleX=FALSE,2)
 # $whichClosest
@@ -279,31 +281,33 @@ kNN(x,y,newx,scaleX=FALSE,2)
 #
 # $regests
 # [1] 0.5
-kNN(x,y,c(5,6),scaleX=FALSE,2,classif=TRUE)
+
+kNN(x,y,c(5,6),scaleX=FALSE,2,classif=TRUE,startAt1=FALSE)
 # $whichClosest
 #   [,1] [,2]
 # [1,]    5    2
 # $regests
-# [1] 1
-# $ypreds
-# [1] 1
+#      dfr.0 dfr.1
+# [1,]     0     1
+
+y <- c(1,1,0,0,0)
 knnout <- kNN(x,y,NULL,scaleX=FALSE,2)
 knnout
 # $whichClosest
 #      [,1] [,2]
-# [1,]    4    3
-# [2,]    3    4
-# [3,]    2    4
-# [4,]    2    5
-# [5,]    4    2
+# [1,]    1    4
+# [2,]    2    3
+# [3,]    3    2
+# [4,]    4    2
+# [5,]    5    4
+
 # $regests
-# [1] 0.0 0.0 0.5 1.0 0.5
-predict(knnout,c(3,3))  # 1
+# [1] 0.5 0.5 0.5 0.5 0.0
 
 x <- rbind(c(1,0),c(2,5),c(0,5),c(3,3),c(6,3),c(4,1))
 y <- rbind( c(1,0,0), c(0,0,1), c(0,1,0), c(0,1,0), c(1,0,0),
    c(0,1,0))
-kNN(x,y,rbind(c(5,6),c(1,0),c(2,3)),2,scaleX=FALSE,classif=TRUE)
+kNN(x,y,rbind(c(5,6),c(1,0),c(2,3)),2,scaleX=FALSE,classif=TRUE,startAt1=FALSE)
 # $whichClosest
 #      [,1] [,2]
 # [1,]    5    2
@@ -316,95 +320,6 @@ kNN(x,y,rbind(c(5,6),c(1,0),c(2,3)),2,scaleX=FALSE,classif=TRUE)
 # [3,]  0.0  0.5  0.5
 # $ypreds
 # [1] 0 0 1
-kNN(x,y,rbind(c(5,6),c(1,0),c(2,3)),2,scaleX=FALSE,classif=TRUE,allK=TRUE)
-# $whichClosest
-#      [,1] [,2]
-# [1,]    5    2
-# [2,]    1    6
-# [3,]    4    2
-# $regests
-#      [,1] [,2] [,3]
-# [1,]  1.0  0.0  0.0
-# [2,]  1.0  0.0  0.0
-# [3,]  0.0  1.0  0.0
-# [4,]  0.5  0.0  0.5
-# [5,]  0.5  0.5  0.0
-# [6,]  0.0  0.5  0.5
-# $ypreds
-#      [,1] [,2] [,3]
-# [1,]    0    0    1
-# [2,]    0    0    1
-
-\dontrun{
-data(prgeng)
-pe <- prgeng
-# dummies for MS, PhD
-pe$ms <- as.integer(pe$educ == 14)
-pe$phd <- as.integer(pe$educ == 16)
-# computer occupations only
-pecs <- pe[pe$occ >= 100 & pe$occ <= 109,]
-# for simplicity, let's choose a few predictors
-pecs1 <- pecs[,c(1,7,9,12,13,8)]
-# will predict wage income from age, gender etc.
-# prepare nearest-neighbor data, k up to 50
-xdata <- preprocessx(pecs1[,1:5],50)
-zout <- knnest(pecs1[,6],xdata,50)  # k = 50
-# find the est. mean income for 42-year-old women, 52 weeks worked, with
-# a Master's
-predict(zout,matrix(c(42,2,52,0,0),nrow=1),TRUE)  # 62106
-# try k = 25; don't need to call preprocessx() again
-zout <- knnest(pecs1[,6],xdata,25)
-predict(zout,matrix(c(42,2,52,0,0),nrow=1),TRUE)  # 69104
-# quite a difference; what k values are good?
-kmout <- kmin(pecs1[,6],xdata) # at least 50
-# what about a man?
-zout <- knnest(pecs1[,6],xdata,50)
-predict(zout,matrix(c(42,1,52,0,0),nrow=1),TRUE)  # 78588
-# form training and test sets, fit on the former and predict on the
-# latter
-fullidxs <- 1:nrow(pecs1)
-train <- sample(fullidxs,10000)
-xdata <- preprocessx(pecs1[train,1:5],50)
-trainout <- knnest(pecs1[train,6],xdata,50)
-testout <- predict(trainout,as.matrix(pecs1[-train,-6]),TRUE)
-# find mean abs. prediction error (about $25K)
-mean(abs(pecs1[-train,6] - testout))
-# examples of fit assessment
-# look for nonlinear relations between Y and each X
-nonparvsxplot(zout)  # keep hitting Enter for next plot
-# there seem to be quadratic relations with age and wkswrkd, so add quad
-# terms and run lm()
-pecs2 <- pecs1 
-pecs2$age2 <- pecs1$age^2 
-pecs2$wks2 <- pecs1$wkswrkd^2 
-lmout2 <- lm(wageinc ~ .,data=pecs2) 
-# check parametric fit by comparing to kNN
-parvsnonparplot(lmout2,zout) 
-# linear model line somewhat faint, due to large n;
-# parametric model seems to overpredict at high end;
-# to deal with faintness, reduce size of points
-parvsnonparplot(lmout2,zout,cex=0.1) 
-# assess homogeneity of conditional variance
-nonparvarplot(zout) 
-# hockey stick!
-}
-
-# Y vector-valued (3 classes)
-# 3 clusters, equal wts, coded 0,1,2
-n <- 1500 
-# within-grp cov matrix
-cv <- rbind(c(1,0.2),c(0.2,1)) 
-xy <- NULL 
-for (i in 1:3) 
-   xy <- rbind(xy,rmvnorm(n,mean=rep(i*2.0,2),sigma=cv)) 
-y <- rep(0:2,each=n)
-xy <- cbind(xy,dummy(y))
-xdata <- preprocessx(xy[,-(3:5)],20) # X is xy[,1:2], k <= 20
-ko <- knnest(xy[,3:5],xdata,20) 
-# find predicted Y for each data pt 
-mx <- apply(as.matrix(ko$regest),1,which.max) - 1
-# overall correct classification rate
-mean(mx == y)  # should be about 0.87
 
 }
 

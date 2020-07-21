@@ -20,6 +20,8 @@ regression and classification analysis, and machine learning.
 
    \itemize{
 
+   \item multivariable regression: mvrlm
+
    \item nonlinear regression:  nlshc
 
    \item ridge regression:  ridgelm, plot
@@ -37,6 +39,8 @@ regression and classification analysis, and machine learning.
    nonparvarplot
 
    \item other: boundaryplot, pwplot, nonparvsxplot
+
+   \item linear multiclass prediction: mvrlm
 
    }
 
@@ -61,8 +65,6 @@ regression and classification analysis, and machine learning.
    \item neural networks: krsFit,multCol
 
    \item advanced grid search: fineTuning, fineTuningPar, plot.tuner
-
-   \item image data augmentation: augMatrix
 
    \item loss: l1, l2, MAPE
 
@@ -110,7 +112,7 @@ regression and classification analysis, and machine learning.
 
    \item imgFilesToMatrix,imgFileToVector
 
-   \item augMatrix
+   \item image data augmentation: augMatrix
 
    }
 

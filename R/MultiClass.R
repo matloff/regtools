@@ -465,7 +465,7 @@ boundaryplot <- function(y01,x,regests,pairs=combn(ncol(x),2),
    }
 }
 
-#######################  mvrlm()  ################################
+#######################  linClass()  ################################
 
 # uses multivariate (i.e. vector R) lm() for classification; faster than
 # glm(), and may be useful as a rough tool if the goal is prediction, 
@@ -473,39 +473,37 @@ boundaryplot <- function(y01,x,regests,pairs=combn(ncol(x),2),
 
 # arguments:
 
-#    x: the usual matrix/df of predictor values
-#    y: an R factor, vector or matrix/df; if vector, assumed to contain
-#       class ID codes, and converted to a factor, which is then
-#       converted to dummies; if matrix/df, assumed to already consist
-#       of dummies
-#    yname: name to be used as a base in dummies created from y
+#    dta: data frame, one column for class, rest for features; class
+#       column must be an R factor
+#    yName: name of the class column
 
 # value:
 
-#    object of class 'mvrlm'
-mvrlm <- function(x,y,yname=NULL) {
-   if (!is.matrix(y) && !is.data.frame(y)) {
-      if (is.vector(y)) y <- as.factor(y)
-      if (is.null(yname)) stop('need non-null yname')
-      ydumms <- factorToDummies(y,yname,FALSE)
-   } else ydumms <- y 
-   ydumms <- as.data.frame(ydumms)
-   xy <- cbind(x,ydumms)
-   xnames <- names(x)
-   ynames <- names(ydumms)
-   ynames <- paste0(ynames,collapse=',')
-   cmd <- paste0('lmout <- lm(cbind(',ynames,') ~ .,data=xy)')
+#    object of class 'linClass'
+linClass <- function(dta,yName) {
+   y <- dta[[yName]]
+   if (!is.factor(y)) stop('class column must be an R factor')
+   yIdx <- which(names(dta) == yName)
+   x <- dta[,-yIdx]
+   classNames <- levels(y)
+   yDumms <- factorToDummies(y,'',omitLast=FALSE)
+   colnames(yDumms) <- classNames
+   yDumms <- as.data.frame(yDumms)
+   xy <- cbind(x,yDumms)
+
+   yNames <- paste0(classNames,collapse=',')
+   cmd <- paste0('lmout <- lm(cbind(',yNames,') ~ .,data=xy)')
    eval(parse(text=cmd))
-   class(lmout) <- c('mvrlm',class(lmout))
+   class(lmout) <- c('linClass',class(lmout))
    lmout
 }
 
-# mvrlmObj is output of mvrlm(), newx is a data frame compatible with x
-# in mvrlm()
+# linClassObj is output of linClass(), newx is a data frame compatible with x
+# in linClass(); output is the most likely class label
 
-predict.mvrlm <- function(mvrlmObj,newx) {
-   class(mvrlmObj) <- class(mvrlmObj)[-1]
-   preds <- predict(mvrlmObj,newx)
+predict.linClass <- function(linClassObj,newx) {
+   class(linClassObj) <- class(linClassObj)[-1]
+   preds <- predict(linClassObj,newx)
    tmp <- apply(preds,1,which.max)
    colnames(preds)[tmp]
 }

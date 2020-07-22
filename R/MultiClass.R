@@ -2,26 +2,31 @@
 # One-vs.-All (OVA) and All-vs.All (AVA), parametric models
 
 ##################################################################
-# ovalogtrn: generate estimated regression functions
+# logitClass: generate estimated regression functions
 ##################################################################
 
 # arguments:
 
-#    trnxy:  matrix or dataframe, training set; Y col is a factor 
-#    yname:  name of the Y column
+#    dta:  dataframe, training set; class labels col is a factor 
+#    yName:  name of the class labels column
 
 # value:
 
 #    matrix of the betahat vectors, one class per column; via attr(),
 #    also empirical class probabilities, column names
 
-ovalogtrn <- function(trnxy,yname) {
-   if (is.null(colnames(trnxy))) 
-      stop('trnxy must have column names')
-   ycol <- which(names(trnxy) == yname)
-   y <- trnxy[,ycol]
+ovalogtrn <- function(...) 
+{
+   stop('deprecated; use logitClass()')
+}
+
+logitClass <- function(dta,yName) {
+   if (is.null(colnames(dta)) || !is.data.frame(dta)) 
+      stop('dta must have column names')
+   ycol <- which(names(dta) == yName)
+   y <- dta[,ycol]
    if (!is.factor(y)) stop('Y must be a factor')
-   x <- trnxy[,-ycol,drop=FALSE]
+   x <- dta[,-ycol,drop=FALSE]
    xd <- factorsToDummies(x,omitLast=TRUE)
    yd <- factorToDummies(y,'y',omitLast=FALSE)
    m <- ncol(yd)
@@ -36,17 +41,17 @@ ovalogtrn <- function(trnxy,yname) {
    colnames(outmat) <- as.character(0:(m-1))
    empirclassprobs <- colMeans(yd)
    attr(outmat,'empirclassprobs') <- empirclassprobs
-   class(outmat) <- c('ovalog','matrix')
+   class(outmat) <- c('logitClass','matrix')
    outmat
 }
 
 ##################################################################
-# predict.ovalog: predict Ys from new Xs
+# predict.logitClass: predict Ys from new Xs
 ##################################################################
 
 # arguments:  
 
-#    object:  coefficient matrix, output from ovalogtrn()
+#    object:  coefficient matrix, output from logitClass()
 #    predpts:  points to be predicted; named argument
  
 # value:
@@ -54,9 +59,12 @@ ovalogtrn <- function(trnxy,yname) {
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
 #    each row of predx
 
-ovalogpred <- function() stop('use predict.ovalog()')  # deprecated
+predict.ovalog <- function(...) 
+{
+   stop('')
+}
 
-predict.ovalog <- function(object,...) 
+predict.logitClass <- function(object,...) 
 {
    dts <- list(...)
    predpts <- dts$predpts
@@ -80,28 +88,8 @@ predict.ovalog <- function(object,...)
 }
 
 ##################################################################
-# ovalogloom: LOOM predict Ys from Xs
+# logitClassloom: LOOM predict Ys from Xs
 ##################################################################
-
-ovalogloom <- function() stop('deprecated')
-
-# arguments: as with ovalogtrn()
-
-# value: LOOM-estimated probability of correct classification\
-
-# ovalogloom <- function(m,trnxy) {
-#    n <- nrow(trnxy)
-#    p <- ncol(trnxy) 
-#    i <- 0
-#    correctprobs <- replicate(n,
-#       {
-#          i <- i + 1
-#          ovout <- ovalogtrn(m,trnxy[-i,])
-#          predy <- ovalogpred(ovout,trnxy[-i,-p])
-#          mean(predy == trnxy[-i,p])
-#       })
-#    mean(correctprobs)
-# }
 
 
 ##################################################################
@@ -110,11 +98,11 @@ ovalogloom <- function() stop('deprecated')
 
 # arguments:
 
-#    as in ovalogtrn() above
+#    as in logitClass() above
 
 # value:
 
-#    as in ovalogtrn() above
+#    as in logitClass() above
 
 avalogtrn <- function(trnxy,yname) 
 {
@@ -333,7 +321,7 @@ predict.ovaknn <- function(object,...) {
 #    econdprobs: estimated conditional probs. for class 1, for various t, 
 #       reported by the ML alg.
 #    wrongprob1: proportion of class 1 in the training data; returned as
-#       attr() in, e.g. ovalogtrn()
+#       attr() in, e.g. logitClass()
 #    trueprob1: true proportion of class 1 
  
 # value:
@@ -363,51 +351,6 @@ classadjust <- function(econdprobs,wrongprob1,trueprob1) {
    trueratios <- (1-trueprob1) / trueprob1
    1 / (1 + trueratios * fratios)
 }
-
-## #######################  pwplot()  #####################################
-## 
-## # plot k-NN estimated regression/probability function of a univariate, 
-## # Y against each specified pair of predictors in X 
-## 
-## # for each point t, we ask whether est. P(Y = 1 | X = t) > P(Y = 1); if
-## # yes, plot plus, else circle
-## 
-## # purpose: assess whether each pair of predictor variables predicts Y
-## # well; e.g. if the pluses and circles are rather randomly distributed,
-## # then this pair of predictor variables seems to be largely unrelated to
-## # Y
-##  
-## # cexval is the value of cex in 'plot' 
-## 
-## # if user specifies 'pairs', the format is one pair per column in the
-## # provided matrix
-## 
-## # if band is non-NULL, only points within band, say 0.1, of est. P(Y =
-## # 1) are displayed, for a contour-like effect
-## 
-## pwplot <- function(y,x,k,pairs=combn(ncol(x),2),cexval=0.5,band=NULL) {
-##    p <- ncol(x)
-##    meanyval <- mean(y)
-##    ny <- length(y)
-##    for (m in 1:ncol(pairs)) {
-##       i <- pairs[1,m]
-##       j <- pairs[2,m]
-##       x2 <- x[,c(i,j)]
-##       xd <- preprocessx(x2,k)
-##       kout <- knnest(y,xd,k)
-##       regest <- kout$regest
-##       pred1 <- which(regest >= meanyval)
-##       if (!is.null(band))  {
-##          contourpts <- which(abs(regest - meanyval) < band)
-##          x2 <- x2[contourpts,]
-##       }
-##       xnames <- names(x2)
-##       plot(x2[pred1,1],x2[pred1,2],pch=3,cex=cexval,
-##          xlab=xnames[1],ylab=xnames[2])
-##       graphics::points(x2[-pred1,1],x2[-pred1,2],pch=1,cex=cexval)
-##       readline("next plot")
-##    }
-## }
 
 #######################  boundaryplot()  ################################
 

@@ -24,7 +24,7 @@ S3method(predict,linClass)
 export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    kmin,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
-   ovalogtrn,ovalogpred,avalogtrn,avalogpred,
+   ovalogtrn,avalogtrn,avalogpred,logitClass,
    knntrn,ovaknntrn,predict.ovaknn,classadjust,
    kNN,findOverallLoss,MAPE,probIncorrectClass,kNNxv,
    bestKperPoint, parvsnonparplot,nonparvsxplot,nonparvarplot,

@@ -22,8 +22,10 @@ ovalogtrn <- function(...)
 
 logitClass <- function(dta,yName) 
 {
-   xy <- xClassGetXY(dta,yName) 
-   m <- length(levels(y))
+   xyc <- xClassGetXY(dta,yName) 
+   xy <- xyc$xy
+   classNames <- xyc$classNames
+   m <- length(classNames)
    ncxy <- ncol(xy)
    nx <- ncxy - m 
    x <- xy[,1:nx]
@@ -70,6 +72,7 @@ predict.ovalog <- function(...)
 
 predict.logitClass <- function(object,...) 
 {
+browser()
    dts <- list(...)
    predpts <- dts$predpts
    if (is.null(predpts)) stop('predpts must be a named argument')
@@ -290,7 +293,8 @@ xClassGetXY <- function(dta,yName)
    yDumms <- factorToDummies(y,'',omitLast=FALSE)
    colnames(yDumms) <- classNames
    yDumms <- as.data.frame(yDumms)
-   cbind(x,yDumms)
+   xy <- cbind(x,yDumms)
+   list(xy=xy, classNames=classNames)
 }
 
 # predict.ovaknn: predict multiclass Ys from new Xs

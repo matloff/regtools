@@ -22,19 +22,7 @@ ovalogtrn <- function(...)
 
 logitClass <- function(dta,yName) 
 {
-   if (!is.data.frame(dta)) 
-      stop('dta must be a data frame')
-   ycol <- which(names(dta) == yName)
-   y <- dta[,ycol]
-   if (!is.factor(y)) stop('Y must be a factor')
-   x <- dta[,-ycol,drop=FALSE]
-   classNames <- levels(y)
-   yDumms <- factorToDummies(y,'',omitLast=FALSE)
-   colnames(yDumms) <- classNames
-   yDumms <- as.data.frame(yDumms)
-   xy <- cbind(x,yDumms)
-
-
+   xy <- xClassGetXY(dta,yName) 
    m <- length(levels(y))
    ncxy <- ncol(xy)
    nx <- ncxy - m 
@@ -202,7 +190,7 @@ predict.avalog <- function(object,...)
          mhat <- logitftn(bhat %*% xrow)  # prob of Class i
          if (mhat >= 0.5) wins[i] <- wins[i] + 1 else wins[j] <- wins[j] + 1
       }
-      ypred[r] <- which.max(wins) - 1
+      pred[r] <- which.max(wins) - 1
    }
    ypred
 }
@@ -288,9 +276,21 @@ ovaknntrn <- function(trnxy,yname,k,xval=FALSE)
    xdata
 }
 
+# common code for logitClass(), linClass() etc.; preprocesses the input,
+# returning new data frame xy
 xClassGetXY <- function(dta,yName) 
 {
-
+   if (!is.data.frame(dta)) 
+      stop('dta must be a data frame')
+   ycol <- which(names(dta) == yName)
+   y <- dta[,ycol]
+   if (!is.factor(y)) stop('Y must be a factor')
+   x <- dta[,-ycol,drop=FALSE]
+   classNames <- levels(y)
+   yDumms <- factorToDummies(y,'',omitLast=FALSE)
+   colnames(yDumms) <- classNames
+   yDumms <- as.data.frame(yDumms)
+   cbind(x,yDumms)
 }
 
 # predict.ovaknn: predict multiclass Ys from new Xs

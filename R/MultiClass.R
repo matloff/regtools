@@ -12,8 +12,7 @@
 
 # value:
 
-#    matrix of the betahat vectors, one class per column; via attr(),
-#    also empirical class probabilities, column names
+#    list of glm() output objects, one per class, and some misc.
 
 ovalogtrn <- function(...) 
 {
@@ -24,31 +23,29 @@ logitClass <- function(dta,yName)
 {
    xyc <- xClassGetXY(dta,yName) 
    xy <- xyc$xy
+   x <- xyc$x
+   y <- xyc$y
    classNames <- xyc$classNames
-   m <- length(classNames)
+   nClass <- length(classNames)
    ncxy <- ncol(xy)
-   nx <- ncxy - m 
-   x <- xy[,1:nx]
-   y <- xy[,-(1:nx)]
-   xDumms <- factorsToDummies(x,omitLast=TRUE)
-   xy <- cbind(xDumms,y)
-   nx <- ncol(xy) - m
-   outmat <- matrix(nrow=nx+1,ncol=m)
-   attr(outmat,'Xcolnames') <- colnames(x)
-   # outmat has 1 col for each of the m sets of coefficients
-   for (i in 1:m) {
-      ycol <- nx + i
-      yCol <- xy[,ycol]
-      tmpxy <- cbind(x,yCol)
-      betahat <- coef(glm(yCol ~ .,family=binomial,data=tmpxy))
-      outmat[,i] <- betahat
+   nx <- ncol(x)
+
+   # "One vs. All" (OVA) approach, calling glm() once for each class
+   g <- function(i) {
+      tmp <- cbind(x,yi = y[,i])
+      res <- glm(yi ~ .,data=tmp,family=binomial)
+      if (any(is.na(coef(tmp)))) warning('some NA coeffs')
+      res
    }
-   if (any(is.na(outmat))) warning('some NA coefficients')
-   colnames(outmat) <- colnames(y)
-   empirclassprobs <- colMeans(y)  # for classAdjust() if needed
-   attr(outmat,'empirclassprobs') <- empirclassprobs
-   class(outmat) <- c('logitClass','matrix')
-   outmat
+   outlist <- lapply(1:nClass,g)
+   names(outlist) <- classNames
+   outlist$xNames <- colnames(x)
+   empirclassprobs <- colMeans(y)
+   outlist$empirclassprobs <- empirclassprobs
+   # outlist has 1 elt for each of the m sets of coefficients, + 2 misc.
+   
+   class(outlist) <- c('logitClass')
+   outlist
 }
 
 ##################################################################
@@ -57,39 +54,35 @@ logitClass <- function(dta,yName)
 
 # arguments:  
 
-#    object:  coefficient matrix, output from logitClass()
-#    predpts:  points to be predicted; named argument
+#    object:  output from logitClass()
+#    newx:  data frame of points to be predicted
  
 # value:
  
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
-#    each row of predx
+#    each row of newx
 
 predict.ovalog <- function(...) 
 {
    stop('')
 }
 
-predict.logitClass <- function(object,...) 
+predict.logitClass <- function(object,newx) 
 {
-browser()
-   dts <- list(...)
-   predpts <- dts$predpts
-   if (is.null(predpts)) stop('predpts must be a named argument')
-   predpts <- factorsToDummies(predpts,omitLast=TRUE)
-   if (!identical(colnames(predpts),attr(object,'Xcolnames')))
-      stop('column name mismatch between original, new X variables')
-   # get est reg ftn values for each row of predpts and each col of
-   # coefmat; vals from coefmat[,i] in tmp[,i]; 
-   # say np rows in predpts, i.e. np new cases to predict, and let m be
-   # the number of classes; then tmp is np x m
-   tmp <- cbind(1,predpts) %*% object  # np x m 
-   tmp <- logitftn(tmp)
+   # get probabilities for each class
+   g <- function(i) predict(object[[i]],newx,type='response') 
+   tmp <- sapply(1:(length(object)-2),g)
+   if (is.vector(tmp)) tmp <- matrix(tmp,nrow=1)
+   lobj <- length(object)
+   classNames <- names(object)[-((lobj-1):lobj)]
+   colnames(tmp) <- classNames
+
    # separate logits for the m classes will not necessrily sum to 1, so
    # normalize
-   sumtmp <- apply(tmp,1,sum)  # length np
+   sumtmp <- apply(tmp,1,sum)  
    tmp <- (1/sumtmp) * tmp
-   preds <- apply(tmp,1,which.max) - 1
+   preds <- apply(tmp,1,which.max) 
+   preds <- classNames[preds]
    attr(preds,'probs') <- tmp
    preds
 }
@@ -280,7 +273,7 @@ ovaknntrn <- function(trnxy,yname,k,xval=FALSE)
 }
 
 # common code for logitClass(), linClass() etc.; preprocesses the input,
-# returning new data frame xy
+# returning new data frame xy, same x but dummies for y now
 xClassGetXY <- function(dta,yName) 
 {
    if (!is.data.frame(dta)) 
@@ -289,12 +282,11 @@ xClassGetXY <- function(dta,yName)
    y <- dta[,ycol]
    if (!is.factor(y)) stop('Y must be a factor')
    x <- dta[,-ycol,drop=FALSE]
+   yDumms <- factorsToDummies(y,omitLast=FALSE)
    classNames <- levels(y)
-   yDumms <- factorToDummies(y,'',omitLast=FALSE)
    colnames(yDumms) <- classNames
-   yDumms <- as.data.frame(yDumms)
    xy <- cbind(x,yDumms)
-   list(xy=xy, classNames=classNames)
+   list(x=x, y=yDumms, classNames=classNames)
 }
 
 # predict.ovaknn: predict multiclass Ys from new Xs

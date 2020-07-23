@@ -20,26 +20,42 @@ ovalogtrn <- function(...)
    stop('deprecated; use logitClass()')
 }
 
-logitClass <- function(dta,yName) {
-   if (is.null(colnames(dta)) || !is.data.frame(dta)) 
-      stop('dta must have column names')
+logitClass <- function(dta,yName) 
+{
+   if (!is.data.frame(dta)) 
+      stop('dta must be a data frame')
    ycol <- which(names(dta) == yName)
    y <- dta[,ycol]
    if (!is.factor(y)) stop('Y must be a factor')
    x <- dta[,-ycol,drop=FALSE]
-   xd <- factorsToDummies(x,omitLast=TRUE)
-   yd <- factorToDummies(y,'y',omitLast=FALSE)
-   m <- ncol(yd)
-   outmat <- matrix(nrow=ncol(xd)+1,ncol=m)
-   attr(outmat,'Xcolnames') <- colnames(xd)
-   # 1 col for each of the m sets of coefficients
+   classNames <- levels(y)
+   yDumms <- factorToDummies(y,'',omitLast=FALSE)
+   colnames(yDumms) <- classNames
+   yDumms <- as.data.frame(yDumms)
+   xy <- cbind(x,yDumms)
+
+
+   m <- length(levels(y))
+   ncxy <- ncol(xy)
+   nx <- ncxy - m 
+   x <- xy[,1:nx]
+   y <- xy[,-(1:nx)]
+   xDumms <- factorsToDummies(x,omitLast=TRUE)
+   xy <- cbind(xDumms,y)
+   nx <- ncol(xy) - m
+   outmat <- matrix(nrow=nx+1,ncol=m)
+   attr(outmat,'Xcolnames') <- colnames(x)
+   # outmat has 1 col for each of the m sets of coefficients
    for (i in 1:m) {
-      betahat <- coef(glm(yd[,i] ~ xd,family=binomial))
+      ycol <- nx + i
+      yCol <- xy[,ycol]
+      tmpxy <- cbind(x,yCol)
+      betahat <- coef(glm(yCol ~ .,family=binomial,data=tmpxy))
       outmat[,i] <- betahat
    }
    if (any(is.na(outmat))) warning('some NA coefficients')
-   colnames(outmat) <- as.character(0:(m-1))
-   empirclassprobs <- colMeans(yd)
+   colnames(outmat) <- colnames(y)
+   empirclassprobs <- colMeans(y)  # for classAdjust() if needed
    attr(outmat,'empirclassprobs') <- empirclassprobs
    class(outmat) <- c('logitClass','matrix')
    outmat
@@ -272,6 +288,11 @@ ovaknntrn <- function(trnxy,yname,k,xval=FALSE)
    xdata
 }
 
+xClassGetXY <- function(dta,yName) 
+{
+
+}
+
 # predict.ovaknn: predict multiclass Ys from new Xs
 
 # arguments:  
@@ -424,6 +445,8 @@ boundaryplot <- function(y01,x,regests,pairs=combn(ncol(x),2),
 
 #    object of class 'linClass'
 linClass <- function(dta,yName) {
+   if (!is.data.frame(dta)) 
+      stop('dta must be a data frame')
    y <- dta[[yName]]
    if (!is.factor(y)) stop('class column must be an R factor')
    yIdx <- which(names(dta) == yName)

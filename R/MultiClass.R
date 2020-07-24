@@ -7,7 +7,7 @@
 
 # arguments:
 
-#    dta:  dataframe, training set; class labels col is a factor 
+#    data:  dataframe, training set; class labels col is a factor 
 #    yName:  name of the class labels column
 
 # value:
@@ -19,9 +19,9 @@ ovalogtrn <- function(...)
    stop('deprecated; use logitClass()')
 }
 
-logitClass <- function(dta,yName) 
+logitClass <- function(data,yName) 
 {
-   xyc <- xClassGetXY(dta,yName) 
+   xyc <- xClassGetXY(data,yName) 
    xy <- xyc$xy
    x <- xyc$x
    y <- xyc$y
@@ -29,17 +29,6 @@ logitClass <- function(dta,yName)
    nClass <- length(classNames)
    ncxy <- ncol(xy)
    nx <- ncol(x)
-
-   # "One vs. All" (OVA) approach, calling glm() once for each class
-   g <- function(i) {
-      tmp <- cbind(x,yi = y[,i])
-      res <- glm(yi ~ .,data=tmp,family=binomial)
-      if (any(is.na(coef(tmp)))) warning('some NA coeffs')
-      res
-   }
-   outlist <- lapply(1:nClass,g)
-   names(outlist) <- classNames
-   outlist$xNames <- colnames(x)
    empirclassprobs <- colMeans(y)
    outlist$empirclassprobs <- empirclassprobs
    # outlist has 1 elt for each of the m sets of coefficients, + 2 misc.
@@ -60,7 +49,8 @@ logitClass <- function(dta,yName)
 # value:
  
 #    vector of predicted Y values, in {0,1,...,m-1}, one element for
-#    each row of newx
+#    each row of newx; also has an R attribute giving the matrix of
+#    class probabilities
 
 predict.ovalog <- function(...) 
 {
@@ -274,19 +264,21 @@ ovaknntrn <- function(trnxy,yname,k,xval=FALSE)
 
 # common code for logitClass(), linClass() etc.; preprocesses the input,
 # returning new data frame xy, same x but dummies for y now
-xClassGetXY <- function(dta,yName) 
+xClassGetXY <- function(data,yName,xMustNumeric=FALSE) 
 {
-   if (!is.data.frame(dta)) 
-      stop('dta must be a data frame')
-   ycol <- which(names(dta) == yName)
-   y <- dta[,ycol]
+   if (!is.data.frame(data)) 
+      stop('data must be a data frame')
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
    if (!is.factor(y)) stop('Y must be a factor')
-   x <- dta[,-ycol,drop=FALSE]
+   x <- data[,-ycol,drop=FALSE]
+   if (xMustNumeric && hasFactors(x))
+      stop('"X" must be numeric')
    yDumms <- factorsToDummies(y,omitLast=FALSE)
    classNames <- levels(y)
    colnames(yDumms) <- classNames
    xy <- cbind(x,yDumms)
-   list(x=x, y=yDumms, classNames=classNames)
+   list(xy=xy, x=x, y=yDumms, classNames=classNames)
 }
 
 # predict.ovaknn: predict multiclass Ys from new Xs
@@ -433,26 +425,19 @@ boundaryplot <- function(y01,x,regests,pairs=combn(ncol(x),2),
 
 # arguments:
 
-#    dta: data frame, one column for class, rest for features; class
+#    data: data frame, one column for class, rest for features; class
 #       column must be an R factor
 #    yName: name of the class column
 
 # value:
 
 #    object of class 'linClass'
-linClass <- function(dta,yName) {
-   if (!is.data.frame(dta)) 
-      stop('dta must be a data frame')
-   y <- dta[[yName]]
-   if (!is.factor(y)) stop('class column must be an R factor')
-   yIdx <- which(names(dta) == yName)
-   x <- dta[,-yIdx]
-   classNames <- levels(y)
-   yDumms <- factorToDummies(y,'',omitLast=FALSE)
-   colnames(yDumms) <- classNames
-   yDumms <- as.data.frame(yDumms)
-   xy <- cbind(x,yDumms)
 
+linClass <- function(data,yName) {
+
+   xyc <- xClassGetXY(data,yName)
+   xy <- xyc$xy
+   classNames <- xyc$classNames
    yNames <- paste0(classNames,collapse=',')
    cmd <- paste0('lmout <- lm(cbind(',yNames,') ~ .,data=xy)')
    eval(parse(text=cmd))
@@ -470,7 +455,54 @@ predict.linClass <- function(linClassObj,newx) {
    colnames(preds)[tmp]
 }
 
-#########################  confusion matrix  #################################
+#########################  knnClass()  #################################
+# esp. if have some quadratic terms
+
+# arguments:
+
+#    data: data frame, one column for class, rest for features; class
+#    column must be an R factor
+ 
+# value:
+ 
+#    vector of predicted labels, one element for each row of newx; also
+#    has an R attribute giving the matrix of class probabilities
+
+knnClass <- function(data,yName,k,scaleX=TRUE) 
+{
+   
+   xyc <- xClassGetXY(data,yName,xMustNumeric=TRUE)
+   x <- xyc$x
+   xm <- as.matrix(x)
+   y <- xyc$y
+   xy <- xyc$xy
+   classNames <- xyc$classNames
+   nClass <- length(classNames)
+   ncxy <- ncol(xy)
+   nx <- ncol(x)
+
+   knnout <- kNN(xm,y,newx=NULL,k,scaleX,classif=TRUE)
+   knnout$classNames <- classNames
+   class(knnout) <- c('knnClass','kNN')
+   knnout
+
+}
+
+predict.knnClass <- function(object,newx)
+{
+   class(object) <- 'kNN'
+   preds <- predict(object,newx)
+   if (is.vector(preds)) preds <- matrix(preds,nrow=1)
+   probs <- preds
+   classNames <- object$classNames
+   colnames(probs) <- classNames
+   res <- apply(preds,1,which.max)
+   res <- classNames[res]
+   attr(res,'probs') <- probs
+   res
+}
+
+#########################  confusion matrix  ################################
 
 # generates the confusion matrix
 

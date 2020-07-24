@@ -22,15 +22,6 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
    origx
 }
 
-# x is a data frame; returns TRUE if at least one column is a factor
-hasFactors <- function(x) 
-{
-   for (i in 1:ncol(x)) {
-      if (is.factor(x[,i])) return(TRUE)
-   }
-   FALSE
-}
-
 #########################  mmscale()  #################################
 
 # scale to [0,1]
@@ -64,7 +55,16 @@ mmscale <- function (m,scalePars=NULL)
    m
 }
 
-#################  convert between factors and dummies  ##################
+################### factors and dummy variables########################
+
+# x is a data frame; returns TRUE if at least one column is a factor
+hasFactors <- function(x) 
+{
+   for (i in 1:ncol(x)) {
+      if (is.factor(x[,i])) return(TRUE)
+   }
+   FALSE
+}
 
 # these routines are useful in that some regression packages insist that
 # predictor be factors, while some require dummy variables
@@ -81,7 +81,15 @@ mmscale <- function (m,scalePars=NULL)
 # thus the factor names and levels are save in attributes, and can be
 # used as input, via factorsInfo
 
-factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL) 
+# arguments
+
+#    dfr: a data frame
+#    omitLast: if TRUE, make m-1 dummies for an m-level factor
+#    factorsInfo: use factor levels found earlier
+#    dfOut: if TRUE, output a data frame rather than a matrix
+
+factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
+   dfOut=FALSE)
 {
    if (!is.null(factorsInfo)) stop('factorsInfo not yet implemented')
    if (is.factor(dfr)) dfr <- as.data.frame(dfr)
@@ -102,7 +110,7 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL)
       }
    }
    outDF[,1] <- NULL  # delete filler
-   as.matrix(outDF)
+   if (!dfOut) as.matrix(outDF) else outDF
 }
 
 # converts just a single factor 

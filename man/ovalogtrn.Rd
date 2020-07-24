@@ -9,6 +9,9 @@
 \alias{factorTo012ec}
 \alias{classadjust}
 \alias{boundaryplot}
+\alias{knnClass}
+\alias{linClass}
+\alias{logitClass}
 
 \title{Classification with More Than 2 Classes}
 

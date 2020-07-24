@@ -1,6 +1,6 @@
 # regtools 
 
-## Novel tools tools for linear, nonlinear and machine learning methods in regression and classification
+## Novel tools tools for parametric and machine learning methods in regression and classification
 
 Various tools for Prediction and/or Description goals in regression,
 classification and machine learning.  
@@ -10,13 +10,14 @@ Linear Models to Machine Learning: Statistical Regression and
 Classification</i>, N. Matloff, CRC, 2017 (recipient of the
 *Technometrics* Eric Ziegel Award for Best Book Reviewed in 2017), and
 with my forthcoming book, *The Art of Machine Learning: Algorithms+Data+R*,
-NSP, 2020 .  But **the tools are useful in general, ndependently of the
+NSP, 2020 .  But **the tools are useful in general, independently of the
 books**.
 
 See function list by typing
 
 ``` r
 > ?regtools
+``` 
 
 ## FEATURES
 

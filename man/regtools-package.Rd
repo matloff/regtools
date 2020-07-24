@@ -14,13 +14,9 @@ regression and classification analysis, and machine learning.
 
 \section{Function List}{
 
-(under construction)
-
 \bold{Parametric modeling:}
 
    \itemize{
-
-   \item multivariable regression: mvrlm
 
    \item nonlinear regression:  nlshc
 
@@ -40,7 +36,7 @@ regression and classification analysis, and machine learning.
 
    \item other: boundaryplot, pwplot, nonparvsxplot
 
-   \item linear multiclass prediction: mvrlm
+   \item linear multiclass prediction: linClass
 
    }
 
@@ -50,8 +46,9 @@ regression and classification analysis, and machine learning.
 
    \item unbalanced data: classadjust (see \bold{UnbalancedClasses.md})
    
-   \item One vs. All, All vs. All: avalogtrn, avalogpred, ovalogtrn,
-   ovalogpred 
+   \item All vs. All: avalogtrn, avalogpred
+
+   \item One vs. All wrappers: knnClass, linClass, logitClass
 
    }
 

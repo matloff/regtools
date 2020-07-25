@@ -1,7 +1,10 @@
 
-# (adapted from rectools pkg)
+# recommender systems tools; partially adapted from rectools pkg
 
-# utility to read in raw data in standard format,
+
+##################  ops to group recsys data  ############################
+
+# utility to in raw data in standard format,
 
 #    (user ID, item ID, rating)
 
@@ -24,7 +27,7 @@
 #       ratings:  vector of ratings made by this user
 #       itms:  IDs of items rated by this user
 
-groupUserData <- function(ratingsIn='') 
+groupUserData <- function(ratingsIn) 
 {
 
    if (ncol(ratingsIn) > 3)
@@ -58,6 +61,45 @@ groupUserData <- function(ratingsIn='')
       class(retval[[userID]]) <- 'usrDatum'
    }
    class(retval) <- 'usrData'
+   retval
+}
+
+# analog of groupUserData() for items
+
+groupItemData <- function(ratingsIn) 
+{
+
+   if (ncol(ratingsIn) > 3)
+      stop('ratingsIn more than 3 columns')
+
+   # IMPORTANT NOTE: in order to work in cross-validation, etc. we need
+   # to abandon the idea of having the item IDs start at 1 and be
+   # consecutive; instead, we will just use the ID numbers as list
+   # indices; e.g. if we have items numbered 2,8,85 then retval below
+   # will consist of retval[[2]], retval[[8]] and retval[[85]]
+
+   # rownums[[i]] will be the row numbers in ratingsIn belonging to item i
+   rownums <- split(1:nrow(ratingsIn),ratingsIn[,2])
+   nitems <- length(rownums)
+   nusers <- length(unique(ratingsIn[,1]))
+
+   # retval will ultimately be the return value, a list of lists as
+   # described above.
+   retval <- list()
+
+   for (i in 1:nitems) {
+      whichrows <- rownums[[i]]  # row nums in ratingsIn for item i
+      itemID <- as.character(ratingsIn[whichrows[1],2])
+      # start building itmDatum object for this user
+      retval[[itemID]] <- list()
+      retval[[itemID]]$itemID <- itemID
+      retval[[itemID]]$usrs <- ratingsIn[whichrows,1]
+      retval[[itemID]]$ratings <- ratingsIn[whichrows,3]
+      names(retval[[itemID]]$ratings) <- as.character(retval[[itemID]]$itms) 
+
+      class(retval[[itemID]]) <- 'itmDatum'
+   }
+   class(retval) <- 'itmData'
    retval
 }
 

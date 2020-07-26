@@ -108,3 +108,49 @@ findInputRow <- function(ratingsIn,usrID,itmID) {
    ratingsIn[ratingsIn[,1]==usrID & ratingsIn[,2]==itmID,]
 }
 
+#########################  knnRec*(  ################################
+
+# arguments:
+
+#   userData, itemData: outputs of groupUserData(), groupItemData()
+#   user,item: the query pair
+#   k: number of nearest neighbors
+#   minMatch: 2 users won't be compared unless that have rated
+#      at least this many items in common
+
+#   value: predicted rating
+
+knnRec <- function(userData,itemData,user,item,k,minMatch=2)
+{
+   if (minMatch != 2) stop('general minMatch not yet implemented')
+   charUser <- as.character(user)
+   uDatum <- userData[[charUser]]
+   udItems <- uDatum$items
+   if (item %in% udItems) {
+      i <- which(udItems == item)
+      return(i)
+   }
+
+   haveRated <- itemData[[as.character(item)]]
+   cd <- function(usr) cosDist(user,usr)
+   dists <- sapply(haveRated,cd)
+   
+   
+}
+
+cosDist <- function(x,y)
+{  
+   # rated items in common
+   commItms <- intersect(x$itms,y$itms)
+   if (length(commItms)==0) return(NaN)
+   # where are those common items in x and y?
+   xwhere <- which(!is.na(match(x$itms,commItms))) 
+   ywhere <- which(!is.na(match(y$itms,commItms))) 
+   xvec <- x$ratings[xwhere]
+   yvec <- y$ratings[ywhere]
+   xvec %*% yvec / (l2a(xvec) * l2a(yvec))
+}
+
+
+
+

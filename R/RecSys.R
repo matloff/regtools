@@ -120,8 +120,19 @@ findInputRow <- function(ratingsIn,usrID,itmID) {
 
 #   value: predicted rating
 
-knnRec <- function(userData,itemData,user,item,k,minMatch=2)
+knnRec <- function(ratings) 
 {
+   obj <- list()
+   obj$userData <- groupUserData(ratings)
+   obj$itemData <- groupItemData(ratings)
+   class(obj) <- 'knnRec'
+   obj
+}
+
+predict.knnRec  <- function(object,user,item,k,minMatch=2)
+{
+   userData <- object$userData
+   itemData <- object$itemData
    if (minMatch != 2) stop('general minMatch not yet implemented')
    charUser <- as.character(user)
    uDatum <- userData[[charUser]]

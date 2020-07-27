@@ -22,6 +22,7 @@ S3method(predict,krsFit)
 S3method(predict,logitClass)
 S3method(predict,linClass)
 S3method(predict,knnClass)
+S3method(predict,knnRec)
 
 export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    kmin,
@@ -39,7 +40,7 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    factorsToDummies,factorToDummies,dummiesToFactor,hasFactors,dummiesToInt,
    xyDataframeToMatrix,dummiesToInt,
    imgTo2D,imgFilesToMatrix,imgFileToVector,augMatrix,
-   stdErrPred,
+   stdErrPred,knnRec,
    fineTuning,fineTuningPar,getNamedArgs,partTrnTst,makeOutdf,
    krsFit,krsFitImg,diagNeural,
    TStoX,TStoXmv,textToXY,textToXYpred)

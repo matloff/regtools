@@ -135,24 +135,28 @@ knnRec <- function(ratings)
 
 #   value: predicted rating
 
-predict.knnRec  <- function(object,user,item,k,minMatch=2)
+predict.knnRec  <- function(object,user,item,k,minMatch=1)
 {
    userData <- object$userData
    itemData <- object$itemData
-   if (minMatch != 2) stop('general minMatch not yet implemented')
+   if (minMatch > 1) stop('general minMatch not yet implemented')
    charUser <- chr(user)
    uDatum <- userData[[chr(user)]]
    udItems <- uDatum$itms
    if (item %in% udItems) {
       i <- which(udItems == item)
-      return(i)
+      return(uDatum$ratings[i])
    }
 
 browser()
-   haveRated <- itemData[[as.character(item)]]
-   cd <- function(usr) cosDist(user$items,userData[[chr(usr$items)]])
+   haveRated <- itemData[[chr(item)]]$usrs
+   cd <- function(usrId) {
+      usrId <- chr(usrId)
+      dist <- cosDist(uDatum,userData[[usrId]])
+      c(usrId,dist)
+   }
    dists <- sapply(haveRated,cd)
-   
+   dists
    
 }
 
@@ -169,6 +173,7 @@ cosDist <- function(x,y)
    xvec %*% yvec / (l2a(xvec) * l2a(yvec))
 }
 
+l2a <- function(x) sqrt(x %*% x)
 
 
 

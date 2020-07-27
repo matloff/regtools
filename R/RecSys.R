@@ -50,13 +50,13 @@ groupUserData <- function(ratingsIn)
 
    for (i in 1:nusers) {
       whichrows <- rownums[[i]]  # row nums in ratingsIn for user i
-      userID <- as.character(ratingsIn[whichrows[1],1])
+      userID <- chr(ratingsIn[whichrows[1],1])
       # start building usrDatum object for this user
       retval[[userID]] <- list()
       retval[[userID]]$userID <- userID
       retval[[userID]]$itms <- ratingsIn[whichrows,2]
       retval[[userID]]$ratings <- ratingsIn[whichrows,3]
-      names(retval[[userID]]$ratings) <- as.character(retval[[userID]]$itms) 
+      names(retval[[userID]]$ratings) <- chr(retval[[userID]]$itms) 
 
       class(retval[[userID]]) <- 'usrDatum'
    }
@@ -89,7 +89,7 @@ groupItemData <- function(ratingsIn)
 
    for (i in 1:nitems) {
       whichrows <- rownums[[i]]  # row nums in ratingsIn for item i
-      itemID <- as.character(ratingsIn[whichrows[1],2])
+      itemID <- chr(ratingsIn[whichrows[1],2])
       # start building itmDatum object for this user
       retval[[itemID]] <- list()
       retval[[itemID]]$itemID <- itemID
@@ -103,12 +103,27 @@ groupItemData <- function(ratingsIn)
    retval
 }
 
+chr <- function(i) as.character(i)
+
 # utility:  find input row for a given user, item
 findInputRow <- function(ratingsIn,usrID,itmID) {
    ratingsIn[ratingsIn[,1]==usrID & ratingsIn[,2]==itmID,]
 }
 
 #########################  knnRec*(  ################################
+
+# arguments: ratings data in standard (user,item,rating) form
+
+# value: R list, user and item data, class 'knnRec'
+
+knnRec <- function(ratings) 
+{
+   obj <- list()
+   obj$userData <- groupUserData(ratings)
+   obj$itemData <- groupItemData(ratings)
+   class(obj) <- 'knnRec'
+   obj
+}
 
 # arguments:
 
@@ -120,30 +135,22 @@ findInputRow <- function(ratingsIn,usrID,itmID) {
 
 #   value: predicted rating
 
-knnRec <- function(ratings) 
-{
-   obj <- list()
-   obj$userData <- groupUserData(ratings)
-   obj$itemData <- groupItemData(ratings)
-   class(obj) <- 'knnRec'
-   obj
-}
-
 predict.knnRec  <- function(object,user,item,k,minMatch=2)
 {
    userData <- object$userData
    itemData <- object$itemData
    if (minMatch != 2) stop('general minMatch not yet implemented')
-   charUser <- as.character(user)
-   uDatum <- userData[[charUser]]
-   udItems <- uDatum$items
+   charUser <- chr(user)
+   uDatum <- userData[[chr(user)]]
+   udItems <- uDatum$itms
    if (item %in% udItems) {
       i <- which(udItems == item)
       return(i)
    }
 
+browser()
    haveRated <- itemData[[as.character(item)]]
-   cd <- function(usr) cosDist(user,usr)
+   cd <- function(usr) cosDist(user$items,userData[[chr(usr$items)]])
    dists <- sapply(haveRated,cd)
    
    

@@ -148,15 +148,19 @@ predict.knnRec  <- function(object,user,item,k,minMatch=1)
       return(uDatum$ratings[i])
    }
 
-browser()
    haveRated <- itemData[[chr(item)]]$usrs
+   if (length(haveRated) == 0) warning(paste('no users rated item',item))
    cd <- function(usrId) {
       usrId <- chr(usrId)
       dist <- cosDist(uDatum,userData[[usrId]])
       c(usrId,dist)
    }
+   browser()
    dists <- sapply(haveRated,cd)
-   dists
+   dists <- as.numeric(dists)
+   dists <- matrix(dists,ncol=2)
+   knear <- order(dists[,2])[1:k]
+   knear
    
 }
 

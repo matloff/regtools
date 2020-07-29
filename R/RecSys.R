@@ -159,6 +159,11 @@ predict.knnRec  <- function(object,user,item,k,minMatch=1)
    dists <- sapply(haveRated,cd)
    dists <- as.numeric(dists)
    dists <- matrix(dists,ncol=2)
+   if (k > nrow(dists)) {
+      k <- nrow(dists)
+      warning('k reduced, too few neighbors')
+   }
+   tmp <- order(dists[,2])[1:k]
    knear <- order(dists[,2])[1:k]
    knear
    

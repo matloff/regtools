@@ -151,13 +151,12 @@ predict.knnRec  <- function(object,user,item,k,minMatch=1)
    dists <- sapply(haveRated,cd)
    dists <- as.numeric(dists)
    dists <- matrix(dists,nrow=2)
-   if (k > nrow(dists)) {
-      k <- nrow(dists)
+   if (k > ncol(dists)) {
+      k <- ncol(dists)
       warning('k reduced, too few neighbors')
    }
    tmp <- order(dists[2,])[1:k]
    knear <- dists[1,][tmp]
-   browser()
    getUij <- function(usr) 
    {
       ud <- userData[[chr(usr)]]

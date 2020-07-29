@@ -4,7 +4,7 @@
 
 ##################  ops to group recsys data  ############################
 
-# utility to in raw data in standard format,
+# input raw data in standard format,
 
 #    (user ID, item ID, rating)
 
@@ -103,13 +103,6 @@ groupItemData <- function(ratingsIn)
    retval
 }
 
-chr <- function(i) as.character(i)
-
-# utility:  find input row for a given user, item
-findInputRow <- function(ratingsIn,usrID,itmID) {
-   ratingsIn[ratingsIn[,1]==usrID & ratingsIn[,2]==itmID,]
-}
-
 #########################  knnRec*(  ################################
 
 # arguments: ratings data in standard (user,item,rating) form
@@ -163,9 +156,7 @@ predict.knnRec  <- function(object,user,item,k,minMatch=1)
       k <- nrow(dists)
       warning('k reduced, too few neighbors')
    }
-   tmp <- order(dists[,2])[1:k]
    knear <- order(dists[,2])[1:k]
-   knear
    
 }
 
@@ -182,7 +173,25 @@ cosDist <- function(x,y)
    xvec %*% yvec / (l2a(xvec) * l2a(yvec))
 }
 
+#####################  utilities  #################################
+
+# abbreviation for as.character()
+chr <- function(i) as.character(i)
+
+# find input row for a given user, item
+findInputRow <- function(ratingsIn,usrID,itmID) {
+   ratingsIn[ratingsIn[,1]==usrID & ratingsIn[,2]==itmID,]
+}
+
+# l2 norm
 l2a <- function(x) sqrt(x %*% x)
 
-
+# get user i's rating of item j from output of groupUserData()
+getUserRating <- function(userData,i,j) 
+{
+   itmList <- userData[[chr(i)]]$itms
+   pos <- which(itmList == j)
+   if (length(pos) == 0) warning('no such item')
+   userData$ratings[pos]
+}
 

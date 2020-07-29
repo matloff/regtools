@@ -148,16 +148,23 @@ predict.knnRec  <- function(object,user,item,k,minMatch=1)
       dist <- cosDist(uDatum,userData[[usrId]])
       c(usrId,dist)
    }
-   browser()
    dists <- sapply(haveRated,cd)
    dists <- as.numeric(dists)
-   dists <- matrix(dists,ncol=2)
+   dists <- matrix(dists,nrow=2)
    if (k > nrow(dists)) {
       k <- nrow(dists)
       warning('k reduced, too few neighbors')
    }
-   knear <- order(dists[,2])[1:k]
-   
+   tmp <- order(dists[2,])[1:k]
+   knear <- dists[1,][tmp]
+   browser()
+   getUij <- function(usr) 
+   {
+      ud <- userData[[chr(usr)]]
+      getUserRating(ud,item)
+   }
+   tmp <- sapply(knear,getUij)
+   mean(tmp,na.rm=TRUE)
 }
 
 cosDist <- function(x,y)
@@ -186,12 +193,15 @@ findInputRow <- function(ratingsIn,usrID,itmID) {
 # l2 norm
 l2a <- function(x) sqrt(x %*% x)
 
-# get user i's rating of item j from output of groupUserData()
-getUserRating <- function(userData,i,j) 
+# get rating of item j from output of groupUserData()
+getUserRating <- function(userData,j) 
 {
-   itmList <- userData[[chr(i)]]$itms
+   itmList <- userData$itms
    pos <- which(itmList == j)
-   if (length(pos) == 0) warning('no such item')
+   if (length(pos) == 0) {
+      warning('no such item')
+      return(NA)
+   }
    userData$ratings[pos]
 }
 

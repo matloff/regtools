@@ -121,6 +121,14 @@ regression and classification analysis, and machine learning.
 
    }
 
+\bold{Recommender systems:}
+
+   \itemize{
+
+   \item knnRec
+
+   }
+
 \bold{Misc.:}
 
    \itemize{

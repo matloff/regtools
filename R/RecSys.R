@@ -196,12 +196,9 @@ anovaRec <- function(ratingsDF,userXs=NULL,itemXs=NULL)
    users <- unique(userID)
    aCol <- names(ratingsDF)[1]
    for (userx in userXs) {
-
-
       cvrs <- unique(ratingsDF[[userx]])
       grid <- expand.grid(x=users,y=cvrs)
       names(grid) <- c(aCol,userx)
-      rws <- findRows(grid,AcOL
    }
    class(res) <- 'anovaRec'
    res

@@ -103,7 +103,7 @@ groupItemData <- function(ratingsIn)
    retval
 }
 
-#########################  knnRec*(  ################################
+#########################  knnRec()  ################################
 
 # arguments: ratings data in standard (user,item,rating) form
 
@@ -177,6 +177,36 @@ cosDist <- function(x,y)
    xvec <- x$ratings[xwhere]
    yvec <- y$ratings[ywhere]
    xvec %*% yvec / (l2a(xvec) * l2a(yvec))
+}
+
+#####################  anovaRec()  #################################
+
+anovaRec <- function(ratingsDF,userXs=NULL,itemXs=NULL) 
+{
+   res <- list()  # will ultimately be the return value
+   userID <- ratingsDF[,1]
+   itemID <- ratingsDF[,2]
+   ratings <- ratingsDF[,3]
+   res$overallMean <- mean(ratings)
+   userMeans <- tapply(ratings,userID,mean)
+   res$userMainEffects <- userMeans - res$overallMean 
+   itemMeans <- tapply(ratings,itemID,mean)
+   itemMainEffects <- itemMeans - res$overallMean 
+   res$itemMainEffects <- itemMeans - res$overallMean 
+   users <- unique(userID)
+   for (userx in userXs) {
+      cvrs <- unique(ratingsDF[[userx]])
+   }
+   class(res) <- 'anovaRec'
+   res
+}
+
+predict.anovaRec <- function(object,user,item) 
+{
+   pred <- object$overallMean
+   pred <- pred + object$userMainEffects[chr(user)]
+   pred <- pred + object$itemMainEffects[chr(item)]
+   pred
 }
 
 #####################  utilities  #################################

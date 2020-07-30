@@ -194,11 +194,28 @@ anovaRec <- function(ratingsDF,userXs=NULL,itemXs=NULL)
    itemMainEffects <- itemMeans - res$overallMean 
    res$itemMainEffects <- itemMeans - res$overallMean 
    users <- unique(userID)
+   aCol <- names(ratingsDF)[1]
    for (userx in userXs) {
+
+
       cvrs <- unique(ratingsDF[[userx]])
+      grid <- expand.grid(x=users,y=cvrs)
+      names(grid) <- c(aCol,userx)
+      rws <- findRows(grid,AcOL
    }
    class(res) <- 'anovaRec'
    res
+}
+
+# get interaction effect
+getXEffect <- function(grid,gridRow) 
+{
+   tmp <- grid[gridRow,]
+   usr <- tmp[,1]
+   cvr <- tmp[,2]
+   usrColName <- names(grid)[,1]
+   usrCol <- which(names(ratingsDF) == usrColName)
+   rws <- findRows(ratingsDF,
 }
 
 predict.anovaRec <- function(object,user,item) 
@@ -214,9 +231,12 @@ predict.anovaRec <- function(object,user,item)
 # abbreviation for as.character()
 chr <- function(i) as.character(i)
 
-# find input row for a given user, item
-findInputRow <- function(ratingsIn,usrID,itmID) {
-   ratingsIn[ratingsIn[,1]==usrID & ratingsIn[,2]==itmID,]
+# find row in matrix/df m for which m[,aCol] = aVal, m[,bCol] = bVal;
+# aCol, bCol can be either numeric column numbers or column names
+findRows <- function(m,aCol,aVal,bCol,bVal) {
+   aWhich <- which(m[,aCol] == aVal)
+   bWhich <- which(m[,bCol] == bVal)
+   intersect(aWhich,bWhich)
 }
 
 # l2 norm

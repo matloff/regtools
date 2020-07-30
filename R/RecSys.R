@@ -215,7 +215,6 @@ getXEffect <- function(grid,gridRow)
    cvr <- tmp[,2]
    usrColName <- names(grid)[,1]
    usrCol <- which(names(ratingsDF) == usrColName)
-   rws <- findRows(ratingsDF,
 }
 
 predict.anovaRec <- function(object,user,item) 

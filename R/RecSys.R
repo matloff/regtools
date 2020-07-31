@@ -181,32 +181,52 @@ cosDist <- function(x,y)
 
 #####################  anovaRec()  #################################
 
-anovaRec <- function(ratingsDF,userXs=NULL,itemXs=NULL) 
+# phrased in terms of ANOVA, but just common sense adjustments
+# 
+# Y_ij = mu + user_i + movie_j + generk_k + user.genre _ik
+# 
+# use the word "propensity" to mean differences in means
+# 
+# user_i is the extra propensity, beyond mu, for user i to like movies; 
+# genre_k is the extra propensity, beyond mu, for genre k to be liked
+# user.genre _ik is the further extra propensity for user i to like 
+#    movies in genre k
+
+anovaRec <- function(ratingsDF,userCvrs=NULL,itemXs=NULL) 
 {
    res <- list()  # will ultimately be the return value
    userID <- ratingsDF[,1]
    itemID <- ratingsDF[,2]
    ratings <- ratingsDF[,3]
-   res$overallMean <- mean(ratings)
-   userMeans <- tapply(ratings,userID,mean)
-   res$userMainEffects <- userMeans - res$overallMean 
-   itemMeans <- tapply(ratings,itemID,mean)
-   itemMainEffects <- itemMeans - res$overallMean 
-   res$itemMainEffects <- itemMeans - res$overallMean 
+   overallMean <- mean(ratings)
+   usermeans <- tapply(ratings,userID,mean)
+   res$userMainEffects <- usermeans - overallMean 
+   itemmeans <- tapply(ratings,itemID,mean)
+   itemMainEffects <- itemmeans - overallMean 
    users <- unique(userID)
    aCol <- names(ratingsDF)[1]
+   cvrMainEffects <- list()
    userCvrEffects <- list()
-   browser()
-   for (userx in userXs) {
-      cvrs <- unique(ratingsDF[[userx]])
-      tmp <- tapply(ratings,list(ratingsDF[,aCol],ratingsDF[,userx]),mean)
-      tmp <- tmp - res$overallMean
+   for (usercvr in userCvrs) {
+      cvrmeans <- tapply(ratings,ratingsDF[[usercvr]],mean)
+      cvrMainEffects[[usercvr]] <- cvrmeans - overallMean
+      tmp <- tapply(ratings,list(ratingsDF[,aCol],ratingsDF[,usercvr]),mean)
+      tmp <- tmp - overallMean
       for (i in 1:nrow(tmp)) {
          usr <- rownames(tmp)[i]
          tmp[i,] <- tmp[i,] - res$userMainEffects[[usr]]
       }
-      userCvrEffects[[userx]] <- tmp
+   browser()
+      for (k in 1:ncol(tmp)) {
+         cvr <- colnames(tmp)[k]
+         tmp[,k] <- tmp[,k] - cvrMainEffects[[usercvr]][cvr]
+      }
+      userCvrEffects[[usercvr]] <- tmp
    }
+   res$overallMean <- overallMean
+   res$userMainEffects <- userMainEffects
+   res$itemMainEffects <- itemMainEffects
+   res$cvrMainEffects <- cvrMainEffects
    res$userCvrEffects <- userCvrEffects
    class(res) <- 'anovaRec'
    res

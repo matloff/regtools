@@ -195,11 +195,19 @@ anovaRec <- function(ratingsDF,userXs=NULL,itemXs=NULL)
    res$itemMainEffects <- itemMeans - res$overallMean 
    users <- unique(userID)
    aCol <- names(ratingsDF)[1]
+   userCvrEffects <- list()
+   browser()
    for (userx in userXs) {
       cvrs <- unique(ratingsDF[[userx]])
-      grid <- expand.grid(x=users,y=cvrs)
-      names(grid) <- c(aCol,userx)
+      tmp <- tapply(ratings,list(ratingsDF[,aCol],ratingsDF[,userx]),mean)
+      tmp <- tmp - res$overallMean
+      for (i in 1:nrow(tmp)) {
+         usr <- rownames(tmp)[i]
+         tmp[i,] <- tmp[i,] - res$userMainEffects[[usr]]
+      }
+      userCvrEffects[[userx]] <- tmp
    }
+   res$userCvrEffects <- userCvrEffects
    class(res) <- 'anovaRec'
    res
 }

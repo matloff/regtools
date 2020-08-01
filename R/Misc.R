@@ -236,7 +236,9 @@ stdErrPred <- function(regObj,xnew) {
 
 ulist <- function(lst) 
 {
-   tmp <- substitute(for (nm in names(lst)) assign(nm,lst[[nm]]))
+   nms <- names(lst)
+   if (any(nms == '')
+   tmp <- substitute(for (nm in nms) assign(nm,lst[[nm]]))
    eval(tmp,parent.frame())
 }
 

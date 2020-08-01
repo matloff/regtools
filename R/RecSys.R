@@ -200,13 +200,18 @@ anovaRec <- function(ratingsDF,userCvrs=NULL,itemXs=NULL)
    ratings <- ratingsDF[,3]
 
    tmp <- getUsrItmMainEffects(ratings,userID,itemID)
-   ulist(tmp)  #unpack return list
+   ulist(tmp)  # userMainEffects,itemMainEffects, overallMean)
+   tmp <- getCvrXEffects(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
+      userMainEffects,itemMainEffects) 
+   ulist(tmp)  
+   # cvrMainEffects,userCvrXEffects,itemCvrXEffects
 
    res$overallMean <- overallMean
    res$userMainEffects <- userMainEffects
    res$itemMainEffects <- itemMainEffects
    res$cvrMainEffects <- cvrMainEffects
-   res$userCvrEffects <- userCvrEffects
+   res$userCvrXEffects <- userCvrXEffects
+   res$itemCvrXEffects <- itemCvrXEffects
    class(res) <- 'anovaRec'
    res
 }
@@ -219,14 +224,16 @@ getUsrItmMainEffects <- function(ratings,userID,itemID)
    itemmeans <- tapply(ratings,itemID,mean)
    itemMainEffects <- itemmeans - overallMean 
    list(userMainEffects=userMainEffects,itemMainEffects=itemMainEffects,
-      overallMean)
+      overallMean=overallMean)
 }
 
-getCvrEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs) 
+getCvrXEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
+      userMainEffects,itemMainEffects) 
 {
    aCol <- names(ratingsDF)[1]
    cvrMainEffects <- list()
-   userCvrEffects <- list()
+   userCvrXEffects <- list()
+   itemCvrXEffects <- list()
    for (usercvr in userCvrs) {
       cvrmeans <- tapply(ratings,ratingsDF[[usercvr]],mean)
       cvrMainEffects[[usercvr]] <- cvrmeans - overallMean
@@ -240,9 +247,9 @@ getCvrEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs)
          cvr <- colnames(tmp)[k]
          tmp[,k] <- tmp[,k] - cvrMainEffects[[usercvr]][cvr]
       }
-      userCvrEffects[[usercvr]] <- tmp
+      userCvrXEffects[[usercvr]] <- tmp
    }
-   list(cvrMainEffects=cvrMainEffects)
+   list(cvrMainEffects=cvrMainEffects,userCvrXEffects)
 
 }
 

@@ -1,7 +1,5 @@
 
-
-
-#########################  unscale()  #################################
+#########################  scaling  #################################
 
 # undoes R 'scale()'
 
@@ -21,8 +19,6 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
    }
    origx
 }
-
-#########################  mmscale()  #################################
 
 # scale to [0,1]
 
@@ -193,9 +189,7 @@ xyDataframeToMatrix <- function(xy) {
    as.matrix(cbind(xd,yd))
 }
 
-########################################################################
 ###################  misc. data frame/matrix ops  ######################
-########################################################################
 
 # multiply x[,cols] by vals, e.g. x[,cols[1]] * vals[1]
 # code by Bochao Xin
@@ -232,5 +226,17 @@ stdErrPred <- function(regObj,xnew) {
    xx <- c(1,xnew)  # the 1 accounts for the intercept term
    xx <- as.numeric(xx)  # in case xnew was a row in a data frame
    as.numeric(sqrt(xx %*% vcov(regObj) %*% xx))
+}
+
+######################  misc. list ops ################################
+
+# assign list components to individual variables of the same names
+
+# similar to unpack() in zeallot pkg
+
+ulist <- function(lst) 
+{
+   tmp <- substitute(for (nm in names(lst)) assign(nm,lst[[nm]]))
+   eval(tmp,parent.frame())
 }
 

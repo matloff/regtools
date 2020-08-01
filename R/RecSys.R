@@ -198,11 +198,11 @@ anovaRec <- function(ratingsDF,userCvrs=NULL,itemXs=NULL)
    userID <- ratingsDF[,1]
    itemID <- ratingsDF[,2]
    ratings <- ratingsDF[,3]
-   overallMean <- mean(ratings)
-   usermeans <- tapply(ratings,userID,mean)
-   res$userMainEffects <- usermeans - overallMean 
-   itemmeans <- tapply(ratings,itemID,mean)
-   itemMainEffects <- itemmeans - overallMean 
+
+   ulist(getMainEffects(ratings,userID,itemID))
+
+   tmp <- getMainEffects(ratings,userID,itemID)
+   overallMean <- 
    users <- unique(userID)
    aCol <- names(ratingsDF)[1]
    cvrMainEffects <- list()
@@ -214,7 +214,7 @@ anovaRec <- function(ratingsDF,userCvrs=NULL,itemXs=NULL)
       tmp <- tmp - overallMean
       for (i in 1:nrow(tmp)) {
          usr <- rownames(tmp)[i]
-         tmp[i,] <- tmp[i,] - res$userMainEffects[[usr]]
+         tmp[i,] <- tmp[i,] - userMainEffects[[usr]]
       }
    browser()
       for (k in 1:ncol(tmp)) {
@@ -232,14 +232,15 @@ anovaRec <- function(ratingsDF,userCvrs=NULL,itemXs=NULL)
    res
 }
 
-# get interaction effect
-getXEffect <- function(grid,gridRow) 
+getMainEffects <- function(ratings,userID,itemID) 
 {
-   tmp <- grid[gridRow,]
-   usr <- tmp[,1]
-   cvr <- tmp[,2]
-   usrColName <- names(grid)[,1]
-   usrCol <- which(names(ratingsDF) == usrColName)
+   overallMean <- mean(ratings)
+   usermeans <- tapply(ratings,userID,mean)
+   userMainEffects <- usermeans - overallMean 
+   itemmeans <- tapply(ratings,itemID,mean)
+   itemMainEffects <- itemmeans - overallMean 
+   list(userMainEffects=userMainEffects,itemMainEffects=itemMainEffects,
+      overallMean)
 }
 
 predict.anovaRec <- function(object,user,item) 

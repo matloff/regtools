@@ -199,11 +199,31 @@ anovaRec <- function(ratingsDF,userCvrs=NULL,itemXs=NULL)
    itemID <- ratingsDF[,2]
    ratings <- ratingsDF[,3]
 
-   ulist(getMainEffects(ratings,userID,itemID))
+   tmp <- getUsrItmMainEffects(ratings,userID,itemID)
+   ulist(tmp)  #unpack return list
 
-   tmp <- getMainEffects(ratings,userID,itemID)
-   overallMean <- 
-   users <- unique(userID)
+   res$overallMean <- overallMean
+   res$userMainEffects <- userMainEffects
+   res$itemMainEffects <- itemMainEffects
+   res$cvrMainEffects <- cvrMainEffects
+   res$userCvrEffects <- userCvrEffects
+   class(res) <- 'anovaRec'
+   res
+}
+
+getUsrItmMainEffects <- function(ratings,userID,itemID) 
+{
+   overallMean <- mean(ratings)
+   usermeans <- tapply(ratings,userID,mean)
+   userMainEffects <- usermeans - overallMean 
+   itemmeans <- tapply(ratings,itemID,mean)
+   itemMainEffects <- itemmeans - overallMean 
+   list(userMainEffects=userMainEffects,itemMainEffects=itemMainEffects,
+      overallMean)
+}
+
+getCvrEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs) 
+{
    aCol <- names(ratingsDF)[1]
    cvrMainEffects <- list()
    userCvrEffects <- list()
@@ -216,31 +236,14 @@ anovaRec <- function(ratingsDF,userCvrs=NULL,itemXs=NULL)
          usr <- rownames(tmp)[i]
          tmp[i,] <- tmp[i,] - userMainEffects[[usr]]
       }
-   browser()
       for (k in 1:ncol(tmp)) {
          cvr <- colnames(tmp)[k]
          tmp[,k] <- tmp[,k] - cvrMainEffects[[usercvr]][cvr]
       }
       userCvrEffects[[usercvr]] <- tmp
    }
-   res$overallMean <- overallMean
-   res$userMainEffects <- userMainEffects
-   res$itemMainEffects <- itemMainEffects
-   res$cvrMainEffects <- cvrMainEffects
-   res$userCvrEffects <- userCvrEffects
-   class(res) <- 'anovaRec'
-   res
-}
+   list(cvrMainEffects=cvrMainEffects)
 
-getMainEffects <- function(ratings,userID,itemID) 
-{
-   overallMean <- mean(ratings)
-   usermeans <- tapply(ratings,userID,mean)
-   userMainEffects <- usermeans - overallMean 
-   itemmeans <- tapply(ratings,itemID,mean)
-   itemMainEffects <- itemmeans - overallMean 
-   list(userMainEffects=userMainEffects,itemMainEffects=itemMainEffects,
-      overallMean)
 }
 
 predict.anovaRec <- function(object,user,item) 

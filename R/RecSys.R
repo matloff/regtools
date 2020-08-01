@@ -248,7 +248,7 @@ getCvrXEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
          tmp[,k] <- tmp[,k] - cvrMainEffects[[usercvr]][cvr]
       }
       userCvrXEffects[[usercvr]] <- tmp
-      itemCvrXEffects[[usercvr]] <- tmp
+      itemCvrXEffects[[usercvr]] <- NULL
    }
    list(cvrMainEffects=cvrMainEffects,userCvrXEffects=userCvrXEffects,
       itemCvrXEffects=itemCvrXEffects)

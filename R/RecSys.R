@@ -229,16 +229,16 @@ getUsrItmMainEffects <- function(ratings,userID,itemID)
 getCvrXEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
       userMainEffects,itemMainEffects) 
 {
-   usrcolname <- names(ratingsDF)[1]
    cvrMainEffects <- list()
    userCvrXEffects <- list()
    itemCvrXEffects <- list()
+   usrcolname <- names(ratingsDF)[1]
    for (usercvr in userCvrs) {
       cvrmeans <- tapply(ratings,ratingsDF[[usercvr]],mean)
       cvrMainEffects[[usercvr]] <- cvrmeans - overallMean
       tmp <- 
          tapply(ratings,list(ratingsDF[,usrcolname],ratingsDF[,usercvr]),mean)
-      tmp <- tmp - overallMean
+      tmp <- tmp + overallMean
       for (i in 1:nrow(tmp)) {
          usr <- rownames(tmp)[i]
          tmp[i,] <- tmp[i,] - userMainEffects[[usr]]
@@ -248,7 +248,23 @@ getCvrXEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
          tmp[,k] <- tmp[,k] - cvrMainEffects[[usercvr]][cvr]
       }
       userCvrXEffects[[usercvr]] <- tmp
-      itemCvrXEffects[[usercvr]] <- NULL
+   }
+   itmcolname <- names(ratingsDF)[2]
+   for (itemcvr in itemCvrs) {
+      cvrmeans <- tapply(ratings,ratingsDF[[itemcvr]],mean)
+      cvrMainEffects[[itemcvr]] <- cvrmeans - overallMean
+      tmp <- 
+         tapply(ratings,list(ratingsDF[,itmcolname],ratingsDF[,itemcvr]),mean)
+      tmp <- tmp + overallMean
+      for (i in 1:nrow(tmp)) {
+         itm <- rownames(tmp)[i]
+         tmp[i,] <- tmp[i,] - itemMainEffects[[itm]]
+      }
+      for (k in 1:ncol(tmp)) {
+         cvr <- colnames(tmp)[k]
+         tmp[,k] <- tmp[,k] - cvrMainEffects[[itemcvr]][cvr]
+      }
+      itemCvrXEffects[[itmWcvr]] <- tmp
    }
    list(cvrMainEffects=cvrMainEffects,userCvrXEffects=userCvrXEffects,
       itemCvrXEffects=itemCvrXEffects)

@@ -237,7 +237,7 @@ stdErrPred <- function(regObj,xnew) {
 ulist <- function(lst) 
 {
    nms <- names(lst)
-   if (any(nms == ''))
+   if (any(nms == '')) stop('missing list name')
    tmp <- substitute(for (nm in nms) assign(nm,lst[[nm]]))
    eval(tmp,parent.frame())
 }

@@ -74,7 +74,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    #    stop('classif=TRUE can be set only if allK is FALSE')
    if (ncol(y) > 1 && !allK) classif <- TRUE
    # checks on newx
-   if (is.factor(newx) || is.data.frame(newx) && hasFactors(newwx))
+   if (is.factor(newx) || is.data.frame(newx) && hasFactors(newx))
       stop('change to dummies, factorsToDummies()')
    if (is.vector(newx)) newx <- matrix(newx,nrow=1)
    if (is.data.frame(newx)) {

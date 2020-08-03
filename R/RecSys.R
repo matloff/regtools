@@ -192,7 +192,7 @@ cosDist <- function(x,y)
 # user.genre _ik is the further extra propensity for user i to like 
 #    movies in genre k
 
-anovaRec <- function(ratingsDF,userCvrs=NULL,itemXs=NULL) 
+anovaRec <- function(ratingsDF,userCvrs=NULL,itemCvrs=NULL) 
 {
    res <- list()  # will ultimately be the return value
    userID <- ratingsDF[,1]
@@ -264,7 +264,7 @@ getCvrXEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
          cvr <- colnames(tmp)[k]
          tmp[,k] <- tmp[,k] - cvrMainEffects[[itemcvr]][cvr]
       }
-      itemCvrXEffects[[itmWcvr]] <- tmp
+      itemCvrXEffects[[itemcvr]] <- tmp
    }
    list(cvrMainEffects=cvrMainEffects,userCvrXEffects=userCvrXEffects,
       itemCvrXEffects=itemCvrXEffects)

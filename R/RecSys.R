@@ -204,7 +204,6 @@ anovaRec <- function(ratingsDF,userCvrs=NULL,itemCvrs=NULL)
    tmp <- getCvrXEffects(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
       userMainEffects,itemMainEffects) 
    ulist(tmp)  # cvrMainEffects,userCvrXEffects,itemCvrXEffects
-
    res$overallMean <- overallMean
    res$userMainEffects <- userMainEffects
    res$itemMainEffects <- itemMainEffects
@@ -266,16 +265,30 @@ getCvrXEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
       }
       itemCvrXEffects[[itemcvr]] <- tmp
    }
+   if (is.null(userCvrs)) userCvrXEffects <- NULL
+   if (is.null(itemCvrs)) itemCvrXEffects <- NULL
    list(cvrMainEffects=cvrMainEffects,userCvrXEffects=userCvrXEffects,
       itemCvrXEffects=itemCvrXEffects)
 
 }
 
-predict.anovaRec <- function(object,user,item) 
+# predict a single (user,item) pair; cvrs is an R list with component
+# names as in the ratingsDF input to anovaRec()
+
+predict.anovaRec <- function(object,user,item,userCvrs=NULL,itemCvrs=NULL) 
 {
    pred <- object$overallMean
    pred <- pred + object$userMainEffects[chr(user)]
    pred <- pred + object$itemMainEffects[chr(item)]
+   if (!is.null(userCvrs)) {
+      nms <- names(userCvrs)
+      for (nm in nms) {
+         pred <- pred + object$cvrMainEffects[[nm]]
+         mat <- object$userCvrXEffects[[nm]]
+         col <- userCvrs[[nm]]
+         pred <- pred + mat[chr(user),chr(col)]
+      }
+   }
    pred
 }
 

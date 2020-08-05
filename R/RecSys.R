@@ -283,9 +283,9 @@ predict.anovaRec <- function(object,user,item,userCvrs=NULL,itemCvrs=NULL)
    if (!is.null(userCvrs)) {
       nms <- names(userCvrs)
       for (nm in nms) {
-         pred <- pred + object$cvrMainEffects[[nm]]
-         mat <- object$userCvrXEffects[[nm]]
          col <- userCvrs[[nm]]
+         pred <- pred + object$cvrMainEffects[[nm]][chr(col)]
+         mat <- object$userCvrXEffects[[nm]]
          pred <- pred + mat[chr(user),chr(col)]
       }
    }

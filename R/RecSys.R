@@ -281,12 +281,23 @@ predict.anovaRec <- function(object,user,item,userCvrs=NULL,itemCvrs=NULL)
    pred <- pred + object$userMainEffects[chr(user)]
    pred <- pred + object$itemMainEffects[chr(item)]
    if (!is.null(userCvrs)) {
+      if (!is.list(userCvrs)) stop('userCvrs must be a list')
       nms <- names(userCvrs)
       for (nm in nms) {
-         col <- userCvrs[[nm]]
+         col <- userCvrs[[nm]]  # value of this covariate
          pred <- pred + object$cvrMainEffects[[nm]][chr(col)]
          mat <- object$userCvrXEffects[[nm]]
          pred <- pred + mat[chr(user),chr(col)]
+      }
+   }
+   if (!is.null(itemCvrs)) {
+      if (!is.list(itemCvrs)) stop('itemCvrs must be a list')
+      nms <- names(itemCvrs)
+      for (nm in nms) {
+         col <- itemCvrs[[nm]]   # value of this covariate
+         pred <- pred + object$cvrMainEffects[[nm]][chr(col)]
+         mat <- object$itemCvrXEffects[[nm]]
+         pred <- pred + mat[chr(item),chr(col)]
       }
    }
    pred

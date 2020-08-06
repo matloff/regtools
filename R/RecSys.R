@@ -30,9 +30,6 @@
 groupUserData <- function(ratingsIn) 
 {
 
-   if (ncol(ratingsIn) > 3)
-      stop('ratingsIn more than 3 columns')
-
    # IMPORTANT NOTE: in order to work in cross-validation, etc. we need
    # to abandon the idea of having the user IDs start at 1 and be
    # consecutive; instead, we will just use the ID numbers as list
@@ -68,9 +65,6 @@ groupUserData <- function(ratingsIn)
 
 groupItemData <- function(ratingsIn) 
 {
-
-   if (ncol(ratingsIn) > 3)
-      stop('ratingsIn more than 3 columns')
 
    # IMPORTANT NOTE: in order to work in cross-validation, etc. we need
    # to abandon the idea of having the item IDs start at 1 and be
@@ -114,9 +108,15 @@ knnRec <- function(ratings)
    obj <- list()
    obj$userData <- groupUserData(ratings)
    obj$itemData <- groupItemData(ratings)
+   obj$overallMean <- mean(ratings[,3])
+   obj$users <- names(obj$userData)
+   obj$items <- names(obj$itemData)
    class(obj) <- 'knnRec'
    obj
 }
+
+# note: prediction is from the user's point of view; we find users in
+# our training data similar to the given user etc.
 
 # arguments:
 
@@ -134,6 +134,15 @@ predict.knnRec  <- function(object,user,item,k,minMatch=1)
    itemData <- object$itemData
    if (minMatch > 1) stop('general minMatch not yet implemented')
    charUser <- chr(user)
+   if (!(charUser %in% object$users)) {
+      warning('new user countered, returning overall mean')
+      return(object$overallMean)
+   }
+   charItem <- chr(item)
+   if (!(charItem %in% object$items)) {
+      warning('new item countered, returning overall mean')
+      return(object$overallMean)
+   }
    uDatum <- userData[[chr(user)]]
    udItems <- uDatum$itms
    if (item %in% udItems) {

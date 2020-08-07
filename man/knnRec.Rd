@@ -43,7 +43,22 @@ set.  Prediction is then done via \code{predict.knnRec}, via the generic
 function \code{predict}.  Similarly for \code{anovaRec}.
 
 The function \code{anovaRec} allows for covariates ("side information").
-They are divided into user covariates and item covariates.
+These may be useful, say, for prediction of new cases having very little
+rating data.
+
+The covariates are divided into user covariates and item covariates.  To see why,
+consider the famous MovieLens data, say using Genre as a covariate.
+Since knowledge of the item/film implies knowledge of the genre,
+interaction between item and covariate in this cases makes no sense, but
+a user/genre interaction may be reasonable.
+
+The function \code{anovaRec} gets its name from its ANOVA-like
+decompositions, e.g.
+
+E(Y_ij) = mu + alpha_i + beta_j + (alphabeta)_ij
+
+where Y_ij is the rating user i gives item j.  Only 2-way interactions
+are allowed.
 
 }
 

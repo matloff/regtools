@@ -1,6 +1,6 @@
-\name{knnRec}
-\alias{knnRec}
-\alias{predict.knnRec}
+\name{knnRec,anovaRec}
+\alias{knnRec},anovaRec
+\alias{predict.knnRec,predict.anovaRec}
 
 \title{Tools for Recommender Systems}
 
@@ -9,6 +9,8 @@
 \usage{ 
    knnRec(ratings) 
    predict.knnRec(object, user, item, k, minMatch = 1)
+   anovaRec(ratingsDF,userCvrs=NULL,itemCvrs=NULL) 
+   predict.anovaRec(object,user,item,userCvrs=NULL,itemCvrs=NULL) 
 
 }
 
@@ -16,6 +18,7 @@
    \item{ratings}{A data frame whose first 3 columns are user ID, item
       ID and rating.  All must be numeric, though they need not be
       consecutive nor begin with 1.}
+   \item{ratingsDF}{As with \code{ratings}.}
    \item{object}{An object returned by one of the training set
       functions, such as \code{knnRec}.}
    \item{user}{Numeric user ID}
@@ -23,6 +26,10 @@
    \item{k}{Number of nearest neighbors.}
    \item{minMatch}{Minimum number of nearest neighbors to be counted in
       neighborhood mean.}
+   \item{userCvrs}{A character vector, listing column names of the user
+      covariates.}
+   \item{itemCvrs}{A character vector, listing column names of the item
+      covariates.}
 }
 
 \details{

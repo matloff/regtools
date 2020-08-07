@@ -246,7 +246,7 @@ getCvrXEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
       cvrMainEffects[[usercvr]] <- cvrmeans - overallMean
       tmp <- 
          tapply(ratings,list(ratingsDF[,usrcolname],ratingsDF[,usercvr]),mean)
-      tmp <- tmp + overallMean
+      tmp <- tmp - overallMean
       for (i in 1:nrow(tmp)) {
          usr <- rownames(tmp)[i]
          tmp[i,] <- tmp[i,] - userMainEffects[[usr]]
@@ -255,7 +255,6 @@ getCvrXEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
          cvr <- colnames(tmp)[k]
          tmp[,k] <- tmp[,k] - cvrMainEffects[[usercvr]][cvr]
       }
-         browser()
       userCvrXEffects[[usercvr]] <- tmp
    }
    itmcolname <- names(ratingsDF)[2]

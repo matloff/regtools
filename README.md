@@ -13,12 +13,6 @@ with my forthcoming book, *The Art of Machine Learning: Algorithms+Data+R*,
 NSP, 2020 .  But **the tools are useful in general, independently of the
 books**.
 
-See function list by typing
-
-``` r
-> ?regtools
-``` 
-
 ## FEATURES
 
 * Advanced tool for tuning-parameter grid search, including plotting,
@@ -66,6 +60,29 @@ in Prediction contexts, see
 * Interesting datasets.
 
 A number of examples of use follow below.
+
+## OVERVIEW: FUNCTION CATEGORIES
+
+See full function list by typing
+
+``` r
+> ?regtools
+``` 
+
+Here are the main categories:
+
+- Parametric modeling
+- Diagnostic plots
+- Classification
+- Machine learning
+- Dummies and R factors
+- Statistics
+- Matrix
+- Time series
+- Image processing 
+- Text processing
+- Recommender systems
+- Misc.
 
 ## EXAMPLE:  ADVANCED GRID SEARCH
 

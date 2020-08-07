@@ -312,7 +312,35 @@ predict.anovaRec <- function(object,user,item,userCvrVals=NULL,itemCvrVals=NULL)
    pred
 }
 
-#####################  utilities  #################################
+#########################  mfRec()  ################################### 
+
+# collaborative filtering based on matrix factorization; wrappers for 
+# recosystem package
+
+# arguments:
+
+#    ratings: as in knnRec() above
+#    rnk: desired matrix rank
+#    niter: number of iterations
+#    lambda: L1 regularization parameter
+
+# value:
+
+# object of class 'mfRec', with components P, Q, where A approx= P'Q
+
+mfRec <- function(ratings,rnk=10,nmf=FALSE,niter=20,lambda=0) 
+{
+   require(recosystem)
+   r <- Reco()
+   train_set <-
+      data_memory(ratings[,1],ratings[,2],ratings[,3],index1=TRUE)
+   r$train(train_set,opts = list(dim=rnk,nmf=nmf,niter=niter,costp_l1=lambda))
+   result <- r$output(out_memory(),out_memory())
+   result$overallMean
+   class(result) <- 'mfRec'
+}
+
+########################  utilities  ###################################
 
 # abbreviation for as.character()
 chr <- function(i) as.character(i)

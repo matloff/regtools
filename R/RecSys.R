@@ -284,26 +284,26 @@ getCvrXEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
 # predict a single (user,item) pair; cvrs is an R list with component
 # names as in the ratingsDF input to anovaRec()
 
-predict.anovaRec <- function(object,user,item,userCvrs=NULL,itemCvrs=NULL) 
+predict.anovaRec <- function(object,user,item,userCvrVals=NULL,itemCvrVals=NULL) 
 {
    pred <- object$overallMean
    pred <- pred + object$userMainEffects[chr(user)]
    pred <- pred + object$itemMainEffects[chr(item)]
-   if (!is.null(userCvrs)) {
-      if (!is.list(userCvrs)) stop('userCvrs must be a list')
-      nms <- names(userCvrs)
+   if (!is.null(userCvrVals)) {
+      if (!is.list(userCvrVals)) stop('userCvrVals must be a list')
+      nms <- names(userCvrVals)
       for (nm in nms) {
-         col <- userCvrs[[nm]]  # value of this covariate
+         col <- userCvrVals[[nm]]  # value of this covariate
          pred <- pred + object$cvrMainEffects[[nm]][chr(col)]
          mat <- object$userCvrXEffects[[nm]]
          pred <- pred + mat[chr(user),chr(col)]
       }
    }
-   if (!is.null(itemCvrs)) {
-      if (!is.list(itemCvrs)) stop('itemCvrs must be a list')
-      nms <- names(itemCvrs)
+   if (!is.null(itemCvrVals)) {
+      if (!is.list(itemCvrVals)) stop('itemCvrVals must be a list')
+      nms <- names(itemCvrVals)
       for (nm in nms) {
-         col <- itemCvrs[[nm]]   # value of this covariate
+         col <- itemCvrVals[[nm]]   # value of this covariate
          pred <- pred + object$cvrMainEffects[[nm]][chr(col)]
          mat <- object$itemCvrXEffects[[nm]]
          pred <- pred + mat[chr(item),chr(col)]

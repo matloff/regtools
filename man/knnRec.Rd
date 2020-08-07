@@ -1,5 +1,5 @@
 \name{knnRec,anovaRec}
-\alias{knnRec},anovaRec
+\alias{knnRec},anovaRec}
 \alias{predict.knnRec,predict.anovaRec}
 
 \title{Tools for Recommender Systems}

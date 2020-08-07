@@ -255,6 +255,7 @@ getCvrXEffects <- function(ratings,ratingsDF,userCvrs,itemCvrs,overallMean,
          cvr <- colnames(tmp)[k]
          tmp[,k] <- tmp[,k] - cvrMainEffects[[usercvr]][cvr]
       }
+         browser()
       userCvrXEffects[[usercvr]] <- tmp
    }
    itmcolname <- names(ratingsDF)[2]

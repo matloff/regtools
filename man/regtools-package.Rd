@@ -125,7 +125,9 @@ regression and classification analysis, and machine learning.
 
    \itemize{
 
-   \item knnRec, anovaRec
+   \item knnRec, anovaRec, mfRec
+
+   \item predictMany
 
    }
 

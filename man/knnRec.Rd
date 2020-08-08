@@ -1,6 +1,6 @@
-\name{knnRec,anovaRec}
-\alias{knnRec,anovaRec}
-\alias{predict.knnRec,predict.anovaRec}
+\name{knnRec,anovaRec,mfRec}
+\alias{knnRec,anovaRec,mfRec}
+\alias{predict.knnRec,predict.anovaRec,predict.anovaRec.mfRec}
 
 \title{Tools for Recommender Systems}
 
@@ -11,6 +11,8 @@
    predict.knnRec(object, user, item, k, minMatch = 1)
    anovaRec(ratingsDF,userCvrs=NULL,itemCvrs=NULL) 
    predict.anovaRec(object,user,item,userCvrVals=NULL,itemCvrVals=NULL) 
+   mfRec(ratings,rnk=10,nmf=FALSE,niter=20,lambda=0) 
+   predict.mfRec(object,user,item,)
 
 }
 
@@ -22,7 +24,9 @@
    \item{object}{An object returned by one of the training set
       functions, such as \code{knnRec}.}
    \item{user}{Numeric user ID}
-   \item{item}{Numeric item ID}
+   \item{item}{Numeric item ID.  In the case of \code{mfRec}, specifying
+      a negative number -m will result in the m top-rated items for this
+      user.}
    \item{k}{Number of nearest neighbors.}
    \item{minMatch}{Minimum number of nearest neighbors to be counted in
       neighborhood mean.}
@@ -34,31 +38,56 @@
       name = covariate value.}
    \item{itemCvrVals}{An R list, with components of the form covariate
       name = covariate value.}
+   \item{rnk}{Matrix rank.}
+   \item{nmf}{If TRUE, use NMF instead of SVD.}
+   \item{niter}{Number of iterations.}
+   \item{lambda}{L1 regularizer.}
 }
 
 \details{
 
+Several methods for collaborative filtering.
+
+\itemize{
+
+   \item The function \code{knnRec} uses a k-Nearest Neighbor method.
+   If we desire a rating for user u of item i, the method first finds
+   all users who rated i, then averages the ratings of i by the k
+   nearest of these users to u.  
+   
+   Requires a large dataset.
+
+   \item The function \code{anovaRec} gets its name from its ANOVA-like
+   decompositions, e.g. 
+   
+   E(Y_ij) = mu + alpha_i + beta_j + (alphabeta)_ij
+
+   where Y_ij is the rating user i gives item j.  Only 2-way
+   interactions are allowed.
+
+   The function \code{anovaRec} allows for covariates ("side
+   information").  These may be useful, say, for prediction of new cases
+   having very little rating data.
+
+   Very fast, almost no memory usage.
+
+   \item The function \code{mfRec} uses the matrix factorization method.
+   One can also request multiple top-rated items.
+
+   In some cases, this will be the most accurate method.  Slower, and
+   somewhat memory-intensive.
+
+}
+
 The function \code{knnRec} does the preparation work on the training
 set.  Prediction is then done via \code{predict.knnRec}, via the generic
-function \code{predict}.  Similarly for \code{anovaRec}.
+function \code{predict}.  Similarly for \code{anovaRec} for the others.
 
-The function \code{anovaRec} allows for covariates ("side information").
-These may be useful, say, for prediction of new cases having very little
-rating data.
-
-The covariates are divided into user covariates and item covariates.  To see why,
-consider the famous MovieLens data, say using Genre as a covariate.
-Since knowledge of the item/film implies knowledge of the genre,
-interaction between item and covariate in this cases makes no sense, but
-a user/genre interaction may be reasonable.
-
-The function \code{anovaRec} gets its name from its ANOVA-like
-decompositions, e.g.
-
-E(Y_ij) = mu + alpha_i + beta_j + (alphabeta)_ij
-
-where Y_ij is the rating user i gives item j.  Only 2-way interactions
-are allowed.
+For \code{anovaRec}, the covariates are divided into user covariates and
+item covariates.  To see why, consider the famous MovieLens data, say
+using Genre as a covariate.  Since knowledge of the item/film implies
+knowledge of the genre, interaction between item and covariate in this
+cases makes no sense, but a user/genre interaction may be reasonable.
 
 }
 
@@ -66,7 +95,7 @@ are allowed.
 
 The function \code{knnRec} returns an object of class \code{'knnRec'},
 to be used as input to \code{predict}.  The output of the latter is 
-the predicted value.  Similarly for \code{anovaRec}.
+the predicted value.  Similarly for the others.
 
 }
 

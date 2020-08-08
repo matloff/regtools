@@ -395,3 +395,27 @@ getUserRating <- function(userData,j)
    userData$ratings[pos]
 }
 
+# the above predict.* do one (user,item) pair at a time (or for Reco,
+# one user at a time); this function predicts a bunch of (user,item)
+# pairs, no covariates
+
+# arguments:
+
+#    object: an object of class '*Rec', e.g. 'knnRec' 
+#    newxs: a data frame containing user and item columns of the same 
+#       names as the 'ratings' input that produced 'object'
+
+# value: a vector of predicted values
+
+predictMany <- function(object,newxs) 
+{
+   prednewx <- function(i) predict(object,newxs[i,1],newxs[i,2])
+   res <- sapply(1:nrow(newxs),prednewx)
+   # if output of sapply() is a list instead of a vector, probably
+   # either the original fit was done incorrectly or there is a data
+   # problem
+   if (is.list(res))
+      stop('preds is a list instead of a vector, likely incorrect fit')
+   res
+}
+

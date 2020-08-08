@@ -350,21 +350,46 @@ mfRec <- function(ratings,rnk=10,nmf=FALSE,niter=20,lambda=0)
    result
 }
 
+# if item = -m, report the m top-rated items
 predict.mfRec <- function(object,user,item) 
 {
    user <- match(user,object$userIDs)
-   item <- match(item,object$itemIDs)
+   if (is.na(user)) {
+      warning('no such user, returning mean')
+      return(object$overallMean)
+   }
+   m <- item
+   if (m > 0) {
+      item <- match(item,object$itemIDs)
+      if (is.na(item)) {
+         warning('no such item, returning mean')
+         return(object$overallMean)
+      }
+   }
 
    # set up classical A approx= WH
    w <- object$P
    h <- t(object$Q)    # classic H
 
-   pred <- w[user,] %*% h[,item]
-   if (is.nan(pred)) {
-      warning('NaN, predicting using overall mean')
-      pred <- object$overallMean
+   if (m > 0) {
+      pred <- w[user,] %*% h[,item]
+      if (is.nan(pred)) {
+         warning('NaN, predicting using overall mean')
+         pred <- object$overallMean
+      }
+   } else {
+      wrow <- w[user,]
+      if (any(is.nan(wrow)) || any(is.nan(h)))
+         stop("NaNs, can't compute")
+      preds <- as.vector(wrow %*% h)
+      tmp <- order(preds,decreasing=TRUE)
+      tmpM <- tmp[1:(-m)]
+      pred <- preds[tmpM]
+      names(pred) <- tmpM
    }
+
    pred
+
 }
 
 ########################  utilities  ###################################

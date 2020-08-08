@@ -331,13 +331,40 @@ predict.anovaRec <- function(object,user,item,userCvrVals=NULL,itemCvrVals=NULL)
 mfRec <- function(ratings,rnk=10,nmf=FALSE,niter=20,lambda=0) 
 {
    require(recosystem)
+   # pkg assumes user, item IDs are 1,2,3,..., so need a lookup table,
+   # both here and in prediction
+   userIDs <- unique(ratings[,1])
+   ratings[,1] <- match(ratings[,1],userIDs)
+   itemIDs <- unique(ratings[,2])
+   ratings[,2] <- match(ratings[,2],itemIDs)
    r <- Reco()
    train_set <-
       data_memory(ratings[,1],ratings[,2],ratings[,3],index1=TRUE)
    r$train(train_set,opts = list(dim=rnk,nmf=nmf,niter=niter,costp_l1=lambda))
    result <- r$output(out_memory(),out_memory())
-   result$overallMean
+   result$overallMean <- mean(ratings[,3])
+   result$userIDs <- userIDs
+   result$itemIDs <- itemIDs
    class(result) <- 'mfRec'
+   result$r <- r
+   result
+}
+
+predict.mfRec <- function(object,user,item) 
+{
+   user <- match(user,object$userIDs)
+   item <- match(item,object$itemIDs)
+
+   # set up classical A approx= WH
+   w <- object$P
+   h <- t(object$Q)    # classic H
+
+   pred <- w[user,] %*% h[,item]
+   if (is.nan(pred)) {
+      warning('NaN, predicting using overall mean')
+      pred <- object$overallMean
+   }
+   pred
 }
 
 ########################  utilities  ###################################

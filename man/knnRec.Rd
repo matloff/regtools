@@ -1,5 +1,5 @@
-\name{knnRec,anovaRec,mfRec}
-\alias{knnRec,anovaRec,mfRec}
+\name{knnRec,anovaRec,mfRec,predictMany}
+\alias{knnRec,anovaRec,mfRec,predictMany}
 \alias{predict.knnRec,predict.anovaRec,predict.anovaRec.mfRec}
 
 \title{Tools for Recommender Systems}
@@ -13,6 +13,7 @@
    predict.anovaRec(object,user,item,userCvrVals=NULL,itemCvrVals=NULL) 
    mfRec(ratings,rnk=10,nmf=FALSE,niter=20,lambda=0) 
    predict.mfRec(object,user,item,)
+   predictMany(object,newxs)
 
 }
 
@@ -42,6 +43,8 @@
    \item{nmf}{If TRUE, use NMF instead of SVD.}
    \item{niter}{Number of iterations.}
    \item{lambda}{L1 regularizer.}
+   \item{newxs}{Data frame consisting of a user column and an item
+      column.}
 }
 
 \details{
@@ -88,6 +91,12 @@ item covariates.  To see why, consider the famous MovieLens data, say
 using Genre as a covariate.  Since knowledge of the item/film implies
 knowledge of the genre, interaction between item and covariate in this
 cases makes no sense, but a user/genre interaction may be reasonable.
+
+At present, only categorical covariates are allowed. Use
+\code{discretize} to convert continuous variables.
+
+The \code{predict.*} functions operate on a single (user,item) pair.  If
+many new pairs are to be predicted, use the wrapper \code{predictMany}.
 
 }
 

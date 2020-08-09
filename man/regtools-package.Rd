@@ -139,7 +139,9 @@ regression and classification analysis, and machine learning.
 
    \item data frames: catDFRow, tabletofakedf
 
-   \item R: getNamedArgs
+   \item R: getNamedArgs, ulist
+
+   \item discretize
 
    }
 

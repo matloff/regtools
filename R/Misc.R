@@ -242,3 +242,25 @@ ulist <- function(lst)
    eval(tmp,parent.frame())
 }
 
+#########################  other misc.  ################################
+
+# convenience wrapper for cut() 
+
+# arguments:
+
+#    x: numeric vector
+#    endpts: endpoints for the desired intervals, treated as open on the
+#       left and closed on the right; to avoid NA values, make sure all
+#       of x is accommodated
+
+# value:
+
+#    discrete version of x, with values 1,2,3,...; will have an R
+#    attribute, 'endpts', so as to remember which ones we used
+
+discretize <- function(x,endpts)
+{
+   xc <- cut(x,endpts,labels=1:(length(endpts)-1))
+   attr(xc,'endpts') <- endpts
+   xc
+}

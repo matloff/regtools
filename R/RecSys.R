@@ -347,6 +347,12 @@ mfRec <- function(ratings,rnk=10,nmf=FALSE,niter=20,lambda=0)
    result$itemIDs <- itemIDs
    class(result) <- 'mfRec'
    result$r <- r
+   # check overdetermined
+   nu <- length(userIDs)
+   ni <- length(itemIDs)
+   ncoeffs <- rnk * (nu+ni)
+   if (ncoeffs > nu * ni) 
+      warning('overdetermined system')
    result
 }
 

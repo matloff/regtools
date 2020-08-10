@@ -1,43 +1,50 @@
 
 # under construction
 
-## # uniform wrapper for various dimension reduction methods, including
-## # predict() functions
-## 
-## dimRed <- function(dat,method='prcomp',nComps) 
-## {
-##    compSizes <- NULL  # eigenvalues etc.
-##    if (method == 'prcomp') {
-##       tmp <- prcomp(dat)
-##       tmp$method <- 'prcomp'
-##       tmp$rotation <- tmp$rotation[,1:nComps]
-##    } else if (method == 'svd') {
-##       tmp <- svd(dat,nu=nComps,nv=nComps)
-##       tmp$method <- 'svd'
-##    } else if (method == 'nmf') {
-##       require(NMF)
-##    } else stop('no such method')
-##    tmp$compSizes <- compSizes
-##    class(tmp) <- c('dimRed',class(tmp))
-##    tmp
-## }
-## 
-## # apply the same transformation to new X data
-## dimRecNewX <- function(object,newxs) 
-## {
-##    method <- object$method
-##    if (method == 'prcomp') {
-##       predict(object,newxs)
-##    } 
-## }
-## 
-## # ask for further reduction in the number of components
-## reduceComps <- function(object,nNewComps) 
-## {
-##    method <- object$method
-##    if (method == 'prcomp') {
-##       object$rotation <- object$rotation[,1:nNewComps]
-##    }
-##    object
-## }
-## 
+# uniform wrapper for various dimension reduction methods, including
+# predict() functions
+
+# no centering/scaling is done; user may do separately
+
+dimRed <- function(dat,method='prcomp',nComps) 
+{
+   compSizes <- NULL  # eigenvalues etc.
+   if (method == 'prcomp') {
+      tmp <- prcomp(dat,center=FALSE,scale.=FALSE)
+      tmp$method <- 'prcomp'
+      tmp$rotation <- tmp$rotation[,1:nComps]
+   } else if (method == 'svd') {
+      tmp <- svd(dat,nu=nComps,nv=nComps)
+      tmp$method <- 'svd'
+      tmp$rotation <- v  # equiv to PCA $rotation
+   } else if (method == 'nmf') {
+      require(NMF)
+   } else stop('no such method')
+   tmp$compSizes <- compSizes
+   class(tmp) <- c('dimRed',class(tmp))
+   tmp
+}
+
+# apply the same transformation to new X data
+dimRedNewX <- function(object,newxs) 
+{
+   method <- object$method
+   if (method == 'prcomp' || method == 'svd') {
+      if (!is.matrix(newxs)) {
+         newxs <- as.matrix(newxs)
+         if (nrow(newxs) == 1) newxs <- t(newxs)
+      }
+      newxs %*% object$rotation
+   } 
+}
+
+# ask for further reduction in the number of components
+reduceComps <- function(object,nNewComps) 
+{
+   method <- object$method
+   if (method == 'prcomp' || method == 'svd') {
+      object$rotation <- object$rotation[,1:nNewComps]
+   }
+   object
+}
+

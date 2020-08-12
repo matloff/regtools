@@ -44,7 +44,7 @@ dimRedNewX <- function(object,newxs)
    if (method == 'prcomp' || method == 'svd' || method == 'irlba') {
       if (!is.matrix(newxs)) {
          newxs <- as.matrix(newxs)
-         if (nrow(newxs) == 1) newxs <- t(newxs)
+         if (ncol(newxs) == 1) newxs <- t(newxs)
       }
       newxs %*% object$rotation
    } 

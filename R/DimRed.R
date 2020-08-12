@@ -30,8 +30,8 @@ dimRed <- function(dat,method='prcomp',nComps)
       tmp$rotation <- tmp$v  # equiv to PCA $rotation
    } else if (method == 'irlba') {
       require(irlba)
-      tmp$method <- 'irlba'
       tmp <- irlba(dat,nComps)
+      tmp$method <- 'irlba'
       tmp$rotation <- tmp$v
    } else stop('no such method')
    tmp$compSizes <- compSizes

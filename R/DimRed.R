@@ -6,6 +6,15 @@
 
 # no centering/scaling is done; user may do separately
 
+# example
+
+# tg <- ToothGrowth
+# tg$supp <- as.numeric(tg$supp)
+# tg <- as.matrix(tg)
+# tgsvd <- dimRed(tg,method='svd',2)  # 2 PCs out of a possible 3
+# newx <- c(8.8,1,0.5)
+# dimRedNewX(tgsvd,newx)
+
 dimRed <- function(dat,method='prcomp',nComps) 
 {
    compSizes <- NULL  # eigenvalues etc.

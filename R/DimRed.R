@@ -13,7 +13,9 @@
 # tg <- as.matrix(tg)
 # tgsvd <- dimRed(tg,method='svd',2)  # 2 PCs out of a possible 3
 # newx <- c(8.8,1,0.5)
-# dimRedNewX(tgsvd,newx)
+# dimRedNewX(tgsvd,newx)  # -8.860902 0.4095568, new coordinates
+# tg1 <- reduceComps(tgsvd,1)  # go down to just 1 PC
+# dimRedNewX(tg1,newx)  # -8.860902
 
 dimRed <- function(dat,method='prcomp',nComps) 
 {
@@ -44,7 +46,7 @@ dimRedNewX <- function(object,newxs)
    if (method == 'prcomp' || method == 'svd' || method == 'irlba') {
       if (!is.matrix(newxs)) {
          newxs <- as.matrix(newxs)
-         if (nrow(newxs) == 1) newxs <- t(newxs)
+         if (ncol(newxs) == 1) newxs <- t(newxs)
       }
       newxs %*% object$rotation
    } 

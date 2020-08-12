@@ -16,9 +16,12 @@ dimRed <- function(dat,method='prcomp',nComps)
    } else if (method == 'svd') {
       tmp <- svd(dat,nu=nComps,nv=nComps)
       tmp$method <- 'svd'
-      tmp$rotation <- v  # equiv to PCA $rotation
-   } else if (method == 'nmf') {
-      require(NMF)
+      tmp$rotation <- tmp$v  # equiv to PCA $rotation
+   } else if (method == 'irlba') {
+      require(irlba)
+      tmp$method <- 'irlba'
+      tmp <- irlba(dat,nComps)
+      tmp$rotation <- tmp$v
    } else stop('no such method')
    tmp$compSizes <- compSizes
    class(tmp) <- c('dimRed',class(tmp))
@@ -29,7 +32,7 @@ dimRed <- function(dat,method='prcomp',nComps)
 dimRedNewX <- function(object,newxs) 
 {
    method <- object$method
-   if (method == 'prcomp' || method == 'svd') {
+   if (method == 'prcomp' || method == 'svd' || method == 'irlba') {
       if (!is.matrix(newxs)) {
          newxs <- as.matrix(newxs)
          if (nrow(newxs) == 1) newxs <- t(newxs)
@@ -42,7 +45,7 @@ dimRedNewX <- function(object,newxs)
 reduceComps <- function(object,nNewComps) 
 {
    method <- object$method
-   if (method == 'prcomp' || method == 'svd') {
+   if (method == 'prcomp' || method == 'svd' || method == 'irlba') {
       object$rotation <- object$rotation[,1:nNewComps]
    }
    object

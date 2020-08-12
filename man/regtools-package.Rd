@@ -63,6 +63,8 @@ regression and classification analysis, and machine learning.
 
    \item advanced grid search: fineTuning, fineTuningPar, plot.tuner
 
+   \item dimension reduction: dimRed, dimRedNewX, reduceCols
+
    \item loss: l1, l2, MAPE
 
    }

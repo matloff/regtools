@@ -37,7 +37,7 @@ boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
 \arguments{
 \item{data}{A data frame, containing "X" and "Y" data.}
 \item{yName}{Name of the column in \code{data} corresponding to "Y", the
-   class labels.}
+   class labels.  Must be an R factor.}
 \item{logitClass}{Object returned by \code{logitClass}.}
 \item{linClass}{Object returned by \code{linClass}.}
 \item{newx}{Data frame of one or more new cases to predict.}

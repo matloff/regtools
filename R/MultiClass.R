@@ -456,7 +456,6 @@ predict.linClass <- function(linClassObj,newx) {
 }
 
 #########################  knnClass()  #################################
-# esp. if have some quadratic terms
 
 # arguments:
 

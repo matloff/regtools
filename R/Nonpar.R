@@ -68,8 +68,8 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
    if (is.matrix(y) && identical(smoothingFtn,mean)) 
       smoothingFtn <- colMeans
-   # if (is.matrix(y) && allK)  print('stub')
-   #    stop('for now, in multiclass case, allK must be FALSE')
+   if (is.matrix(y) && allK)  
+      stop('for now, in multiclass case, allK must be FALSE')
    # if (classif && allK) print('stub')
    #    stop('classif=TRUE can be set only if allK is FALSE')
    if (ncol(y) > 1 && !allK) classif <- TRUE

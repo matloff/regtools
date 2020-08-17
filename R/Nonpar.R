@@ -137,6 +137,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       fyh <- function(closestIdxsRow) smoothingFtn(y[closestIdxsRow,,drop=FALSE])
       if (!allK) {
          if (identical(smoothingFtn,loclin)) {
+         browser()
             regests <- loclin(newx,cbind(x,y)[closestIdxs,])
          } else {
             regests <- apply(closestIdxs,1,fyh)
@@ -310,6 +311,7 @@ knnest <- function(y,xdata,k,nearf=meany)
    idxs <- xdata$idxs 
    if (ncol(idxs) < k) stop('k must be <= kmax')
    if (is.vector(y)) y <- as.matrix(y)
+   if (ncol(y) == 2) stop('for 2-class case, use Y = 0,1 vector')
    idx <- idxs [,1:k]
    # set idxrows[[i]] to row i of idx, the indices of
    # the neighbors of the i-th observation
@@ -533,7 +535,7 @@ meany <- function(predpt,nearxy)
 
 vary <- function(predpt,nearxy) {
    nycol <- ncol(nearxy) - length(predpt)
-   if (nycol > 1) stop('not capable of vector y yet')
+   if (nycol > 1) stop('not capable of vector y with vary()')
    # predpt not used (but see loclin() below)
    ycol <- ncol(nearxy)
    var(nearxy[,ycol])
@@ -543,10 +545,18 @@ vary <- function(predpt,nearxy) {
 loclin <- function(predpts,nearxy) {
    if (is.vector(predpts)) predpts <- matrix(predpts,nrow=1)
    nycol <- ncol(nearxy) - ncol(predpts)
-   if (nycol > 1) stop('not capable of vector y yet')
-   ycol <- ncol(nearxy)
-   bhat <- coef(lm(nearxy[,ycol] ~ nearxy[,-ycol]))
-   cbind(1,predpts) %*% bhat
+   if (nycol > 1) {
+      xy <- as.data.frame(nearxy)
+      ystartcol <- ncol(predpts) + 1
+      yNames <- paste0(names(xy)[ystartcol:ncol(xy)],collapse=',')
+      cmd <- paste0('lmout <- lm(cbind(',yNames,') ~ .,data=xy)')
+      eval(parse(text=cmd))
+      predict(lmout,as.data.frame(predpts))
+   } else {
+      ycol <- ncol(nearxy)
+      bhat <- coef(lm(nearxy[,ycol] ~ nearxy[,-ycol]))
+      cbind(1,predpts) %*% bhat
+   }
 }
 
 ######################  parvsnonparplot(), etc. ###############################

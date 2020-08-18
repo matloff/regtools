@@ -137,7 +137,6 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       fyh <- function(closestIdxsRow) smoothingFtn(y[closestIdxsRow,,drop=FALSE])
       if (!allK) {
          if (identical(smoothingFtn,loclin)) {
-         browser()
             regests <- loclin(newx,cbind(x,y)[closestIdxs,])
          } else {
             regests <- apply(closestIdxs,1,fyh)

@@ -76,7 +76,12 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    # checks on newx
    if (is.factor(newx) || is.data.frame(newx) && hasFactors(newx))
       stop('change to dummies, factorsToDummies()')
-   if (is.vector(newx)) newx <- matrix(newx,nrow=1)
+   if (is.vector(newx)) {
+      nms <- names(newx)
+      newx <- matrix(newx,nrow=1)
+      colnames(newx) <- nms
+   }
+   
    if (is.data.frame(newx)) {
       newx <- as.matrix(newx)
    }
@@ -543,19 +548,20 @@ vary <- function(predpt,nearxy) {
 # fit linear model to the data z, Y in last column, and predict at xnew
 loclin <- function(predpts,nearxy) {
    if (is.vector(predpts)) predpts <- matrix(predpts,nrow=1)
+   xy <- as.data.frame(nearxy)
+   # single- and multicolumn Y work on the same code
    nycol <- ncol(nearxy) - ncol(predpts)
-   if (nycol > 1) {
-      xy <- as.data.frame(nearxy)
-      ystartcol <- ncol(predpts) + 1
-      yNames <- paste0(names(xy)[ystartcol:ncol(xy)],collapse=',')
+   ystartcol <- ncol(predpts) + 1
+   yNames <- paste0(names(xy)[ystartcol:ncol(xy)],collapse=',')
+##    if (nycol > 1) {
       cmd <- paste0('lmout <- lm(cbind(',yNames,') ~ .,data=xy)')
       eval(parse(text=cmd))
       predict(lmout,as.data.frame(predpts))
-   } else {
-      ycol <- ncol(nearxy)
-      bhat <- coef(lm(nearxy[,ycol] ~ nearxy[,-ycol]))
-      cbind(1,predpts) %*% bhat
-   }
+##   } else {
+##      ycol <- ncol(nearxy)
+##      bhat <- coef(lm(nearxy[,ycol] ~ nearxy[,-ycol]))
+##      cbind(1,predpts) %*% bhat
+##   }
 }
 
 ######################  parvsnonparplot(), etc. ###############################

@@ -242,6 +242,47 @@ ulist <- function(lst)
    eval(tmp,parent.frame())
 }
 
+
+#######################  loss functions  ###############################
+
+# mean absolute prediction error
+MAPE <- function(y,yhat) 
+{
+   if (!is.vector(y)) 
+      stop('predicted classes must be a vector')
+   mean(abs(y-yhat))
+}
+
+
+
+# overall probability of correct classification, y as a vector of 0s and
+# 1s, yhat a vector of estimated probabilities of 1
+probIncorrectClass <- function(y,yhat) 
+{
+   if (is.vector(y)) {
+      yhat <- round(yhat)
+      return(mean(yhat != y))
+   }
+   classPred <- apply(yhat,1,which.max) 
+   classActual <- apply(y,1,which.max)
+   mean(classPred != classActual)
+}
+
+propMisclass <- function(y,yhat) 
+{
+   if (!is.vector(y) && !is.factor(y)) 
+      stop('predicted classes must be a vector or factor')
+   mean(y == yhat)
+}
+
+# included lossFtn choices are MAPE and probIncorrectClass; user may
+# supply others
+findOverallLoss <- function (regests, y, lossFtn = MAPE) 
+{
+   loss1row <- function(regestsRow) lossFtn(y, regestsRow)
+   apply(regests, 1, loss1row)
+}
+
 #########################  other misc.  ################################
 
 # convenience wrapper for cut() 

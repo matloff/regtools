@@ -2,7 +2,7 @@
 ######################  k-NN routines  #############################
 
 # kNN() is now the main k-NN routine in the package; knnest() is
-# deprecated 
+# deprecated; see also knnClass()
 
 # in its basic form, kNN() does both fitting and predicting; if the
 # latter will be done repeatedly over time, call kNN() with newx = NULL,
@@ -241,29 +241,67 @@ kNNxv <- function(x,y,k,scaleX=TRUE,PCAcomps=0,
    }
    regests
 }
+######################  expandVars  ###############################
 
-# mean absolute prediction error
-MAPE <- function(y,yhat) mean(abs(y-yhat))
+# exploration of the expandVars and expandVals arguments in kNN()
 
-# overall probability of correct classification, y as a vector of 0s and
-# 1s, yhat a vector of estimated probabilities of 1
-probIncorrectClass <- function(y,yhat) 
+# arguments:
+ 
+#    xtrn: vector or matrix for "X" portion of training data
+#    ytrn: vector or matrix for "Y" portion of training data; matrix
+#       case is for vector "Y", i.e. multiclass 
+#    xtst,ytst: test data analogs of xtrn, ytrn
+#    k: number of nearest neighbors
+#    eVar: column number of the predictor to be expanded
+#    maxEVal: maximum expansion 
+#    lossFtn: loss function; internal offerings are 'MAPE' and 'propMisclass'
+#    eValIncr: expansion value increment 
+
+# value:
+
+#    mean loss, evaluated from 0 to maxEVal, increments of eValIncr
+
+exploreExpVars <- 
+   function(xtrn,ytrn,xtst,ytst,k,eVar,maxEVal,lossFtn,eValIncr=0.05) 
 {
-   if (is.vector(y)) {
-      yhat <- round(yhat)
-      return(mean(yhat != y))
-   }
-   classPred <- apply(yhat,1,which.max) 
-   classActual <- apply(y,1,which.max)
-   mean(classPred != classActual)
+   lossFunction <- get(lossFtn)
+   dfr <- data.frame(NULL,NULL)
+   for (w in seq(0.05,1.5,eValIncr)) {
+      preds <- kNN(xtrn,ytrn,xtst,k,expandVars=eVar,expandVals=w)
+      dfr <- rbind(dfr,c(w,mean(lossFunction(preds$regests,ytst))))
+   } 
+   names(dfr) <- c('w',lossFtn)
+   frmla <- as.formula(paste0(lossFtn, ' ~ w'))
+   lwout <- loess(frmla,data=dfr) 
+   lwout
 }
 
-# included lossFtn choices are MAPE and probIncorrectClass; user may
-# supply others
-findOverallLoss <- function (regests, y, lossFtn = MAPE) 
+# plot output of exploreExpVars(), one or more runs on the same plot
+
+######################  plotExpVars()  ###############################
+
+# arguments:
+
+#    as for exploreExpVars() above, but with
+
+#    eVars: indices of the predictors to be expanded (1 at a time)
+#    ylim: as in R plot(), lower and upper limits for Y axis
+
+plotExpVars <- function(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
+   ylim,eValIncr=0.05) 
 {
-   loss1row <- function(regestsRow) lossFtn(y, regestsRow)
-   apply(regests, 1, loss1row)
+   for (i in 1:length(eVars)) {
+      lwout <- exploreExpVars(xtrn,ytrn,xtst,ytst,k,eVars[i],maxEVal,lossFtn,
+         eValIncr=eValIncr)
+      if (i == 1) {
+         plot(lwout$x,lwout$fitted,type='l',ylim=c(20000,30000))
+      } else {
+         lines(lwout$x,lwout$fitted,col=i)
+      }
+   }
+   varNames <- colnames(xtrn)[eVars]
+   legend('topright',legend=varNames,col=1:length(eVars),lty=1:2)
+
 }
 
 
@@ -656,11 +694,4 @@ bestKperPoint <- function(kNNout,y)
    }
    sapply(1:n,bestK)
 }
-
-######################  knnstep() ###############################
-
-# stepwise variable selection, for classification problems; add/delete
-# predictor based on change in overall prediction error
-
-######### experimental ###########
 

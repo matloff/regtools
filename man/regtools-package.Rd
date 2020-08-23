@@ -50,6 +50,8 @@ regression and classification analysis, and machine learning.
 
    \item One vs. All wrappers: knnClass, linClass, logitClass
 
+   \item k-NN reweighting: exploreExpVars, plotExpVars
+
    }
 
 \bold{Machine learning:}

@@ -294,8 +294,8 @@ plotExpVars <- function(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
       lwout <- exploreExpVars(xtrn,ytrn,xtst,ytst,k,eVars[i],maxEVal,lossFtn,
          eValIncr=eValIncr)
       if (i == 1) {
-         plot(lwout$x,lwout$fitted,type='l',ylim,
-            xlab='w',ylab='accuracy')
+         plot(lwout$x,lwout$fitted,type='l',ylim=ylim,
+            xlab='w',ylab='accuracy',lwd=2)
       } else {
          lines(lwout$x,lwout$fitted,col=i)
       }

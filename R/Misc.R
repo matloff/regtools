@@ -272,7 +272,7 @@ propMisclass <- function(y,yhat)
 {
    if (!is.vector(y) && !is.factor(y)) 
       stop('predicted classes must be a vector or factor')
-   mean(y == yhat)
+   mean(y != yhat)
 }
 
 # included lossFtn choices are MAPE and probIncorrectClass; user may

@@ -1,10 +1,10 @@
 #  Clearing the Confusion: Scaling in PCA
 
 Many resources on machine learning (ML) methodology recommend, or even
-state as crucial, that one scale one's data, i.e.  divide each variable
-by its standard deviation (after subtracting the mean), before applying
-Principal Component Analysis (PCA).  Here we will show why that can be
-problematic, and provide an alternative.
+state as crucial, that one *scale* (or *standardize*) one's data, i.e.
+divide each variable by its standard deviation (after subtracting the
+mean), before applying Principal Component Analysis (PCA).  Here we will
+show why that can be problematic, and provide alternatives.
 
 ## Overview
 
@@ -47,9 +47,9 @@ Again, their phrasing is rather imperative:
 > If PCA is requested but centering and scaling are not, the values will
 > still be centered and scaled. 
 
-The word "must" is used here:
-
 * [Visually Enforced](https://www.gastonsanchez.com/visually-enforced/how-to/2012/06/17/PCA-in-R/)
+
+The word "must" is used here:
 
 > Since most of the times the variables are measured in different scales,
 > the PCA must be performed with standardized data (mean = 0, variance =
@@ -72,7 +72,7 @@ variables after centering and scaling.
 PCA is all about removing variables with small variance, as they are
 essentially constant.  If we work with A and B, we would of course use
 only A.  **But if we work with A' and B', we would use both of them, as
-they both have variance 1.0.**
+they both have variance 1.0.**  Scaling has seriously misled us here.
 
 ## Alternatives
 

@@ -114,14 +114,6 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 
    if (PCAcomps > 0) 
       stop('PCA now must be done separately')
-#       colnames(newx) <- colnames(x)
-#       PCAout <- prcomp(x,center=FALSE,scale.=FALSE)
-#       rot <- PCAout$rotation
-#       rot <- rot[,1:PCAcomps,drop=FALSE]
-#       PCAout$rotation <- rot
-#       x <- predict(PCAout,x)
-#       newx <- predict(PCAout,newx)
-#    } else PCAout <- NULL
 
    # find NNs
    tmp <- FNN::get.knnx(data=x, query=newx, k=kmax1)
@@ -133,6 +125,8 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 
    # we might want to try various values of k (allK = T), up through
    # kmax; e.g.  for k = 2 would just use the first 2 columns
+
+   # now, the predictions
 
    # treat kmax1 = 1 specially, as otherwise get 1x1 matrix issues
    if (kmax1 == 1) {
@@ -161,6 +155,11 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    # start building return value
 
    tmplist <- list(whichClosest=closestIdxs,regests=regests)
+
+   # MH dists for possible re-run using loclin()
+   meanx <- rep(0,ncol(x))
+   covx <- cov(x)
+   tmplist$mhdists <- mahalanobis(newx,meanx,covx)
 
    if (classif && !noPreds) {
       if (ncol(y) > 1) {  # multiclass (> 2) case
@@ -192,7 +191,8 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 
 # actual call is predict(kNNoutput,newx,add1); for each row in newx, the
 # 1-nearest row in kNNoutput$x is found, and the corresponding
-# kNNoutput$regests value returned 
+# kNNoutput$regests value returned; should change this to k >= 1
+
 predict.kNN <- function(object,...)
 {
    x <- object$x

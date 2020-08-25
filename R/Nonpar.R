@@ -587,20 +587,23 @@ vary <- function(predpt,nearxy) {
 # fit linear model to the data z, Y in last column, and predict at xnew
 loclin <- function(predpts,nearxy) {
    if (is.vector(predpts)) predpts <- matrix(predpts,nrow=1)
-   xy <- as.data.frame(nearxy)
-   # single- and multicolumn Y work on the same code
+   # single- and multicolumn Y work on mostly the same code
+   xy <- nearxy
    nycol <- ncol(nearxy) - ncol(predpts)
    ystartcol <- ncol(predpts) + 1
-   yNames <- paste0(names(xy)[ystartcol:ncol(xy)],collapse=',')
-##    if (nycol > 1) {
+   colnames(xy) <- paste0('z',1:ncol(xy))
+   yNames <- paste0('y',1:nycol)
+   colnames(xy)[ystartcol:ncol(xy)] <- yNames
+   xy <- as.data.frame(xy)
+   colnames(predpts) <- paste0('z',1:ncol(predpts))
+   predpts <- as.data.frame(predpts)
+   if (nycol > 1) {
       cmd <- paste0('lmout <- lm(cbind(',yNames,') ~ .,data=xy)')
-      eval(parse(text=cmd))
-      predict(lmout,as.data.frame(predpts))
-##   } else {
-##      ycol <- ncol(nearxy)
-##      bhat <- coef(lm(nearxy[,ycol] ~ nearxy[,-ycol]))
-##      cbind(1,predpts) %*% bhat
-##   }
+   } else {
+      cmd <- paste0('lmout <- lm(',yNames[1],' ~ .,data=xy)')
+   }
+   eval(parse(text=cmd))
+   predict(lmout,predpts)
 }
 
 ######################  parvsnonparplot(), etc. ###############################

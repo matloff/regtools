@@ -262,13 +262,21 @@ kNNxv <- function(x,y,k,scaleX=TRUE,PCAcomps=0,
 #    mean loss, evaluated from 0 to maxEVal, increments of eValIncr
 
 exploreExpVars <- 
-   function(xtrn,ytrn,xtst,ytst,k,eVar,maxEVal,lossFtn,eValIncr=0.05) 
+   function(xtrn,ytrn,xtst,ytst,k,eVar,maxEVal,lossFtn,eValIncr=0.05,
+      classif=FALSE,leave1out=FALSE) 
 {
    lossFunction <- get(lossFtn)
    dfr <- data.frame(NULL,NULL)
+   if (classif) ytst <- apply(ytst,1,which.max)
    for (w in seq(0.05,1.5,eValIncr)) {
-      preds <- kNN(xtrn,ytrn,xtst,k,expandVars=eVar,expandVals=w)
-      dfr <- rbind(dfr,c(w,mean(lossFunction(preds$regests,ytst))))
+      preds <- kNN(xtrn,ytrn,xtst,k,expandVars=eVar,expandVals=w,
+         classif=classif,leave1out)
+      if (!classif) {
+         prds <- preds$regests
+      } else {
+         prds <- preds$ypreds
+      }
+      dfr <- rbind(dfr,c(w,mean(lossFunction(prds,ytst))))
    } 
    names(dfr) <- c('w',lossFtn)
    frmla <- as.formula(paste0(lossFtn, ' ~ w'))
@@ -276,9 +284,9 @@ exploreExpVars <-
    lwout
 }
 
-# plot output of exploreExpVars(), one or more runs on the same plot
-
 ######################  plotExpVars()  ###############################
+
+# plot output of exploreExpVars(), one or more runs on the same plot
 
 # arguments:
 
@@ -288,11 +296,11 @@ exploreExpVars <-
 #    ylim: as in R plot(), lower and upper limits for Y axis
 
 plotExpVars <- function(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
-   ylim,eValIncr=0.05) 
+   ylim,eValIncr=0.05,classif=FALSE,leave1out=FALSE) 
 {
    for (i in 1:length(eVars)) {
       lwout <- exploreExpVars(xtrn,ytrn,xtst,ytst,k,eVars[i],maxEVal,lossFtn,
-         eValIncr=eValIncr)
+         eValIncr=eValIncr,classif=classif,leave1out=leave1out)
       if (i == 1) {
          plot(lwout$x,lwout$fitted,type='l',ylim=ylim,
             xlab='w',ylab='accuracy',lwd=2)
@@ -301,7 +309,7 @@ plotExpVars <- function(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
       }
    }
    varNames <- colnames(xtrn)[eVars]
-   legend('topright',legend=varNames,col=1:length(eVars),lty=1:2)
+   legend('topright',legend=varNames,col=1:length(eVars),lwd=1.5)
 
 }
 
@@ -684,9 +692,11 @@ matrixtolist <- function (rc, m)
 
 # kNNout: output from kNN()
 # y: Y vector used in computing kNNout
+# lossFtn: 'MAPE' or 'propMisclass'
 
-bestKperPoint <- function(kNNout,y) 
+bestKperPoint <- function(kNNout,y,lossFtn='MAPE') 
 {
+   lossFunction <- get(lossFtn)
    whichClosest <- kNNout$whichClosest
    if (!kNNout$leave1out) whichClosest <- whichClosest[,-1]
    n <- nrow(whichClosest)
@@ -694,7 +704,8 @@ bestKperPoint <- function(kNNout,y)
    bestK <- function(i) {
       nearYs <- y[whichClosest[i,]]
       nearYbars <- cumsum(nearYs) / 1:nc
-      which.min(abs(y[i] - nearYbars))
+      # which.min(abs(y[i] - nearYbars))
+      which.min(lossFunction(nearYbars,y))
    }
    sapply(1:n,bestK)
 }

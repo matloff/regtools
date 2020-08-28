@@ -696,16 +696,23 @@ matrixtolist <- function (rc, m)
 
 bestKperPoint <- function(kNNout,y,lossFtn='MAPE') 
 {
+
+stop('under construction')
+   if (lossFtn != 'MAPE') stop('presently only MAPE loss')
+   if (length(y) != length(kNNout$regests)) 
+      stop('y must be same as in knnout')
+   if (!kNNout$leave1out) stop('leave1out must be used')
+
    lossFunction <- get(lossFtn)
    whichClosest <- kNNout$whichClosest
-   if (!kNNout$leave1out) whichClosest <- whichClosest[,-1]
+   whichClosest <- whichClosest[,-1]
    n <- nrow(whichClosest)
    nc <- ncol(whichClosest)
    bestK <- function(i) {
       nearYs <- y[whichClosest[i,]]
       nearYbars <- cumsum(nearYs) / 1:nc
       # which.min(abs(y[i] - nearYbars))
-      which.min(lossFunction(nearYbars,y))
+      which.min(lossFunction(nearYbars,y[i]))  # problem here
    }
    sapply(1:n,bestK)
 }

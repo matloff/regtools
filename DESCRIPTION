@@ -1,5 +1,5 @@
 Package: regtools
-Version: 1.3.0
+Version: 1.4.0
 Title: Regression and Classification Tools
 Authors@R: c(person("Norm", "Matloff", email = "matloff@cs.ucdavis.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9179-6785")),
            person("Robin", "Yancey", email = "reyancey@ucdavis.edu", role = c("aut")),

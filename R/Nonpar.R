@@ -61,8 +61,10 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    if (is.data.frame(x)) 
       x <- as.matrix(x)
    # checks on y
+   nYvals <- length(unique(y))
    if (is.vector(y)) {
-      if (classif) y <- factorsToDummies(as.factor(y),omitLast=FALSE)
+      if (classif && nYvals > 2) 
+         y <- factorsToDummies(as.factor(y),omitLast=FALSE)
       else y <- matrix(y,ncol=1)
    }
    if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
@@ -697,7 +699,16 @@ bestKperPoint <- function(x,y,maxK,lossFtn='MAPE',classif=FALSE)
 
    if (lossFtn != 'MAPE' && lossFtn != 'propMisclass') 
       stop('only MAPE or propMisclass loss allowed')
-
+   if (lossFtn == 'propMisclass') {
+      if (!classif) stop('classif must be TRUE here')
+      yvals <- unique(y)
+      if (yvals != 0:1 && yvals != 1:0)
+         stop('Y must be coded 0,1 for classif=TRUE')
+   } else {
+      if (classif) {
+         stop('did you want propMisclass?')
+      }
+   }
    knnout <- kNN(x,y,x,maxK,leave1out=TRUE,classif=classif)
    whichClosest <- knnout$whichClosest
    whichClosest <- whichClosest[,-1]
@@ -707,9 +718,9 @@ bestKperPoint <- function(x,y,maxK,lossFtn='MAPE',classif=FALSE)
       nearYs <- y[whichClosest[i,]]
       nearYbars <- cumsum(nearYs) / 1:nc
       if (lossFtn == 'MAPE') {
-          which.min(abs(nearYbars -y[i]))
+         which.min(abs(nearYbars -y[i]))
       } else {
-         stop('presently only MAPE loss')
+         which.min((round(nearYbars) == y[i]))
       }
    }
    sapply(1:n,bestK)

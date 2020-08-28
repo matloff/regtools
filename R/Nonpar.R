@@ -690,29 +690,26 @@ matrixtolist <- function (rc, m)
 # for each point in the training set, find which k would have produced
 # the best (MAPE) prediction
 
-# kNNout: output from kNN()
-# y: Y vector used in computing kNNout
-# lossFtn: 'MAPE' or 'propMisclass'
+# a single set is used for training and test, but with leave1out TRUE
 
-bestKperPoint <- function(kNNout,y,lossFtn='MAPE') 
+bestKperPoint <- function(x,y,maxK,lossFtn='MAPE',classif=FALSE) 
 {
 
-stop('under construction')
    if (lossFtn != 'MAPE') stop('presently only MAPE loss')
-   if (length(y) != length(kNNout$regests)) 
-      stop('y must be same as in knnout')
-   if (!kNNout$leave1out) stop('leave1out must be used')
 
-   lossFunction <- get(lossFtn)
-   whichClosest <- kNNout$whichClosest
+   knnout <- kNN(x,y,x,maxK,leave1out=TRUE,classif=classif)
+   whichClosest <- knnout$whichClosest
    whichClosest <- whichClosest[,-1]
    n <- nrow(whichClosest)
    nc <- ncol(whichClosest)
    bestK <- function(i) {
       nearYs <- y[whichClosest[i,]]
       nearYbars <- cumsum(nearYs) / 1:nc
-      # which.min(abs(y[i] - nearYbars))
-      which.min(lossFunction(nearYbars,y[i]))  # problem here
+      if (lossFtn == 'MAPE') {
+          which.min(abs(nearYbars -y[i]))
+      } else {
+         stop('presently only MAPE loss')
+      }
    }
    sapply(1:n,bestK)
 }

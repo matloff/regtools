@@ -1,4 +1,4 @@
-\name{knnest,meany,vary,loclin,predict.knn,preprocessx,kmin,parvsnonparplot,nonparvsxplot,l1,l2,kNN}
+\name{knnest,meany,vary,loclin,predict.knn,preprocessx,kmin,parvsnonparplot,nonparvsxplot,l1,l2,kNN,bestKperPoint}
 \alias{kNN}
 \alias{knnest}
 \alias{predict.knn}
@@ -42,7 +42,7 @@ nonparvarplot(knnout,returnPts=FALSE)
 l2(y,muhat)
 l1(y,muhat)
 MAPE(y,yhat)
-bestKperPoint(kNNout,y)
+bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
 }
 
 \arguments{
@@ -75,6 +75,7 @@ bestKperPoint(kNNout,y)
   \item{nearxy}{A set of X neighbors of a point.}
   \item{nearf}{Function to apply to the nearest neighbors of a point.}
   \item{kmax}{Maximal number of nearest neighbors to find.}
+  \item{maxK}{Maximal number of nearest neighbors to find.}
   \item{xval}{Cross-validation flag. If TRUE, then the set of nearest 
      neighbors of a point will not include the point itself.}
   \item{lossftn}{Loss function to be used in cross-validation
@@ -88,6 +89,7 @@ bestKperPoint(kNNout,y)
   \item{returnPts}{If TRUE, return matrix of plotted points.}
   \item{kNNout}{Object returned by \code{kNN}.}
   \item{startAt1}{If TRUE, class labels start at 1, else 0.}
+  \item{lossftn}{Loss function.}
   
 }
 

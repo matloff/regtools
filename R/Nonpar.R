@@ -695,7 +695,8 @@ matrixtolist <- function (rc, m)
 bestKperPoint <- function(x,y,maxK,lossFtn='MAPE',classif=FALSE) 
 {
 
-   if (lossFtn != 'MAPE') stop('presently only MAPE loss')
+   if (lossFtn != 'MAPE' && lossFtn != 'propMisclass') 
+      stop('only MAPE or propMisclass loss allowed')
 
    knnout <- kNN(x,y,x,maxK,leave1out=TRUE,classif=classif)
    whichClosest <- knnout$whichClosest

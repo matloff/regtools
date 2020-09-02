@@ -450,3 +450,17 @@ predictMany <- function(object,newxs)
    res
 }
 
+####################  misc. RecSys  ###################################
+
+# converts the adjacency matrix of a unidirectional bipartite graph to
+# (user,item,rating) format, with rating = 0,1
+
+adjToUIR <- function(adj) 
+{
+   if (is.data.frame(adj)) adj <- as.matrix(adj)
+   rws <- as.vector(row(adj))
+   cls <- as.vector(col(adj))
+   adjvec <- as.vector(adj)
+   cbind(rws,cls,adjvec)
+}
+

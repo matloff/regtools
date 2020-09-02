@@ -133,6 +133,8 @@ regression and classification analysis, and machine learning.
 
    \item predictMany
 
+   \item adjToUIR
+
    }
 
 \bold{Misc.:}

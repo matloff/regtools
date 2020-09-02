@@ -48,4 +48,5 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    knnRec,anovaRec,mfRec,predictMany,
    fineTuning,fineTuningPar,getNamedArgs,partTrnTst,makeOutdf,
    krsFit,krsFitImg,diagNeural,
+   adjToUIR,
    TStoX,TStoXmv,textToXY,textToXYpred)

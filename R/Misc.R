@@ -115,7 +115,8 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
 
 # factorInfo is used if we are converting a factor that we've already
 # converted on previous data; this argument is used to ensure that the
-# conversion on the new data is consistent with the old
+# conversion on the new data is consistent with the old, important for
+# prediction settings
 
 # easier to have both f, fname required
 
@@ -173,6 +174,19 @@ intToDummies <- function(x,fname,omitLast=TRUE)
 {
    tmp <- as.factor(x)
    factorToDummies(tmp,fname,omitLast=omitLast)
+}
+
+# inputs a data frame and converts all character columns to factors
+
+charsToFactors <- function(dtaf) 
+{
+   for (i in 1:ncol(dtaf)) {
+      cli <- dtaf[,i]
+      if (is.character(cli)) {
+         dtaf[,i] <- as.factor(cli)
+      }
+   }
+   dtaf
 }
 
 # inputs a data frame intended for regression/classification, with X in

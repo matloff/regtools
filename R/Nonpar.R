@@ -60,6 +60,11 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    if (hasFactors(x)) stop('use factorsToDummies() to create dummies')
    if (is.data.frame(x)) 
       x <- as.matrix(x)
+   ccout <- constCols(x) 
+   if (length(ccout) > 0) {
+      warning('X data has constant columns:')
+      print(ccout)
+   }
    # checks on y
    nYvals <- length(unique(y))
    if (is.vector(y)) {
@@ -88,6 +93,9 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       newx <- as.matrix(newx)
    }
    # at this point, x, y and newx will all be matrices
+
+   if (nrow(y) != nrow(x)) 
+      stop('number of X data points not equal to that of Y')
 
    if (noPreds) newx <- x
 
@@ -165,7 +173,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       tmplist$mhdists <- mahalanobis(newx,meanx,covx)
    )
    if (is.null(tried) || inherits(tried,'try-error')) {
-      warning('Mahalanobis distances not calculatee')
+      warning('Mahalanobis distances not calculated')
       tmplist$mhdists <- NULL
    } 
 

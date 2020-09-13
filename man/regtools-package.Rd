@@ -77,7 +77,7 @@ regression and classification analysis, and machine learning.
 
    \item conversion between factors and dummies: dummiesToFactor,
    dummiesToInt, factorsToDummies, factorToDummies, factorTo012etc,
-   dummiesToInt,hasFactors
+   dummiesToInt,hasFactors,charsToFactors
 
    }
 

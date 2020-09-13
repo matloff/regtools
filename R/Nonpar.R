@@ -161,7 +161,13 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    # MH dists for possible re-run using loclin()
    meanx <- rep(0,ncol(x))
    covx <- cov(x)
-   tmplist$mhdists <- mahalanobis(newx,meanx,covx)
+   tried <- try(
+      tmplist$mhdists <- mahalanobis(newx,meanx,covx)
+   )
+   if (is.null(tried) || inherits(tried,'try-error')) {
+      warning('Mahalanobis distances not calculatee')
+      tmplist$mhdists <- NULL
+   } 
 
    if (classif && !noPreds) {
       if (ncol(y) > 1) {  # multiclass (> 2) case

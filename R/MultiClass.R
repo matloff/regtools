@@ -1,5 +1,54 @@
 
-# One-vs.-All (OVA) and All-vs.All (AVA), parametric models
+# multiclass models
+
+##################################################################
+##################################################################
+
+# the *Class() functions provide wrappers for a uniform interface, for
+# quick and convenient fitting and prediction; for any given method, not
+# all options are offered in the wrapper version; sophisticated use
+# should use the original functions; each has a predict() method, again
+# with a fairly uniform interface
+
+# the 2-class case is included
+
+# *Class() arguments:
+
+#    data:  dataframe, training set; class labels col is a factor 
+#    yName:  name of the class labels column
+#    possible options
+
+# value:
+
+#    see individual functions below
+
+# predict() arguments:
+
+#    object:  output from logitClass()
+#    possible options
+#    newx:  data frame of points to be predicted
+ 
+# value:  R list with components
+ 
+#    ypreds:  R factor instance of predicted class labels, one element f
+#       for each row of newx 
+#    conditprobs:  vector/matrix of class probabilities; in the 2-class
+#       case, a vector, the probabilities of Y = 1
+
+# deprecated:
+
+ovalogtrn <- function(...) 
+{
+   stop('deprecated; use logitClass()')
+}
+
+predict.ovalog <- function(...) 
+{
+   stop('')
+}
+
+##################################################################
+##################################################################
 
 ##################################################################
 # logitClass: generate estimated regression functions
@@ -14,25 +63,29 @@
 
 #    list of glm() output objects, one per class, and some misc.
 
-ovalogtrn <- function(...) 
-{
-   stop('deprecated; use logitClass()')
-}
-
 logitClass <- function(data,yName) 
 {
+stop('under construction')
    xyc <- xClassGetXY(data,yName) 
    xy <- xyc$xy
    x <- xyc$x
+   yDumms <- xyc$yDumms
    y <- xyc$y
    classNames <- xyc$classNames
    nClass <- length(classNames)
    ncxy <- ncol(xy)
    nx <- ncol(x)
-   empirclassprobs <- colMeans(y)
-   outlist$empirclassprobs <- empirclassprobs
-   # outlist has 1 elt for each of the m sets of coefficients, + 2 misc.
-   
+   nydumms <- ncxy - nx
+   empirClassProbs <- colMeans(yDumms)
+   outlist <- 
+      list(x=x,y=y,classNames=classNames,empirClassProbs=empirClassProbs)
+   doGlm <- function(colI) 
+   {
+      tmpDF <- cbind(x,yDumms[,colI])
+      names(tmpDF)[nx+1] <- 'yDumm'
+      glmout <- glm(yDumm ~ .,data=tmpDF,family=binomial)
+   }
+   outlist$glmOuts <- lapply(1:nydumms,doGlm)
    class(outlist) <- c('logitClass')
    outlist
 }
@@ -52,15 +105,12 @@ logitClass <- function(data,yName)
 #    each row of newx; also has an R attribute giving the matrix of
 #    class probabilities
 
-predict.ovalog <- function(...) 
-{
-   stop('')
-}
-
 predict.logitClass <- function(object,newx) 
 {
+stop('under construction')
    # get probabilities for each class
-   g <- function(i) predict(object[[i]],newx,type='response') 
+   glmOuts <- object$glmOuts
+   g <- function(i) predict(glmOuts[[i]],newx,type='response') 
    tmp <- sapply(1:(length(object)-2),g)
    if (is.vector(tmp)) tmp <- matrix(tmp,nrow=1)
    lobj <- length(object)
@@ -77,10 +127,114 @@ predict.logitClass <- function(object,newx)
    preds
 }
 
-##################################################################
-# logitClassloom: LOOM predict Ys from Xs
+#######################  linClass()  ################################
+
+# uses multivariate (i.e. vector R) lm() for classification; faster than
+# glm(), and may be useful as a rough tool if the goal is prediction, 
+# esp. if have some quadratic terms
+
+# arguments:
+
+#    data: data frame, one column for class, rest for features; class
+#       column must be an R factor
+#    yName: name of the class column
+
+# value:
+
+#    object of class 'linClass'
+
+linClass <- function(data,yName) {
+stop('under construction')
+
+   xyc <- xClassGetXY(data,yName)
+   xy <- xyc$xy
+   classNames <- xyc$classNames
+   yNames <- paste0(classNames,collapse=',')
+   cmd <- paste0('lmout <- lm(cbind(',yNames,') ~ .,data=xy)')
+   eval(parse(text=cmd))
+   class(lmout) <- c('linClass',class(lmout))
+   lmout
+}
+
+# linClassObj is output of linClass(), newx is a data frame compatible with x
+# in linClass(); output is the most likely class label
+
+predict.linClass <- function(linClassObj,newx) {
+   class(linClassObj) <- class(linClassObj)[-1]
+   preds <- predict(linClassObj,newx)
+   tmp <- apply(preds,1,which.max)
+   colnames(preds)[tmp]
+}
+
+#########################  knnClass()  #################################
+
+# arguments:
+
+#    data: data frame, one column for class, rest for features; class
+#    column must be an R factor
+ 
+# value:
+ 
+#    vector of predicted labels, one element for each row of newx; also
+#    has an R attribute giving the matrix of class probabilities
+
+knnClass <- function(data,yName,k,scaleX=TRUE) 
+{
+stop('under construction')
+   
+   xyc <- xClassGetXY(data,yName,xMustNumeric=TRUE)
+   x <- xyc$x
+   xm <- as.matrix(x)
+   y <- xyc$y
+   xy <- xyc$xy
+   classNames <- xyc$classNames
+   nClass <- length(classNames)
+   ncxy <- ncol(xy)
+   nx <- ncol(x)
+
+   knnout <- kNN(xm,y,newx=NULL,k,scaleX,classif=TRUE)
+   knnout$classNames <- classNames
+   class(knnout) <- c('knnClass','kNN')
+   knnout
+
+}
+
+predict.knnClass <- function(object,newx)
+{
+   class(object) <- 'kNN'
+   preds <- predict(object,newx)
+   if (is.vector(preds)) preds <- matrix(preds,nrow=1)
+   probs <- preds
+   classNames <- object$classNames
+   colnames(probs) <- classNames
+   res <- apply(preds,1,which.max)
+   res <- classNames[res]
+   attr(res,'probs') <- probs
+   res
+}
+
+# common code for logitClass(), linClass() etc.; preprocesses the input,
+# returning new data frame xy, same x but dummies for y now
+xClassGetXY <- function(data,yName,xMustNumeric=FALSE) 
+{
+   if (!is.data.frame(data)) 
+      stop('data must be a data frame')
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   if (!is.factor(y)) stop('Y must be a factor')
+   x <- data[,-ycol,drop=FALSE]
+   if (xMustNumeric && hasFactors(x))
+      stop('"X" must be numeric')
+   yDumms <- factorsToDummies(y,omitLast=FALSE)
+   classNames <- levels(y)
+   colnames(yDumms) <- classNames
+   xy <- cbind(x,yDumms)
+   list(xy=xy, x=x, y=y, yDumms=yDumms, classNames=classNames)
+}
+
 ##################################################################
 
+#  older AVA, OVA code
 
 ##################################################################
 # avalogtrn: generate estimated regression functions
@@ -129,8 +283,8 @@ avalogtrn <- function(trnxy,yname)
       colnames(outmat)[k] <- paste(ij,collapse=',')
    }
    if (any(is.na(outmat))) warning('some NA coefficients')
-   empirclassprobs <- classcounts/sum(classcounts)
-   attr(outmat,'empirclassprobs') <- empirclassprobs
+   empirClassProbs <- classcounts/sum(classcounts)
+   attr(outmat,'empirClassProbs') <- empirClassProbs
    attr(outmat,'nclasses') <- m
    class(outmat) <- c('avalog','matrix')
    outmat
@@ -238,7 +392,7 @@ matrixtolist <- function (rc,m)
 #               that Y = j given that X = row i in the X data, 
 #               estimated from the training set
 #       k: number of nearest neighbors
-#       empirclassprobs: proportions of cases in classes 0,1,...,m
+#       empirClassProbs: proportions of cases in classes 0,1,...,m
 
 knntrn <- function() stop('use ovaknntrn')
 ovaknntrn <- function(trnxy,yname,k,xval=FALSE)
@@ -253,32 +407,13 @@ ovaknntrn <- function(trnxy,yname,k,xval=FALSE)
    x <- trnxy[,-ycol,drop=FALSE]
    xd <- factorsToDummies(x,omitLast=TRUE)
    xdata <- preprocessx(xd,k,xval=xval)
-   empirclassprobs <- table(y) / sum(table(y))
+   empirClassProbs <- table(y) / sum(table(y))
    knnout <- knnest(yd,xdata,k)
    xdata$regest <- knnout$regest
    xdata$k <- k
-   xdata$empirclassprobs <- empirclassprobs
+   xdata$empirClassProbs <- empirClassProbs
    class(xdata) <- c('ovaknn')
    xdata
-}
-
-# common code for logitClass(), linClass() etc.; preprocesses the input,
-# returning new data frame xy, same x but dummies for y now
-xClassGetXY <- function(data,yName,xMustNumeric=FALSE) 
-{
-   if (!is.data.frame(data)) 
-      stop('data must be a data frame')
-   ycol <- which(names(data) == yName)
-   y <- data[,ycol]
-   if (!is.factor(y)) stop('Y must be a factor')
-   x <- data[,-ycol,drop=FALSE]
-   if (xMustNumeric && hasFactors(x))
-      stop('"X" must be numeric')
-   yDumms <- factorsToDummies(y,omitLast=FALSE)
-   classNames <- levels(y)
-   colnames(yDumms) <- classNames
-   xy <- cbind(x,yDumms)
-   list(xy=xy, x=x, y=yDumms, classNames=classNames)
 }
 
 # predict.ovaknn: predict multiclass Ys from new Xs
@@ -415,90 +550,6 @@ boundaryplot <- function(y01,x,regests,pairs=combn(ncol(x),2),
       points(x2[near05,],pch=21,cex=1.5*cex,bg='red')
       if (m < ncol(pairs)) readline("next plot")
    }
-}
-
-#######################  linClass()  ################################
-
-# uses multivariate (i.e. vector R) lm() for classification; faster than
-# glm(), and may be useful as a rough tool if the goal is prediction, 
-# esp. if have some quadratic terms
-
-# arguments:
-
-#    data: data frame, one column for class, rest for features; class
-#       column must be an R factor
-#    yName: name of the class column
-
-# value:
-
-#    object of class 'linClass'
-
-linClass <- function(data,yName) {
-
-   xyc <- xClassGetXY(data,yName)
-   xy <- xyc$xy
-   classNames <- xyc$classNames
-   yNames <- paste0(classNames,collapse=',')
-   cmd <- paste0('lmout <- lm(cbind(',yNames,') ~ .,data=xy)')
-   eval(parse(text=cmd))
-   class(lmout) <- c('linClass',class(lmout))
-   lmout
-}
-
-# linClassObj is output of linClass(), newx is a data frame compatible with x
-# in linClass(); output is the most likely class label
-
-predict.linClass <- function(linClassObj,newx) {
-   class(linClassObj) <- class(linClassObj)[-1]
-   preds <- predict(linClassObj,newx)
-   tmp <- apply(preds,1,which.max)
-   colnames(preds)[tmp]
-}
-
-#########################  knnClass()  #################################
-
-# arguments:
-
-#    data: data frame, one column for class, rest for features; class
-#    column must be an R factor
- 
-# value:
- 
-#    vector of predicted labels, one element for each row of newx; also
-#    has an R attribute giving the matrix of class probabilities
-
-knnClass <- function(data,yName,k,scaleX=TRUE) 
-{
-   
-   xyc <- xClassGetXY(data,yName,xMustNumeric=TRUE)
-   x <- xyc$x
-   xm <- as.matrix(x)
-   y <- xyc$y
-   xy <- xyc$xy
-   classNames <- xyc$classNames
-   nClass <- length(classNames)
-   ncxy <- ncol(xy)
-   nx <- ncol(x)
-
-   knnout <- kNN(xm,y,newx=NULL,k,scaleX,classif=TRUE)
-   knnout$classNames <- classNames
-   class(knnout) <- c('knnClass','kNN')
-   knnout
-
-}
-
-predict.knnClass <- function(object,newx)
-{
-   class(object) <- 'kNN'
-   preds <- predict(object,newx)
-   if (is.vector(preds)) preds <- matrix(preds,nrow=1)
-   probs <- preds
-   classNames <- object$classNames
-   colnames(probs) <- classNames
-   res <- apply(preds,1,which.max)
-   res <- classNames[res]
-   attr(res,'probs') <- probs
-   res
 }
 
 #########################  confusion matrix  ################################

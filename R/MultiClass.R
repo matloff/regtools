@@ -160,25 +160,26 @@ predict.linClass <- function(linClassObj,newx) {
 # arguments:  see above, plus
 
 #     k: number of nearest neighbors
-#     scaleX: if TRUE, features will be centered and scaled
+#     scaleX: if TRUE, features will be centered and scaled; note that
+#        this means the features must be numeric
 
 # value:  see above
  
 knnClass <- function(data,yName,k,scaleX=TRUE) 
 {
-stop('under construction')
    
    xyc <- xClassGetXY(data,yName,xMustNumeric=TRUE)
    x <- xyc$x
    xm <- as.matrix(x)
    y <- xyc$y
    xy <- xyc$xy
+   yDumms <- xyc$yDumms
    classNames <- xyc$classNames
    nClass <- length(classNames)
    ncxy <- ncol(xy)
    nx <- ncol(x)
 
-   knnout <- kNN(xm,y,newx=NULL,k,scaleX,classif=TRUE)
+   knnout <- kNN(xm,yDumms,newx=NULL,k,scaleX=scaleX,classif=TRUE)
    knnout$classNames <- classNames
    class(knnout) <- c('knnClass','kNN')
    knnout
@@ -188,15 +189,15 @@ stop('under construction')
 predict.knnClass <- function(object,newx)
 {
    class(object) <- 'kNN'
+   newx <- as.matrix(newx)
    preds <- predict(object,newx)
    if (is.vector(preds)) preds <- matrix(preds,nrow=1)
    probs <- preds
    classNames <- object$classNames
    colnames(probs) <- classNames
-   res <- apply(preds,1,which.max)
-   res <- classNames[res]
-   attr(res,'probs') <- probs
-   res
+   predClasses <- apply(preds,1,which.max)
+   predClasses <- classNames[predClasses]
+   list(predClasses=predClasses,probs=probs)
 }
 
 # common code for logitClass(), linClass() etc.; preprocesses the input,

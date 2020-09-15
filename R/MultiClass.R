@@ -54,10 +54,7 @@ predict.ovalog <- function(...)
 # logitClass: generate estimated regression functions
 ##################################################################
 
-# arguments:
-
-#    data:  dataframe, training set; class labels col is a factor 
-#    yName:  name of the class labels column
+# arguments:  see above
 
 # value:
 
@@ -65,7 +62,6 @@ predict.ovalog <- function(...)
 
 logitClass <- function(data,yName) 
 {
-stop('under construction')
    xyc <- xClassGetXY(data,yName) 
    xy <- xyc$xy
    x <- xyc$x
@@ -94,37 +90,26 @@ stop('under construction')
 # predict.logitClass: predict Ys from new Xs
 ##################################################################
 
-# arguments:  
+# arguments:  see above
 
-#    object:  output from logitClass()
-#    newx:  data frame of points to be predicted
+# value:  see above
  
-# value:
- 
-#    vector of predicted Y values, in {0,1,...,m-1}, one element for
-#    each row of newx; also has an R attribute giving the matrix of
-#    class probabilities
-
 predict.logitClass <- function(object,newx) 
 {
-stop('under construction')
    # get probabilities for each class
    glmOuts <- object$glmOuts
-   g <- function(i) predict(glmOuts[[i]],newx,type='response') 
-   tmp <- sapply(1:(length(object)-2),g)
-   if (is.vector(tmp)) tmp <- matrix(tmp,nrow=1)
-   lobj <- length(object)
-   classNames <- names(object)[-((lobj-1):lobj)]
-   colnames(tmp) <- classNames
-
+   g <- function(glmOutsElt) predict(glmOutsElt,newx,type='response') 
+   probs <- sapply(glmOuts,g)
+   if (is.vector(probs)) probs <- matrix(probs,nrow=1)
+   classNames <- object$classNames
+   colnames(probs) <- classNames
    # separate logits for the m classes will not necessrily sum to 1, so
    # normalize
-   sumtmp <- apply(tmp,1,sum)  
-   tmp <- (1/sumtmp) * tmp
-   preds <- apply(tmp,1,which.max) 
-   preds <- classNames[preds]
-   attr(preds,'probs') <- tmp
-   preds
+   sumprobs <- apply(probs,1,sum)  
+   probs <- (1/sumprobs) * probs
+   predClasses <- apply(probs,1,which.max) 
+   predClasses <- classNames[predClasses]
+   list(predClasses=predClasses,probs=probs)
 }
 
 #######################  linClass()  ################################

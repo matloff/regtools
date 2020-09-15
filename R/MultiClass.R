@@ -190,12 +190,46 @@ predict.knnClass <- function(object,newx)
 {
    class(object) <- 'kNN'
    newx <- as.matrix(newx)
-   preds <- predict(object,newx)
-   if (is.vector(preds)) preds <- matrix(preds,nrow=1)
-   probs <- preds
+   probs <- predict(object,newx)
+   if (is.vector(preds)) probs <- matrix(probs,nrow=1)
+   collectForReturn(object,probs)
+}
+
+#########################  rfClass()  #################################
+
+# random forests
+
+# arguments:  see above, plus
+
+#     ntree: number of treesprobsto generate
+#     minNodeSize: minimum number of data points in a node
+
+# value:  see above
+ 
+rfClass <- function(data,yName,nTree=500,minNodeSize=10) 
+{
+ 
+   require(randomForest)
+   xyc <- xClassGetXY(data,yName,xMustNumeric=TRUE)
+   frml <- as.formula(paste(yName,'~ .'))
+   rfout <- randomForest(frml,data=data,ntree=nTree,nodesize=minNodeSize)
+   rfout$classNames <- xyc$classNames
+   class(rfout) <- c('rfClass','randomForest')
+   rfout
+}
+
+predict.rfClass <- function(object,newx)
+{
+stop('under construction')
+   class(object) <- 'randomForest'
+   preds <- predict(object,newx,type='prob')
+}
+
+collectForReturn <- function(object,probs) 
+{
    classNames <- object$classNames
    colnames(probs) <- classNames
-   predClasses <- apply(preds,1,which.max)
+   predClasses <- apply(probs,1,which.max)
    predClasses <- classNames[predClasses]
    list(predClasses=predClasses,probs=probs)
 }

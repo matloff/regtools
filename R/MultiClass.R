@@ -7,10 +7,13 @@
 # the *Class() functions provide wrappers for a uniform interface, for
 # quick and convenient fitting and prediction; for any given method, not
 # all options are offered in the wrapper version; sophisticated use
-# should use the original functions; each has a predict() method, again
-# with a fairly uniform interface
+# should use the original functions; they might be viewed as analogous
+# to the qplot() function in ggplot2
 
-# the 2-class case is included
+# each has a predict() method, again with a fairly uniform interface
+
+# the 2-class case is included, but with more appropriate form for the
+# predictions
 
 # *Class() arguments:
 
@@ -92,7 +95,7 @@ logitClass <- function(data,yName)
 
 # arguments:  see above
 
-# value:  see above
+# value:  object of class 'logitClass'; see above for components
  
 predict.logitClass <- function(object,newx) 
 {
@@ -114,23 +117,17 @@ predict.logitClass <- function(object,newx)
 
 #######################  linClass()  ################################
 
-# uses multivariate (i.e. vector R) lm() for classification; faster than
+# uses multivariate (i.e. vector Y) lm() for classification; faster than
 # glm(), and may be useful as a rough tool if the goal is prediction, 
-# esp. if have some quadratic terms
+# esp. if have some quadratic terms, which would make the linear
+# approximation better
 
-# arguments:
+# arguments:  see above
 
-#    data: data frame, one column for class, rest for features; class
-#       column must be an R factor
-#    yName: name of the class column
+# value:  object of class 'linClass'; lm() output object, plus misc.
 
-# value:
-
-#    object of class 'linClass'
-
-linClass <- function(data,yName) {
-stop('under construction')
-
+linClass <- function(data,yName) 
+{
    xyc <- xClassGetXY(data,yName)
    xy <- xyc$xy
    classNames <- xyc$classNames
@@ -141,28 +138,32 @@ stop('under construction')
    lmout
 }
 
-# linClassObj is output of linClass(), newx is a data frame compatible with x
-# in linClass(); output is the most likely class label
+# arguments:  see above
+
+# value:  see above
 
 predict.linClass <- function(linClassObj,newx) {
    class(linClassObj) <- class(linClassObj)[-1]
    preds <- predict(linClassObj,newx)
-   tmp <- apply(preds,1,which.max)
-   colnames(preds)[tmp]
+   probs <- pmax(preds,0)
+   probs <- pmin(probs,1)
+   if (is.vector(probs)) probs <- matrix(probs,nrow=1)
+   probsums <- apply(probs,1,sum)
+   probs <- probs * 1/probsums
+   predClasses <- apply(preds,1,which.max)
+   predClasses <- colnames(preds)[predClasses]
+   list(predClasses=predClasses,probs=probs)
 }
 
 #########################  knnClass()  #################################
 
-# arguments:
+# arguments:  see above, plus
 
-#    data: data frame, one column for class, rest for features; class
-#    column must be an R factor
- 
-# value:
- 
-#    vector of predicted labels, one element for each row of newx; also
-#    has an R attribute giving the matrix of class probabilities
+#     k: number of nearest neighbors
+#     scaleX: if TRUE, features will be centered and scaled
 
+# value:  see above
+ 
 knnClass <- function(data,yName,k,scaleX=TRUE) 
 {
 stop('under construction')

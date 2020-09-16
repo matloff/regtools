@@ -191,7 +191,7 @@ predict.knnClass <- function(object,newx)
    class(object) <- 'kNN'
    newx <- as.matrix(newx)
    probs <- predict(object,newx)
-   if (is.vector(preds)) probs <- matrix(probs,nrow=1)
+   if (is.vector(probs)) probs <- matrix(probs,nrow=1)
    collectForReturn(object,probs)
 }
 
@@ -208,7 +208,6 @@ predict.knnClass <- function(object,newx)
  
 rfClass <- function(data,yName,nTree=500,minNodeSize=10) 
 {
- 
    require(randomForest)
    xyc <- xClassGetXY(data,yName,xMustNumeric=TRUE)
    frml <- as.formula(paste(yName,'~ .'))
@@ -220,11 +219,13 @@ rfClass <- function(data,yName,nTree=500,minNodeSize=10)
 
 predict.rfClass <- function(object,newx)
 {
-stop('under construction')
    class(object) <- 'randomForest'
-   preds <- predict(object,newx,type='prob')
+   probs <- predict(object,newx,type='prob')
+   collectForReturn(object,probs)
 }
 
+# some predict.*Class() functions call this for cleanup at end; see
+# list() below for values
 collectForReturn <- function(object,probs) 
 {
    classNames <- object$classNames

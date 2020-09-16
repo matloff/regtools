@@ -589,5 +589,28 @@ confusion <- function(actual,pred) {
    table(actual,pred)
 }
 
+#########################  labelsToProbs()  ################################
+
+# generates estimated conditional class probabilities from predicted
+# labels; useful for classification methodology that does not inherently
+# generate those probabilities
+
+# for a given new case, the k nearest neighbors in the training set are
+# obtained; the predicted class labels for the neighbors are then
+# obtained, and the resulting proportions for the different labels are
+# then used as the estimated probabilities
+
+# arguments:
+
+#    x: the feature matrix of the training set; must be numeric
+#    news: matrix of new cases to be predicted
+#    classNames: levels(y) from the training set y
+#    k: number of neighbors
+
+labelsToProbs <- function(x,newx,classNames,k) 
+{
+stop('under construction')
+}
+
 
 

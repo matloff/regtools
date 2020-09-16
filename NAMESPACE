@@ -22,6 +22,7 @@ S3method(predict,krsFit)
 S3method(predict,logitClass)
 S3method(predict,linClass)
 S3method(predict,knnClass)
+S3method(predict,rfClass)
 S3method(predict,knnRec)
 S3method(predict,anovaRec)
 S3method(predict,mfRec)
@@ -30,7 +31,7 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    kmin,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
    ovalogtrn,avalogtrn,avalogpred,
-   logitClass,linClass,knnClass,
+   logitClass,linClass,knnClass,rfClass,
    knntrn,ovaknntrn,predict.ovaknn,classadjust,
    kNN,findOverallLoss,MAPE,probIncorrectClass,kNNxv,propMisclass,
    plotExpVars,exploreExpVars,multCols,

@@ -603,13 +603,30 @@ confusion <- function(actual,pred) {
 # arguments:
 
 #    x: the feature matrix of the training set; must be numeric
-#    news: matrix of new cases to be predicted
+#    fittedY: R factor, predicted classes in the training set
+#    newX: matrix of new cases to be predicted
 #    classNames: levels(y) from the training set y
 #    k: number of neighbors
 
-labelsToProbs <- function(x,newx,classNames,k) 
+labelsToProbs <- function(x,newX,fittedY,classNames,k) 
 {
-stop('under construction')
+   stop('under construction')
+   # newX <- scale(newX,center=ctr,scale=scl)
+   newX <- scale(newX)
+   tmp <- FNN::get.knnx(x,newX,k)
+   nClass <- length((classNames))
+   doRowI <- function(i)  # do row i of newX
+   {
+      idxs <- tmp$nn.index[i,k]
+      nhbrFittedY <- fittedY[idxs]
+      tblNhbrs <- table(nhbrFittedY)
+      nhbrClasses <- names(tblNhbrs)
+      probs <- rep(0,nClass)
+      probs[nhbrClasses] = tblNhbrs / k
+      probs
+   }
+   tmp <- t(sapply(1:nrow(newX),doRowI))
+   tmp
 }
 
 

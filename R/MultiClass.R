@@ -610,18 +610,21 @@ confusion <- function(actual,pred) {
 
 labelsToProbs <- function(x,newX,fittedY,classNames,k) 
 {
-   stop('under construction')
-   # newX <- scale(newX,center=ctr,scale=scl)
-   newX <- scale(newX)
+   # stop('under construction')
+   x <- scale(x)
+   ctr <- attr(x,'scaled:center')
+   scl <- attr(x,'scaled:scale')
+   newX <- scale(newX,center=ctr,scale=scl)
    tmp <- FNN::get.knnx(x,newX,k)
    nClass <- length((classNames))
    doRowI <- function(i)  # do row i of newX
    {
-      idxs <- tmp$nn.index[i,k]
+      idxs <- tmp$nn.index[i,]
       nhbrFittedY <- fittedY[idxs]
       tblNhbrs <- table(nhbrFittedY)
       nhbrClasses <- names(tblNhbrs)
       probs <- rep(0,nClass)
+      names(probs) <- classNames
       probs[nhbrClasses] = tblNhbrs / k
       probs
    }

@@ -224,6 +224,37 @@ predict.rfClass <- function(object,newx)
    collectForReturn(object,probs)
 }
 
+#########################  svmClass()  #################################
+
+# random forests
+
+# arguments:  see above, plus
+
+#     gamma: scale param, e.g. sd of radial basis ftn
+#     cost: the SVM "C" parameter penalizing nonseparable data
+
+# value:  see above
+ 
+svmClass <- function(data,yName,gamma=1.0,cost=1.0) 
+{
+stop('under construction')
+   require(e1071)
+   xyc <- xClassGetXY(data,yName,xMustNumeric=TRUE)
+   frml <- as.formula(paste(yName,'~ .'))
+   svmout <- svm(frml,data=data,cost=cost,gamma=gamma)
+   svmout$classNames <- xyc$classNames
+   class(svmout) <- c('svmClass','svm')
+   svmout
+}
+
+predict.svmClass <- function(object,newx)
+{
+stop('under construction')
+   class(object) <- 'randomForest'
+   probs <- predict(object,newx,type='prob')
+   collectForReturn(object,probs)
+}
+
 # some predict.*Class() functions call this for cleanup at end; see
 # list() below for values
 collectForReturn <- function(object,probs) 

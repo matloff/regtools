@@ -237,26 +237,35 @@ predict.rfClass <- function(object,newx)
  
 svmClass <- function(data,yName,gamma=1.0,cost=1.0) 
 {
-stop('under construction')
    require(e1071)
    xyc <- xClassGetXY(data,yName,xMustNumeric=TRUE)
    frml <- as.formula(paste(yName,'~ .'))
    svmout <- svm(frml,data=data,cost=cost,gamma=gamma)
    svmout$classNames <- xyc$classNames
+   ycol <- which(names(data) == yName)
+   svmout$x <- data[,-ycol,drop=FALSE]
    class(svmout) <- c('svmClass','svm')
    svmout
 }
 
-predict.svmClass <- function(object,newx)
+predict.svmClass <- function(object,newx,k=25)
 {
-stop('under construction')
-   class(object) <- 'randomForest'
-   probs <- predict(object,newx,type='prob')
-   collectForReturn(object,probs)
+   class(object) <- 'svm'
+   preds <- predict(object,newx)
+   res <- list(predClasses=preds)
+   classNames <- object$classNames
+   x <- object$x
+   probs <- labelsToProbs(x,newx,svmout$fitted,classNames,k)
+   res$probs <- probs
+   res
 }
 
+prd <- predict.svmClass
+
 # some predict.*Class() functions call this for cleanup at end; see
-# list() below for values
+# list() below for values; intended for settings in which the base
+# algorithm returns probabilities, from which this function will
+# computed predicted classes
 collectForReturn <- function(object,probs) 
 {
    classNames <- object$classNames
@@ -641,7 +650,10 @@ confusion <- function(actual,pred) {
 
 labelsToProbs <- function(x,newX,fittedY,classNames,k) 
 {
-   # stop('under construction')
+   if (!is.matrix(x)) {
+      x <- as.matrix(x)
+      if (!is.numeric(x)) stop('x must be numeric')
+   }
    x <- scale(x)
    ctr <- attr(x,'scaled:center')
    scl <- attr(x,'scaled:scale')

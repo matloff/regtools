@@ -226,7 +226,7 @@ predict.rfClass <- function(object,newx)
 
 #########################  svmClass()  #################################
 
-# random forests
+# SVM
 
 # arguments:  see above, plus
 
@@ -260,7 +260,73 @@ predict.svmClass <- function(object,newx,k=25)
    res
 }
 
-prd <- predict.svmClass
+#########################  boostClass()  #################################
+
+# gradient boosting
+
+# arguments:  see above, plus
+
+#     nTrees: number of trees
+#     minNodeSize: minimum number of data points per tree node
+#     learnRate: learning rate: 
+
+# value:  see above
+ 
+boostClass <- function(data,yName,nTrees=100,minNodeSize=10,learnRate=0.1)
+{
+   require(gbm)
+   xyc <- xClassGetXY(data,yName) 
+   xy <- xyc$xy
+   x <- xyc$x
+   yDumms <- xyc$yDumms
+   y <- xyc$y
+   classNames <- xyc$classNames
+   nClass <- length(classNames)
+   ncxy <- ncol(xy)
+   nx <- ncol(x)
+   nydumms <- ncxy - nx
+   empirClassProbs <- colMeans(yDumms)
+   outlist <- 
+      list(x=x,y=y,classNames=classNames,empirClassProbs=empirClassProbs)
+   doGbm <- function(colI) 
+   {
+      tmpDF <- cbind(x,yDumms[,colI])
+      names(tmpDF)[nx+1] <- 'yDumm'
+      gbmout <- gbm(yDumm ~ .,data=tmpDF,
+         n.trees=nTrees,n.minobsinnode=minNodeSize,shrinkage=learnRate)
+   }
+   outlist$gbmOuts <- lapply(1:nydumms,doGbm)
+   class(outlist) <- c('boostClass')
+   outlist
+}
+
+####################  predict.boostClass  ######################
+
+# arguments:  see above
+
+# value:  object of class 'boostClass'; see above for components
+ 
+predict.boostClass <- function(object,newx) 
+{
+stop('under construction')
+   # get probabilities for each class
+   gbmOuts <- object$gbmOuts
+   g <- function(glmOutsElt) predict(glmOutsElt,newx,type='response') 
+   probs <- sapply(glmOuts,g)
+   if (is.vector(probs)) probs <- matrix(probs,nrow=1)
+   classNames <- object$classNames
+   colnames(probs) <- classNames
+   # separate logits for the m classes will not necessrily sum to 1, so
+   # normalize
+   sumprobs <- apply(probs,1,sum)  
+   probs <- (1/sumprobs) * probs
+   predClasses <- apply(probs,1,which.max) 
+   predClasses <- classNames[predClasses]
+   list(predClasses=predClasses,probs=probs)
+}
+
+
+
 
 # some predict.*Class() functions call this for cleanup at end; see
 # list() below for values; intended for settings in which the base
@@ -675,5 +741,9 @@ labelsToProbs <- function(x,newX,fittedY,classNames,k)
    tmp
 }
 
-
+logOddsToProbs <- function(x) 
+{
+   u <- exp(-x)
+   1 / (1+u)
+}
 

@@ -38,18 +38,6 @@
 #    conditprobs:  vector/matrix of class probabilities; in the 2-class
 #       case, a vector, the probabilities of Y = 1
 
-# deprecated:
-
-ovalogtrn <- function(...) 
-{
-   stop('deprecated; use qLogit()')
-}
-
-predict.ovalog <- function(...) 
-{
-   stop('')
-}
-
 ##################################################################
 ##################################################################
 

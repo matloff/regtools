@@ -1,6 +1,18 @@
 
 # multiclass models; see also th q*() functions
 
+# deprecated:
+
+ovalogtrn <- function(...) 
+{
+   stop('deprecated; use qLogit()')
+}
+
+predict.ovalog <- function(...) 
+{
+   stop('')
+}
+
 ##################################################################
 
 #  older AVA, OVA code

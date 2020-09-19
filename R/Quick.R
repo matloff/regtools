@@ -156,7 +156,7 @@ predict.qLin <- function(linClassObj,newx) {
 
 # value:  see above
  
-knnClass <- function(data,yName,k,scaleX=TRUE,classif) 
+qKNN <- function(data,yName,k,scaleX=TRUE,classif) 
 {
    
 stop('under construction')
@@ -179,7 +179,7 @@ stop('under construction')
 
 }
 
-predict.knnClass <- function(object,newx)
+predict.qKNN <- function(object,newx)
 {
    class(object) <- 'kNN'
    newx <- as.matrix(newx)

@@ -1,10 +1,16 @@
-\name{logitClass,linClass,knnClass}
-\alias{logitClass}
-\alias{linClass}
-\alias{knnClass}
-\alias{predict.knnClass}
-\alias{predict.linClass}
-\alias{predict.logitClass}
+\name{qLogit}
+\alias{qLogit}
+\alias{qLin}
+\alias{qKNN}
+\alias{qRF}
+\alias{qSVM}
+\alias{qBoost}
+\alias{predict.qLogit}
+\alias{predict.qLin}
+\alias{predict.qKNN}
+\alias{predict.qRF}
+\alias{predict.qSVM}
+\alias{predict.qBoost}
 
 \title{Quick Classification Wrappers}
 
@@ -15,9 +21,12 @@ the role of \code{qplot} in the \pkg{ggplot2} package.
 }
 
 \usage{
-logitClass(data, yName)
-linClass(data, yName)
-knnClass(data, yName, k, scaleX = TRUE) 
+qLogit(data, yName,classif=TRUE)
+qLin(data, yName,classif)
+qKNN(data, yName, k, scaleX = TRUE,classif) 
+qRF(data, yName,classif) 
+qSVM(data, yName,classif) 
+qBoost(data, yName,classif) 
 }
 
 \arguments{

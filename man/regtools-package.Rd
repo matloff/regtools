@@ -52,6 +52,9 @@ regression and classification analysis, and machine learning.
 
    \item k-NN reweighting: exploreExpVars, plotExpVars
 
+   \item quick convenience classification functions: logitClass,
+   knnClass, linClass, rfClass, boostClass
+
    }
 
 \bold{Machine learning:}

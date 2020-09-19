@@ -53,7 +53,6 @@
 
 qLogit <- function(data,yName,classif=TRUE) 
 {
-stop('under construction')
    if (!classif) stop('for classification problems only')
    xyc <- xClassGetXY(data,yName) 
    xy <- xyc$xy
@@ -108,14 +107,13 @@ predict.qLogit <- function(object,newx)
 
 #######################  qLin()  ################################
 
-# uses multivariate (i.e. vector Y) lm() for classification; faster than
-# glm(), and may be useful as a rough tool if the goal is prediction, 
-# esp. if have some quadratic terms, which would make the linear
-# approximation better
+# in regression case, simply wrapers ordinary lm()
 
-# arguments:  see above
-
-# value:  object of class 'qLin'; lm() output object, plus misc.
+# in classification case, uses multivariate (i.e. vector Y) lm() for
+# classification; faster than glm(), and may be useful as a rough tool
+# if the goal is prediction, esp. if have some quadratic terms, which
+# would make the linear approximation better arguments:  see above
+# value:  object of class 'qLin' -- lm() output object, plus misc.
 
 qLin <- function(data,yName,classif) 
 {

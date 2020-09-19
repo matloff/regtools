@@ -308,15 +308,14 @@ boostClass <- function(data,yName,nTrees=100,minNodeSize=10,learnRate=0.1)
  
 predict.boostClass <- function(object,newx) 
 {
-stop('under construction')
    # get probabilities for each class
    gbmOuts <- object$gbmOuts
-   g <- function(glmOutsElt) predict(glmOutsElt,newx,type='response') 
-   probs <- sapply(glmOuts,g)
+   g <- function(gbmOutsElt) predict(gbmOutsElt,newx,type='response') 
+   probs <- sapply(gbmOuts,g)
    if (is.vector(probs)) probs <- matrix(probs,nrow=1)
    classNames <- object$classNames
    colnames(probs) <- classNames
-   # separate logits for the m classes will not necessrily sum to 1, so
+   # separate runs for the m classes will not necessrily sum to 1, so
    # normalize
    sumprobs <- apply(probs,1,sum)  
    probs <- (1/sumprobs) * probs
@@ -324,9 +323,6 @@ stop('under construction')
    predClasses <- classNames[predClasses]
    list(predClasses=predClasses,probs=probs)
 }
-
-
-
 
 # some predict.*Class() functions call this for cleanup at end; see
 # list() below for values; intended for settings in which the base

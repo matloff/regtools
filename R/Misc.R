@@ -87,6 +87,7 @@ hasFactors <- function(x)
 factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
    dfOut=FALSE)
 {
+stop('under construction')
    if (!is.null(factorsInfo)) stop('factorsInfo not yet implemented')
    if (is.factor(dfr)) dfr <- as.data.frame(dfr)
    outDF <- data.frame(rep(0,nrow((dfr))))  # filler start
@@ -122,7 +123,6 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
 
 factorToDummies <- function (f,fname,omitLast=TRUE,factorInfo=NULL) 
 {
-stop('under construction')
     n <- length(f)
     fl <- levels(f)
     if (!is.null(factorInfo)) {
@@ -130,22 +130,20 @@ stop('under construction')
        if (fn != fname) stop('mismatched fname')
        ol <- factorInfo$omitLast
        if (ol != omitLast) stop('mismatChed omitLast')
-       fullLevelsOrig <- factorInfo$fullLvls
-       if (length(setdiff(fl,fullLevelsOrig))) 
+       fullLevels <- factorInfo$fullLvls
+       if (length(setdiff(fl,fullLevels))) 
           stop(paste('new factor level found'))
-    }
-    fSave <- f
-    lfl <- length(fl)
-    if (omitLast) fl <- fl[-lfl]
-    # ndumms <- lfl - omitLast
-    ndumms <- length(fl)
+    } else fullLevels <- fl
+    useLevels <- 
+       if(omitLast) fullLevels[-length(fullLevels)] else fullLevels
+    ndumms <- length(useLevels)
     dms <- matrix(nrow = n, ncol = ndumms)
-    for (i in 1:ndumms) dms[, i] <- as.integer(f == fl[i])
-    colnames(dms) <- paste(fname,'.', fl, sep = "")
+    for (i in 1:ndumms) dms[, i] <- as.integer(f == useLevels[i])
+    colnames(dms) <- paste(fname,'.', useLevels, sep = "")
     tmp <- list()
     tmp$fname <- fname
     tmp$omitLast <- omitLast
-    tmp$fullLvls <- levels(f)  # all levels even last
+    tmp$fullLvls <- fullLevels  # all levels even last
     attr(dms,'factorInfo') <- tmp
     dms
 }

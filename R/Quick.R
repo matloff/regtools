@@ -61,7 +61,7 @@
 qLogit <- function(data,yName,classif=TRUE) 
 {
    if (!classif) stop('for classification problems only')
-   xyc <- xClassGetXY(data,yName) 
+   xyc <- xClassGetXY(data,yName,classif=TRUE) 
    xy <- xyc$xy
    x <- xyc$x
    yDumms <- xyc$yDumms
@@ -127,7 +127,7 @@ predict.qLogit <- function(object,newx)
 qLin <- function(data,yName,classif) 
 {
    if (classif) {
-      xyc <- xClassGetXY(data,yName)
+      xyc <- xClassGetXY(data,yName,classif=TRUE)
       xy <- xyc$xy
       classNames <- xyc$classNames
       # check for numeric class names
@@ -174,21 +174,19 @@ predict.qLin <- function(object,newx) {
  
 qKNN <- function(data,yName,k,scaleX=TRUE,classif) 
 {
-   
 stop('under construction')
-   xyc <- xClassGetXY(data,yName,xMustNumeric=TRUE)
+   xyc <- xClassGetXY(data,yName,xMustNumeric=TRUE,classif=classif)
    x <- xyc$x
    xm <- as.matrix(x)
    y <- xyc$y
-   xy <- xyc$xy
-   yDumms <- xyc$yDumms
-   classNames <- xyc$classNames
-   nClass <- length(classNames)
-   ncxy <- ncol(xy)
-   nx <- ncol(x)
+   if (classif) {
+      xy <- xyc$xy
+      y <- xyc$yDumms
+      classNames <- xyc$classNames
+   } 
 
-   knnout <- kNN(xm,yDumms,newx=NULL,k,scaleX=scaleX,classif=TRUE)
-   knnout$classNames <- classNames
+   knnout <- kNN(xm,y,newx=NULL,k,scaleX=scaleX,classif=classif)
+   if (classif) knnout$classNames <- classNames
    knnout$classif <- classif
    class(knnout) <- c('knnClass','kNN')
    knnout
@@ -199,9 +197,10 @@ predict.qKNN <- function(object,newx)
 {
    class(object) <- 'kNN'
    newx <- as.matrix(newx)
-   probs <- predict(object,newx)
-   if (is.vector(probs)) probs <- matrix(probs,nrow=1)
-   collectForReturn(object,probs)
+   preds <- predict(object,newx)
+   if (!object$classif) return(preds)
+   if (is.vector(preds)) preds <- matrix(preds,nrow=1)
+   collectForReturn(object,preds)
 }
 
 #########################  qRF()  #################################
@@ -353,15 +352,17 @@ collectForReturn <- function(object,probs)
    list(predClasses=predClasses,probs=probs)
 }
 
-# common code for logitClass(), linClass() etc.; preprocesses the input,
-# returning new data frame xy, same x but dummies for y now
-xClassGetXY <- function(data,yName,xMustNumeric=FALSE) 
+# common code for qLogit(), qLin() etc.; preprocesses the input,
+# returning new data frame xy, same x but y changing to dummies if
+# classif
+
+xClassGetXY <- function(data,yName,xMustNumeric=FALSE,classif) 
 {
    if (!is.data.frame(data)) 
       stop('data must be a data frame')
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
-   if (!is.factor(y)) stop('Y must be a factor')
+   if (classif && !is.factor(y)) stop('Y must be a factor')
    x <- data[,-ycol,drop=FALSE]
    if (xMustNumeric && hasFactors(x))
       stop('"X" must be numeric')

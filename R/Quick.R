@@ -17,7 +17,8 @@
 # q*() arguments:
 
 #    data:  dataframe, training set; class labels col is a factor 
-#    yName:  column name for outcome variable
+#    yName:  column name for outcome variable; in classification case,
+#       must be a factor
 #    classif:  TRUE for classification problems
 #    possible options
 

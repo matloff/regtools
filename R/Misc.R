@@ -122,25 +122,30 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
 
 factorToDummies <- function (f,fname,omitLast=TRUE,factorInfo=NULL) 
 {
+stop('under construction')
     n <- length(f)
     fl <- levels(f)
     if (!is.null(factorInfo)) {
+       fn <- factorInfo$fname
+       if (fn != fname) stop('mismatched fname')
        ol <- factorInfo$omitLast
-       if (ol != omitLast) warning('mismatched omitLast')
-       fLevelsOrig <- factorInfo$lvls
-       if (length(setdiff(fl,fLevelsOrig))) 
+       if (ol != omitLast) stop('mismatChed omitLast')
+       fullLevelsOrig <- factorInfo$fullLvls
+       if (length(setdiff(fl,fullLevelsOrig))) 
           stop(paste('new factor level found'))
     }
-    fl.orig <- fl
+    fSave <- f
     lfl <- length(fl)
     if (omitLast) fl <- fl[-lfl]
-    ndumms <- lfl - omitLast
+    # ndumms <- lfl - omitLast
+    ndumms <- length(fl)
     dms <- matrix(nrow = n, ncol = ndumms)
     for (i in 1:ndumms) dms[, i] <- as.integer(f == fl[i])
     colnames(dms) <- paste(fname,'.', fl, sep = "")
     tmp <- list()
+    tmp$fname <- fname
     tmp$omitLast <- omitLast
-    tmp$lvls <- fl.orig
+    tmp$fullLvls <- levels(f)  # all levels even last
     attr(dms,'factorInfo') <- tmp
     dms
 }

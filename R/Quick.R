@@ -31,12 +31,18 @@
 #    newx:  data frame of points to be predicted
 #    possible options
  
-# value:  R list with components
+# value:  R list with components as follows:
  
-#    ypreds:  R factor instance of predicted class labels, one element f
-#       for each row of newx 
-#    conditprobs:  vector/matrix of class probabilities; in the 2-class
-#       case, a vector, the probabilities of Y = 1
+#    classification case:
+
+#       ypreds:  R factor instance of predicted class labels, one element f
+#          for each row of newx 
+#       conditprobs:  vector/matrix of class probabilities; in the 2-class
+#          case, a vector, the probabilities of Y = 1
+ 
+#    regression case:
+
+#       vector of predicted values
 
 ##################################################################
 ##################################################################
@@ -107,21 +113,29 @@ predict.qLogit <- function(object,newx)
 
 #######################  qLin()  ################################
 
-# in regression case, simply wrapers ordinary lm()
+# in regression case, simply wraps ordinary lm()
 
 # in classification case, uses multivariate (i.e. vector Y) lm() for
 # classification; faster than glm(), and may be useful as a rough tool
 # if the goal is prediction, esp. if have some quadratic terms, which
-# would make the linear approximation better arguments:  see above
+# would make the linear approximation better 
+
+# arguments:  see above
 # value:  object of class 'qLin' -- lm() output object, plus misc.
 
 qLin <- function(data,yName,classif) 
 {
-stop('under construction')
-   xyc <- xClassGetXY(data,yName)
-   xy <- xyc$xy
-   classNames <- xyc$classNames
-   yNames <- paste0(classNames,collapse=',')
+   if (classif) {
+      xyc <- xClassGetXY(data,yName)
+      xy <- xyc$xy
+      classNames <- xyc$classNames
+      # check for numeric class names
+      checkNumericNames(classNames)
+      yNames <- paste0(classNames,collapse=',')
+   } else {
+      xy <- data
+      yNames <- yName
+   }
    cmd <- paste0('lmout <- lm(cbind(',yNames,') ~ .,data=xy)')
    eval(parse(text=cmd))
    lmout$classif <- classif 
@@ -133,9 +147,10 @@ stop('under construction')
 
 # value:  see above
 
-predict.qLin <- function(linClassObj,newx) {
-   class(linClassObj) <- class(linClassObj)[-1]
-   preds <- predict(linClassObj,newx)
+predict.qLin <- function(object,newx) {
+   class(object) <- class(object)[-1]
+   preds <- predict(object,newx)
+   if (!object$classif) return(preds)
    probs <- pmax(preds,0)
    probs <- pmin(probs,1)
    if (is.vector(probs)) probs <- matrix(probs,nrow=1)
@@ -354,4 +369,24 @@ xClassGetXY <- function(data,yName,xMustNumeric=FALSE)
    colnames(yDumms) <- classNames
    xy <- cbind(x,yDumms)
    list(xy=xy, x=x, y=y, yDumms=yDumms, classNames=classNames)
+}
+
+checkNumericNames <- function(nms) 
+{
+   for (nm in nms) {
+      s <- substr(nm,1,1)
+      if (s >= '0' && s <= '9') {
+         stop('factor level begins with a digit')
+      }
+   }
+}
+
+# prepend the string s to each element of the character vector v
+prepend <- function(s,v) 
+{
+   v <- as.character(v)
+   for (i in 1:length(v)) {
+      v[i] <- paste0(s,v[i])
+   }
+   as.factor(v)
 }

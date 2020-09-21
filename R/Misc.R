@@ -100,7 +100,6 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
    outDF <- NULL
    nullFI <- is.null(factorsInfo)
    if (nullFI) factorsInfoOut <- list()
-   browser()
    for (i in 1:ncol(dfr)) {
       dfi <- dfr[,i]
       if (length(levels(dfi)) == 1) {

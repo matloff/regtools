@@ -51,16 +51,9 @@ mmscale <- function (m,scalePars=NULL)
    m
 }
 
+#######################################################################
 ################### factors and dummy variables########################
-
-# x is a data frame; returns TRUE if at least one column is a factor
-hasFactors <- function(x) 
-{
-   for (i in 1:ncol(x)) {
-      if (is.factor(x[,i])) return(TRUE)
-   }
-   FALSE
-}
+#######################################################################
 
 # these routines are useful in that some regression packages insist that
 # predictor be factors, while some require dummy variables
@@ -74,40 +67,60 @@ hasFactors <- function(x)
 # predicted may be missing a level of some factor; this of course is
 # especially true if one is predicting a single case
 
-# thus the factor names and levels are save in attributes, and can be
-# used as input, via factorsInfo
+# thus the factor names and levels are saved in attributes, and can be
+# used as input, via factorInfo and factorsInfo for factorToDummies()
+# and factorsToDummies(): 
+
+# factorToDummies() outputs and later inputs factorInfo
+# factorsToDummies() outputs and later inputs factorsInfo
+
+####################  factorsToDummies()  ######################
 
 # arguments
 
 #    dfr: a data frame
 #    omitLast: if TRUE, make m-1 dummies for an m-level factor
-#    factorsInfo: use factor levels found earlier
+#    factorsInfo: factor levels found earlier, R list, element nm
+#       is levels of factor named nm
 #    dfOut: if TRUE, output a data frame rather than a matrix
+
+# if the input has cols not numeric or factor, ftn will quit
 
 factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
    dfOut=FALSE)
 {
 stop('under construction')
-   if (!is.null(factorsInfo)) stop('factorsInfo not yet implemented')
    if (is.factor(dfr)) dfr <- as.data.frame(dfr)
-   outDF <- data.frame(rep(0,nrow((dfr))))  # filler start
+   # for now, no input cols other than numeric, factor allowed
+   nnf <- function(i)  (!is.numeric(dfr[,i]) && !is.factor(dfr[,i]))
+   notnumfact <- sapply(1:ncol(dfr),nnf)
+   if (any(notnumfact)) 
+      stop('non-numeric, non-factor columns encountered')
+   outDF <- NULL
+   nullFI <- is.null(factorsInfo)
+   if (nullFI) factorsInfoOut <- list()
    for (i in 1:ncol(dfr)) {
       dfi <- dfr[,i]
+      if (length(levels(dfi)) == 1) {
+         msg <- paste(names(dfr)[i],'constant column: ',i) 
+         warning(msg)
+      }
       if (!is.factor(dfi)) {
+         if (!is.numeric(dfi)) 
+            stop('nonnumeric, nonfactor column encountered')
          outDF <- cbind(outDF,dfi) 
          names(outDF)[ncol(outDF)] <- names(dfr)[i]
       } else {
-            if (length(levels(dfi)) == 1) {
-               msg <- paste(names(dfr)[i],'constant, not included')
-               warning(msg)
-               next
-            }
-         dumms <- factorToDummies(dfi,names(dfr)[i],omitLast=omitLast)
+         colName <- names(dfr)[i]
+         dumms <- factorToDummies(dfi,colName,omitLast=omitLast)
+         factorInfo <- attr(dumms,'factorInfo')
+         factorsInfoOut[[colName]] <- factorInfo
          outDF <- cbind(outDF,dumms)
       }
    }
-   outDF[,1] <- NULL  # delete filler
-   if (!dfOut) as.matrix(outDF) else outDF
+   dfOut <- if (!dfOut) as.matrix(outDF) else outDF
+   attr(dfOut,'factorsInfo') <- factorsInfoOut
+   dfOut
 }
 
 # converts just a single factor 
@@ -204,6 +217,15 @@ xyDataframeToMatrix <- function(xy) {
    xd <- factorsToDummies(x,omitLast=TRUE)
    yd <- factorToDummies(y,'y',omitLast=FALSE)
    as.matrix(cbind(xd,yd))
+}
+
+# x is a data frame; returns TRUE if at least one column is a factor
+hasFactors <- function(x) 
+{
+   for (i in 1:ncol(x)) {
+      if (is.factor(x[,i])) return(TRUE)
+   }
+   FALSE
 }
 
 ###################  misc. data frame/matrix ops  ######################

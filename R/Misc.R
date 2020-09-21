@@ -89,37 +89,45 @@ mmscale <- function (m,scalePars=NULL)
 factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
    dfOut=FALSE)
 {
-stop('under construction')
    if (is.factor(dfr)) dfr <- as.data.frame(dfr)
+
    # for now, no input cols other than numeric, factor allowed
    nnf <- function(i)  (!is.numeric(dfr[,i]) && !is.factor(dfr[,i]))
    notnumfact <- sapply(1:ncol(dfr),nnf)
    if (any(notnumfact)) 
       stop('non-numeric, non-factor columns encountered')
+
    outDF <- NULL
    nullFI <- is.null(factorsInfo)
    if (nullFI) factorsInfoOut <- list()
+   browser()
    for (i in 1:ncol(dfr)) {
       dfi <- dfr[,i]
       if (length(levels(dfi)) == 1) {
          msg <- paste(names(dfr)[i],'constant column: ',i) 
          warning(msg)
       }
+      colName <- names(dfr)[i]
       if (!is.factor(dfi)) {
          if (!is.numeric(dfi)) 
             stop('nonnumeric, nonfactor column encountered')
          outDF <- cbind(outDF,dfi) 
-         names(outDF)[ncol(outDF)] <- names(dfr)[i]
+         colnames(outDF)[ncol(outDF)] <- colName
       } else {
-         colName <- names(dfr)[i]
-         dumms <- factorToDummies(dfi,colName,omitLast=omitLast)
-         factorInfo <- attr(dumms,'factorInfo')
-         factorsInfoOut[[colName]] <- factorInfo
+         dumms <- factorToDummies(dfi,colName,omitLast=omitLast,
+            factorInfo=factorsInfo[[i]])
+         if (nullFI) {
+            factorInfo <- attr(dumms,'factorInfo')
+            factorsInfoOut[[colName]] <- factorInfo
+         }
          outDF <- cbind(outDF,dumms)
       }
    }
    dfOut <- if (!dfOut) as.matrix(outDF) else outDF
-   attr(dfOut,'factorsInfo') <- factorsInfoOut
+   if (nullFI) {
+      attr(dfOut,'factorsInfo') <- factorsInfoOut
+   }  else
+      attr(dfOut,'factorsInfo') <- factorsInfo
    dfOut
 }
 

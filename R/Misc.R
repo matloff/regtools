@@ -270,8 +270,13 @@ catDFRow <- function(dfRow) {
 
 # print the classes of a data frame
 
-getDFclasses <- 
-   function(dframe) sapply(1:ncol(dframe),function(i) class(dframe[,i]))
+getDFclasses <- function(dframe) {
+   tmp <- sapply(1:ncol(dframe),function(i) class(dframe[,i]))
+   names(tmp) <- names(dframe)
+   tmp
+}
+
+
 
 ######################  misc. lm() routines  #######################
 

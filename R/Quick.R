@@ -127,7 +127,6 @@ predict.qLogit <- function(object,newx)
 
 qLin <- function(data,yName) 
 {
-stop('under construction')
    classif <- is.factor(data[[yName]])
    if (classif) {
       xyc <- getXY(data,yName,classif=TRUE)

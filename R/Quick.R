@@ -18,9 +18,8 @@
 
 #    data:  dataframe, training set; class labels col is a factor; other
 #       columns may be factors
-#    yName:  column name for outcome variable; in classification case,
-#       must be a factor
-#    classif:  TRUE for classification problems
+#    yName:  column name for outcome variable; vector indicates
+#       regression, factor classification 
 #    possible options
 
 # value:
@@ -59,8 +58,9 @@
 
 #    list of glm() output objects, one per class, and some misc.
 
-qLogit <- function(data,yName,classif=TRUE) 
+qLogit <- function(data,yName) 
 {
+   classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
    xyc <- getXY(data,yName,classif=TRUE) 
    xy <- xyc$xy
@@ -125,8 +125,10 @@ predict.qLogit <- function(object,newx)
 # arguments:  see above
 # value:  object of class 'qLin' -- lm() output object, plus misc.
 
-qLin <- function(data,yName,classif) 
+qLin <- function(data,yName) 
 {
+stop('under construction')
+   classif <- is.factor(data[[yName]])
    if (classif) {
       xyc <- getXY(data,yName,classif=TRUE)
       xy <- xyc$xy
@@ -173,9 +175,10 @@ predict.qLin <- function(object,newx) {
 
 # value:  see above
  
-qKNN <- function(data,yName,k,scaleX=TRUE,classif) 
+qKNN <- function(data,yName,k,scaleX=TRUE) 
 {
 stop('under construction')
+   classif <- is.factor(data[[yName]])
    xyc <- getXY(data,yName,xMustNumeric=TRUE,classif=classif)
    x <- xyc$x
    xm <- as.matrix(x)
@@ -218,6 +221,7 @@ predict.qKNN <- function(object,newx)
 qRF <- function(data,yName,nTree=500,minNodeSize=10,classif) 
 {
 stop('under construction')
+   classif <- is.factor(data[[yName]])
    require(randomForest)
    xyc <- getXY(data,yName,xMustNumeric=TRUE)
    frml <- as.formula(paste(yName,'~ .'))
@@ -246,9 +250,10 @@ predict.qRF <- function(object,newx)
 
 # value:  see above
  
-qSVM <- function(data,yName,gamma=1.0,cost=1.0,classif=TRUE) 
+qSVM <- function(data,yName,gamma=1.0,cost=1.0) 
 {
 stop('under construction')
+   classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
    require(e1071)
    xyc <- getXY(data,yName,xMustNumeric=TRUE)
@@ -287,9 +292,10 @@ predict.qSVM <- function(object,newx,k=25)
 # value:  see above
  
 qBoost <- function(data,yName,
-   nTrees=100,minNodeSize=10,learnRate=0.1,claasif=TRUE)
+   nTrees=100,minNodeSize=10,learnRate=0.1)
 {
 stop('under construction')
+   classif <- is.factor(data[[yName]])
    require(gbm)
    xyc <- getXY(data,yName) 
    xy <- xyc$xy
@@ -359,8 +365,25 @@ collectForReturn <- function(object,probs)
 
 getXY <- function(data,yName,xMustNumeric=FALSE,classif) 
 {
-stop('under construction')
+   if (!is.data.frame(data))
+      stop('data must be a data frame')
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol,drop=FALSE]
+   # if (xMustNumeric && hasFactors(x))
+   #    stop('"X" must be numeric')
+   if (classif) {
+      yDumms <- factorsToDummies(y,omitLast=FALSE)
+      classNames <- levels(y)
+      colnames(yDumms) <- classNames
+      xy <- cbind(x,yDumms)
+   } else {
+      yDumms <- NULL
+      classNames <- NULL
+   }
+   list(xy=xy, x=x, y=y, yDumms=yDumms, classNames=classNames)
 
+}
 #########################  scaling  #################################
 
 # undoes R 'scale()'
@@ -684,7 +707,7 @@ discretize <- function(x,endpts)
    xc <- cut(x,endpts,labels=1:(length(endpts)-1))
    attr(xc,'endpts') <- endpts
    xc
-}
+
    if (!is.data.frame(data)) 
       stop('data must be a data frame')
    ycol <- which(names(data) == yName)

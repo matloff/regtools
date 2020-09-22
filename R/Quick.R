@@ -182,6 +182,8 @@ qKNN <- function(data,yName,k,scaleX=TRUE)
    xyc <- getXY(data,yName,xMustNumeric=TRUE,classif=classif)
    x <- xyc$x
    xm <- as.matrix(x)
+   factorsInfo <- xyc$factorsInfo
+   if (!is.null(factorsInfo)) attr(xm,'factorsInfo') <- factorsInfo
    y <- xyc$y
    if (classif) {
       xy <- xyc$xy
@@ -192,7 +194,8 @@ qKNN <- function(data,yName,k,scaleX=TRUE)
    knnout <- kNN(xm,y,newx=NULL,k,scaleX=scaleX,classif=classif)
    if (classif) knnout$classNames <- classNames
    knnout$classif <- classif
-   class(knnout) <- c('knnClass','kNN')
+   knnout$factorsInfo <- factorsInfo
+   class(knnout) <- c('qKNN','kNN')
    knnout
 
 }
@@ -200,7 +203,9 @@ qKNN <- function(data,yName,k,scaleX=TRUE)
 predict.qKNN <- function(object,newx)
 {
    class(object) <- 'kNN'
-   newx <- as.matrix(newx)
+   classif <- object$classif
+   xyc <- getXY(newx,NULL,TRUE,FALSE,object$factorsInfo)
+   newx <- as.matrix(xyc$x)
    preds <- predict(object,newx)
    if (!object$classif) return(preds)
    if (is.vector(preds)) preds <- matrix(preds,nrow=1)
@@ -361,16 +366,21 @@ collectForReturn <- function(object,probs)
 
 # common code for qLogit(), qLin() etc.; preprocesses the input,
 # returning new data frame xy, same x but y changing to dummies if
-# classif
+# classif; if yName is null, check features only
 
-getXY <- function(data,yName,xMustNumeric=FALSE,classif) 
+getXY <- function(data,yName,xMustNumeric=FALSE,classif,
+   factorsInfo=NULL) 
 {
    if (!is.data.frame(data))
       stop('data must be a data frame')
-   ycol <- which(names(data) == yName)
-   y <- data[,ycol]
+   if (!is.null(yName)) {
+      ycol <- which(names(data) == yName)
+      y <- data[,ycol]
+   } else y <- ycol <- NULL
    if (classif && !is.factor(y)) stop('Y must be a factor')
-   x <- data[,-ycol,drop=FALSE]
+   if (!is.null(y)) {
+      x <- data[,-ycol,drop=FALSE]
+   } else x <- data
    # check for non-numeric cols in x, if necessary
    if (xMustNumeric) {
       xClasses <- getDFclasses(x)
@@ -381,14 +391,15 @@ getXY <- function(data,yName,xMustNumeric=FALSE,classif)
       x <- factorsToDummies(x,omitLast=TRUE)
       factorsInfo <- attr(x,'factorsInfo')
    } else factorsInfo <- NULL
-   if (classif) {
-      yDumms <- factorsToDummies(y,omitLast=FALSE)
+   if (classif && !is.null(yName)) {
+      yDumms <- factorsToDummies(y,omitLast=FALSE,factorsInfo=factorsInfo)
       classNames <- levels(y)
       colnames(yDumms) <- classNames
       xy <- cbind(x,yDumms)
    } else {
       yDumms <- NULL
       classNames <- NULL
+      xy <- NULL
    }
    list(xy=xy,x=x,y=y,yDumms=yDumms,classNames=classNames,
       factorsInfo=factorsInfo)

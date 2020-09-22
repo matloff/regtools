@@ -1,5 +1,7 @@
 
+#######################################################################
 #########################  scaling  #################################
+#######################################################################
 
 # undoes R 'scale()'
 
@@ -235,7 +237,9 @@ hasFactors <- function(x)
    FALSE
 }
 
+#######################################################################
 ###################  misc. data frame/matrix ops  ######################
+#######################################################################
 
 # multiply x[,cols] by vals, e.g. x[,cols[1]] * vals[1]
 # code by Bochao Xin
@@ -256,13 +260,18 @@ constCols <- function(d) {
    return(which(nDistinct == 1))
 }
 
-#######################  printing ##### #######################
+# print a data frame row
 
 catDFRow <- function(dfRow) {
   for (i in 1:ncol(dfRow)) {
      cat(as.character(dfRow[1,i]),' ')
   }
 }
+
+# print the classes of a data frame
+
+getDFclasses <- 
+   function(dframe) sapply(1:ncol(dframe),function(i) class(dframe[,i]))
 
 ######################  misc. lm() routines  #######################
 
@@ -351,3 +360,4 @@ discretize <- function(x,endpts)
    attr(xc,'endpts') <- endpts
    xc
 }
+

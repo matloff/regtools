@@ -141,7 +141,7 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
 
 # easier to have both f, fname required
 
-factorToDummies <- function (f,fname,omitLast=TRUE,factorInfo=NULL) 
+factorToDummies <- function (f,fname,omitLast=FALSE,factorInfo=NULL) 
 {
     n <- length(f)
     fl <- levels(f)

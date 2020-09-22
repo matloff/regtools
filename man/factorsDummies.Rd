@@ -12,8 +12,8 @@ variables.
 }
 
 \usage{
-factorToDummies(f,fname,omitLast=TRUE,factorInfo=NULL)
-factorsToDummies(dfr,omitLast=TRUE)
+factorToDummies(f,fname,omitLast=FALSE,factorInfo=NULL)
+factorsToDummies(dfr,omitLast=FALSE,factorsInfo=NULL,dfOut=FALSE)
 dummiesToFactor(dms,inclLast=FALSE) 
 charsToFactors(dtaf)
 }
@@ -24,10 +24,34 @@ that is of this type to begin with.  On the other hand, many regression
 packages, e.g. \pkg{lars}, disallow factors.  These utilities facilitate
 conversion from one form to another.
 
-The optional argument \code{factorIno} is intended for use in prediction
+The optional argument \code{factorInfo} is intended for use in prediction
 contexts.  Typically a set of new cases will not have all levels of the
 factor in the training set.  Without this argument, only an incomplete
 set of dummies would be generated for the set of new cases.
+
+
+A key point about changing factors to dummies is that, for later
+prediction after fitting a model in our training set, one needs to use
+the same transformations.  Say a factor has levels 'abc', 'de' and 'f'
+(and \code{omitLast = FALSE}).  If we later have a set of say two new
+cases to predict, and their values for this factor are 'de' and 'f', we
+would generate dummies for them but not for 'abc', incompatible with the
+three dummies used in the training set.
+
+Thus the factor names and levels are saved in attributes, and can be
+used as input:  The relations are as follows:
+
+\itemize{
+
+\item \code{factorsToDummies} calls \code{factorToDummies} on each
+factor it finds in its input data frame
+
+\item \code{factorToDummies} outputs and later inputs \code{factorInfo}
+
+\item \code{factorsToDummies} outputs and later inputs \code{factorsInfo}
+
+}
+
 }
 
 \arguments{

@@ -223,12 +223,11 @@ predict.qKNN <- function(object,newx)
 
 # value:  see above
  
-qRF <- function(data,yName,nTree=500,minNodeSize=10,classif) 
+qRF <- function(data,yName,nTree=500,minNodeSize=10) 
 {
-stop('under construction')
    classif <- is.factor(data[[yName]])
    require(randomForest)
-   xyc <- getXY(data,yName,xMustNumeric=TRUE)
+   xyc <- getXY(data,yName,xMustNumeric=FALSE,classif=classif)
    frml <- as.formula(paste(yName,'~ .'))
    rfout <- randomForest(frml,data=data,ntree=nTree,nodesize=minNodeSize)
    rfout$classNames <- xyc$classNames
@@ -240,8 +239,14 @@ stop('under construction')
 predict.qRF <- function(object,newx)
 {
    class(object) <- 'randomForest'
-   probs <- predict(object,newx,type='prob')
-   collectForReturn(object,probs)
+   classif <- object$classif
+   if (classif) {
+      probs <- predict(object,newx,type='prob')
+      res <- collectForReturn(object,probs)
+   } else {
+      res <- predict(object,newx,type='response')
+   }
+   res
 }
 
 #########################  qSVM()  #################################
@@ -257,11 +262,10 @@ predict.qRF <- function(object,newx)
  
 qSVM <- function(data,yName,gamma=1.0,cost=1.0) 
 {
-stop('under construction')
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
    require(e1071)
-   xyc <- getXY(data,yName,xMustNumeric=TRUE)
+   xyc <- getXY(data,yName,xMustNumeric=FALSE,classif=TRUE)
    frml <- as.formula(paste(yName,'~ .'))
    svmout <- svm(frml,data=data,cost=cost,gamma=gamma)
    svmout$classNames <- xyc$classNames
@@ -371,6 +375,7 @@ collectForReturn <- function(object,probs)
 getXY <- function(data,yName,xMustNumeric=FALSE,classif,
    factorsInfo=NULL) 
 {
+stop('under construction')
    if (!is.data.frame(data))
       stop('data must be a data frame')
    if (!is.null(yName)) {

@@ -64,6 +64,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    if (length(ccout) > 0) {
       warning('X data has constant columns:')
       print(ccout)
+      if (scaleX) stop('constant columns cannot work with scaling')
    }
    # checks on y
    nYvals <- length(unique(y))

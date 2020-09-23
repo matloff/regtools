@@ -265,12 +265,14 @@ qSVM <- function(data,yName,gamma=1.0,cost=1.0)
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
    require(e1071)
-   xyc <- getXY(data,yName,xMustNumeric=FALSE,classif=TRUE)
+   # xyc <- getXY(data,yName,xMustNumeric=FALSE,classif=TRUE)
    frml <- as.formula(paste(yName,'~ .'))
    svmout <- svm(frml,data=data,cost=cost,gamma=gamma)
-   svmout$classNames <- xyc$classNames
    ycol <- which(names(data) == yName)
    svmout$x <- data[,-ycol,drop=FALSE]
+   y <- data[,ycol]
+   # svmout$classNames <- xyc$classNames
+   svmout$classNames <- levels(y)
    svmout$classif <- classif
    class(svmout) <- c('qSVM','svm')
    svmout
@@ -375,7 +377,6 @@ collectForReturn <- function(object,probs)
 getXY <- function(data,yName,xMustNumeric=FALSE,classif,
    factorsInfo=NULL) 
 {
-stop('under construction')
    if (!is.data.frame(data))
       stop('data must be a data frame')
    if (!is.null(yName)) {
@@ -397,7 +398,7 @@ stop('under construction')
       factorsInfo <- attr(x,'factorsInfo')
    } else factorsInfo <- NULL
    if (classif && !is.null(yName)) {
-      yDumms <- factorsToDummies(y,omitLast=FALSE,factorsInfo=factorsInfo)
+      yDumms <- factorsToDummies(y,omitLast=FALSE,factorsInfo=NULL)
       classNames <- levels(y)
       colnames(yDumms) <- classNames
       xy <- cbind(x,yDumms)

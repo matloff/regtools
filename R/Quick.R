@@ -274,19 +274,19 @@ qSVM <- function(data,yName,gamma=1.0,cost=1.0)
    # svmout$classNames <- xyc$classNames
    svmout$classNames <- levels(y)
    svmout$classif <- classif
-   class(svmout) <- c('qSVM','svm')
+   class(svmout) <- c('qSVM',class(svmout))
    svmout
 }
 
 predict.qSVM <- function(object,newx,k=25)
 {
-   class(object) <- 'svm'
+   class(object) <- class(object)[-1]
    preds <- predict(object,newx)
    res <- list(predClasses=preds)
    classNames <- object$classNames
    x <- object$x
-   probs <- labelsToProbs(x,newx,svmout$fitted,classNames,k)
-   res$probs <- probs
+   # probs <- labelsToProbs(x,newx,svmout$fitted,classNames,k)
+   # res$probs <- probs
    res
 }
 

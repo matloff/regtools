@@ -291,9 +291,7 @@ predict.qSVM <- function(object,newx,k=25,scaleX=TRUE)
    res
 }
 
-prd <- predict.qSVM
-
-#########################  qBoost()  #################################
+#########################  qGBoost()  #################################
 
 # gradient boosting
 
@@ -305,11 +303,11 @@ prd <- predict.qSVM
 
 # value:  see above
  
-qBoost <- function(data,yName,
+qGBoost <- function(data,yName,
    nTrees=100,minNodeSize=10,learnRate=0.1)
 {
-stop('under construction')
    classif <- is.factor(data[[yName]])
+   if (!classif) stop('classification only')
    require(gbm)
    xyc <- getXY(data,yName) 
    xy <- xyc$xy
@@ -332,17 +330,17 @@ stop('under construction')
          n.trees=nTrees,n.minobsinnode=minNodeSize,shrinkage=learnRate)
    }
    outlist$gbmOuts <- lapply(1:nydumms,doGbm)
-   class(outlist) <- c('qBoost')
+   class(outlist) <- c('qGBoost')
    outlist
 }
 
-####################  predict.qBoost  ######################
+####################  predict.qGBoost  ######################
 
 # arguments:  see above
 
-# value:  object of class 'qBoost'; see above for components
+# value:  object of class 'qGBoost'; see above for components
  
-predict.qBoost <- function(object,newx) 
+predict.qGBoost <- function(object,newx) 
 {
    # get probabilities for each class
    gbmOuts <- object$gbmOuts

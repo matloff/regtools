@@ -361,22 +361,30 @@ confusion <- function(actual,pred) {
 
 # arguments:
 
-#    x: the feature matrix of the training set; must be numeric
+#    x: the feature columns of the training set; must be numeric
 #    fittedY: R factor, predicted classes in the training set
 #    newX: matrix of new cases to be predicted
 #    classNames: levels(y) from the training set y
 #    k: number of neighbors
 
-labelsToProbs <- function(x,newX,fittedY,classNames,k) 
+labelsToProbs <- function(x,newX,fittedY,classNames,k,scaleX=TRUE) 
 {
-   if (!is.matrix(x)) {
-      x <- as.matrix(x)
-      if (!is.numeric(x)) stop('x must be numeric')
+   if (!is.numeric(x)) {
+      xyc <- getXY(x,yName=NULL,xMustNumeric=TRUE,classif=FALSE,
+         factorsInfo=NULL)
+      x <- xyc$x
+      xyc <- getXY(newX,yName=NULL,xMustNumeric=TRUE,classif=FALSE,
+         factorsInfo=xyc$factorsInfo)
+      newX <- xyc$x
    }
-   x <- scale(x)
-   ctr <- attr(x,'scaled:center')
-   scl <- attr(x,'scaled:scale')
-   newX <- scale(newX,center=ctr,scale=scl)
+   x <- as.matrix(x)
+   newX <- as.matrix(newX)
+   if (scaleX) {
+      x <- scale(x)
+      ctr <- attr(x,'scaled:center')
+      scl <- attr(x,'scaled:scale')
+      newX <- scale(newX,center=ctr,scale=scl)
+   }
    tmp <- FNN::get.knnx(x,newX,k)
    nClass <- length((classNames))
    doRowI <- function(i)  # do row i of newX

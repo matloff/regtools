@@ -358,6 +358,32 @@ predict.qGBoost <- function(object,newx)
    list(predClasses=predClasses,probs=probs)
 }
 
+#########################  qNeural()  #################################
+
+# gradient boosting
+
+# arguments:  see above, plus
+
+#     hidden
+#     minNodeSize: minimum number of data points per tree node
+#     learnRate: learning rate: 
+
+# value:  see above
+ 
+qNeural <- function(data,yName,hidden,nEpoch)
+{
+stop('under construction')
+   classif <- is.factor(data[[yName]])
+   ycol <- which(names(data) == yName)
+   x <- data[,-ycol]
+   if (!is.numeric(x))
+   y <- data[,ycol]
+   classNames <- levels(y)
+   y <- as.numeric(y)
+}
+
+###################  utilities for q*()  #########################
+
 # some predict.*Class() functions call this for cleanup at end; see
 # list() below for values; intended for settings in which the base
 # algorithm returns probabilities, from which this function will

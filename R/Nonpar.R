@@ -168,15 +168,17 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    tmplist <- list(whichClosest=closestIdxs,regests=regests)
 
    # MH dists for possible re-run using loclin()
-   meanx <- rep(0,ncol(x))
-   covx <- cov(x)
-   tried <- try(
-      tmplist$mhdists <- mahalanobis(newx,meanx,covx)
-   )
-   if (is.null(tried) || inherits(tried,'try-error')) {
-      warning('Mahalanobis distances not calculated')
-      tmplist$mhdists <- NULL
-   } 
+   if (length(ccout) == 0) {
+      meanx <- rep(0,ncol(x))
+      covx <- cov(x)
+      tried <- try(
+         tmplist$mhdists <- mahalanobis(newx,meanx,covx)
+      )
+      if (is.null(tried) || inherits(tried,'try-error')) {
+         warning('Mahalanobis distances not calculated')
+         tmplist$mhdists <- NULL
+      } 
+   }
 
    if (classif && !noPreds) {
       if (ncol(y) > 1) {  # multiclass (> 2) case

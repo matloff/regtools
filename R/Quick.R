@@ -2,8 +2,8 @@
 ##################################################################
 ##################################################################
 
-# this q*() series is inspired ggplot2::qplot; here 'q' is for "quick."
-# as in qplot() and the old C library function qsort()
+# this qe*() series is inspired ggplot2::qplot; here 'qe' is for
+# "quick-explore"
 
 # the functions provide wrappers with a uniform interface, for
 # quick and convenient fitting and prediction; for any given method, 
@@ -14,13 +14,13 @@
 
 # each has a predict() method, again with a fairly uniform interface
 
-# q*() arguments:
+# qe*() arguments:
 
 #    data:  dataframe, training set; class labels col is a factor; other
 #       columns may be factors
 #    yName:  column name for outcome variable; vector indicates
 #       regression, factor classification 
-#    possible options
+#    possible algorithm-specific options
 
 # value:
 
@@ -49,7 +49,7 @@
 ##################################################################
 
 ##################################################################
-# qLogit: generate estimated regression functions
+# qeLogit: generate estimated regression functions
 ##################################################################
 
 # arguments:  see above
@@ -58,7 +58,7 @@
 
 #    list of glm() output objects, one per class, and some misc.
 
-qLogit <- function(data,yName) 
+qeLogit <- function(data,yName) 
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
@@ -83,19 +83,19 @@ qLogit <- function(data,yName)
    }
    outlist$glmOuts <- lapply(1:nydumms,doGlm)
    outlist$classif <- classif
-   class(outlist) <- c('qLogit')
+   class(outlist) <- c('qeLogit')
    outlist
 }
 
 ##################################################################
-# predict.qLogit: predict Ys from new Xs
+# predict.qeLogit: predict Ys from new Xs
 ##################################################################
 
 # arguments:  see above
 
-# value:  object of class 'qLogit'; see above for components
+# value:  object of class 'qeLogit'; see above for components
  
-predict.qLogit <- function(object,newx) 
+predict.qeLogit <- function(object,newx) 
 {
    # get probabilities for each class
    glmOuts <- object$glmOuts
@@ -113,7 +113,7 @@ predict.qLogit <- function(object,newx)
    list(predClasses=predClasses,probs=probs)
 }
 
-#######################  qLin()  ################################
+#######################  qeLin()  ################################
 
 # in regression case, simply wraps ordinary lm()
 
@@ -123,9 +123,9 @@ predict.qLogit <- function(object,newx)
 # would make the linear approximation better 
 
 # arguments:  see above
-# value:  object of class 'qLin' -- lm() output object, plus misc.
+# value:  object of class 'qeLin' -- lm() output object, plus misc.
 
-qLin <- function(data,yName) 
+qeLin <- function(data,yName) 
 {
    classif <- is.factor(data[[yName]])
    if (classif) {
@@ -142,7 +142,7 @@ qLin <- function(data,yName)
    cmd <- paste0('lmout <- lm(cbind(',yNames,') ~ .,data=xy)')
    eval(parse(text=cmd))
    lmout$classif <- classif 
-   class(lmout) <- c('qLin',class(lmout))
+   class(lmout) <- c('qeLin',class(lmout))
    lmout
 }
 
@@ -150,7 +150,7 @@ qLin <- function(data,yName)
 
 # value:  see above
 
-predict.qLin <- function(object,newx) {
+predict.qeLin <- function(object,newx) {
    class(object) <- class(object)[-1]
    preds <- predict(object,newx)
    if (!object$classif) return(preds)
@@ -164,7 +164,7 @@ predict.qLin <- function(object,newx) {
    list(predClasses=predClasses,probs=probs)
 }
 
-#########################  qKNN()  #################################
+#########################  qeKNN()  #################################
 
 # arguments:  see above, plus
 
@@ -176,7 +176,7 @@ predict.qLin <- function(object,newx) {
 
 # see note in kNN() man pg
  
-qKNN <- function(data,yName,k,scaleX=TRUE) 
+qeKNN <- function(data,yName,k,scaleX=TRUE) 
 {
    classif <- is.factor(data[[yName]])
    xyc <- getXY(data,yName,xMustNumeric=TRUE,classif=classif)
@@ -195,12 +195,12 @@ qKNN <- function(data,yName,k,scaleX=TRUE)
    if (classif) knnout$classNames <- classNames
    knnout$classif <- classif
    knnout$factorsInfo <- factorsInfo
-   class(knnout) <- c('qKNN','kNN')
+   class(knnout) <- c('qeKNN','kNN')
    knnout
 
 }
 
-predict.qKNN <- function(object,newx)
+predict.qeKNN <- function(object,newx)
 {
    class(object) <- 'kNN'
    classif <- object$classif
@@ -212,7 +212,7 @@ predict.qKNN <- function(object,newx)
    collectForReturn(object,preds)
 }
 
-#########################  qRF()  #################################
+#########################  qeRF()  #################################
 
 # random forests
 
@@ -223,7 +223,7 @@ predict.qKNN <- function(object,newx)
 
 # value:  see above
  
-qRF <- function(data,yName,nTree=500,minNodeSize=10) 
+qeRF <- function(data,yName,nTree=500,minNodeSize=10) 
 {
    classif <- is.factor(data[[yName]])
    require(randomForest)
@@ -232,11 +232,11 @@ qRF <- function(data,yName,nTree=500,minNodeSize=10)
    rfout <- randomForest(frml,data=data,ntree=nTree,nodesize=minNodeSize)
    rfout$classNames <- xyc$classNames
    rfout$classif <- classif
-   class(rfout) <- c('qRF','randomForest')
+   class(rfout) <- c('qeRF','randomForest')
    rfout
 }
 
-predict.qRF <- function(object,newx)
+predict.qeRF <- function(object,newx)
 {
    class(object) <- 'randomForest'
    classif <- object$classif
@@ -249,7 +249,7 @@ predict.qRF <- function(object,newx)
    res
 }
 
-#########################  qSVM()  #################################
+#########################  qeSVM()  #################################
 
 # SVM
 
@@ -260,7 +260,7 @@ predict.qRF <- function(object,newx)
 
 # value:  see above
  
-qSVM <- function(data,yName,gamma=1.0,cost=1.0) 
+qeSVM <- function(data,yName,gamma=1.0,cost=1.0) 
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
@@ -274,11 +274,11 @@ qSVM <- function(data,yName,gamma=1.0,cost=1.0)
    # svmout$classNames <- xyc$classNames
    svmout$classNames <- levels(y)
    svmout$classif <- classif
-   class(svmout) <- c('qSVM',class(svmout))
+   class(svmout) <- c('qeSVM',class(svmout))
    svmout
 }
 
-predict.qSVM <- function(object,newx,k=25,scaleX=TRUE)
+predict.qeSVM <- function(object,newx,k=25,scaleX=TRUE)
 {
    class(object) <- class(object)[-1]
    preds <- predict(object,newx)
@@ -291,7 +291,7 @@ predict.qSVM <- function(object,newx,k=25,scaleX=TRUE)
    res
 }
 
-#########################  qGBoost()  #################################
+#########################  qeGBoost()  #################################
 
 # gradient boosting
 
@@ -303,7 +303,7 @@ predict.qSVM <- function(object,newx,k=25,scaleX=TRUE)
 
 # value:  see above
  
-qGBoost <- function(data,yName,
+qeGBoost <- function(data,yName,
    nTrees=100,minNodeSize=10,learnRate=0.1)
 {
    classif <- is.factor(data[[yName]])
@@ -330,17 +330,17 @@ qGBoost <- function(data,yName,
          n.trees=nTrees,n.minobsinnode=minNodeSize,shrinkage=learnRate)
    }
    outlist$gbmOuts <- lapply(1:nydumms,doGbm)
-   class(outlist) <- c('qGBoost')
+   class(outlist) <- c('qeGBoost')
    outlist
 }
 
-####################  predict.qGBoost  ######################
+####################  predict.qeGBoost  ######################
 
 # arguments:  see above
 
-# value:  object of class 'qGBoost'; see above for components
+# value:  object of class 'qeGBoost'; see above for components
  
-predict.qGBoost <- function(object,newx) 
+predict.qeGBoost <- function(object,newx) 
 {
    # get probabilities for each class
    gbmOuts <- object$gbmOuts
@@ -358,7 +358,7 @@ predict.qGBoost <- function(object,newx)
    list(predClasses=predClasses,probs=probs)
 }
 
-#########################  qNeural()  #################################
+#########################  qeNeural()  #################################
 
 # gradient boosting
 
@@ -370,7 +370,7 @@ predict.qGBoost <- function(object,newx)
 
 # value:  see above
  
-qNeural <- function(data,yName,hidden,nEpoch=30)
+qeNeural <- function(data,yName,hidden,nEpoch=30)
 {
    classif <- is.factor(data[[yName]])
    ycol <- which(names(data) == yName)
@@ -390,11 +390,11 @@ qNeural <- function(data,yName,hidden,nEpoch=30)
    krsout$classNames=classNames
    krsout$factorsInfo=factorsInfo
    krsout$x <- x
-   class(krsout) <- c('qNeural',class(krsout))
+   class(krsout) <- c('qeNeural',class(krsout))
    krsout
 }
 
-predict.qNeural <- function(object,newx)
+predict.qeNeural <- function(object,newx)
 {
    class(object) <- class(object)[-1]
    if (nrow(newx) == 1) {  # kludge!; Tensorflow issue
@@ -432,7 +432,7 @@ collectForReturn <- function(object,probs)
    list(predClasses=predClasses,probs=probs)
 }
 
-# common code for qLogit(), qLin() etc.; preprocesses the input,
+# common code for qeLogit(), qeLin() etc.; preprocesses the input,
 # returning new data frame xy, same x but y changing to dummies if
 # classif; if yName is null, check features only
 

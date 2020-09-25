@@ -19,12 +19,13 @@ S3method(predict,ovalog)
 S3method(plot,tuner)
 S3method(reorder,tuner)
 S3method(predict,krsFit)
-S3method(predict,qLogit)
-S3method(predict,qLin)
-S3method(predict,qKNN)
-S3method(predict,qRF)
-S3method(predict,qSVM)
-S3method(predict,qGBoost)
+S3method(predict,qeLogit)
+S3method(predict,qeLin)
+S3method(predict,qeKNN)
+S3method(predict,qeRF)
+S3method(predict,qeSVM)
+S3method(predict,qeGBoost)
+S3method(predict,qeNeural)
 S3method(predict,knnRec)
 S3method(predict,anovaRec)
 S3method(predict,mfRec)
@@ -33,7 +34,7 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    kmin,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
    ovalogtrn,avalogtrn,avalogpred,
-   qLogit,qLin,qKNN,qRF,qSVM,qGBoost,
+   qeLogit,qeLin,qeKNN,qeRF,qeSVM,qeGBoost,qeNeural,
    knntrn,ovaknntrn,predict.ovaknn,classadjust,labelsToProbs,logOddsToProbs,
    kNN,findOverallLoss,MAPE,probIncorrectClass,kNNxv,propMisclass,
    plotExpVars,exploreExpVars,multCols,

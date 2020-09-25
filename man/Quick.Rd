@@ -1,32 +1,34 @@
-\name{qLogit}
-\alias{qLogit}
-\alias{qLin}
-\alias{qKNN}
-\alias{qRF}
-\alias{qSVM}
-\alias{qBoost}
-\alias{predict.qLogit}
-\alias{predict.qLin}
-\alias{predict.qKNN}
-\alias{predict.qRF}
-\alias{predict.qSVM}
-\alias{predict.qBoost}
+\name{qeLogit}
+\alias{qeLogit}
+\alias{qeLin}
+\alias{qeKNN}
+\alias{qeRF}
+\alias{qeSVM}
+\alias{qeGBoost}
+\alias{qeNeural}
+\alias{predict.qeLogit}
+\alias{predict.qeLin}
+\alias{predict.qeKNN}
+\alias{predict.qeRF}
+\alias{predict.qeSVM}
+\alias{predict.qeGBoost}
+\alias{predict.qeNeural}
 
 \title{Quick Classification Wrappers}
 
 \description{
-Quick access to multiclass methods, with a uniform interface.  For
-advanced work, analysts should use the methods directly.  Analogous to
-the role of \code{qplot} in the \pkg{ggplot2} package.
+Quick access to multiclass methods, with a uniform interface,
+intended for convenient initial exploration of a dataset.  For
+advanced work, analysts should use the methods directly.  
 }
 
 \usage{
-qLogit(data, yName,classif=TRUE)
-qLin(data, yName,classif)
-qKNN(data, yName, k, scaleX = TRUE,classif) 
-qRF(data, yName,classif) 
-qSVM(data, yName,classif) 
-qBoost(data, yName,classif) 
+qeLogit(data, yName,classif=TRUE)
+qeLin(data, yName,classif)
+qeKNN(data, yName, k, scaleX = TRUE,classif) 
+qeRF(data, yName,classif) 
+qeSVM(data, yName,classif) 
+qeGBoost(data, yName,classif) 
 }
 
 \arguments{
@@ -39,9 +41,10 @@ qBoost(data, yName,classif)
 \details{
 
 As noted, these functions are intended for quick, first-level analysis
-of multiclass classification data. Emphasis here is on convenience. In
-most cases, the full basket of function options is not reflected, and
-second-level analysis should use the relevant packages directly.
+of regression or multiclass classification problems.  Emphasis here is
+on convenience. In most cases, the full basket of function options is
+not reflected, and second-level analysis should use the relevant
+packages directly.
 
 Each function has a \code{predict} method. Arguments are at least:
 \code{object}, the return value of the previously-called \code{*Class}

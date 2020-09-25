@@ -21,8 +21,8 @@ diagNeural(krsFitOut)
   \item{x}{X data, predictors, one row per data point, in the training
      set.  Must be a matrix.}
   \item{y}{Numeric vector of Y values.  In classification case
-     must be integers, not an R factor, and take on the values 1,2,...,
-     \code{nClass}}.
+     must be integers, not an R factor, and take on the values 0,1,2,...,
+     \code{nClass}-1}.
   \item{hidden}{Vector of number of units per 
      hidden layer, or the rate for a dropout layer.} 
   \item{acts}{Vector of names of the activation functions.}

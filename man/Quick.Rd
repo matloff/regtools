@@ -23,12 +23,23 @@ advanced work, analysts should use the methods directly.
 }
 
 \usage{
-qeLogit(data, yName,classif=TRUE)
-qeLin(data, yName,classif)
-qeKNN(data, yName, k, scaleX = TRUE,classif) 
-qeRF(data, yName,classif) 
-qeSVM(data, yName,classif) 
-qeGBoost(data, yName,classif) 
+qeLogit(data,yName)
+qeLin(data,yName)
+qeKNN(data,yName,k,scaleX=TRUE) 
+qeRF(data,yName,nTree,minNodeSize) 
+qeSVM(data,yName,gamma=1.0,cost=1.0) 
+qeGBoost(data,yName,nTrees=100,minNodeSize=10,learnRate=0.1) 
+qeNeural(data,yName,hidden,nEpoch=30) 
+predict.qeLogit(object,newx)
+predict.qeLin(object,newx)
+predict.qeKNN(object,newx)
+predict.qeRF(object,newx)
+predict.qeSVM(object,newx,k=25,scaleX=TRUE)
+predict.qeGBoostt(object,newx)
+predict.qeNeural(object,newx)
+
+predict.qeSVM(object,newx,k=25,scaleX=TRUE)
+
 }
 
 \arguments{
@@ -65,6 +76,96 @@ case, a vector, the probabilities of Y = 1.
 
 \examples{
 
+\dontrun{
+
+data(peFactors)
+pe <- peFactors[,c(1,3,5,7:9)]
+
+# logit
+lgout <- qeLogit(pe,'occ')
+preds <- predict(lgout,pe[,-3])
+mean(preds$predClasses == pe[,3])
+# [1] 0.3853161
+mean(preds$probs[,1])
+# [1] 0.22851
+mean(pe[,3] == '100')
+# [1] 0.2285714
+predict(lgout,pe[1,-3])
+# $predClasses
+# [1] "102"
+#
+# $probs
+#  100       101       102       106        140        141
+# [1,] 0.2924927 0.2162206 0.3331735 0.0439862 0.02220282
+# 0.09192411
+
+# lin
+pe$occ <- prepend('a',pe$occ)
+lmout <- qeLin(pe,'occ')
+preds <- predict(lmout,pe[,-3])
+mean(preds$predClasses == pe[,3])
+mean(preds$probs[,1])
+mean(pe[,3] == 'a100')
+predict(lgout,pe[1,-3])
+lmout <- qeLin(pe,'wageinc')
+preds <- predict(lmout,pe[,-5])
+mean(abs(preds - pe[,5]))
+# [1] 25047.36
+predict(lmout,pe[1,-5])
+
+
+# k-NN
+knnout <- qeKNN(pe,'occ',25)
+preds <- predict(knnout,pe[,-3])
+mean(preds$predClasses == pe[,3])
+mean(preds$pre == 'a100')
+mean(preds$probs[,1])
+predict(knnout,pe[1,-3])
+knnout <- qeKNN(pe,'wageinc',25)
+preds <- predict(knnout,pe[,-5])
+mean(abs(preds-pe[,5]))
+predict(knnout,pe[1,-5])
+
+# RF
+rfout <- qeRF(pe,'occ',25)
+preds <- predict(rfout,pe[,-3])
+mean(preds$predClasses == pe[,3])
+mean(preds$probs[,1])
+mean(preds$predClasses == 'a100')
+predict(rfout,pe[1,-3])
+rfout <- qeRF(pe,'wageinc',25)
+preds <- predict(rfout,pe[,-5])
+mean(abs(preds-pe[,5]))
+predict(rfout,pe[1,-5])
+
+# SVM
+svmout <- qeSVM(pe,'occ',25)
+preds <- prd(svmout,pe[,-3])
+mean(preds$predClasses == pe[,3])
+mean(preds$probs[,1])
+
+# gboost
+gbmout <- qeGBoost(pe,'occ')
+preds <- predict(gbmout,pe[,-3])
+mean(abs(preds - pe[,5]))
+mean(preds$probs[,1])
+mean(preds$pre == 'a100')
+predict(gbimout,pe[1,-3])
+
+ NNs
+nnout <- qeNeural(pe,'wageinc',c(5,5),30)
+predict(nnout,pe[1,-5])
+preds <- predict(nnout,pe[,-5])
+mean(abs(preds-pe[,5]))
+nnout <- qeNeural(pe,'occ',c(5,5),30)
+predict(nnout,pe[1,-3])
+preds <- predict(nnout,pe[,-3])
+mean(preds == pe[,3])
+
+
+
+
+}
 }
 
 \author{

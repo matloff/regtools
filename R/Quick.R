@@ -370,16 +370,51 @@ predict.qGBoost <- function(object,newx)
 
 # value:  see above
  
-qNeural <- function(data,yName,hidden,nEpoch)
+qNeural <- function(data,yName,hidden,nEpoch=30)
 {
-stop('under construction')
    classif <- is.factor(data[[yName]])
    ycol <- which(names(data) == yName)
    x <- data[,-ycol]
-   if (!is.numeric(x))
+   if (!is.numeric(x)) {
+      x <- factorsToDummies(x,omitLast=TRUE)
+      factorsInfo <- attr(x,'factorsInfo')
+   } else factorsInfo <- NULL
    y <- data[,ycol]
-   classNames <- levels(y)
-   y <- as.numeric(y)
+   if (classif) {
+      classNames <- levels(y)
+      y <- as.numeric(as.factor(y)) - 1
+   } else classNames <- NULL
+   krsout <- krsFit(x,y,hidden,classif=classif,nClass=length(classNames),
+      nEpoch=nEpoch)
+   krsout$classif <- classif
+   krsout$classNames=classNames
+   krsout$factorsInfo=factorsInfo
+   krsout$x <- x
+   class(krsout) <- c('qNeural',class(krsout))
+   krsout
+}
+
+predict.qNeural <- function(object,newx)
+{
+   class(object) <- class(object)[-1]
+   if (nrow(newx) == 1) {  # kludge!; Tensorflow issue
+      kludge1row <- TRUE
+      newx <- rbind(newx,newx)
+   } else kludge1row <- FALSE
+   if (!is.null(object$factorsInfo)) {
+      newx <- factorsToDummies(newx,omitLast=TRUE,
+         factorsInfo=object$factorsInfo)
+   }
+   preds <- predict(object,newx)
+   if (!object$classif) {
+      if (kludge1row) preds <- preds[1]
+      preds
+   } else {
+      classNames <- object$classNames
+      preds <- classNames[preds+1]
+      preds
+      # not implementing class probs for now
+   } 
 }
 
 ###################  utilities for q*()  #########################

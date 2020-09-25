@@ -116,7 +116,7 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
          colnames(outDF)[ncol(outDF)] <- colName
       } else {
          dumms <- factorToDummies(dfi,colName,omitLast=omitLast,
-            factorInfo=factorsInfo[[i]])
+            factorInfo=factorsInfo[[colName]])
          if (nullFI) {
             factorInfo <- attr(dumms,'factorInfo')
             factorsInfoOut[[colName]] <- factorInfo
@@ -124,12 +124,12 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
          outDF <- cbind(outDF,dumms)
       }
    }
-   dfOut <- if (!dfOut) as.matrix(outDF) else outDF
+   res <- if (!dfOut) as.matrix(outDF) else outDF
    if (nullFI) {
-      attr(dfOut,'factorsInfo') <- factorsInfoOut
+      attr(res,'factorsInfo') <- factorsInfoOut
    }  else
-      attr(dfOut,'factorsInfo') <- factorsInfo
-   dfOut
+      attr(res,'factorsInfo') <- factorsInfo
+   res
 }
 
 # converts just a single factor 

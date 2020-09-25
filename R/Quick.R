@@ -62,13 +62,7 @@ qeLogit <- function(data,yName,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
-   if (!is.null(holdout)) {
-      nHold <- holdout[1]
-      seed <- holdout[2]
-      idxs <- sample(1:nrow(data),nHold)
-      tst <- data[idxs,]
-      data <- data[-idxs,]
-   }
+   if (!is.null(holdout)) splitData(holdout,data)
    xyc <- getXY(data,yName,classif=TRUE) 
    xy <- xyc$xy
    x <- xyc$x
@@ -139,9 +133,10 @@ predict.qeLogit <- function(object,newx)
 # arguments:  see above
 # value:  object of class 'qeLin' -- lm() output object, plus misc.
 
-qeLin <- function(data,yName) 
+qeLin <- function(data,yName,holdout=NULL) 
 {
    classif <- is.factor(data[[yName]])
+   if (!is.null(holdout)) splitData(holdout,data)
    if (classif) {
       xyc <- getXY(data,yName,classif=TRUE)
       xy <- xyc$xy
@@ -157,6 +152,14 @@ qeLin <- function(data,yName)
    eval(parse(text=cmd))
    lmout$classif <- classif 
    class(lmout) <- c('qeLin',class(lmout))
+   if (!is.null(holdout)) {
+      ycol <- which(names(data) == yName)
+      preds <- predict(lmout,tst[,-ycol])
+      lmout$holdoutPreds <- preds
+      lmout$testAcc <- 
+         if (classif) mean(preds$predClasses == tst[,ycol])
+         else mean(abs(preds - tst[,ycol]))
+   }
    lmout
 }
 
@@ -311,14 +314,14 @@ predict.qeSVM <- function(object,newx,k=25,scaleX=TRUE)
 
 # arguments:  see above, plus
 
-#     nTrees: number of trees
+#     nTree: number of trees
 #     minNodeSize: minimum number of data points per tree node
 #     learnRate: learning rate: 
 
 # value:  see above
  
 qeGBoost <- function(data,yName,
-   nTrees=100,minNodeSize=10,learnRate=0.1)
+   nTree=100,minNodeSize=10,learnRate=0.1)
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('classification only')
@@ -341,7 +344,7 @@ qeGBoost <- function(data,yName,
       tmpDF <- cbind(x,yDumms[,colI])
       names(tmpDF)[nx+1] <- 'yDumm'
       gbmout <- gbm(yDumm ~ .,data=tmpDF,
-         n.trees=nTrees,n.minobsinnode=minNodeSize,shrinkage=learnRate)
+         n.trees=nTree,n.minobsinnode=minNodeSize,shrinkage=learnRate)
    }
    outlist$gbmOuts <- lapply(1:nydumms,doGbm)
    class(outlist) <- c('qeGBoost')
@@ -431,9 +434,9 @@ predict.qeNeural <- function(object,newx)
    } 
 }
 
-###################  utilities for q*()  #########################
+###################  utilities for qe*()  #########################
 
-# some predict.*Class() functions call this for cleanup at end; see
+# some predict.qe*() functions call this for cleanup at end; see
 # list() below for values; intended for settings in which the base
 # algorithm returns probabilities, from which this function will
 # computed predicted classes
@@ -487,6 +490,23 @@ getXY <- function(data,yName,xMustNumeric=FALSE,classif,
       factorsInfo=factorsInfo)
 
 }
+
+# standard split into training, test sets
+
+require(gtools)
+
+splitData <- defmacro(holdout,data, 
+   expr={
+      nHold <- holdout[1]
+      seed <- holdout[2]
+      set.seed(seed)
+      idxs <- sample(1:nrow(data),nHold);
+      tst <- data[idxs,];
+      data <- data[-idxs,]
+   }
+)
+
+######################  misc.  ###############################0w
 
 checkNumericNames <- function(nms)
 {

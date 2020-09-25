@@ -28,7 +28,7 @@ qeLin(data,yName)
 qeKNN(data,yName,k,scaleX=TRUE) 
 qeRF(data,yName,nTree,minNodeSize) 
 qeSVM(data,yName,gamma=1.0,cost=1.0) 
-qeGBoost(data,yName,nTrees=100,minNodeSize=10,learnRate=0.1) 
+qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1) 
 qeNeural(data,yName,hidden,nEpoch=30) 
 predict.qeLogit(object,newx)
 predict.qeLin(object,newx)
@@ -47,7 +47,6 @@ predict.qeNeural(object,newx)
   \item{k}{Number of nearest neighbors} 
   \item{scaleX}{Scale the features.} 
   \item{nTree}{Number of trees.} 
-  \item{nTrees}{Number of trees.} 
   \item{minNodeSize}{Minimum number of data points in a tree node.} 
   \item{learnRate}{Learning rate.} 
   \item{hidden}{Vector of units per hidden layer.  Fractional values

@@ -14,11 +14,11 @@
 \alias{predict.qeGBoost}
 \alias{predict.qeNeural}
 
-\title{Quick Classification Wrappers}
+\title{Quick-Explore Regression/Classification Wrappers}
 
 \description{
-Quick access to multiclass methods, with a uniform interface,
-intended for convenient initial exploration of a dataset.  For
+Quick access to regression and multiclass methods, with a very simple
+interface.  Intended for convenient initial exploration of a dataset.  For
 advanced work, analysts should use the methods directly.  
 }
 
@@ -38,39 +38,56 @@ predict.qeSVM(object,newx,k=25,scaleX=TRUE)
 predict.qeGBoostt(object,newx)
 predict.qeNeural(object,newx)
 
-predict.qeSVM(object,newx,k=25,scaleX=TRUE)
-
 }
 
 \arguments{
-  \item{data}{Dataframe, training set. Class labels column is an R factor.}
+  \item{data}{Dataframe, training set. Classification case is signaled
+     via labels column being an R factor.}
   \item{yName}{Name of the class labels column.}
   \item{k}{Number of nearest neighbors} 
   \item{scaleX}{Scale the features.} 
+  \item{nTree}{Number of trees.} 
+  \item{nTrees}{Number of trees.} 
+  \item{minNodeSize}{Minimum number of data points in a tree node.} 
+  \item{learnRate}{Learning rate.} 
+  \item{hidden}{Vector of units per hidden layer.  Fractional values
+     indicated dropout proportions.} 
+  \item{nEpoch}{Number of iterations in neural net.
 }
 
 \details{
 
 As noted, these functions are intended for quick, first-level analysis
 of regression or multiclass classification problems.  Emphasis here is
-on convenience. In most cases, the full basket of function options is
-not reflected, and second-level analysis should use the relevant
-packages directly.
+on convenience. In most cases, the full basket of options in the wrapped
+function is not reflected, and second-level analysis should use the
+relevant packages directly.
 
-Each function has a \code{predict} method. Arguments are at least:
-\code{object}, the return value of the previously-called \code{*Class}
-function, and \code{newx}, a data frame of points to be predicted.  
-In some cases, there are additional parameters.
+The \code{qe*} functions do model fit.  Each of them has a
+\code{predict} method. Arguments are at least: \code{object}, the return
+value of the previously-called \code{*Class} function, and \code{newx},
+a data frame of points to be predicted.  In some cases, there are
+additional parameters.
    
 }
 
 \value{
 
-The \code{*Class} functions return an R list, with components:
-\code{ypreds}, R factor instance of predicted class labels, one element 
-for each row of \code{newx}, and  
-\code{conditprobs}, vector/matrix of class probabilities; in the 2-class
-case, a vector, the probabilities of Y = 1.
+R list with components as follows:
+
+Classification case:
+
+\itemize{
+
+\item \code{predClasses}:  R factor instance of predicted class labels 
+
+\item \code{probs}:  vector/matrix of class probabilities; in the 2-class
+case, a vector, the probabilities of Y = 1
+
+}
+}
+
+Regression case: vector of predicted values
 
 }
 
@@ -161,10 +178,6 @@ nnout <- qeNeural(pe,'occ',c(5,5),30)
 predict(nnout,pe[1,-3])
 preds <- predict(nnout,pe[,-3])
 mean(preds == pe[,3])
-
-
-
-
 }
 }
 

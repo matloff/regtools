@@ -406,8 +406,8 @@ predict.qeNeural <- function(object,newx)
          factorsInfo=object$factorsInfo)
    }
    preds <- predict(object,newx)
+   if (kludge1row) preds <- preds[1]
    if (!object$classif) {
-      if (kludge1row) preds <- preds[1]
       preds
    } else {
       classNames <- object$classNames

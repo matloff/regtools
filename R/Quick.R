@@ -58,10 +58,17 @@
 
 #    list of glm() output objects, one per class, and some misc.
 
-qeLogit <- function(data,yName) 
+qeLogit <- function(data,yName,holdout=NULL) 
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
+   if (!is.null(holdout)) {
+      nHold <- holdout[1]
+      seed <- holdout[2]
+      idxs <- sample(1:nrow(data),nHold)
+      tst <- data[idxs,]
+      data <- data[-idxs,]
+   }
    xyc <- getXY(data,yName,classif=TRUE) 
    xy <- xyc$xy
    x <- xyc$x
@@ -84,6 +91,13 @@ qeLogit <- function(data,yName)
    outlist$glmOuts <- lapply(1:nydumms,doGlm)
    outlist$classif <- classif
    class(outlist) <- c('qeLogit')
+   if (!is.null(holdout)) {
+      ycol <- which(names(data) == yName)
+      preds <- predict(outlist,tst[,-ycol])
+      outlist$holdoutPreds <- preds
+      outlist$testAcc <- 
+         mean(preds$predClasses == tst[,ycol])
+   }
    outlist
 }
 

@@ -210,7 +210,6 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,holdout=NULL)
    class(knnout) <- c('qeKNN','kNN')
    if (!is.null(holdout)) predictHoldout(knnout)
    knnout
-
 }
 
 predict.qeKNN <- function(object,newx)
@@ -239,6 +238,7 @@ predict.qeKNN <- function(object,newx)
 qeRF <- function(data,yName,nTree=500,minNodeSize=10,holdout=NULL) 
 {
    classif <- is.factor(data[[yName]])
+   if (!is.null(holdout)) splitData(holdout,data)
    require(randomForest)
    xyc <- getXY(data,yName,xMustNumeric=FALSE,classif=classif)
    frml <- as.formula(paste(yName,'~ .'))
@@ -246,6 +246,7 @@ qeRF <- function(data,yName,nTree=500,minNodeSize=10,holdout=NULL)
    rfout$classNames <- xyc$classNames
    rfout$classif <- classif
    class(rfout) <- c('qeRF','randomForest')
+   if (!is.null(holdout)) predictHoldout(rfout)
    rfout
 }
 
@@ -277,6 +278,7 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
+   if (!is.null(holdout)) splitData(holdout,data)
    require(e1071)
    # xyc <- getXY(data,yName,xMustNumeric=FALSE,classif=TRUE)
    frml <- as.formula(paste(yName,'~ .'))
@@ -288,6 +290,7 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,holdout=NULL)
    svmout$classNames <- levels(y)
    svmout$classif <- classif
    class(svmout) <- c('qeSVM',class(svmout))
+   if (!is.null(holdout)) predictHoldout(svmout)
    svmout
 }
 
@@ -323,8 +326,9 @@ qeGBoost <- function(data,yName,
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('classification only')
+   if (!is.null(holdout)) splitData(holdout,data)
    require(gbm)
-   xyc <- getXY(data,yName) 
+   xyc <- getXY(data,yName,classif=classif) 
    xy <- xyc$xy
    x <- xyc$x
    yDumms <- xyc$yDumms
@@ -345,7 +349,9 @@ qeGBoost <- function(data,yName,
          n.trees=nTree,n.minobsinnode=minNodeSize,shrinkage=learnRate)
    }
    outlist$gbmOuts <- lapply(1:nydumms,doGbm)
+   outlist$nTree <- nTree
    class(outlist) <- c('qeGBoost')
+   if (!is.null(holdout)) predictHoldout(outlist)
    outlist
 }
 
@@ -359,7 +365,9 @@ predict.qeGBoost <- function(object,newx)
 {
    # get probabilities for each class
    gbmOuts <- object$gbmOuts
-   g <- function(gbmOutsElt) predict(gbmOutsElt,newx,type='response') 
+   nTree <- object$nTree
+   g <- function(gbmOutsElt) 
+      predict(gbmOutsElt,newx,n.trees=nTree,type='response') 
    probs <- sapply(gbmOuts,g)
    if (is.vector(probs)) probs <- matrix(probs,nrow=1)
    classNames <- object$classNames

@@ -85,13 +85,7 @@ qeLogit <- function(data,yName,holdout=NULL)
    outlist$glmOuts <- lapply(1:nydumms,doGlm)
    outlist$classif <- classif
    class(outlist) <- c('qeLogit')
-   if (!is.null(holdout)) {
-      ycol <- which(names(data) == yName)
-      preds <- predict(outlist,tst[,-ycol])
-      outlist$holdoutPreds <- preds
-      outlist$testAcc <- 
-         mean(preds$predClasses == tst[,ycol])
-   }
+   if (!is.null(holdout)) predictHoldout(outlist)
    outlist
 }
 
@@ -193,9 +187,10 @@ predict.qeLin <- function(object,newx) {
 
 # see note in kNN() man pg
  
-qeKNN <- function(data,yName,k,scaleX=TRUE) 
+qeKNN <- function(data,yName,k,scaleX=TRUE,holdout=NULL) 
 {
    classif <- is.factor(data[[yName]])
+   if (!is.null(holdout)) splitData(holdout,data)
    xyc <- getXY(data,yName,xMustNumeric=TRUE,classif=classif)
    x <- xyc$x
    xm <- as.matrix(x)
@@ -213,6 +208,7 @@ qeKNN <- function(data,yName,k,scaleX=TRUE)
    knnout$classif <- classif
    knnout$factorsInfo <- factorsInfo
    class(knnout) <- c('qeKNN','kNN')
+   if (!is.null(holdout)) predictHoldout(knnout)
    knnout
 
 }
@@ -240,7 +236,7 @@ predict.qeKNN <- function(object,newx)
 
 # value:  see above
  
-qeRF <- function(data,yName,nTree=500,minNodeSize=10) 
+qeRF <- function(data,yName,nTree=500,minNodeSize=10,holdout=NULL) 
 {
    classif <- is.factor(data[[yName]])
    require(randomForest)
@@ -277,7 +273,7 @@ predict.qeRF <- function(object,newx)
 
 # value:  see above
  
-qeSVM <- function(data,yName,gamma=1.0,cost=1.0) 
+qeSVM <- function(data,yName,gamma=1.0,cost=1.0,holdout=NULL) 
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
@@ -295,16 +291,18 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0)
    svmout
 }
 
-predict.qeSVM <- function(object,newx,k=25,scaleX=TRUE)
+predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
 {
    class(object) <- class(object)[-1]
    preds <- predict(object,newx)
    res <- list(predClasses=preds)
    classNames <- object$classNames
    x <- object$x
-   probs <- labelsToProbs(x,newx,svmout$fitted,classNames,k,
-      scaleX=scaleX)
-   res$probs <- probs
+   if (!is.null(k)) {
+      probs <- labelsToProbs(x,newx,svmout$fitted,classNames,k,
+         scaleX=scaleX)
+      res$probs <- probs
+   }
    res
 }
 
@@ -321,7 +319,7 @@ predict.qeSVM <- function(object,newx,k=25,scaleX=TRUE)
 # value:  see above
  
 qeGBoost <- function(data,yName,
-   nTree=100,minNodeSize=10,learnRate=0.1)
+   nTree=100,minNodeSize=10,learnRate=0.1,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('classification only')
@@ -387,7 +385,7 @@ predict.qeGBoost <- function(object,newx)
 
 # value:  see above
  
-qeNeural <- function(data,yName,hidden,nEpoch=30)
+qeNeural <- function(data,yName,hidden,nEpoch=30,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    ycol <- which(names(data) == yName)
@@ -503,6 +501,17 @@ splitData <- defmacro(holdout,data,
       idxs <- sample(1:nrow(data),nHold);
       tst <- data[idxs,];
       data <- data[-idxs,]
+   }
+)
+
+predictHoldout <- defmacro(res,
+   expr={
+      ycol <- which(names(data) == yName);
+      preds <- predict(res,tst[,-ycol]);
+      res$holdoutPreds <- preds;
+      res$testAcc <- 
+         if (classif) mean(preds$predClasses == tst[,ycol])
+         else mean(abs(preds - tst[,ycol]))
    }
 )
 

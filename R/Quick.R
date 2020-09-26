@@ -396,6 +396,7 @@ predict.qeGBoost <- function(object,newx)
 qeNeural <- function(data,yName,hidden,nEpoch=30,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
+   if (!is.null(holdout)) splitData(holdout,data)
    ycol <- which(names(data) == yName)
    x <- data[,-ycol]
    if (!is.numeric(x)) {
@@ -414,6 +415,7 @@ qeNeural <- function(data,yName,hidden,nEpoch=30,holdout=NULL)
    krsout$factorsInfo=factorsInfo
    krsout$x <- x
    class(krsout) <- c('qeNeural',class(krsout))
+   if (!is.null(holdout)) predictHoldout(krsout)
    krsout
 }
 
@@ -435,7 +437,8 @@ predict.qeNeural <- function(object,newx)
    } else {
       classNames <- object$classNames
       preds <- classNames[preds+1]
-      preds
+      outlist <- list(predClasses=preds,probs=NULL)
+      outlist
       # not implementing class probs for now
    } 
 }
@@ -518,7 +521,7 @@ predictHoldout <- defmacro(res,
       preds <- predict(res,tst[,-ycol]);
       res$holdoutPreds <- preds;
       res$testAcc <- 
-         if (classif) mean(preds$predClasses == tst[,ycol])
+         if (res$classif) mean(preds$predClasses == tst[,ycol])
          else mean(abs(preds - tst[,ycol]))
    }
 )

@@ -58,7 +58,8 @@
 
 #    list of glm() output objects, one per class, and some misc.
 
-qeLogit <- function(data,yName,holdout=NULL) 
+qeLogit <- function(data,yName,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
@@ -127,7 +128,8 @@ predict.qeLogit <- function(object,newx)
 # arguments:  see above
 # value:  object of class 'qeLin' -- lm() output object, plus misc.
 
-qeLin <- function(data,yName,holdout=NULL) 
+qeLin <- function(data,yName,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
 {
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
@@ -187,7 +189,8 @@ predict.qeLin <- function(object,newx) {
 
 # see note in kNN() man pg
  
-qeKNN <- function(data,yName,k,scaleX=TRUE,holdout=NULL) 
+qeKNN <- function(data,yName,k,scaleX=TRUE,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
 {
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
@@ -235,7 +238,8 @@ predict.qeKNN <- function(object,newx)
 
 # value:  see above
  
-qeRF <- function(data,yName,nTree=500,minNodeSize=10,holdout=NULL) 
+qeRF <- function(data,yName,nTree=500,minNodeSize=10,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
 {
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
@@ -274,7 +278,8 @@ predict.qeRF <- function(object,newx)
 
 # value:  see above
  
-qeSVM <- function(data,yName,gamma=1.0,cost=1.0,holdout=NULL) 
+qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
@@ -322,7 +327,8 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
 # value:  see above
  
 qeGBoost <- function(data,yName,
-   nTree=100,minNodeSize=10,learnRate=0.1,holdout=NULL)
+   nTree=100,minNodeSize=10,learnRate=0.1,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('classification only')
@@ -393,7 +399,8 @@ predict.qeGBoost <- function(object,newx)
 
 # value:  see above
  
-qeNeural <- function(data,yName,hidden,nEpoch=30,holdout=NULL)
+qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
 {
    classif <- is.factor(data[[yName]])
    require(keras)

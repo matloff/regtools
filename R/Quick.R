@@ -383,7 +383,7 @@ predict.qeGBoost <- function(object,newx)
 
 #########################  qeNeural()  #################################
 
-# gradient boosting
+# neural networks 
 
 # arguments:  see above, plus
 
@@ -396,6 +396,7 @@ predict.qeGBoost <- function(object,newx)
 qeNeural <- function(data,yName,hidden,nEpoch=30,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
+   require(keras)
    if (!is.null(holdout)) splitData(holdout,data)
    ycol <- which(names(data) == yName)
    x <- data[,-ycol]

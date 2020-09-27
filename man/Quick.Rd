@@ -23,13 +23,13 @@ advanced work, analysts should use the methods directly.
 }
 
 \usage{
-qeLogit(data,yName)
-qeLin(data,yName)
-qeKNN(data,yName,k,scaleX=TRUE) 
-qeRF(data,yName,nTree,minNodeSize) 
-qeSVM(data,yName,gamma=1.0,cost=1.0) 
-qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1) 
-qeNeural(data,yName,hidden,nEpoch=30) 
+qeLogit(data,yName,holdout=NULL)
+qeLin(data,yName,holdout=NULL)
+qeKNN(data,yName,k,scaleX=TRUE,holdout=NULL) 
+qeRF(data,yName,nTree,minNodeSize,holdout=NULL) 
+qeSVM(data,yName,gamma=1.0,cost=1.0,holdout=NULL) 
+qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,holdout=NULL) 
+qeNeural(data,yName,hidden,nEpoch=30,holdout=NULL) 
 predict.qeLogit(object,newx)
 predict.qeLin(object,newx)
 predict.qeKNN(object,newx)
@@ -44,6 +44,8 @@ predict.qeNeural(object,newx)
   \item{data}{Dataframe, training set. Classification case is signaled
      via labels column being an R factor.}
   \item{yName}{Name of the class labels column.}
+  \item{holdout}{If not NULL, form a holdout set; 2-component vector, 
+     c(holdout_size,initial_seed). After fitting to the remaining data.}
   \item{k}{Number of nearest neighbors} 
   \item{scaleX}{Scale the features.} 
   \item{nTree}{Number of trees.} 
@@ -51,16 +53,29 @@ predict.qeNeural(object,newx)
   \item{learnRate}{Learning rate.} 
   \item{hidden}{Vector of units per hidden layer.  Fractional values
      indicated dropout proportions.} 
-  \item{nEpoch}{Number of iterations in neural net.
+  \item{nEpoch}{Number of iterations in neural net.}
 }
 
 \details{
 
 As noted, these functions are intended for quick, first-level analysis
 of regression or multiclass classification problems.  Emphasis here is
-on convenience. In most cases, the full basket of options in the wrapped
-function is not reflected, and second-level analysis should use the
-relevant packages directly.
+on convenience and simplicity. 
+
+The idea is that, given a new dataset, the analyst can quickly and
+easily try fitting a number of models in succession, say first logistic,
+then random forests, then neural networks, which would be done by
+calling \code{qeLogit}, \code{qeRF} and \code{qeNeural}.  The common
+interface is
+
+\code{qeAlgorithm}(dataframe,y_column_name,alg_specific_args,holdout)
+
+The optional \code{holdout} argument triggers formation of a holdout set
+and the corresponding cross-validation evaluation of predictive power.
+
+In most cases, the full basket of options in the wrapped function is not
+reflected, and second-level analysis should use the relevant packages
+directly.
 
 The \code{qe*} functions do model fit.  Each of them has a
 \code{predict} method. Arguments are at least: \code{object}, the return
@@ -84,7 +99,11 @@ Classification case:
 case, a vector, the probabilities of Y = 1
 
 }
-}
+
+If a holdout set was requested, an additional returned component will be
+\code{testAcc}, the accuracy on the holdout set.  This will be Mean
+Absolute Prediction Error in the regression case, and proportion of
+correct classification in the classification case.
 
 Regression case: vector of predicted values
 
@@ -114,6 +133,8 @@ predict(lgout,pe[1,-3])
 #  100       101       102       106        140        141
 # [1,] 0.2924927 0.2162206 0.3331735 0.0439862 0.02220282
 # 0.09192411
+lgout <- qeLogit(pe,'occ',holdout=c(1000,9999))
+lgout$testAcc  # 0.373
 
 # lin
 pe$occ <- prepend('a',pe$occ)

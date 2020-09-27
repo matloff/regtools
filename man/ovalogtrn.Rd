@@ -9,9 +9,7 @@
 \alias{factorTo012ec}
 \alias{classadjust}
 \alias{boundaryplot}
-\alias{knnClass}
-\alias{linClass}
-\alias{logitClass}
+\alias{labelsToProbs}
 
 \title{Classification with More Than 2 Classes}
 
@@ -32,6 +30,8 @@ avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx,trueclassprobs=NULL)
 classadjust(econdprobs,wrongprob1,trueprob1) 
 boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
+labelsToProbs(x,newX,fittedY,classNames,k,scaleX=TRUE)
+
 }
 
 \arguments{
@@ -41,7 +41,12 @@ boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
 \item{logitClass}{Object returned by \code{logitClass}.}
 \item{linClass}{Object returned by \code{linClass}.}
 \item{newx}{Data frame of one or more new cases to predict.}
-\item{x}{X data matrix.}
+\item{classNames}{Names of the classes, in "levels" order.}
+\item{fittedY}{Predicted classes in the trained model.}
+\item{newX}{Data frame of one or more new cases to predict.}
+\item{k}{Number of nearest neighbors.}
+\item{scaleX}{Scale the features.}
+\item{x}{X data frame or matrix.}
 \item{pairs}{Two-row matrix, column i of which is a pair of predictor
    variables to graph.}
 \item{cex}{Symbol size for plotting.}
@@ -73,14 +78,13 @@ boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
 
 \details{
 
-These functions do classification in the multiclass setting.  
+These functions aid classification in the multiclass setting.  
 
-For most uses, the convenience "xClass" functions, e.g.
-\code{logitClass} should be used, with their simple, uniform interface.
-
-Currently, the package includes the following "xClass" functions:
-
-\code{knnClass}, \code{linClass}, \code{logitClass}
+The \code{labelsToProbs} function computes conditional probabilities for
+new cases, using  the training features and the predicted class labels
+in the training set.  This is useful for classification algorithms that
+lack inherent estimation of these probabilities.  This is a new
+approach, which we call \emph{kNNonFit}.
 
 If you have matrix data, convert using \code{as.data.frame}.  Similarly,
 if your entity of class labels is an R vector, convert using

@@ -74,6 +74,14 @@ regression and classification analysis, and machine learning.
 
    }
 
+\bold{Quick-explore machine learning:}
+
+   \itemize{
+
+   \item qeLogit, qeKNN, qeLin, qeRF, qeGBoost, qeSVM, qeNeural
+
+   }
+
 \bold{Dummies and R factors:}
 
    \itemize{

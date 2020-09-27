@@ -17,19 +17,21 @@
 \title{Quick-Explore Regression/Classification Wrappers}
 
 \description{
-Quick access to regression and multiclass methods, with a very simple
+Quick access to machine learning methods, with a very simple
 interface.  Intended for convenient initial exploration of a dataset.  For
 advanced work, analysts should use the methods directly.  
 }
 
 \usage{
-qeLogit(data,yName,holdout=NULL)
-qeLin(data,yName,holdout=NULL)
-qeKNN(data,yName,k,scaleX=TRUE,holdout=NULL) 
-qeRF(data,yName,nTree,minNodeSize,holdout=NULL) 
-qeSVM(data,yName,gamma=1.0,cost=1.0,holdout=NULL) 
-qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,holdout=NULL) 
-qeNeural(data,yName,hidden,nEpoch=30,holdout=NULL) 
+qeLogit(data, holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeLin(data,yName, holdout=c(min(1000,round(0.1*nrow(data))),9999)) 
+qeKNN(data,yName,k,scaleX=TRUE, holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeRF(data,yName,nTree,minNodeSize, holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeSVM(data,yName,gamma=1.0,cost=1.0, holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
 predict.qeLogit(object,newx)
 predict.qeLin(object,newx)
 predict.qeKNN(object,newx)
@@ -45,7 +47,8 @@ predict.qeNeural(object,newx)
      via labels column being an R factor.}
   \item{yName}{Name of the class labels column.}
   \item{holdout}{If not NULL, form a holdout set; 2-component vector, 
-     c(holdout_size,initial_seed). After fitting to the remaining data.}
+     c(holdout_size,initial_seed). After fitting to the remaining data,
+     evaluate accuracy on the test set.}
   \item{k}{Number of nearest neighbors} 
   \item{scaleX}{Scale the features.} 
   \item{nTree}{Number of trees.} 
@@ -64,11 +67,13 @@ on convenience and simplicity.
 
 The idea is that, given a new dataset, the analyst can quickly and
 easily try fitting a number of models in succession, say first logistic,
-then random forests, then neural networks, which would be done by
-calling \code{qeLogit}, \code{qeRF} and \code{qeNeural}.  The common
-interface is
+then random forests, then neural networks: 
 
-\code{qeAlgorithm}(dataframe,y_column_name,alg_specific_args,holdout)
+\code{
+qeLogit(data,yColumnName)
+qeRF(data,yColumnName)
+qeNeural(data,yColumnName)
+}
 
 The optional \code{holdout} argument triggers formation of a holdout set
 and the corresponding cross-validation evaluation of predictive power.
@@ -81,12 +86,22 @@ The \code{qe*} functions do model fit.  Each of them has a
 \code{predict} method. Arguments are at least: \code{object}, the return
 value of the previously-called \code{*Class} function, and \code{newx},
 a data frame of points to be predicted.  In some cases, there are
-additional parameters.
+additional algorithm-specific parameters.
    
 }
 
 \value{
 
+The value returned by \code{qe*} functions depends on the algorithm, but
+with some commonality, e.g. \code{classif}, a logical value indicating
+whether the problem was of classification type.  
+
+If a holdout set was requested, an additional returned component will be
+\code{testAcc}, the accuracy on the holdout set.  This will be Mean
+Absolute Prediction Error in the regression case, and proportion of
+correct classification in the classification case.
+
+The value returned by the \code{predict} functions is an
 R list with components as follows:
 
 Classification case:
@@ -99,11 +114,6 @@ Classification case:
 case, a vector, the probabilities of Y = 1
 
 }
-
-If a holdout set was requested, an additional returned component will be
-\code{testAcc}, the accuracy on the holdout set.  This will be Mean
-Absolute Prediction Error in the regression case, and proportion of
-correct classification in the classification case.
 
 Regression case: vector of predicted values
 

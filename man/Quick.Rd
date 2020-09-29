@@ -18,8 +18,10 @@
 
 \description{
 Quick access to machine learning methods, with a very simple
-interface.  Intended for convenient initial exploration of a dataset.  For
-advanced work, analysts should use the methods directly.  
+interface.  Intended for convenient initial exploration of a dataset,
+both to gauge the predictive effectiveness of a model and to do simple
+prediction of new cases.  The simplicity also makes the series useful
+for teaching.  For advanced work, analysts should use the methods directly.  
 }
 
 \usage{

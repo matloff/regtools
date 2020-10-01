@@ -11,7 +11,9 @@ Illustrations of the (perceived) problems and
 offered remedies appear in numerous parts of the ML literature, ranging
 from [Web tutorials](https://www.datacamp.com/community/tutorials/diving-deep-imbalanced-data)
 to [the research literature](https://link.springer.com/article/10.1186/s40537-018-0151-6#Sec2).  Major packages, such as
-[caret](https://cran.r-project.org/package=caret) and
+[caret](https://cran.r-project.org/package=caret),
+[parsnip](https://cran.r-project.org/package=parsnip),
+and
 [mlr3](https://cran.r-project.org/package=mlr3), also offer remedies.
 
 
@@ -71,6 +73,8 @@ times.
 
 ## Key issue:  How were the data generated?
 
+The examples above illustrate two important cases:
+
 - The fraud data is *imbalanced*, but *naturally so*.  Assuming the
 two-day data collection period was typical, the population class
 probability for fraud will be about what we see in the data, 0.172%.
@@ -125,6 +129,12 @@ may actually undermine your ability to predict new cases well.
 We refer to the class probabilities for given feature
 values as *conditional class probabilities*.  The overall class probabilities,
 e.g. the 0.000172 value above, are *unconditional class probabilities*.
+
+Another key term is the *overall rate of correct classification*.  To
+maximize that, we fit our model and -- say in the two-class case --
+guess Class 1 if and only if its estimated conditional probability is
+greater than 0.5.  This assumes, though, equal costs of the two types
+of misclassification.
 
 ## Goals and perceptions of problems
 

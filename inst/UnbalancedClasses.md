@@ -3,7 +3,8 @@
 Many resources on machine learning (ML) classification problems
 recommend that if one's dataset has unbalanced class sizes, one
 should modify the data to have equal class counts.  Yet it is shown here
-that this is both unnecessary and often harmful.
+that this is both unnecessary and often harmful.  Alternatives are
+presented.
 
 ## Overview
 
@@ -16,11 +17,20 @@ to [the research literature](https://link.springer.com/article/10.1186/s40537-01
 and
 [mlr3](https://cran.r-project.org/package=mlr3), also offer remedies.
 
+All of these sources recommend that you artificially equalize the class
+counts in your data, via various resampling methods.  Say for instance
+we are in the two-class case, and have class sizes of 20000 and 80000
+for class 1 and class 0, respecitvely.  Here are some ways to rebalance.
 
-> All of these sources recommend that you artificially equalize the class
-> counts in your data, via various resampling methods.
-> Upon closer inspection, though, one sees that **this
-> is generally inadvisable, indeed harmful,** for several reasons:
+* Randomly discard 60000 data points from class 0.
+
+* Resample 80000 data points from the 20000, with replacement.
+
+* Using distribution approximation methods such as SMOTE, resample 80000
+  from the 20000.
+
+Upon closer inspection, though, one sees that **this
+is generally inadvisable, indeed harmful,** for several reasons:
 
 * Undersampling is clearly problematic:  Why throw away data?
 **Discarding data weakens our ability to predict new cases.**
@@ -81,7 +91,7 @@ probability for fraud will be about what we see in the data, 0.172%.
 
 - The letters data is *balanced*, but only *artificially so*.  The
 curator of the dataset wanted the data to have about the same number
-of instances of each letter.  But in general English usage, letter occur
+of instances of each letter.  But in general English usage, letters occur
 with quite different frequencies:
 
 >   E          12.02%
@@ -108,6 +118,12 @@ with quite different frequencies:
 
 ([source](http://www.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html)).
 
+## Note on terminology 
+
+We refer to the class probabilities for given feature
+values as *conditional class probabilities*.  The overall class probabilities,
+e.g. the 0.000172 value above, are *unconditional class probabilities*.
+
 ## What your ML algorithm is thinking
 
 ML algorithms take your data literally.  Say you have a two-class
@@ -115,39 +131,47 @@ setting, for Classes 0 and 1.  If about 1/2 your data is Class 1, then
 the algorithm, whether directly or indirectly, operates under the
 assumption that the true population class probabilities are each about 0.5.
 
-In the letter data, since the sampling was actually *designed* to have
+In the letters data, since the sampling was actually *designed* to have
 about the same number of instances for each letter, the algorithm you
 use will then assume the true probabilities of the letters are about
 1/26 each.  We know that is false, as the above table shows.
 
-So, if you do resampling to make your data balanced, you are fooling
-your ML algorithm.  Though that conceivably could be done responsibly, it
-may actually undermine your ability to predict new cases well.
+So, if your sampling scheme artificially creates balanced data, as in
+the letters data, or if you do resampling to make your data balanced, as
+is commonly recommended, you are fooling your ML algorithm.  Though that
+conceivably could be done responsibly, it may actually undermine your
+ability to predict new cases well.
 
-## Note on terminology 
+Note too the role of the *overall rate of correct classification*.  To
+maximize that, say in the two-class case, your ML algorithm will guess
+Class 1 for a new case if and only if the estimated conditional
+probability of Class 1 is greater than 0.5.  This rule assumes, though,
+that there are equal costs of the two types of misclassification, i.e.
+that a false positive and false negative should be given equal weight.
 
-We refer to the class probabilities for given feature
-values as *conditional class probabilities*.  The overall class probabilities,
-e.g. the 0.000172 value above, are *unconditional class probabilities*.
+In many applications this is not the case, and the overall rate is of
+lesser interest.  This is especially true in situations in which the
+data is substantially unbalanced, though it should be kept in mind that
+these are two separate issues: imbalance of the data, and relative
+weights of false positives and negatives.
 
-Another key term is the *overall rate of correct classification*.  To
-maximize that, we fit our model and -- say in the two-class case --
-guess Class 1 if and only if its estimated conditional probability is
-greater than 0.5.  This assumes, though, equal costs of the two types
-of misclassification.
+We will return to this point later.
 
 ## Goals and perceptions of problems
 
 As is often the case, clear, precise statements of problems and goals
 are needed to come up with good, *effective* solutions.  Let's consider
-the two datasets in turn.
-
-It will be easier to discuss the second dataset first.
+the two datasets in turn.  It will be easier to discuss the second
+dataset first.
 
 ### Letter recognition data
 
+For now, we will assume the goal is to maximize the overall rate of
+correct classification.
+
 Intuitively, if we ignore our knowledge of the class probabilities --
-12.02% etc. --- we are reducing our predictive ability.
+12.02% etc. --- we are reducing our overall predictive ability, i.e. 
+our overall rate of correct classification.  As noted
 
 In an experiment in my book (updated here), I sampled from the dataset
 according to the realistic frequencies above, thus producing realistic
@@ -168,18 +192,8 @@ the point; instead, the point is that for any given ML algorithm on
 balanced data, **we can do better by using the adjustment formula** (if,
 of course, the correct class probabilities are known).
 
-As you can see, **balanced data can be our enemy**.
-
-In the above example, we obtained a modest but certainly valued
-improvement in prediction accuracy.  In that data, the features actually
-have rather strong predictive power, but the gain in accuracy would be
-even larger on data with weaker features.
-
-Consider for instance a balanced 2-class setting in which the features
-have almost no predictive power, with true class probabilities 0.75 and 0.25.
-Then (aside from overfitting issues), our correct classification rate
-would be 50% from the balanced data but would jump to 75% with the
-adjustment formula.
+As you can see, balanced data can be our enemy, if our goal is overall
+rate of correct classification.
 
 ### Credit card fraud data
 
@@ -189,23 +203,36 @@ mean that we will always guess that the new case is not fraudulent.
 
 With this approach, we'd miss all the fraudulent cases.  There aren't
 many of them, but even the small number of cases can cause big damage,
-so it is definitely an important issue.  Yet **the solution is not to
+i.e. we are very worried about false negatives (positive meaning we
+guess the transaction is fraudulent).  Yet **the solution is not to
 force the data to be balanced.** 
 
-Instead, we *could* formally assign loss values to the two kinds of error,
-i.e. false positives and false negatives, from the fraud point of view.
-*But it's much easier to take an informal approach:*  We simply calculate
+## First alternative
+
+We *could* formally assign specific
+numerical relative weights to the two kinds of error, i.e. false
+positives and false negatives.  One could then trick our ML algorithm
+into achieving those weights, via mathematically derivations we won't go
+into here.
+
+## Better alternative
+
+**But it's much easier to take an informal approach:**  We simply calculate
 the conditional probabilities of the classes, given the features, and
 have our code flag any that are above a threshhold we specify.
 (Actually, `mlr3` does mention something similar to this as an alternative
 to artificially balancing the data.)
 
 In the credit card fraud case, we may decide, say, to flag any transaction
-with at least a 25% chance of being fraudulent.  We could then check
-these further by hand.
+with at least a 25% chance of being fraudulent.  We could then
+investigate these further by hand.
+
+**This is the natural, simple approach,** explainable to anyone
+regardless of whether they have a good background in stat/ML.
 
 The code would look like this
-(using the same data to fit and predict, just an illustration):
+(using the same data to fit and predict, just an illustration), say for
+**glm()**:
 
 ``` r
 
@@ -220,7 +247,7 @@ The code would look like this
 
 So we'd check cases 542, 6109 and so on by hand.
 
-For the `randomForest` package, a bit more work (could write a wrapper
+For the **randomForest** package, a bit more work (could write a wrapper
 for it):
 
 ``` r
@@ -239,16 +266,28 @@ for it):
 ```
 
 Other ML algorithms/packages are similar.  E.g. for boosting, say with
-the `gbm` package, the procedure is similar to that of `glm()` above.
+the **gbm** package, the procedure is similar to that of **glm()** above.
 
-For neural networks, e.g.  with the `neuralnet` package, call
-`compute()` then take the `net.result` component.
+For neural networks, e.g.  with the **neuralnet** package, call
+**compute()** then take the **net.result** component.  The **keras**
+case is a bit more complicated, but still very possible.
+
+The SVM case is different, as we will explain later in this document.
 
 Actually, both `caret` and `mlr3` allow one to extract probabilities in
 this manner.  But again, this should be done instead of forcing balance,
 which is recommended by those packages.
 
 ## The adjustment formula
+
+Recall the letters example.  The sampling design itself was balanced,
+but artificially so.  Each letter had about the same frequency in the
+data, in spite of the fact that the frequencies vary widely in actual
+English.
+
+The adjustment formula allows us to take the output of an ML fitting on
+the letters data, and convert it to the proper form for the correct
+class probabilities.
 
 For now, we'll assume the two-class setting here, with Class 0
 and Class 1. This is the code for adjustment:
@@ -316,6 +355,8 @@ Frank Harrell
 > sample. It is simply the case that a classifier trained to a 1⁄2 [q =
 > 1/2] prevalence situation will not be applicable to a population with a
 > 1⁄1000 [p = 1/1000] prevalence. 
+
+## Estimating conditional probabilities with SVM
 
 ## Summary
 

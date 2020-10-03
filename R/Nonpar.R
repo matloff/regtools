@@ -86,7 +86,8 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       stop('change to dummies, factorsToDummies()')
    if (is.vector(newx)) {
       nms <- names(newx)
-      newx <- matrix(newx,nrow=1)
+      # is ti one observation or one predictor?
+      newx <- matrix(newx,ncol=ncol(x))
       colnames(newx) <- nms
    }
    
@@ -207,6 +208,8 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    class(tmplist) <- 'kNN'
    tmplist
 }
+
+kn2 <- kNN
 
 # actual call is predict(kNNoutput,newx,add1); for each row in newx, the
 # 1-nearest row in kNNoutput$x is found, and the corresponding

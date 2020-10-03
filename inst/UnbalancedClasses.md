@@ -89,7 +89,7 @@ The examples above illustrate two important cases:
 two-day data collection period was typical, the population class
 probability for fraud will be about what we see in the data, 0.172%.
 
-- The letters data is *balanced*, but only *artificially so*.  The
+- The Letters data is *balanced*, but only *artificially so*.  The
 curator of the dataset wanted the data to have about the same number
 of instances of each letter.  But in general English usage, letters occur
 with quite different frequencies:
@@ -131,13 +131,13 @@ setting, for Classes 0 and 1.  If about 1/2 your data is Class 1, then
 the algorithm, whether directly or indirectly, operates under the
 assumption that the true population class probabilities are each about 0.5.
 
-In the letters data, since the sampling was actually *designed* to have
+In the Letters data, since the sampling was actually *designed* to have
 about the same number of instances for each letter, the algorithm you
 use will then assume the true probabilities of the letters are about
 1/26 each.  We know that is false, as the above table shows.
 
 So, if your sampling scheme artificially creates balanced data, as in
-the letters data, or if you do resampling to make your data balanced, as
+the Letters data, or if you do resampling to make your data balanced, as
 is commonly recommended, you are fooling your ML algorithm.  Though that
 conceivably could be done responsibly, it may actually undermine your
 ability to predict new cases well.
@@ -280,17 +280,27 @@ which is recommended by those packages.
 
 ## The adjustment formula
 
-Recall the letters example.  The sampling design itself was balanced,
+Recall the Letters example.  The sampling design itself was balanced,
 but artificially so.  Each letter had about the same frequency in the
 data, in spite of the fact that the frequencies vary widely in actual
 English.
 
 The adjustment formula allows us to take the output of an ML fitting on
-the letters data, and convert it to the proper form for the correct
+the Letters data, and convert it to the proper form for the correct
 class probabilities.
 
+In general, this adjustment method is useful in three kinds of settings:
+
+* The data are artificially rebalance.
+
+* The sampling scheme for the data is designed to have balanced class
+  data.
+
+* The class probabilities in some application later change.
+
 For now, we'll assume the two-class setting here, with Class 0
-and Class 1. This is the code for adjustment:
+and Class 1. This is the code for adjustment (the function is part of
+the `regtools` package):
 
 ``` r
 
@@ -321,8 +331,6 @@ numbers of the two classes in our dataset, yet we know the true
 (unconditional) class probabilities are 0.2 and 0.8 for Classes 0 and 1.
 Then `wrongratio` would be 0.5/0.5 = 1.0, and `trueratio` would be
 0.2/0.8 = 0.25. 
-
-Use of this procedure is an option in my `regtools` package.
 
 # The case of balanced data but unknown true class probabilities
 
@@ -358,6 +366,20 @@ Frank Harrell
 
 ## Estimating conditional probabilities with SVM
 
+This document has recommended making classification decisions on the
+basis of conditional probabilities rather than predicted classes.  But
+some classification algorithms, notably SVM, do not provide these
+probabilities.  How many they be obtained separately?
+
+One popular method for doing this is *Platt scaling*. This involves
+assuming (something like, there are variations) that conditional
+probability of class 1 given the SVM score has the form of a logistic
+function (sigmoid).
+
+The `regtools` function `labelsToProbs` makes no assumptions.  It simply
+does k-Nearest Neighbor analysis of the conditional probability of
+(e.g. SVM-)predicted class 1 given the feature vector X.
+
 ## Summary
 
 - There's really no need to artificially balance your data, and doing so
@@ -373,7 +395,7 @@ Frank Harrell
 force balance.  Instead, choose a threshhold for conditional
 probabilities, and flag new cases that exceed it.
 
-- If your data is unrealistically balanced, as in the letters example,
+- If your data is unrealistically balanced, as in the Letters example,
   and the true unconditional class probabilities are known, use the
 adjustment formula to convert the reported unconditional probabilities to
 realistic ones, and classify using them.
@@ -406,7 +428,7 @@ P(Y = 1 | X = t) = 1 / [1 + {(1-p)/p} f<sub>0</sub>(t) / f<sub>1</sub>(t)]
 (Eqn. 2)
 
 Now suppose the analyst artificially changes the class counts in the
-data (or, as in the letters example, the data is artificially sampled by
+data (or, as in the Letters example, the data is artificially sampled by
 design), with proportions q and 1-q for the two classes.  In the case of
 artificially equalizing the class proportions, we have q = 0.5.  Then
 the above becomes, in the eyes of your ML algorithm,

@@ -189,7 +189,7 @@ predict(rfout,pe[1,-5])
 
 # SVM
 svmout <- qeSVM(pe,'occ',25)
-preds <- prd(svmout,pe[,-3])
+preds <- predict(svmout,pe[,-3])
 mean(preds$predClasses == pe[,3])
 mean(preds$probs[,1])
 

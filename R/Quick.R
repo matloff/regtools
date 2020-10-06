@@ -287,7 +287,7 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
    require(e1071)
    # xyc <- getXY(data,yName,xMustNumeric=FALSE,classif=TRUE)
    frml <- as.formula(paste(yName,'~ .'))
-   svmout <- svm(frml,data=data,cost=cost,gamma=gamma)
+   svmout <- svm(frml,data=data,cost=cost,gamma=gamma,decision.values=TRUE)
    ycol <- which(names(data) == yName)
    svmout$x <- data[,-ycol,drop=FALSE]
    y <- data[,ycol]

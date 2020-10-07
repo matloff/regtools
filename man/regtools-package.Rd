@@ -126,6 +126,8 @@ regression and classification analysis, and machine learning.
 
    \item image data augmentation: augMatrix
 
+   \item download data: getMNIST
+
    }
 
 \bold{Text processing:}

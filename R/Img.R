@@ -136,3 +136,14 @@ augMatrix <- function(m,nr,nc,...)
    t(sapply(augout,function(augOutElt) as.vector(augOutElt)))
 }
 
+# download mnist data; uses Lampros Mouselimis GitHub site; data frame
+# of the dataset is returned, 784 columns of pixel data plus one column,
+# labeled 'y', for the labels
+getMNIST <- function(saveData=FALSE) 
+{
+   download.file('https://raw.githubusercontent.com/mlampros/DataSets/master/mnist.zip','mnist.zip') 
+   mnist <- read.table(unz("mnist.zip", "mnist.csv"),nrows = 70000, header = T, 
+      quote = "\"", sep = ",") 
+   if (saveData) save(mnist,file='mnist.Rda')
+   mnist
+}

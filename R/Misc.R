@@ -315,19 +315,33 @@ MAPE <- function(y,yhat)
 
 
 
-# overall probability of correct classification, y as a vector of 0s and
-# 1s, yhat a vector of estimated probabilities of 1
-probIncorrectClass <- function(y,yhat) 
+# overall error rate
+
+# either 
+
+#    y is a vector of 0s and 1s, 
+#    yhat a vector of estimated probabilities of 1
+
+# or
+
+#    y is a vector of numeric class labels, starting at 1 or 0
+#    yhat is a matrix, with y[i,j] = prob of Y = j+startAt1-1
+
+probIncorrectClass <- function(y,yhat,startAt1=TRUE
+) 
 {
-   if (is.vector(y)) {
+   if (is.factor(y) || is.factor(yhat)) 
+      stop('vector/matrix inputs only')
+   if (is.vector(yhat)) {
       yhat <- round(yhat)
       return(mean(yhat != y))
    }
    classPred <- apply(yhat,1,which.max) 
-   classActual <- apply(y,1,which.max)
+   classActual <- y -startAt1 + 1
    mean(classPred != classActual)
 }
 
+# proportion misclassified; deprecated in favor of probIncorrectClass
 propMisclass <- function(y,yhat) 
 {
    if (!is.vector(y) && !is.factor(y)) 

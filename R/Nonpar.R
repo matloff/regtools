@@ -292,7 +292,7 @@ exploreExpVars <-
    if (classif) ytst <- apply(ytst,1,which.max)
    for (w in seq(0.05,1.5,eValIncr)) {
       preds <- kNN(xtrn,ytrn,xtst,k,expandVars=eVar,expandVals=w,
-         classif=classif,leave1out)
+         classif=classif,leave1out=leave1out)
       if (!classif) {
          prds <- preds$regests
       } else {

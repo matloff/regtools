@@ -320,6 +320,8 @@ exploreExpVars <-
 plotExpVars <- function(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
    ylim,eValIncr=0.05,classif=FALSE,leave1out=FALSE) 
 {
+   if (is.factor(ytrn) || is.factor(ytst))
+      stop('factor Y not yet implemented; run factorToDummies()')
    for (i in 1:length(eVars)) {
       lwout <- exploreExpVars(xtrn,ytrn,xtst,ytst,k,eVars[i],maxEVal,lossFtn,
          eValIncr=eValIncr,classif=classif,leave1out=leave1out)

@@ -327,7 +327,7 @@ plotExpVars <- function(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
          eValIncr=eValIncr,classif=classif,leave1out=leave1out)
       if (i == 1) {
          plot(lwout$x,lwout$fitted,type='l',ylim=ylim,
-            xlab='w',ylab='accuracy',lwd=2)
+            xlab='w',ylab='loss',lwd=2)
       } else {
          lines(lwout$x,lwout$fitted,col=i)
       }

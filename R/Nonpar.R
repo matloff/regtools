@@ -170,7 +170,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 
    # MH dists for possible re-run using loclin()
    if (length(ccout) == 0) {
-      meanx <- rep(0,ncol(x))
+      meanx <- colMeans(x)
       covx <- cov(x)
       tried <- try(
          tmplist$mhdists <- mahalanobis(newx,meanx,covx)

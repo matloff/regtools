@@ -176,7 +176,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
          tmplist$mhdists <- mahalanobis(newx,meanx,covx)
       )
       if (is.null(tried) || inherits(tried,'try-error')) {
-         warning('Mahalanobis distances not calculated')
+         # warning('Mahalanobis distances not calculated')
          tmplist$mhdists <- NULL
       } 
    }

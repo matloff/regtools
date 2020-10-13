@@ -306,11 +306,11 @@ ulist <- function(lst)
 #######################  loss functions  ###############################
 
 # mean absolute prediction error
-MAPE <- function(y,yhat) 
+MAPE <- function(yhat,y) 
 {
-   if (!is.vector(y)) 
-      stop('predicted classes must be a vector')
-   mean(abs(y-yhat))
+   if (!is.vector(y) || !is.vector(yhat)) 
+      stop('inputs must be vectors')
+   mean(abs(yhat-y))
 }
 
 
@@ -327,7 +327,7 @@ MAPE <- function(y,yhat)
 #    y is a vector of numeric class labels, starting at 1 or 0
 #    yhat is a matrix, with y[i,j] = prob of Y = j+startAt1-1
 
-probIncorrectClass <- function(y,yhat,startAt1=TRUE
+probIncorrectClass <- function(yhat,y,startAt1=TRUE
 ) 
 {
    if (is.factor(y) || is.factor(yhat)) 
@@ -337,7 +337,7 @@ probIncorrectClass <- function(y,yhat,startAt1=TRUE
       return(mean(yhat != y))
    }
    classPred <- apply(yhat,1,which.max) 
-   classActual <- y -startAt1 + 1
+   classActual <- y - startAt1 + 1
    mean(classPred != classActual)
 }
 

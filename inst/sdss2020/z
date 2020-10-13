@@ -1,0 +1,9 @@
+
+tiff('LocLin.tiff',width=6,height=6,unit='in',res=800)
+plottingSim()
+dev.off()
+system('convert LocLin.tiff LocLinTiff.jpg')
+system('mv LocLin* ~/Research/SDSSknn')
+
+
+

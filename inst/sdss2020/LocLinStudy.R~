@@ -103,7 +103,7 @@ plottingSim <- function()
    print(res.5000.20.25[250])
    print(res.5000.20.100[250])
    
-   text(0.190,0.930,labels='p=2,k=25')
+   text(0.190,0.910,labels='p=2,k=25')
    text(0.241,0.893,labels='p=2,k=100')
    text(0.199,0.289,labels='p=10')
    text(0.118,0.066,labels='p=20')

@@ -24,3 +24,5 @@ knnFineTune <- function(data,yName,k,expandVars,ws,classif=FALSE,
 
 }
 
+fT <- fineTuning
+

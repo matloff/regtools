@@ -244,8 +244,13 @@ hasFactors <- function(x)
 # multiply x[,cols] by vals, e.g. x[,cols[1]] * vals[1]
 # code by Bochao Xin
 multCols <- function(x,cols,vals) {
-   tx <- t(x[,cols])
-   x[,cols] <- t(tx*vals)
+#     tx <- t(x[,cols])
+#     x[,cols] <- t(tx*vals)
+   
+   for (i in 1:length(cols)) {
+      cl <- cols[i]
+      x[,cl] <- x[,cl] * vals[1,i]
+   }
    x
 }
 

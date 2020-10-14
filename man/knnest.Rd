@@ -46,30 +46,34 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
 }
 
 \arguments{
-  \item{newx}{New data points to be predicted.  If NULL in \code{kNN},
-     compute regression functions estimates on \code{x} and save for
-     future prediction with \code{predict.kNN}}
+  \item{x}{"X" data, predictors, one row per data point, in the training
+     set.}
   \item{y}{Response variable data in the training set. Vector or matrix,
      the latter case for vector-valued response, e.g. multiclass
      classification.  In that case, can be a vector, either (0,1,2,...,)
      or (1,2,3,...), which automatically is converted into a matrix of
      dummies.}  
-  \item{x}{X data, predictors, one row per data point, in the training
-     set.}
-  \item{...}{Needed for consistency with generic.  See Details below for
-     `arguments.}
-  \item{xdata}{X and associated neighbor indices. Output of
-     \code{preprocessx}.} 
+  \item{newx}{New data points to be predicted.  If NULL in \code{kNN},
+     compute regression functions estimates on \code{x} and save for
+     future prediction with \code{predict.kNN}}
   \item{scaleX}{If TRUE, call \code{scale} on \code{x} and \code{newx}}
   \item{PCAcomps}{If positive, transform \code{x} and \code{newx} by
-     PCA, using the top \code{PCAcomps} principal components}
-  \item{smoothingFtn}{Function to apply to the set of nearest neighbors}
+     PCA, using the top \code{PCAcomps} principal components.  Disabled.}
+  \item{expandVars}{Indices of columns in \code{x} to expand.}
+  \item{expandVals}{The corresponding expansion values.}
+  \item{smoothingFtn}{Function to apply to the "Y" values in the 
+     set of nearest neighbors.}
   \item{allK}{If TRUE, find regression estimates for all \code{k}
      through \code{kmax}}
   \item{leave1out}{If TRUE, omit the 1-nearest neighbor from analysis}
   \item{classif}{If TRUE, compute the predicted class labels, not just
      the regression function values}
+  \item{startAt1}{If TRUE, class labels start at 1, else 0.}
   \item{k}{Number of nearest neighbors} 
+  \item{...}{Needed for consistency with generic.  See Details below for
+     `arguments.}
+  \item{xdata}{X and associated neighbor indices. Output of
+     \code{preprocessx}.} 
   \item{object}{Output of \code{knnest}.}
   \item{predpt}{One point on which to predict, as a vector.}
   \item{nearxy}{A set of X neighbors of a point.}
@@ -88,7 +92,6 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
   \item{yhat}{Vector of estimated regression function values.}
   \item{returnPts}{If TRUE, return matrix of plotted points.}
   \item{kNNout}{Object returned by \code{kNN}.}
-  \item{startAt1}{If TRUE, class labels start at 1, else 0.}
   \item{lossftn}{Loss function.}
   
 }
@@ -96,7 +99,8 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
 \details{
 
    The \code{kNN} function is the main tool here; \code{knnest} is being
-   deprecated.  Here are the capabilities:
+   deprecated.  (Note too \code{qeKNN}, a wrapper for \code{kNN}.)  Here
+   are the capabilities:
 
    In its most basic form, the function will input training data and
    output predictions for new cases \code{newx}.  By default this is
@@ -106,14 +110,17 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
 
    In the second form, \code{newx} is set to NULL.  No predictions are
    made; instead, the regression function is estimated on all data
-   points in \code{x}, and saved in the return value.  Future new cases
-   can then be predicted from this saved object.  Note that in
-   predicting a new case, say \code{z}, a 1-nearest neighbor scheme is
-   used:  The closest point in \code{x} is determined, and the estimated
-   regression function there is then used as the estimate at \code{z}.
-   In this manner, there is almost no computational cost in the
-   prediction stage.  The approximation should work well in moderately
-   large datasets.
+   points in \code{x}, which are saved in the return value.  Future new cases
+   can then be predicted from this saved object, via \code{predict.kNN} 
+   (called via the generic \code{predict}).
+
+   Note that in predicting a new case in this second form, say \code{z},
+   a 1-nearest neighbor scheme is used:  The closest point in \code{x}
+   is determined, and the estimated regression function there is then
+   used as the estimate at \code{z}.  In this manner, there is almost no
+   computational cost in the prediction stage.  The approximation should
+   work well in moderately large datasets, and as noted, will be very
+   fast.
 
    In addition, a novel feature allows the user to weight some
    predictors more than others.  This is done by scaling the given
@@ -122,48 +129,15 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
    \code{scale()} to the data.  In other words, first we create a "level
    playing field" in which all predictors have standard deviation 1.0,
    then scale some of them up or down.
-   
-   The \code{knnest} function does k-nearest neighbor regression
-   function estimation, in any dimension, i.e. any number of predictor
-   variables, and any number of response variables.  This of course 
-   includes classification problems case. A scalar Y = 0,1 would
-   represent two classes, with the regression function reducing to 
-   the conditional probability of class 1, given the predictors.  With
-   more than 2 classes, the response variable, \code{y}, should be a
-   matrix of dummy variables, one column for each class.
 
-   The \code{preprocessx} function does the prep work.  For each row in
-   \code{x}, the code finds the \code{kmax} closest rows to that row.
-   By separating this computation from \code{knnest}, one can save a lot
-   of overall computing time.  If for instance one wants to try the
-   number of nearest neighbors \code{k} at 25, 50 and 100, one can call
-   \code{preprocessx} with \code{kmax} equal to 100, then reuse the
-   results; in calling \code{knnest} for several values of \code{k}, we
-   do not need to call \code{preprocessx} again.  Setting \code{xval} to
-   TRUE turns out cross-validation: the neighborhood of a point will not
-   include the point itself; note that this is set in
-   \code{preprocessx}, not in \code{knnest}.
-   
-   One can specify various types of smoothing by proper specification of
-   the \code{nearf} function. The default is \code{meany}, specifying
-   the standard averaging of the neighbor Y values.  Another possible
-   choice is \code{vary}, specifying calculation of the sample variance
-   of those Y values; this is useful in assessing heteroscedasticity in
-   a linear model.  
-   
-   Another choice is to specify local linear smoothing by setting
-   \code{nearf} to \code{loclin}.  Here the value of the regression
-   function at a point is predicted from a linear fit to the point's
-   neighbors.  This may be especially helpful 
-   to counteract bias near the edges of the data.  As in any regression
-   fit, the number of predictors should be considerably less than the
-   number of neighbors.
+   Another feature of note is to allow local-linear smoothing, by
+   setting \code{smoothingFtn} to \code{loclin}.  Here the value of the
+   regression function at a point is predicted from a linear fit to the
+   point's neighbors.  This may be especially helpful to counteract bias
+   near the edges of the data.  As in any regression fit, the number of
+   predictors should be considerably less than the number of neighbors.
 
-   The X, i.e. predictor, data will be scaled by the code, so as to put
-   all predictor variables on an equal footing.  The scaling parameters
-   will be recorded, and then applied later in prediction.
-
-   The function \code{predict.knn} uses the output of \code{knnest} to
+   The function \code{predict.kNN} uses the output of \code{kNN} to
    do regression estimation or prediction on new points.  Since the
    output of \code{knnest} is of class \code{'knn'}, one invokes this
    function with the simpler \code{predict}.  The second argument is the

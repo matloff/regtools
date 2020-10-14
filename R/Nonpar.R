@@ -166,14 +166,15 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 
    # start building return value
 
-   tmplist <- list(whichClosest=closestIdxs,regests=regests)
+   tmplist <- list(whichClosest=closestIdxs,regests=regests,scaleX=scaleX)
 
    # MH dists for possible re-run using loclin()
    if (length(ccout) == 0) {
       meanx <- colMeans(x)
       covx <- cov(x)
       tried <- try(
-         tmplist$mhdists <- mahalanobis(newx,meanx,covx)
+         tmplist$mhdists <- mahalanobis(newx,meanx,covx),
+         silent=TRUE
       )
       if (is.null(tried) || inherits(tried,'try-error')) {
          # warning('Mahalanobis distances not calculated')
@@ -190,8 +191,6 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       } else ypreds <- round(regests)  # 2-class case
       tmplist$ypreds <- ypreds
    }
-
-   tmplist$scaleX <- scaleX
 
    if (scaleX) {
       tmplist$xcntr <- xcntr

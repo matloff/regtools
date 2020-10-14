@@ -137,35 +137,6 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
    near the edges of the data.  As in any regression fit, the number of
    predictors should be considerably less than the number of neighbors.
 
-   The function \code{predict.kNN} uses the output of \code{kNN} to
-   do regression estimation or prediction on new points.  Since the
-   output of \code{knnest} is of class \code{'knn'}, one invokes this
-   function with the simpler \code{predict}.  The second argument is the
-   set of new points, named \code{predpts} within the code.  It is
-   specified as a matrix if there is more than one prediction point and
-   more than one predictor variable; otherwise, use a vector.
-   
-   A "1-NN" method is used here:  Given a new point u whose
-   Y value we wish to predict, the code finds the single closest row
-   in the training set, and returns the previously-estimated regression
-   function value at that row.  If u needs to be scaled, specify 
-   \code{TRUE} in the third argument of \code{predict};
-   otherwise specify FALSE.
-
-   It can be shown that nearest-neighbor (or kernel) regression
-   estimates are subject to substantial bias near the fringes of the
-   data; the further away from the center of the data, the worse the
-   bias.  This can be mitigated by user specification that a local
-   linear regression be applied, as follows:  For each new point u to
-   predict, the r closest X rows in the training set to u will be found,
-   and a linear regression of the corresponding Y values against those X
-   values will be computed. The result of that operation will be used to
-   predict the Y value at the point u.  The value of r is specified as
-   the third argument in the call to \code{predict}; if left
-   unspecified, the 1-NN method is used as described above, and it may
-   be more accurate than the local-linear approach within the bulk of
-   the data set.
-
    The functions \code{ovaknntrn} and \code{ovaknnpred} are multiclass
    wrappers for \code{knnest} and \code{knnpred}. Here \code{y} is coded
    0,1,...,\code{m}-1 for the \code{m} classes.
@@ -195,13 +166,6 @@ row i of \code{x}.  The first of these indices is for the closest point,
 then for the second-closest, and so on.  If cross-validation is
 requrested (\code{xval = TRUE}, then any point will not be considered a
 neighbor of itself.
-
-The \code{knnest} function returns an expanded version of \code{xdata},
-with the expansion consisting of a new component \code{regest}, the
-estimated regression function values at the training set points.
-
-The function \code{predict.knn} returns the predicted Y values at
-\code{predpts}.  It is called simply via \code{predict}.
 
 One can explore the effects of various numbers of nearest neighbors
 \code{k} through the \code{kmin} function.  (This function should be
@@ -249,53 +213,59 @@ knnout
 
 predict(knnout,c(5,2))  # 7.5
 
-y <- c(1,1,0,0,1)
-kNN(x,y,newx,scaleX=FALSE,2)
-# $whichClosest
-#      [,1] [,2]
-# [1,]    1    4
-#
-# $regests
-# [1] 0.5
+\dontrun{
+data(mlb) 
+mlb <- mlb[,c(4,6,5)]  # height, age, weight
+# fit, then predict 75", age 21, and 72", age 32
+knnout <- kNN(mlb[,1:2],mlb[,3],rbind(c(75,21),c(72,32)),25) 
+knnout$regests
+# [1] 201.84 195.72
 
-kNN(x,y,c(5,6),scaleX=FALSE,2,classif=TRUE,startAt1=FALSE)
-# $whichClosest
-#   [,1] [,2]
-# [1,]    5    2
-# $regests
-#      dfr.0 dfr.1
-# [1,]     0     1
+# fit now, predict later
+knnout <- kNN(mlb[,1:2],mlb[,3],NULL,25) 
+predict(knnout,c(70,28)) 
+# [1] 185.24
 
-y <- c(1,1,0,0,0)
-knnout <- kNN(x,y,NULL,scaleX=FALSE,2)
-knnout
-# $whichClosest
-#      [,1] [,2]
-# [1,]    1    4
-# [2,]    2    3
-# [3,]    3    2
-# [4,]    4    2
-# [5,]    5    4
+data(peDumms) 
+names(peDumms) 
+ped <- peDumms[,c(1,20,22:27,29,31,32)] 
+names(ped) 
 
-# $regests
-# [1] 0.5 0.5 0.5 0.5 0.0
+# fit, and predict income of a 35-year-old man, MS degree, occupation 101,
+# worked 50 weeks, using 25 nearest neighbors
+kNN(ped[,-10],ped[,10],c(35,1,0,0,1,0,0,0,1,50),25) $regests
+# [1] 66460
 
-x <- rbind(c(1,0),c(2,5),c(0,5),c(3,3),c(6,3),c(4,1))
-y <- rbind( c(1,0,0), c(0,0,1), c(0,1,0), c(0,1,0), c(1,0,0),
-   c(0,1,0))
-kNN(x,y,rbind(c(5,6),c(1,0),c(2,3)),2,scaleX=FALSE,classif=TRUE,startAt1=FALSE)
-# $whichClosest
-#      [,1] [,2]
-# [1,]    5    2
-# [2,]    1    6
-# [3,]    4    2
-# $regests
-#      [,1] [,2] [,3]
-# [1,]  0.5  0.0  0.5
-# [2,]  0.5  0.5  0.0
-# [3,]  0.0  0.5  0.5
-# $ypreds
-# [1] 0 0 1
+# fit, and predict occupation 101 for a 35-year-old man, MS degree, 
+# worked 50 weeks, using 25 nearest neighbors
+z <- kNN(ped[,-c(4:8)],ped[,4],c(35,1,0,1,50),25,classif=TRUE)
+z$regests
+# [1] 0.24  24% chance of occupation 101
+z$ypreds
+# [1] 0  class 0, i.e. not occupation 101; round(0.24) = 0, 
+# computed by user request, classif = TRUE
+
+# 
+occs <- as.matrix(ped[, 4:8])
+z <- kNN(ped[,-c(4:8)],occs,c(35,1,0,1,72000,50),25,classif=TRUE)
+z$ypreds
+# [1] 3
+
+# predict occupation in general; let's bring occ.141 back in (was
+# excluded as a predictor due to redundancy)
+names(peDumms)
+#  [1] "age"     "cit.1"   "cit.2"   "cit.3"   "cit.4"   "cit.5"   "educ.1" 
+#  [8] "educ.2"  "educ.3"  "educ.4"  "educ.5"  "educ.6"  "educ.7"  "educ.8" 
+# [15] "educ.9"  "educ.10" "educ.11" "educ.12" "educ.13" "educ.14" "educ.15"
+# [22] "educ.16" "occ.100" "occ.101" "occ.102" "occ.106" "occ.140" "occ.141"
+# [29] "sex.1"   "sex.2"   "wageinc" "wkswrkd" "yrentry"
+occs <- as.matrix(peDumms[,23:28])  # y must be a matrix in kNN()
+z <- kNN(ped[,-c(4:8)],occs,c(35,1,0,1,72000,50),25,classif=TRUE)
+z$ypreds
+# [1] 3   prediction is occ.102
+
+
+}
 
 }
 

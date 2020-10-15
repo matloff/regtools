@@ -112,15 +112,17 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
    made; instead, the regression function is estimated on all data
    points in \code{x}, which are saved in the return value.  Future new cases
    can then be predicted from this saved object, via \code{predict.kNN} 
-   (called via the generic \code{predict}).
+   (called via the generic \code{predict}).  The call form is 
+   \code{predict(knnout,k}, with a default value of 1 for \code{k}.
 
    Note that in predicting a new case in this second form, say \code{z},
-   a 1-nearest neighbor scheme is used:  The closest point in \code{x}
-   is determined, and the estimated regression function there is then
-   used as the estimate at \code{z}.  In this manner, there is almost no
-   computational cost in the prediction stage.  The approximation should
-   work well in moderately large datasets, and as noted, will be very
-   fast.
+   smoothing is done on the fitted values in the training set: The
+   closest \code{k} points in \code{x} are determined as usual, but
+   instead of averaging their Y values, the average is taken over the
+   fitted regression estimates at those points.  In this manner, there
+   is almost no computational cost in the prediction stage.  The
+   approximation should work well in moderately large datasets, and as
+   noted, will be very fast.
 
    In addition, a novel feature allows the user to weight some
    predictors more than others.  This is done by scaling the given

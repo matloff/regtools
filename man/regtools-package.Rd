@@ -50,7 +50,7 @@ regression and classification analysis, and machine learning.
 
    \item One vs. All wrappers: knnClass, linClass, logitClass
 
-   \item k-NN reweighting: exploreExpVars, plotExpVars
+   \item k-NN reweighting: exploreExpVars, plotExpVars, knnFineTune
 
    \item quick convenience classification functions: logitClass,
    knnClass, linClass, rfClass, boostClass
@@ -62,11 +62,12 @@ regression and classification analysis, and machine learning.
    \itemize{
 
    \item k-NN: kNN, kmin, knnest, knntrn, preprocessx, meany, vary, loclin,
-   predict, kmin, pwplot, bestKperPoint
+   predict, kmin, pwplot, bestKperPoint, knnFineTune
 
    \item neural networks: krsFit,multCol
 
-   \item advanced grid search: fineTuning, fineTuningPar, plot.tuner
+   \item advanced grid search: fineTuning, fineTuningPar, plot.tuner,
+      knnFineTune
 
    \item dimension reduction: dimRed, dimRedNewX, reduceCols
 

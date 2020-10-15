@@ -201,6 +201,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    } else {
       tmplist$x <- NULL
    }
+   tmplist$noPreds <- noPreds
    tmplist$leave1out <- leave1out
    tmplist$startAt1adjust <- startA1adjust
    tmplist$expandVars <- expandVars
@@ -216,6 +217,8 @@ kn2 <- kNN
 
 predict.kNN <- function(object,...)
 {
+   if (object$noPreds) 
+      stop('use predict() only if newx = NULL in kNN() call')
    x <- object$x
    regests <- object$regests
    arglist <- list(...)

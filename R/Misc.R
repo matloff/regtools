@@ -246,11 +246,12 @@ hasFactors <- function(x)
 multCols <- function(x,cols,vals) {
 #     tx <- t(x[,cols])
 #     x[,cols] <- t(tx*vals)
-   
-   for (i in 1:length(cols)) {
-      cl <- cols[i]
-      x[,cl] <- x[,cl] * vals[1,i]
-   }
+#    for (i in 1:length(cols)) {
+#       cl <- cols[i]
+#       x[,cl] <- x[,cl] * vals[1,i]
+#    }
+   tx <- t(x[,cols])
+   x[,cols] <- t(tx*vals)
    x
 }
 

@@ -264,6 +264,16 @@ z <- kNN(ped[,-c(4:8)],occs,c(35,1,0,1,72000,50),25,classif=TRUE)
 z$ypreds
 # [1] 3   prediction is occ.102
 
+# try weight age 0.5, wkswrked 1.5; use leave1out to avoid overfit
+knnout <- kNN(ped[,-10],ped[,10],ped[,-10],25,leave1out=TRUE)
+mean(abs(knnout$regests - ped[,10]))
+# [1] 25378.6
+knnout <- kNN(ped[,-10],ped[,10],ped[,-10],25,
+   expandVars=c(1,10),expandVals=c(0.5,1.5),leave1out=TRUE)
+mean(abs(knnout$regests - ped[,10]))
+# [1] 25196.61
+
+
 
 }
 

@@ -110,7 +110,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       newx <- scale(newx,center=xcntr,scale=xscl)
    }
 
-  # expand any specified variables
+   # expand any specified variables
    eVars <- !is.null(expandVars)
    eVals <- !is.null(expandVals)
    if (eVars || eVals) {
@@ -220,6 +220,7 @@ predict.kNN <- function(object,...)
    regests <- object$regests
    arglist <- list(...)
    newx <- arglist[[1]]
+   k <- if(length(arglist) > 1) arglist[[2]] else 1
    expandVars <- object$expandVars
    if (!is.null(expandVars)) 
       stop('separate prediction with expandVars is not yet implemented')
@@ -228,16 +229,16 @@ predict.kNN <- function(object,...)
       newx <- as.matrix(newx)
    }
    if (object$scaleX)  newx <- scale(newx,center=object$xcntr,scale=object$xscl)
-   # k <- 1 + object$leave1out
-   k <- 1
    tmp <- FNN::get.knnx(data=x, query=newx, k=k)
    if (k == 1) {
       # note: if k = 1, closestIdxs will be a 1-column matrix
       closestIdxs <- tmp$nn.index
    } else closestIdxs <- tmp$nn.index[,-1]
-   if (is.vector(regests)) return(regests[closestIdxs])
-   return(regests[closestIdxs,])
+   if (is.vector(regests)) return(regests[k])
+   return(regests[closestIdxs,k])
 }
+
+prdk <- predict.kNN
 
 # n-fold cross validation for kNN(); instead of applying "leave 1 out"
 # to all possible singletons, we do so for a random nSubSam of them;

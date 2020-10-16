@@ -552,7 +552,15 @@ splitData <- defmacro(holdout,data,
 predictHoldout <- defmacro(res,
    expr={
       ycol <- which(names(data) == yName);
-      preds <- predict(res,tst[,-ycol]);
+      tstx <- tst[,-ycol];
+      if (!is.null(res$factorsInfo)) {
+         tstx <- factorsToDummies(tstx,omitLast=TRUE,
+            factorsInfo=res$factorsInfo)
+         saveClasses <- class(res)
+         class(res) <- class(res)[-1]
+         preds <- predict(res,tstx)
+         class(res) <- saveClasses
+      } else preds <- predict(res,tstx)
       res$holdoutPreds <- preds;
       res$testAcc <- 
          if (res$classif) mean(preds$predClasses == tst[,ycol])

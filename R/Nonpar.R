@@ -166,7 +166,8 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 
    # start building return value
 
-   tmplist <- list(whichClosest=closestIdxs,regests=regests,scaleX=scaleX)
+   tmplist <- list(whichClosest=closestIdxs,regests=regests,scaleX=scaleX,
+      classif=classif)
 
    # MH dists for possible re-run using loclin()
    if (length(ccout) == 0) {
@@ -219,6 +220,7 @@ predict.kNN <- function(object,...)
 {
    x <- object$x
    regests <- object$regests
+   classif <- object$classif
    arglist <- list(...)
    newx <- arglist[[1]]
    k <- if(length(arglist) > 1) arglist[[2]] else 1
@@ -234,9 +236,9 @@ predict.kNN <- function(object,...)
    if (k == 1) {
       # note: if k = 1, closestIdxs will be a 1-column matrix
       closestIdxs <- tmp$nn.index
-   } else closestIdxs <- tmp$nn.index[,-1]
-   if (is.vector(regests)) return(regests[k])
-   return(regests[closestIdxs,k])
+   } else stop('k > 1 not implemented yet')
+   if (!classif) regests <- matrix(regests,ncol=1)
+   regests[closestIdxs[,k],]
 }
 
 prdk <- predict.kNN

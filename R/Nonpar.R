@@ -196,11 +196,11 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       tmplist$xcntr <- xcntr
       tmplist$xscl <- xscl
    }
-   if (noPreds) {
+   ## if (noPreds) {
       tmplist$x <- x
-   } else {
-      tmplist$x <- NULL
-   }
+   ## } else {
+   ##    tmplist$x <- NULL
+   ## }
    tmplist$noPreds <- noPreds
    tmplist$leave1out <- leave1out
    tmplist$startAt1adjust <- startA1adjust

@@ -217,8 +217,6 @@ kn2 <- kNN
 
 predict.kNN <- function(object,...)
 {
-   if (object$noPreds) 
-      stop('use predict() only if newx = NULL in kNN() call')
    x <- object$x
    regests <- object$regests
    arglist <- list(...)

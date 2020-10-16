@@ -211,7 +211,11 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,
    knnout$classif <- classif
    knnout$factorsInfo <- factorsInfo
    class(knnout) <- c('qeKNN','kNN')
-   if (!is.null(holdout)) predictHoldout(knnout)
+   if (!is.null(holdout)) {
+      predictHoldout(knnout)
+      knnout$holdIdxs <- holdIdxs
+   } else knnout$holdIdxs <- NULL
+   
    knnout
 }
 
@@ -510,6 +514,15 @@ getXY <- function(data,yName,xMustNumeric=FALSE,classif,
 
 # standard split into training, test sets
 
+# arguments:
+#    holdout: vector of holdout set size, seed
+#    data: XY data frame
+
+# globals/vale:
+#    tst: the generated holdout set
+#    data: the correspondingly reduced training set
+#    holdIdxs: indices of the holdout set in original ata
+
 require(gtools)
 
 splitData <- defmacro(holdout,data, 
@@ -520,8 +533,21 @@ splitData <- defmacro(holdout,data,
       idxs <- sample(1:nrow(data),nHold);
       tst <- data[idxs,];
       data <- data[-idxs,]
+      holdIdxs <- idxs
    }
 )
+
+# do the predictions in the holdout set
+
+# arguments:
+#    res: output of qe*()
+# globals (one level up):
+#    tst: the holdout set
+#   ycol: column index of Y in tst
+
+#  value:
+#     res, but with the holdout predictions and accuracy as new
+#     components
 
 predictHoldout <- defmacro(res,
    expr={

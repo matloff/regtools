@@ -213,7 +213,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 kn2 <- kNN
 
 # actual call is predict(kNNoutput,newx,add1); for each row in newx, the
-# 1-nearest row in kNNoutput$x is found, and the corresponding
+#k 1-nearest row in kNNoutput$x is found, and the corresponding
 # kNNoutput$regests value returned; should change this to k >= 1
 
 predict.kNN <- function(object,...)
@@ -224,9 +224,9 @@ predict.kNN <- function(object,...)
    arglist <- list(...)
    newx <- arglist[[1]]
    # set k for the prediction phase
-   ### odd way to do it, but the cle
-   ### tmp <- object$newxK)
-   ### newxK <- if(!is.null(tmp)) tmp else 1
+   ### tmp <- object$newxK
+   ### if (!is.null(tmp)) newxK <- tmp 
+   ### else 
    newxK <- if(length(arglist) > 1) arglist[[2]] else 1
 
    expandVars <- object$expandVars

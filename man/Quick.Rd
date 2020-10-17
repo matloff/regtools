@@ -26,17 +26,20 @@ for teaching.  For advanced work, analysts should use the methods directly.
 
 \usage{
 qeLogit(data, holdout=c(min(1000,round(0.1*nrow(data))),9999))
-qeLin(data,yName, holdout=c(min(1000,round(0.1*nrow(data))),9999)) 
-qeKNN(data,yName,k,scaleX=TRUE, holdout=c(min(1000,round(0.1*nrow(data))),9999))
-qeRF(data,yName,nTree,minNodeSize, holdout=c(min(1000,round(0.1*nrow(data))),9999))
-qeSVM(data,yName,gamma=1.0,cost=1.0, holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeLin(data,yName, holdout=c(min(1000,round(0.1*nrow(data))),seed=9999)) 
+qeKNN(data,yName,k,scaleX=TRUE,newxK=1,
+   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
+qeRF(data,yName,nTree,minNodeSize,
+   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
+qeSVM(data,yName,gamma=1.0,cost=1.0,
+   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
 qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
    holdout=c(min(1000,round(0.1*nrow(data))),9999))
 qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
    holdout=c(min(1000,round(0.1*nrow(data))),9999))
 predict.qeLogit(object,newx)
 predict.qeLin(object,newx)
-predict.qeKNN(object,newx)
+predict.qeKNN(object,newx,newxK=1)
 predict.qeRF(object,newx)
 predict.qeSVM(object,newx,k=25,scaleX=TRUE)
 predict.qeGBoostt(object,newx)
@@ -148,20 +151,6 @@ predict(lgout,pe[1,-3])
 lgout <- qeLogit(pe,'occ',holdout=c(1000,9999))
 lgout$testAcc  # 0.373
 
-# lin
-pe$occ <- prepend('a',pe$occ)
-lmout <- qeLin(pe,'occ')
-preds <- predict(lmout,pe[,-3])
-mean(preds$predClasses == pe[,3])
-mean(preds$probs[,1])
-mean(pe[,3] == 'a100')
-predict(lgout,pe[1,-3])
-lmout <- qeLin(pe,'wageinc')
-preds <- predict(lmout,pe[,-5])
-mean(abs(preds - pe[,5]))
-# [1] 25047.36
-predict(lmout,pe[1,-5])
-
 
 # k-NN
 knnout <- qeKNN(pe,'occ',25)
@@ -199,7 +188,7 @@ mean(preds$probs[,1])
 mean(preds$pre == 'a100')
 predict(gbimout,pe[1,-3])
 
- NNs
+# NNs
 nnout <- qeNeural(pe,'wageinc',c(5,5),30)
 predict(nnout,pe[1,-5])
 preds <- predict(nnout,pe[,-5])
@@ -208,6 +197,21 @@ nnout <- qeNeural(pe,'occ',c(5,5),30)
 predict(nnout,pe[1,-3])
 preds <- predict(nnout,pe[,-3])
 mean(preds == pe[,3])
+
+# lin
+pe$occ <- prepend('a',pe$occ)
+lmout <- qeLin(pe,'occ')
+preds <- predict(lmout,pe[,-3])
+mean(preds$predClasses == pe[,3])
+mean(preds$probs[,1])
+mean(pe[,3] == 'a100')
+predict(lgout,pe[1,-3])
+lmout <- qeLin(pe,'wageinc')
+preds <- predict(lmout,pe[,-5])
+mean(abs(preds - pe[,5]))
+# [1] 25047.36
+predict(lmout,pe[1,-5])
+
 }
 }
 

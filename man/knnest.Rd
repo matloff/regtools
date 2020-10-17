@@ -99,8 +99,8 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
 \details{
 
    The \code{kNN} function is the main tool here; \code{knnest} is being
-   deprecated.  (Note too \code{qeKNN}, a wrapper for \code{kNN}.)  Here
-   are the capabilities:
+   deprecated.  (Note too \code{qeKNN}, a wrapper for \code{kNN}; more
+   on this below.)  Here are the capabilities:
 
    In its most basic form, the function will input training data and
    output predictions for new cases \code{newx}.  By default this is
@@ -139,9 +139,13 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
    near the edges of the data.  As in any regression fit, the number of
    predictors should be considerably less than the number of neighbors.
 
+   The main alternative to \code{kNN} is \code{qeKNN} in the qe* ("quick
+   and easy") series. It is more convenient, e.g. allowing factor
+   inputs, but less flexible.
+
    The functions \code{ovaknntrn} and \code{ovaknnpred} are multiclass
-   wrappers for \code{knnest} and \code{knnpred}. Here \code{y} is coded
-   0,1,...,\code{m}-1 for the \code{m} classes.
+   wrappers for \code{knnest} and \code{knnpred}, thus also deprecated.
+   Here \code{y} is coded 0,1,...,\code{m}-1 for the \code{m} classes.
 
    The tools here can be useful for fit assessment of parametric models.
    The \code{parvsnonparplot} function plots fitted values of
@@ -247,11 +251,12 @@ z$ypreds
 # [1] 0  class 0, i.e. not occupation 101; round(0.24) = 0, 
 # computed by user request, classif = TRUE
 
-# 
+# the y argument must be either a vector (2-class setting) or a matrix
+# (multiclass setting)
 occs <- as.matrix(ped[, 4:8])
 z <- kNN(ped[,-c(4:8)],occs,c(35,1,0,1,72000,50),25,classif=TRUE)
 z$ypreds
-# [1] 3
+# [1] 3   occupation 3, i.e. 102, is predicted
 
 # predict occupation in general; let's bring occ.141 back in (was
 # excluded as a predictor due to redundancy)
@@ -261,7 +266,7 @@ names(peDumms)
 # [15] "educ.9"  "educ.10" "educ.11" "educ.12" "educ.13" "educ.14" "educ.15"
 # [22] "educ.16" "occ.100" "occ.101" "occ.102" "occ.106" "occ.140" "occ.141"
 # [29] "sex.1"   "sex.2"   "wageinc" "wkswrkd" "yrentry"
-occs <- as.matrix(peDumms[,23:28])  # y must be a matrix in kNN()
+occs <- as.matrix(peDumms[,23:28])  
 z <- kNN(ped[,-c(4:8)],occs,c(35,1,0,1,72000,50),25,classif=TRUE)
 z$ypreds
 # [1] 3   prediction is occ.102
@@ -270,6 +275,9 @@ z$ypreds
 knnout <- kNN(ped[,-10],ped[,10],ped[,-10],25,leave1out=TRUE)
 mean(abs(knnout$regests - ped[,10]))
 # [1] 25378.6
+
+# use of the weighted distance feature; deweight age by a factor of 0.5,
+# put increased weight on weeks worked, factor of 1.5
 knnout <- kNN(ped[,-10],ped[,10],ped[,-10],25,
    expandVars=c(1,10),expandVals=c(0.5,1.5),leave1out=TRUE)
 mean(abs(knnout$regests - ped[,10]))

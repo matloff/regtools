@@ -113,7 +113,8 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
    points in \code{x}, which are saved in the return value.  Future new cases
    can then be predicted from this saved object, via \code{predict.kNN} 
    (called via the generic \code{predict}).  The call form is 
-   \code{predict(knnout,k}, with a default value of 1 for \code{k}.
+   \code{predict(knnout,newxK}, with a default value of 1 for
+   \code{newxK}.
 
    The second form is intended more for production use, so that neighbor
    distances need not be repeatedly recomputed.

@@ -190,7 +190,8 @@ predict.qeLin <- function(object,newx) {
 # see note in kNN() man pg
  
 qeKNN <- function(data,yName,k,scaleX=TRUE,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+   holdout=c(min(1000,round(0.1*nrow(data))),9999),
+   newxK=1)
 {
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
@@ -210,6 +211,7 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,
    if (classif) knnout$classNames <- classNames
    knnout$classif <- classif
    knnout$factorsInfo <- factorsInfo
+   knnout$newxK <- newxK
    class(knnout) <- c('qeKNN','kNN')
    if (!is.null(holdout)) {
       predictHoldout(knnout)
@@ -219,13 +221,14 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,
    knnout
 }
 
-predict.qeKNN <- function(object,newx)
+predict.qeKNN <- function(object,newx,newxK=NULL)
 {
    class(object) <- 'kNN'
    classif <- object$classif
    xyc <- getXY(newx,NULL,TRUE,FALSE,object$factorsInfo)
    newx <- as.matrix(xyc$x)
-   preds <- predict(object,newx)
+   if (!is.null(newxK)) newxK <- object$newxK
+   preds <- predict(object,newx,newxK)
    if (!object$classif) return(preds)
    if (is.vector(preds)) preds <- matrix(preds,nrow=1)
    collectForReturn(object,preds)

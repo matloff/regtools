@@ -223,7 +223,9 @@ predict.kNN <- function(object,...)
    classif <- object$classif
    arglist <- list(...)
    newx <- arglist[[1]]
-   k <- if(length(arglist) > 1) arglist[[2]] else 1
+   # set k for the prediction phase
+   newxK <- if(length(arglist) > 1) arglist[[2]] else 1
+
    expandVars <- object$expandVars
    if (!is.null(expandVars)) 
       stop('separate prediction with expandVars is not yet implemented')
@@ -232,13 +234,28 @@ predict.kNN <- function(object,...)
       newx <- as.matrix(newx)
    }
    if (object$scaleX)  newx <- scale(newx,center=object$xcntr,scale=object$xscl)
-   tmp <- FNN::get.knnx(data=x, query=newx, k=k)
-   if (k == 1) {
-      # note: if k = 1, closestIdxs will be a 1-column matrix
-      closestIdxs <- tmp$nn.index
-   } else stop('k > 1 not implemented yet')
-   if (!classif) regests <- matrix(regests,ncol=1)
-   regests[closestIdxs[,k],]
+
+   # now start calculation of predictions
+   if (is.vector(regests)) regests <- matrix(regests,ncol=1)
+   tmp <- FNN::get.knnx(data=x, query=newx, k=newxK)
+   # row i of closestPts will be the newxK nearest neighbors of data point 
+   # i in the training set
+   closestPts <- tmp$nn.index[,1:newxK,drop=FALSE]
+   doOneNewxPt <- function(newxPtRowNum) 
+   {
+      nghbrs <- closestPts[newxPtRowNum,]
+      nghbrsRegests <- regests[nghbrs,,drop=FALSE]
+      colMeans(nghbrsRegests)
+   }
+   tmp <- sapply(1:nrow(newx),doOneNewxPt)
+   t(tmp)  
+
+###    if (k == 1) {
+###       # note: if k = 1, closestIdxs will be a 1-column matrix
+###       closestIdxs <- tmp$nn.index
+###    } else stop('k > 1 not implemented yet')
+###    if (!classif) regests <- matrix(regests,ncol=1)
+###    regests[closestIdxs[,k],]
 }
 
 prdk <- predict.kNN

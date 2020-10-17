@@ -105,8 +105,8 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
    In its most basic form, the function will input training data and
    output predictions for new cases \code{newx}.  By default this is
    done for a single value of the number \code{k} of nearest neighbors,
-   but the user can request that it be done for all \code{k} through the
-   specified maximum.
+   but by setting \code{allK} to TRUE, the user can request that it be
+   done for all \code{k} through the specified maximum.
 
    In the second form, \code{newx} is set to NULL.  No predictions are
    made; instead, the regression function is estimated on all data
@@ -115,14 +115,15 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
    (called via the generic \code{predict}).  The call form is 
    \code{predict(knnout,k}, with a default value of 1 for \code{k}.
 
+   The second form is intended more for production use, so that neighbor
+   distances need not be repeatedly recomputed.
+
    Note that in predicting a new case in this second form, say \code{z},
    smoothing is done on the fitted values in the training set: The
    closest \code{k} points in \code{x} are determined as usual, but
    instead of averaging their Y values, the average is taken over the
    fitted regression estimates at those points.  In this manner, there
-   is almost no computational cost in the prediction stage.  The
-   approximation should work well in moderately large datasets, and as
-   noted, will be very fast.
+   is almost no computational cost in the prediction stage.  
 
    In addition, a novel feature allows the user to weight some
    predictors more than others.  This is done by scaling the given
@@ -158,36 +159,6 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
    % The \code{parget.knnx} function is a wrapper for use of 'parallel'
    % package with \code{get.knnx} of the 'FNN' package.
    
-}
-
-\value{
-
-The return value of \code{preprocessx} is an R list. Its \code{x}
-component is the scaled \code{x} matrix, with the scaling factors being
-recorded in the \code{scaling} component. The \code{idxs} component
-contains the indices of the nearest neighbors of each point in the
-predictor data, stored in a matrix with \code{nrow(x)} rows and \code{k}
-columns.  Row i contains the indices of the nearest rows in \code{x} to
-row i of \code{x}.  The first of these indices is for the closest point,
-then for the second-closest, and so on.  If cross-validation is
-requrested (\code{xval = TRUE}, then any point will not be considered a
-neighbor of itself.
-
-One can explore the effects of various numbers of nearest neighbors
-\code{k} through the \code{kmin} function.  (This function should be
-cosidered experimental.) It will run \code{knnest} for the values of
-\code{k} specified in \code{nk}.  If the latter is a number, the range 0
-to \code{xdata$kmax} will be divided into \code{nk} equally
-subintervals, and the values of \code{k} used will then be the right
-endpoints of the subintervals.  The function returns an R list, with the
-component \code{meanerrs} containing the cross-validated mean loss
-function values and \code{ks} containing the corresponding values of
-\code{k}; \code{plot.knn} then plots the former against the latter.
-
-% The \code{parget.knnx} function returns the matrix of indices of nearest
-% neighbors, as with the \code{nn.index} component of the return value of
-% \code{get.knnx}.
-
 }
 
 \examples{

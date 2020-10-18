@@ -560,7 +560,12 @@ predictHoldout <- defmacro(res,
    expr={
       ycol <- which(names(data) == yName);
       tstx <- tst[,-ycol];
-      preds <- predict(res,tstx);
+      # in k-NN case, we want to use the newxK from qeKNN() here, but
+      # allow the user to later call predict.qeKNN() with her own value
+      # if desired
+      if (inherits(res,'kNN')) {
+         preds <- predict(res,tstx,newxK)
+      } else preds <- predict(res,tstx);
       res$holdoutPreds <- preds;
       res$testAcc <- 
          if (res$classif) mean(preds$predClasses == tst[,ycol])

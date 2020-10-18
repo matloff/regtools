@@ -224,9 +224,6 @@ predict.kNN <- function(object,...)
    arglist <- list(...)
    newx <- arglist[[1]]
    # set k for the prediction phase
-   ### tmp <- object$newxK
-   ### if (!is.null(tmp)) newxK <- tmp 
-   ### else 
    newxK <- if(length(arglist) > 1) arglist[[2]] else 1
 
    expandVars <- object$expandVars

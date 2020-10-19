@@ -134,7 +134,30 @@ to more sophisticated functions, with an easy, uniform interface.
 E.g. **qeRF()** is a wrapper for the **randomForest()** function in the
 well-known package of the same name.  Each function does the model fit,
 with an optional holdout evaluation, with output ready for prediction of
-new cases via the R generic **predict()**, .e.g. **predict.RF()**.
+new cases via the R generic **predict()**, .e.g. **predict.RF()**.  
+
+Call form:
+
+``` r
+qe*(data,yName, options incl. method-specific)
+```
+
+Currently available:
+
+* **qeLin()** linear model, wrapper for **lm()** 
+
+* **qeLogit()** logistic model, wrapper for **glm(family=binomial)**
+
+* **qeKNN()** k-Nearest Neighbors, wrapper for **regtools** **kNN()**
+
+* **qeRF()** random forests, wrapper for **randomForest** package
+
+* **qeGBoost()** gradient boosting on trees, wrapper for **gbm** package
+
+* **qeSVM()** SVM, wrapper for **e1071** package
+
+* **qeNeural()** neural networks, wrapper for **regtools** function
+**krsFit()**, in turn wrapping **keras** package
 
 ### Linear model
 
@@ -146,6 +169,24 @@ new cases via the R generic **predict()**, .e.g. **predict.RF()**.
        1 
 54509.36 
 ```
+
+As noted, **qeLin()** is largely a wrapper for the usual \textbf{lm()}.
+However, optionally (by default actually), it assesss the model on a
+holdout set, using as loss Mean Absolute Prediction Error or Overall
+Misclassification Rate.
+
+The **regtools** package includes some novel diagnostic methods for
+assessing linear regression models.  One of them plots parametric vs.
+k-NN fit:
+
+``` r
+> parvsnonparplot(lmout,qeKNN(pef,'wageinc',25))
+```
+
+![result](inst/images/PrgEngFit.png)
+
+There is some suggestion here that the linear model tends to
+underpredict at low and high wage values.
 
 (UNDER CONSTRUCTION)
 

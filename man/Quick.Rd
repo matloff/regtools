@@ -25,7 +25,7 @@ for teaching.  For advanced work, analysts should use the methods directly.
 }
 
 \usage{
-qeLogit(data, holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeLogit(data, holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
 qeLin(data,yName, holdout=c(min(1000,round(0.1*nrow(data))),seed=9999)) 
 qeKNN(data,yName,k,scaleX=TRUE,newxK=1,
    holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
@@ -34,9 +34,9 @@ qeRF(data,yName,nTree,minNodeSize,
 qeSVM(data,yName,gamma=1.0,cost=1.0,
    holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
 qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
 qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
 predict.qeLogit(object,newx)
 predict.qeLin(object,newx)
 predict.qeKNN(object,newx,newxK=1)

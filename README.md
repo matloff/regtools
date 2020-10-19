@@ -1,6 +1,6 @@
 # regtools 
 
-## Novel tools tools for parametric and machine learning methods in regression and classification
+## Novel tools tools for regression, classification and machine learning
 
 Various tools for Prediction and/or Description goals in regression,
 classification and machine learning.  
@@ -8,10 +8,16 @@ classification and machine learning.
 Some of them are associated with my book, <i>From
 Linear Models to Machine Learning: Statistical Regression and
 Classification</i>, N. Matloff, CRC, 2017 (recipient of the
-*Technometrics* Eric Ziegel Award for Best Book Reviewed in 2017), and
+Eric Ziegel Award for Best Book Reviewed in 2017, *Technometrics*), and
 with my forthcoming book, *The Art of Machine Learning: Algorithms+Data+R*,
 NSP, 2020 .  But **the tools are useful in general, independently of the
 books**.
+
+<font size="3">
+<span style="color:red"> 
+CLICK [HERE](#quickstart) for a **regtools** Quick Start!
+</span>
+</font>
 
 ## FEATURES
 
@@ -83,6 +89,65 @@ Here are the main categories:
 - Text processing
 - Recommender systems
 - Misc.
+
+## <a name="quickstart">REGTOOLS QUICK START </a> 
+
+Here we will take a quick tour of **regtools**, using a dataset
+**prgeng** that is included in the package.  We'll start with linear
+regression, briefly illustrating **regtools**'s novel diagnostic tools,
+then move on the use of machine learning methods on this data, again
+using the data to illustrate various features of **regtools**.
+
+### The Data
+
+The dataset consists of data on Silicon Valley programmers and engineers
+in the 2000 US Census.  It is available in several forms.  We'll use the
+data frame version, and use only a few features to keep things simple:
+
+``` r
+> data(peFactors)
+> names(peFactors)
+ [1] "age"      "cit"      "educ"     "engl"     "occ"      "birth"   
+ [7] "sex"      "wageinc"  "wkswrkd"  "yrentry"  "powspuma"
+> pef <- peFactors[,c(1,3,5,7:9)]
+> head(pef)
+       age educ occ sex wageinc wkswrkd
+1 50.30082   13 102   2   75000      52
+2 41.10139    9 101   1   12300      20
+3 24.67374    9 102   2   15400      52
+4 50.19951   11 100   1       0      52
+5 51.18112   11 100   2     160       1
+6 57.70413   11 100   1       0       0
+```
+
+The various education and occupation codes may be obtained from the
+reference in the help page for this dataset.
+
+We'll predict wage income.  One cannot get really accuracy with the
+given features, but this dataset will serve as a good introduction to
+the package.
+
+### The qe*() series of regtools wrappers for machine learning functions
+
+Here 'qe' stands for "quick and easy."  They provide convenient access
+to more sophisticated functions, with an easy, uniform interface. 
+E.g. **qeRF()** is a wrapper for the **randomForest()** function in the
+well-known package of the same name.  Each function does the model fit,
+with an optional holdout evaluation, with output ready for prediction of
+new cases via the R generic **predict()**, .e.g. **predict.RF()**.
+
+### Linear model
+
+``` r
+> lmout <- qeLin(pef,'wageinc') 
+> lmout$testAcc
+[1] 25520.6
+> predict(lmout,data.frame(age=32,educ='13',occ='106',sex='1',wkswrkd=45))
+       1 
+54509.36 
+```
+
+(UNDER CONSTRUCTION)
 
 ## EXAMPLE:  ADVANCED GRID SEARCH
 

@@ -539,7 +539,7 @@ splitData <- defmacro(holdout,data,
       set.seed(seed)
       idxs <- sample(1:nrow(data),nHold);
       tst <- data[idxs,];
-      data <- data[-idxs,]
+      # data <- data[-idxs,]
       holdIdxs <- idxs
    }
 )

@@ -260,6 +260,7 @@ qeRF <- function(data,yName,nTree=500,minNodeSize=10,
    rfout <- randomForest(frml,data=data,ntree=nTree,nodesize=minNodeSize)
    rfout$classNames <- xyc$classNames
    rfout$classif <- classif
+   rfout$trainRow1 <- xyc$x[1,]
    class(rfout) <- c('qeRF','randomForest')
    if (!is.null(holdout)) predictHoldout(rfout)
    rfout
@@ -268,6 +269,8 @@ qeRF <- function(data,yName,nTree=500,minNodeSize=10,
 predict.qeRF <- function(object,newx)
 {
    class(object) <- 'randomForest'
+   tmp <- rbind(object$trainRow1,newx)
+   newx <- tmp[-1,]
    classif <- object$classif
    if (classif) {
       probs <- predict(object,newx,type='prob')

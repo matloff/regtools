@@ -128,8 +128,8 @@ We'll predict wage income.  One cannot get really good accuracy with the
 given features, but this dataset will serve as a good introduction to
 these particular features of the package.
 
-The functions will automatically assess the given model on holdout data,
-and will also do a new prediction:
+The **qe\*()** functions' output are ready for making prediction on new cases.
+We'll use this example:
 
 ``` r
 > newx <- data.frame(age=32, educ='13', occ='106', sex='1', wkswrkd=30)
@@ -137,11 +137,30 @@ and will also do a new prediction:
 
 ### The qe*() series of regtools wrappers for machine learning functions
 
-One of the features of **regtools** is its **qe*()** functions, a set of
-wrappers.  Here 'qe' stands for "quick and easy."  These functions
-provide convenient access to more sophisticated functions, with an easy,
-uniform interface.  E.g. **qeRF()** is a wrapper for the
-**randomForest()** function in the well-known package of the same name.
+One of the features of **regtools** is its **qe\*()** functions, a set
+of wrappers.  Here 'qe' stands for "quick and easy."  These functions
+provide convenient access to more sophisticated functions, with a *very
+simple*, uniform interface.  For example,  **qeRF()** is a wrapper for
+the **randomForest()** function in the well-known package of the same
+name.
+
+Note that the simplicity of the interface is just as important as the
+uniformity. To run a neural networks fit to our **pef** data above, we
+simply call
+
+``` r
+qeNeural(pef,'wageinc')
+```
+
+with no preparation code, e.g. no defining a model.  Default values are
+used for hyperparameters, but the user can easily explore other values,
+e.g.
+
+``` r
+qeNeural(pef,'wageinc',hidden=c(100,100)))
+```
+
+
 Each function does the model fit, with an optional holdout evaluation,
 with output ready for prediction of new cases via the R generic
 **predict()**, .e.g. **predict.RF()**.  
@@ -155,7 +174,7 @@ But they do substantially more than the functions they wrap:
 * They handle R factors correctly in prediction, which some of the
   wrapped functions do not do by themselves (see below).
 
-Call form:
+Call form for all **qe\*()** functions:
 
 ``` r
 qe*(data,yName, options incl. method-specific)
@@ -178,15 +197,17 @@ Currently available:
 * **qeNeural()** neural networks, wrapper for **regtools** function
 **krsFit()**, in turn wrapping **keras** package
 
+So, let's try a few:
+
 ### Linear model
 
 ``` r
 > lmout <- qeLin(pef,'wageinc') 
 > lmout$testAcc
-[1] 25520.6
+[1] 25520.6  # Mean Absolute Prediction Error on holdout set
 > predict(lmout,newx)
       11 
-35034.63 
+35034.63   
 ```
 
 The **regtools** package includes some novel diagnostic methods for
@@ -197,20 +218,70 @@ k-NN fit:
 > parvsnonparplot(lmout,qeKNN(pef,'wageinc',25))
 ```
 
-We specified k = 25 nearest neighbors.
+We specified k = 25 nearest neighbors.  Here is the plot:
 
 ![result](inst/images/PrgEngFit.png)
 
 There is some suggestion here that the linear model tends to
 underpredict at low and high wage values.  If the analyst wished to use
-a linear model, she would investigate further, possibly adding quadratic
+a linear model, she would investigate further (always a good idea before
+resorting to machine learning algorithms), possibly adding quadratic
 terms to the model.
 
-### random forests
+### Random forests
 
+``` r
+> rfout <- qeRF(pef,'wageinc')
+> rfout$testAcc
+[1] 25416.02
+```
 
+A bit better than the linear fit, not too surprising in light of what we
+saw in the diagnostic graph above.  And remember, we are using the
+default values of the hyperparameters; we probably can do even better,
+maybe using **regtools**'s advanced grid search (see below).
 
-(UNDER CONSTRUCTION)
+Now, let's try the prediction:
+
+``` r
+> predict(rfout,newx)
+      11 
+39560.77 
+```
+
+Considerably different from what we got with the linear model.  But
+there's more:
+
+``` r
+> class(rfout)
+[1] "qeRF"         "randomForest"
+> rfo <- rfout
+> class(rfo) <- "randomForest"
+> predict(rfo,newx)
+Error in predict.randomForest(rfo, newx) : 
+  Type of predictors in new data do not match that of the training data.
+```
+
+Many packages do not handle prediction of fully new cases correctly, as
+we see here.  The **qe\*()** wrappers remedy this.
+
+### Neural networks
+
+Let's do one more.
+
+``` r
+nout <- qeNeural(pef,'wageinc')
+> nnout$testAcc
+[1] 25043.09
+> predict(nnout,newx)
+[1] 42597.28
+```
+
+Ah, better still.  Again, we should try other combinations of
+hyperparameters besides the defaults.  The **regtools** function
+**fineTuning()** does this in an advanced manner, as seen in the next
+section:
+
 
 ## EXAMPLE:  ADVANCED GRID SEARCH
 
@@ -363,7 +434,7 @@ are free of model bias, they are very useful in assessing the parametric
 models.
 
 Let's take a look at the included dataset **prgeng**, some Census data
-for California engineers and programmers in the year 2000. The response
+for California tech workers in the year 2000. The response
 variable in this example is wage income, and the predictors are age,
 gender, number of weeks worked, and dummy variables for MS and PhD
 degrees.  You can read the details of the data by typing

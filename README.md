@@ -92,11 +92,12 @@ Here are the main categories:
 
 ## <a name="quickstart">REGTOOLS QUICK START </a> 
 
-Here we will take a quick tour of **regtools**, using a dataset
-**prgeng** that is included in the package.  We'll start with linear
-regression, briefly illustrating **regtools**'s novel diagnostic tools,
-then move on the use of machine learning methods on this data, again
-using the data to illustrate various features of **regtools**.
+Here we will take a quick tour of a subset of **regtools** features,
+using a dataset **prgeng** that is included in the package.  We'll start
+with linear regression, briefly illustrating **regtools**'s novel
+diagnostic tools, then move on the use of machine learning methods on
+this data, again using the data to illustrate various features of
+**regtools**.
 
 ### The Data
 
@@ -123,18 +124,36 @@ data frame version, and use only a few features to keep things simple:
 The various education and occupation codes may be obtained from the
 reference in the help page for this dataset.
 
-We'll predict wage income.  One cannot get really accuracy with the
+We'll predict wage income.  One cannot get really good accuracy with the
 given features, but this dataset will serve as a good introduction to
-the package.
+these particular features of the package.
+
+The functions will automatically assess the given model on holdout data,
+and will also do a new prediction:
+
+``` r
+> newx <- data.frame(age=32, educ='13', occ='106', sex='1', wkswrkd=30)
+```
 
 ### The qe*() series of regtools wrappers for machine learning functions
 
-Here 'qe' stands for "quick and easy."  They provide convenient access
-to more sophisticated functions, with an easy, uniform interface. 
-E.g. **qeRF()** is a wrapper for the **randomForest()** function in the
-well-known package of the same name.  Each function does the model fit,
-with an optional holdout evaluation, with output ready for prediction of
-new cases via the R generic **predict()**, .e.g. **predict.RF()**.  
+One of the features of **regtools** is its **qe*()** functions, a set of
+wrappers.  Here 'qe' stands for "quick and easy."  These functions
+provide convenient access to more sophisticated functions, with an easy,
+uniform interface.  E.g. **qeRF()** is a wrapper for the
+**randomForest()** function in the well-known package of the same name.
+Each function does the model fit, with an optional holdout evaluation,
+with output ready for prediction of new cases via the R generic
+**predict()**, .e.g. **predict.RF()**.  
+
+As noted, these functions are largely convenience wrappers.
+But they do substantially more than the functions they wrap:
+
+* They automatically assesses the model on a holdout set, using as loss
+  Mean Absolute Prediction Error or Overall Misclassification Rate.
+
+* They handle R factors correctly in prediction, which some of the
+  wrapped functions do not do by themselves (see below).
 
 Call form:
 
@@ -165,15 +184,10 @@ Currently available:
 > lmout <- qeLin(pef,'wageinc') 
 > lmout$testAcc
 [1] 25520.6
-> predict(lmout,data.frame(age=32,educ='13',occ='106',sex='1',wkswrkd=45))
-       1 
-54509.36 
+> predict(lmout,newx)
+      11 
+35034.63 
 ```
-
-As noted, **qeLin()** is largely a wrapper for the usual \textbf{lm()}.
-However, optionally (by default actually), it assesss the model on a
-holdout set, using as loss Mean Absolute Prediction Error or Overall
-Misclassification Rate.
 
 The **regtools** package includes some novel diagnostic methods for
 assessing linear regression models.  One of them plots parametric vs.
@@ -183,10 +197,18 @@ k-NN fit:
 > parvsnonparplot(lmout,qeKNN(pef,'wageinc',25))
 ```
 
+We specified k = 25 nearest neighbors.
+
 ![result](inst/images/PrgEngFit.png)
 
 There is some suggestion here that the linear model tends to
-underpredict at low and high wage values.
+underpredict at low and high wage values.  If the analyst wished to use
+a linear model, she would investigate further, possibly adding quadratic
+terms to the model.
+
+### random forests
+
+
 
 (UNDER CONSTRUCTION)
 

@@ -45,12 +45,31 @@
 
 #       vector of predicted values
 
-##################################################################
-##################################################################
+# a note on predictors/features that are R factors:
+
+# In e.g. lm(), suppose some of the predictors are factors. Internally
+# lm() will convert these to dummy variables, alleviating the user of
+# that burden.  However, it can create problems in using the fitted
+# model to predict new cases, say newx.
+
+# Here newx must be a data frame (even if it has only one row), with
+# column names matching those of the the training data frame.  But the
+# types must match too, and in particular, for factors the levels must
+# match.  This can be tricky.
+
+# Our solution here is to have the qe*() functions include one row of
+# the input data in the output object; the utility getRow1() does this.
+# Then in the paired predict.qe*(), we call another utility,
+# setTrainFactors() to make the factor levels match.  This is done by
+# temporarily tacking newx onto the saved input row, resulting in a data
+# frame that preserves the structure of the original data, then deleted
+# that saved row.
 
 ##################################################################
-# qeLogit: generate estimated regression functions
+####################  the qe*() functions  #######################
 ##################################################################
+
+# qeLogit: generate estimated regression functions
 
 # arguments:  see above
 
@@ -85,14 +104,13 @@ qeLogit <- function(data,yName,
    }
    outlist$glmOuts <- lapply(1:nydumms,doGlm)
    outlist$classif <- classif
+   outlist$trainRow1 <- getRow1(data,yName)
    class(outlist) <- c('qeLogit')
    if (!is.null(holdout)) predictHoldout(outlist)
    outlist
 }
 
-##################################################################
 # predict.qeLogit: predict Ys from new Xs
-##################################################################
 
 # arguments:  see above
 
@@ -100,6 +118,7 @@ qeLogit <- function(data,yName,
  
 predict.qeLogit <- function(object,newx) 
 {
+   newx <- setTrainFactors(object,newx)
    # get probabilities for each class
    glmOuts <- object$glmOuts
    g <- function(glmOutsElt) predict(glmOutsElt,newx,type='response') 
@@ -147,6 +166,7 @@ qeLin <- function(data,yName,
    cmd <- paste0('lmout <- lm(cbind(',yNames,') ~ .,data=xy)')
    eval(parse(text=cmd))
    lmout$classif <- classif 
+   lmout$trainRow1 <- getRow1(data,yName)
    class(lmout) <- c('qeLin',class(lmout))
    if (!is.null(holdout)) {
       ycol <- which(names(data) == yName)
@@ -165,6 +185,7 @@ qeLin <- function(data,yName,
 
 predict.qeLin <- function(object,newx) {
    class(object) <- class(object)[-1]
+   newx <- setTrainFactors(object,newx)
    preds <- predict(object,newx)
    if (!object$classif) return(preds)
    probs <- pmax(preds,0)
@@ -212,6 +233,7 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,
    knnout$classif <- classif
    knnout$factorsInfo <- factorsInfo
    knnout$newxK <- newxK
+   knnout$trainRow1 <- getRow1(data,yName)
    class(knnout) <- c('qeKNN','kNN')
    if (!is.null(holdout)) {
       predictHoldout(knnout)
@@ -224,6 +246,7 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,
 predict.qeKNN <- function(object,newx,newxK=NULL)
 {
    class(object) <- 'kNN'
+   newx <- setTrainFactors(object,newx)
    classif <- object$classif
    xyc <- getXY(newx,NULL,TRUE,FALSE,object$factorsInfo)
    newx <- as.matrix(xyc$x)
@@ -260,7 +283,7 @@ qeRF <- function(data,yName,nTree=500,minNodeSize=10,
    rfout <- randomForest(frml,data=data,ntree=nTree,nodesize=minNodeSize)
    rfout$classNames <- xyc$classNames
    rfout$classif <- classif
-   rfout$trainRow1 <- xyc$x[1,]
+   rfout$trainRow1 <- getRow1(data,yName)
    class(rfout) <- c('qeRF','randomForest')
    if (!is.null(holdout)) predictHoldout(rfout)
    rfout
@@ -269,8 +292,7 @@ qeRF <- function(data,yName,nTree=500,minNodeSize=10,
 predict.qeRF <- function(object,newx)
 {
    class(object) <- 'randomForest'
-   tmp <- rbind(object$trainRow1,newx)
-   newx <- tmp[-1,]
+   newx <- setTrainFactors(object,newx)
    classif <- object$classif
    if (classif) {
       probs <- predict(object,newx,type='prob')
@@ -308,6 +330,7 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
    # svmout$classNames <- xyc$classNames
    svmout$classNames <- levels(y)
    svmout$classif <- classif
+   svmout$trainRow1 <- getRow1(data,yName)
    class(svmout) <- c('qeSVM',class(svmout))
    if (!is.null(holdout)) predictHoldout(svmout)
    svmout
@@ -316,6 +339,7 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
 predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
 {
    class(object) <- class(object)[-1]
+   newx <- setTrainFactors(object,newx)
    preds <- predict(object,newx)
    res <- list(predClasses=preds)
    classNames <- object$classNames
@@ -370,19 +394,17 @@ qeGBoost <- function(data,yName,
    }
    outlist$gbmOuts <- lapply(1:nydumms,doGbm)
    outlist$nTree <- nTree
+   outlist$trainRow1 <- getRow1(data,yName)
    class(outlist) <- c('qeGBoost')
    if (!is.null(holdout)) predictHoldout(outlist)
    outlist
 }
 
-####################  predict.qeGBoost  ######################
-
 # arguments:  see above
-
 # value:  object of class 'qeGBoost'; see above for components
- 
 predict.qeGBoost <- function(object,newx) 
 {
+   newx <- setTrainFactors(object,newx)
    # get probabilities for each class
    gbmOuts <- object$gbmOuts
    nTree <- object$nTree
@@ -436,6 +458,7 @@ qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
    krsout$classNames=classNames
    krsout$factorsInfo=factorsInfo
    krsout$x <- x
+   krsout$trainRow1 <- getRow1(data,yName)
    class(krsout) <- c('qeNeural',class(krsout))
    if (!is.null(holdout)) predictHoldout(krsout)
    krsout
@@ -444,6 +467,7 @@ qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
 predict.qeNeural <- function(object,newx)
 {
    class(object) <- class(object)[-1]
+   newx <- setTrainFactors(object,newx)
    if (nrow(newx) == 1) {  # kludge!; Tensorflow issue
       kludge1row <- TRUE
       newx <- rbind(newx,newx)
@@ -466,6 +490,21 @@ predict.qeNeural <- function(object,newx)
 }
 
 ###################  utilities for qe*()  #########################
+
+# see note on factor features at top of this file
+setTrainFactors <- function(object,newx) 
+{
+   tmp <- rbind(object$trainRow1,newx)
+   newx <- tmp[-1,]
+   newx
+}
+
+# see note on factor features at top of this file
+getRow1 <- function(data,yName) 
+{
+   ycol <- which(names(data) == yName)
+   data[1,-ycol]
+}
 
 # some predict.qe*() functions call this for cleanup at end; see
 # list() below for values; intended for settings in which the base

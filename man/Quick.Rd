@@ -92,6 +92,11 @@ The \code{qe*} functions do model fit.  Each of them has a
 value of the previously-called \code{*Class} function, and \code{newx},
 a data frame of points to be predicted.  In some cases, there are
 additional algorithm-specific parameters.
+
+An additional benefit is that the \code{predict} functions work
+correctly on new cases with R factors.  The proper levels are assigned
+to the new cases.  (Of course, if a new case has a level not in the
+original data, nothing can be done.)
    
 }
 
@@ -131,25 +136,17 @@ Regression case: vector of predicted values
 data(peFactors)
 pe <- peFactors[,c(1,3,5,7:9)]
 
+newx <- data.frame(age=32, educ='13', occ='106', sex='1', wkswrkd=30)
+
 # logit
 lgout <- qeLogit(pe,'occ')
 preds <- predict(lgout,pe[,-3])
 mean(preds$predClasses == pe[,3])
-# [1] 0.3853161
 mean(preds$probs[,1])
-# [1] 0.22851
 mean(pe[,3] == '100')
-# [1] 0.2285714
 predict(lgout,pe[1,-3])
-# $predClasses
-# [1] "102"
-#
-# $probs
-#  100       101       102       106        140        141
-# [1,] 0.2924927 0.2162206 0.3331735 0.0439862 0.02220282
-# 0.09192411
 lgout <- qeLogit(pe,'occ',holdout=c(1000,9999))
-lgout$testAcc  # 0.373
+lgout$testAcc  
 
 
 # k-NN
@@ -163,6 +160,7 @@ knnout <- qeKNN(pe,'wageinc',25)
 preds <- predict(knnout,pe[,-5])
 mean(abs(preds-pe[,5]))
 predict(knnout,pe[1,-5])
+predict(knnout,newx)  # 26791.6
 
 # RF
 rfout <- qeRF(pe,'occ',25)
@@ -209,7 +207,6 @@ predict(lgout,pe[1,-3])
 lmout <- qeLin(pe,'wageinc')
 preds <- predict(lmout,pe[,-5])
 mean(abs(preds - pe[,5]))
-# [1] 25047.36
 predict(lmout,pe[1,-5])
 
 }

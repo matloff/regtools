@@ -491,22 +491,15 @@ letters in the dataset are not similar to those in actual English texts.
 The correct frequencies are given in the **ltrfreqs** dataset included
 here in the **regtools** package.
 
-In order to adjust the analysis accordingly, the **ovalogtrn()**
-function has an optional **truepriors** argument.  For the letters
-example, we could set this argument to **ltrfreqs**.  The function
-**knntrn()** also has such an argument.  (The term *priors*
-here does NOT refer to a subjective Bayesian analysis. It is merely a
-standard term for the class probabilities.)
-
-In an example in the book associated with this package, the use of
-correct priors increased the rate of correct classification from 75 to
-88%.
+We can adjust the analysis accordingly, using the **classadjust()**
+function.
 
 ## EXAMPLE:  RECTANGULARIZATION OF TIME SERIES
 
 This allows use of ordinary tools like **lm()** for prediction in time
 series data.  Since the goal here is prediction rather than inference,
 an informal model can be quite effective, as well as convenient.
+Note that we can also use the machine learning functions.
 
 The basic idea is that **x[i]** is predicted by
 **x[i-lg],
@@ -517,8 +510,8 @@ x[i-1]**,
 where **lg** is the lag.
 
 ``` r
-xy <- TStoX(Nile,5)
-head(xy)
+> xy <- TStoX(Nile,5)
+> head(xy)
 #      [,1] [,2] [,3] [,4] [,5] [,6]
 # [1,] 1120 1160  963 1210 1160 1160
 # [2,] 1160  963 1210 1160 1160  813
@@ -526,30 +519,53 @@ head(xy)
 # [4,] 1210 1160 1160  813 1230 1370
 # [5,] 1160 1160  813 1230 1370 1140
 # [6,] 1160  813 1230 1370 1140  995
-head(Nile,36)
+> head(Nile,36)
 #  [1] 1120 1160  963 1210 1160 1160  813 1230 1370 1140  995  935 1110  994 1020
 # [16]  960 1180  799  958 1140 1100 1210 1150 1250 1260 1220 1030 1100  774  840
 # [31]  874  694  940  833  701  916
 ```
 
-Try **lm()**:
+Try **qeLin()**.  We'll need to convert to data frame form for this:
 
 ``` r
-lmout <- lm(xy[,6] ~ xy[,1:5])
-lmout
+> xyd <- data.frame(xy)  # col names now X1,...,X6
+> lmout <- qeLin(xyd,'X6') 
+> lmout
+> lmout
 ...
 Coefficients:
-Coefficients:
-(Intercept)   xy[, 1:5]1   xy[, 1:5]2   xy[, 1:5]3   xy[, 1:5]4   xy[, 1:5]5  
+(Intercept)           X1           X2           X3           X4           X5  
   307.84354      0.08833     -0.02009      0.08385      0.13171      0.37160  
+```
+
+Only the most recent observation, X6, seems to have much impact.  We
+essentially have an ARMA-1 model, possibly ARMA-2.
+
+Actually, the results here are quite similar to those of the "real" ARMA
+function:
+
+``` r
+> arma(Nile,c(5,0))
+
+Coefficient(s):
+      ar1        ar2        ar3        ar4        ar5  intercept  
+  0.37145    0.13171    0.08391   -0.01992    0.08839  307.69318  
 ```
 
 Predict the 101st observation:
 
 ``` r
-cfs <- coef(lmout)
-cfs %*% c(1,Nile[96:100])
-#          [,1]
-# [1,] 784.4925
+> predict(lmout,xyd[95,-6])
+      95 
+810.3493 
+```
+
+Let's try a nonparametric approach, using random forests:
+
+``` r
+> rfout <- qeRF(xyd,'X6')
+> predict(rfout,xyd[95,-6])
+      95 
+812.1225 
 ```
 

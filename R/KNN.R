@@ -145,7 +145,8 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       regests <- y[closestIdxs,]
    } else {
       # in fyh(), closestIdxs is a row in closestIdxs, with the first k columns
-      fyh <- function(closestIdxsRow) smoothingFtn(y[closestIdxsRow,,drop=FALSE])
+      fyh <- function(closestIdxsRow) 
+         smoothingFtn(y[closestIdxsRow,,drop=FALSE],xy)
       if (!allK) {
          if (identical(smoothingFtn,loclin)) {
             regests <- loclin(newx,cbind(x,y)[closestIdxs,])
@@ -220,10 +221,7 @@ kn2 <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 
    noPreds <- is.null(newx)  # don't predict, just save for future predict
    startA1adjust <- if (startAt1) 0 else 1
-   # general checks 
-   if (identical(smoothingFtn,loclin)) {
-      if (allK) stop('cannot use loclin() yet with allK = TRUE')
-   }
+   
    # checks on x
    if (is.vector(x)) x <- matrix(x,ncol=1)
    if (hasFactors(x)) stop('use factorsToDummies() to create dummies')
@@ -243,12 +241,7 @@ kn2 <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       else y <- matrix(y,ncol=1)
    }
    if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
-   if (is.matrix(y) && identical(smoothingFtn,mean)) 
-      smoothingFtn <- colMeans
-   if (ncol(y) > 1 && allK)  
-      stop('for now, in multiclass case, allK must be FALSE')
-   # if (classif && allK) print('stub')
-   #    stop('classif=TRUE can be set only if allK is FALSE')
+   if (identical(smoothingFtn,mean)) smoothingFtn <- meany
    if (ncol(y) > 1 && !allK) classif <- TRUE
    # checks on newx
    if (is.factor(newx) || is.data.frame(newx) && hasFactors(newx))
@@ -312,22 +305,13 @@ browser()
    if (kmax1 == 1) {
       regests <- y[closestIdxs,]
    } else {
-      # in fyh(), closestIdxs is a row in closestIdxs, with the first k columns
-      fyh <- 
-         function(closestIdxsRow) smoothingFtn(y[closestIdxsRow,,drop=FALSE])
-      if (identical(smoothingFtn,loclin)) {
-         nearxy <- cbind(x,y)[closestIdxs,]
-         loclin1 <- function(predpts) loclin(predpts,nearxy)
-         smoothingFtn <- loclin1
-      } else if (identical(smoothingFtn,vary)) {
-         nearxy <- cbind(x,y)[closestIdxs,]
-         vary1 <- function(predpts) vary(predpts,nearxy)
-         smoothingFtn <- vary1
-      }
-      # else {
-         regests <- apply(closestIdxs,1,fyh)
-         if (ncol(y) > 1) regests <- t(regests)
-      # }
+      # in fyh(), closestIdxs is a row in closestIdxs, from the first k
+      # columns; it will choose rows in x,y, to obtain neighboring x,y
+      # values
+      fyh <- function(newxI) 
+         smoothingFtn(closestIdxs[newxI,],x,y,newx[newxI,])
+      regests <- sapply(1:nrow(newx),fyh)
+      if (ncol(y) > 1) regests <- t(regests)
    }
 
    # start building return value
@@ -758,12 +742,6 @@ kmin <- function(y,xdata,lossftn=l2,nk=5,nearf=meany) {
    result
 }
 
-#### removed, Aug. 8, 2019
-
-## # incorrect prediction in 2-class classification problem
-## predwrong <- function(muhat,y)
-##    as.integer(y == round(muhat))
-
 ### ######################  plot.kmin()  ###############################
 
 # x is output from kmin()
@@ -779,47 +757,37 @@ plot.kmin <- function(x,y,...) {
 # nearest-neighbor Y values; standard kNN uses the mean, implemented
 # here as mean()
 
-# find mean of Y on the data z, Y in last column, and predict at xnew
-meany <- function(predpt,nearxy) 
+# note that xy = cbind(x,y) is used globally
+
+# find mean of Y in the neighborhood of predpt; latter not used here
+meany <- function(closestIdxsRow,x,y,predpt) 
 {
-   # predpt not directly used (but see loclin() below)
-   nxcol <- 
-      if(is.vector(predpt)) length(predpt) else ncol(predpt)
-   nxycol <- ncol(nearxy)
-   ycols <- (nxcol+1):nxycol
-   colMeans(nearxy[,ycols,drop=FALSE])
+   colMeans(y[closestIdxsRow,,drop=FALSE])
 }
 
-# find variance of Y in the neighborhood of predpt
+# find variance of Y in the neighborhood of predpt; latter not used here
 
-vary <- function(predpt,nearxy) {
-   nycol <- ncol(nearxy) - length(predpt)
-   if (nycol > 1) stop('not capable of vector y with vary()')
-   # predpt not used (but see loclin() below)
-   ycol <- ncol(nearxy)
-   var(nearxy[,ycol])
+vary <- function(closestIdxsRow,x,y,predpt) {
+   if (ncol(y) > 1) stop('vary() must have scalar y')
+   apply(y[closestIdxsRow,,drop=FALSE],2,var)
 }
 
-# fit linear model to the data z, Y in last column, and predict at xnew
-loclin <- function(predpts,nearxy) {
-   if (is.vector(predpts)) predpts <- matrix(predpts,nrow=1)
-   # single- and multicolumn Y work on mostly the same code
-   xy <- nearxy
-   nycol <- ncol(nearxy) - ncol(predpts)
-   ystartcol <- ncol(predpts) + 1
-   colnames(xy) <- paste0('z',1:ncol(xy))
+# fit linear model to the neighborhood data, and predict at predpt
+loclin <- function(closestIdxsRow,x,y,predpt) {
+   nxcol <- ncol(x)
+   nycol <- ncol(y)
+   if (nycol > 1) stop('loclin() must have scalar y')
+   xNames <- paste0('x',1:nxcol)
    yNames <- paste0('y',1:nycol)
-   colnames(xy)[ystartcol:ncol(xy)] <- yNames
-   xy <- as.data.frame(xy)
-   colnames(predpts) <- paste0('z',1:ncol(predpts))
-   predpts <- as.data.frame(predpts)
-   if (nycol > 1) {
-      cmd <- paste0('lmout <- lm(cbind(',yNames,') ~ .,data=xy)')
-   } else {
-      cmd <- paste0('lmout <- lm(',yNames[1],' ~ .,data=xy)')
-   }
+   colnames(x) <- xNames
+   predpt <- matrix(predpt,nrow=1)
+   colnames(predpt) <- xNames
+   predpt <- data.frame(predpt)
+   colnames(y) <- yNames
+   xy <- data.frame(cbind(x,y))
+   cmd <- paste0('lmout <- lm(',yNames[1],' ~ .,data=xy)')
    eval(parse(text=cmd))
-   predict(lmout,predpts)
+   predict(lmout,predpt)
 }
 
 ######################  parvsnonparplot(), etc. ###############################

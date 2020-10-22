@@ -20,13 +20,13 @@
 #   newx: vector or matrix; "X" values to be predicted, if any; if NULL,
 #      compute regests values at each "X", saving for later
 #      prediction using predict.kNN()
-#   kmax: maximum value of k requested; see 'allK' below
+#   kmax: value of k requested
 #   scaleX: x and newx will be scaled
 #   PCAcomps: apply PCA (after scaling, if any) to x, newx, using this
 #      many components; 0 means no PCA
 #   smoothingFtn: op applied to the "Y"s of nearest neighbors; could be,
 #      say, median instead of mean, even variance
-#   allK: report kNN estimates for all k = 1,...,kmax; otherwise just k = kmax
+#   allK: currently disabled
 #   leave1out: delete the 1-nearest neighbor (n-fold cross-validation)
 #   classif: if TRUE, consider this a classification problem. 
 #      Then 'ypreds' will be included in the return value.  See also the
@@ -45,173 +45,6 @@
 #    for leave1out), regests, scaleX, x, leave1out
 
 kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
-          expandVars=NULL,expandVals=NULL,
-          smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
-          classif=FALSE,startAt1=TRUE)
-{  
-   noPreds <- is.null(newx)  # don't predict, just save for future predict
-   startA1adjust <- if (startAt1) 0 else 1
-   # general checks 
-   if (identical(smoothingFtn,loclin)) {
-      if (allK) stop('cannot use loclin() yet with allK = TRUE')
-   }
-   # checks on x
-   if (is.vector(x)) x <- matrix(x,ncol=1)
-   if (hasFactors(x)) stop('use factorsToDummies() to create dummies')
-   if (is.data.frame(x)) 
-      x <- as.matrix(x)
-   ccout <- constCols(x) 
-   if (length(ccout) > 0) {
-      warning('X data has constant columns:')
-      print(ccout)
-      if (scaleX) stop('constant columns cannot work with scaling')
-   }
-   # checks on y
-   nYvals <- length(unique(y))
-   if (is.vector(y)) {
-      if (classif && nYvals > 2) 
-         y <- factorsToDummies(as.factor(y),omitLast=FALSE)
-      else y <- matrix(y,ncol=1)
-   }
-   if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
-   if (is.matrix(y) && identical(smoothingFtn,mean)) 
-      smoothingFtn <- colMeans
-   if (ncol(y) > 1 && allK)  
-      stop('for now, in multiclass case, allK must be FALSE')
-   # if (classif && allK) print('stub')
-   #    stop('classif=TRUE can be set only if allK is FALSE')
-   if (ncol(y) > 1 && !allK) classif <- TRUE
-   # checks on newx
-   if (is.factor(newx) || is.data.frame(newx) && hasFactors(newx))
-      stop('change to dummies, factorsToDummies()')
-   if (is.vector(newx)) {
-      nms <- names(newx)
-      # is ti one observation or one predictor?
-      newx <- matrix(newx,ncol=ncol(x))
-      colnames(newx) <- nms
-   }
-   
-   if (is.data.frame(newx)) {
-      newx <- as.matrix(newx)
-   }
-   # at this point, x, y and newx will all be matrices
-
-   if (nrow(y) != nrow(x)) 
-      stop('number of X data points not equal to that of Y')
-
-   if (noPreds) newx <- x
-
-   kmax1 <- kmax + leave1out
-
-   if (scaleX) {
-      x <- scale(x)
-      xcntr <- attr(x,'scaled:center')
-      xscl <- attr(x,'scaled:scale')
-      newx <- scale(newx,center=xcntr,scale=xscl)
-   }
-
-   # expand any specified variables
-   eVars <- !is.null(expandVars)
-   eVals <- !is.null(expandVals)
-   if (eVars || eVals) {
-      if(xor(eVars,eVals)) {
-        stop('expandVars and expandVals must be used together')
-      }
-      if (length(expandVars) != length(expandVals)) {
-          stop('expandVars and expandVals should have the same length')
-      }
-      x <- multCols(x,expandVars,expandVals)
-      newx <- multCols(newx,expandVars,expandVals)  
-   }
-
-   if (PCAcomps > 0) 
-      stop('PCA now must be done separately')
-
-   # find NNs
-   tmp <- FNN::get.knnx(data=x, query=newx, k=kmax1)
-   closestIdxs <- tmp$nn.index
-   if (leave1out) closestIdxs <- closestIdxs[,-1,drop=FALSE]
-
-   # closestIdxs is a matrix; row i gives the indices of the kmax 
-   # closest rows in x to newx[i,]
-
-   # we might want to try various values of k (allK = T), up through
-   # kmax; e.g.  for k = 2 would just use the first 2 columns
-
-   # now, the predictions
-
-   # treat kmax1 = 1 specially, as otherwise get 1x1 matrix issues
-   if (kmax1 == 1) {
-      regests <- y[closestIdxs,]
-   } else {
-      # in fyh(), closestIdxs is a row in closestIdxs, with the first k columns
-      fyh <- function(closestIdxsRow) 
-         smoothingFtn(y[closestIdxsRow,,drop=FALSE],xy)
-      if (!allK) {
-         if (identical(smoothingFtn,loclin)) {
-            regests <- loclin(newx,cbind(x,y)[closestIdxs,])
-         } else {
-            regests <- apply(closestIdxs,1,fyh)
-            if (ncol(y) > 1) regests <- t(regests)
-         }
-      } else {
-         regests <- NULL
-         for (k in 1:kmax) 
-            regests <- 
-               if (ncol(y) == 1)
-                 rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
-               else 
-                 rbind(regests,t(apply(closestIdxs[,1:k,drop=FALSE],1,fyh)))
-      }
-   }
-
-   # start building return value
-
-   tmplist <- list(whichClosest=closestIdxs,regests=regests,scaleX=scaleX,
-      classif=classif)
-
-   # MH dists for possible re-run using loclin()
-   if (length(ccout) == 0) {
-      meanx <- colMeans(x)
-      covx <- cov(x)
-      tried <- try(
-         tmplist$mhdists <- mahalanobis(newx,meanx,covx),
-         silent=TRUE
-      )
-      if (is.null(tried) || inherits(tried,'try-error')) {
-         # warning('Mahalanobis distances not calculated')
-         tmplist$mhdists <- NULL
-      } 
-   }
-
-   if (classif && !noPreds) {
-      if (ncol(y) > 1) {  # multiclass (> 2) case
-         yp <- apply(regests,1,which.max) - startA1adjust
-         if (!allK) {
-           ypreds <- yp
-         } else ypreds <- matrix(yp,nrow=kmax,byrow=TRUE)
-      } else ypreds <- round(regests)  # 2-class case
-      tmplist$ypreds <- ypreds
-   }
-
-   if (scaleX) {
-      tmplist$xcntr <- xcntr
-      tmplist$xscl <- xscl
-   }
-   ## if (noPreds) {
-      tmplist$x <- x
-   ## } else {
-   ##    tmplist$x <- NULL
-   ## }
-   tmplist$noPreds <- noPreds
-   tmplist$leave1out <- leave1out
-   tmplist$startAt1adjust <- startA1adjust
-   tmplist$expandVars <- expandVars
-   class(tmplist) <- 'kNN'
-   tmplist
-}
-
-kn2 <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
           expandVars=NULL,expandVals=NULL,
           smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
           classif=FALSE,startAt1=TRUE)
@@ -300,7 +133,6 @@ kn2 <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 
    # now, the predictions
 
-browser()
    # treat kmax1 = 1 specially, as otherwise get 1x1 matrix issues
    if (kmax1 == 1) {
       regests <- y[closestIdxs,]

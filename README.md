@@ -144,15 +144,15 @@ simple*, uniform interface.  For example,  **qeRF()** is a wrapper for
 the **randomForest()** function in the well-known package of the same
 name.
 
-Note that the simplicity of the interface is just as important as the
-uniformity. To run a neural networks fit to our **pef** data above, we
+*Note that the simplicity of the interface is just as important as the
+uniformity.* To run a neural networks fit to our **pef** data above, we
 simply call
 
 ``` r
 qeNeural(pef,'wageinc')
 ```
 
-with no preparation code, e.g. no defining a model.  Default values are
+*with no preparation code,* e.g. no defining a model.  Default values are
 used for hyperparameters, but the user can easily explore other values,
 e.g.
 
@@ -161,14 +161,14 @@ qeNeural(pef,'wageinc',hidden=c(100,100)))
 ```
 
 
-Each function does the model fit, with an optional holdout evaluation,
+Each function does the model fit, including an optional holdout evaluation,
 with output ready for prediction of new cases via the R generic
 **predict()**, .e.g. **predict.RF()**.  
 
 As noted, these functions are largely convenience wrappers.
 But they do substantially more than the functions they wrap:
 
-* They automatically assesses the model on a holdout set, using as loss
+* They automatically assess the model on a holdout set, using as loss
   Mean Absolute Prediction Error or Overall Misclassification Rate.
 
 * They handle R factors correctly in prediction, which some of the
@@ -186,7 +186,7 @@ Currently available:
 
 * **qeLogit()** logistic model, wrapper for **glm(family=binomial)**
 
-* **qeKNN()** k-Nearest Neighbors, wrapper for **regtools** **kNN()**
+* **qeKNN()** k-Nearest Neighbors, wrapper for the **regtools** function **kNN()**
 
 * **qeRF()** random forests, wrapper for **randomForest** package
 
@@ -194,8 +194,7 @@ Currently available:
 
 * **qeSVM()** SVM, wrapper for **e1071** package
 
-* **qeNeural()** neural networks, wrapper for **regtools** function
-**krsFit()**, in turn wrapping **keras** package
+* **qeNeural()** neural networks, wrapper for **regtools** function **krsFit()**, in turn wrapping **keras** package
 
 So, let's try a few:
 
@@ -222,11 +221,11 @@ We specified k = 25 nearest neighbors.  Here is the plot:
 
 ![result](inst/images/PrgEngFit.png)
 
-There is some suggestion here that the linear model tends to
-underpredict at low and high wage values.  If the analyst wished to use
-a linear model, she would investigate further (always a good idea before
-resorting to machine learning algorithms), possibly adding quadratic
-terms to the model.
+Glancing at the red 45-degree line, we see some suggestion here that the
+linear model tends to underpredict at low and high wage values.  If the
+analyst wished to use a linear model, she would investigate further
+(always a good idea before resorting to machine learning algorithms),
+possibly adding quadratic terms to the model.
 
 ### Random forests
 
@@ -272,13 +271,13 @@ Let's do one more.
 ``` r
 nout <- qeNeural(pef,'wageinc')
 > nnout$testAcc
-[1] 25043.09
+[1] 25971.06
 > predict(nnout,newx)
-[1] 42597.28
+[1] 35663.24
 ```
 
-Ah, better still.  Again, we should try other combinations of
-hyperparameters besides the defaults.  The **regtools** function
+Again, we should try other combinations of hyperparameters besides the
+defaults.  And we should do a number of runs.  The **regtools** function
 **fineTuning()** does this in an advanced manner, as seen in the next
 section:
 
@@ -291,9 +290,14 @@ try many combinations of candidate values of the tuning parameters to
 find the "best" combination, say in the sense of highest rate of correct
 classification in a classification problem.
 
-Various machine learning packages include grid search functions.  But as
-will be seen below, the one in **regtools** has some novel features not
-found in the other packages.
+A number of machine learning packages include grid search functions.  But 
+the one in **regtools** has some novel features not
+found in the other packages:
+
+* Use of standard errors to avoid "p-hacking."
+
+* A graphical interface, enabling the user to see at a glance how the
+  various hyperparameters interact.
 
 First, though, a brief discussion regardng finding the "best"
 hyperparameter combination.
@@ -302,12 +306,12 @@ hyperparameter combination.
 
 **But why the quotation marks around the word *best* above?**  The fact
 is that, due to sampling variation, a naive grid search may not give you
-the best parameter combination:
+the best parameter combination, due to sampling variation:
 
 1. The full dataset is a sample from some target population.
 
 2. Most grid search functions use *cross-validation*, in which the data
-   are (one or more times) split into a training set and a prediction
+   are (one or more times) randomly split into a training set and a prediction
 set, thus adding further sampling variation.
 
 So the parameter combination that seems best in the grid search may not
@@ -326,20 +330,24 @@ should NOT necessarily choose the combination with the absolute minimum
 loss; one might instead just the one with the smallest standard error,
 as it's the one we're most sure of.
 
+And moreover...
+
 ### A further caveat
 
 In fact, it is often wrong to even speak of the "best" hyperparameter
 combination in the first place. This is because there actually might be
 several optimal configurations, due to the fact that the mean loss
-sample loss values of different hyperparameters may be correlated (often
-negatively).  
+sample loss values of different hyperparameters may be correlated often
+negatively.  Thus we should not be surprised when we see several
+configurations that are quite different from each other yet have similar
+loss values.
 
 ### In other words
 
-Just pick a good one, without obsessing too much over "best," and pay
-attention to standard errors.
+Just pick a good combination of hyperparameters, without obsessing too
+much over "best," and pay attention to standard errors.
 
-### The **regtools** approach ###
+### The **regtools** approach to grid search ###
 
 The **regtools** grid search function **fineTuning()** is an advanced
 grid search tool, in two ways:
@@ -353,16 +361,16 @@ for the mean losses.
 thereby providing guidance for further combinations to investigate.
 
 Here is an example using the famous Pima diabetes data (stored in a data
-frame **db** in the example below).  This is a binary problem
-in which we are predicting presence or absence of the disease.  We'll do
-an SVM analysis, using the **ksvm()** function from the **kernlab**
-package, with a polynomial kernel.  Our parameters are **d**, the degree
-of the polynomial, and **C**, the penalty for each datapoint inside the
-margin.
+frame **db** in the example below).  This is a binary problem in which
+we are predicting presence or absence of the disease.  We'll do an SVM
+analysis, with our hyperparameters being **gamma**, a shape parameter,
+and **cost**, the penalty for each datapoint inside the margin.
 
-The grid search function **fineTuning()** calls a user-defined function
-that fits the user's model on the training data and then predicts on the
-test data.
+The **regtools** grid search function **fineTuning()** calls a
+user-defined function that fits the user's model on the training data
+and then predicts on the test data.  The user-defined function is
+specified in the **fineTuning()** argument **regcall**, which in our
+example here will be **pdCall**:
 
 ``` r
 # user provides a function stating the analysis to run on any parameter
@@ -402,8 +410,7 @@ And the output:
 Here is what happened in the **fineTuning()** call:
 
 * We fit SVM models, using **qeSVM()**, which has two SVM-specific
-  parameters, **gamma** and **cost**.  (See the documentation for
-**e1071::svm()**.)
+  parameters, **gamma** and **cost**.  (See the documentation for **e1071::svm()**.)
 
 * We specified the values 0.5, 1 and 1.5 for **gamma**, and the same for
   **cost**.  That means 9 possible combinations.
@@ -412,14 +419,13 @@ Here is what happened in the **fineTuning()** call:
   **qeSVM()** on each one,  
 
 * Running **qeSVM()** is accomplished via the **fineTuning()** argument
-  **regCall**, which specifies a user-written function, in this case
-**pdCall()**.
+  **regCall**, which specifies a user-written function, in this case **pdCall()**.
 
 * In calling **regCall()**, **fineTuning()** passes the current
   hyperparameter combination, **cmbi**, and the current training and
 holdout sets, **dtrn** and **dtst**.  The user-supplied **regCall()**,
 in this case **pdCall()** then calls the desired machine learning
-function, here **qeSVM()**, and calculates the resulting mean loss.
+function, here **qeSVM()**, and calculates the resulting mean loss for that combination.
 
 Technically the best combination is (0.5,1.5), but several gave similar
 results, as can be seen by the Bonferroni-Dunn column, which gives radii of
@@ -453,9 +459,8 @@ We saw above an example of one such function, **parvsnonparplot()**.
 Another is **nonparvarplot()**.  Here is the data prep:
 
 ``` r
-data(peDumms)
+data(peDumms)  # dummy variables version of prgeng
 pe1 <- peDumms[c('age','educ.14','educ.16','sex.1','wageinc','wkswrkd')]
-lmout <- lm(wageinc ~ .,data=pe1)
 ```
 
 We will check the classical assumption of homoscedasticity,

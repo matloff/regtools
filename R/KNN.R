@@ -179,11 +179,8 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       tmplist$xcntr <- xcntr
       tmplist$xscl <- xscl
    }
-   ## if (noPreds) {
-      tmplist$x <- x
-   ## } else {
-   ##    tmplist$x <- NULL
-   ## }
+   tmplist$x <- x
+   tmplist$y <- y
    tmplist$noPreds <- noPreds
    tmplist$leave1out <- leave1out
    tmplist$startAt1adjust <- startA1adjust
@@ -670,10 +667,12 @@ nonparvsxplot <- function(knnout,lmout=NULL) {
 
 nonparvarplot <- function(knnout,returnPts=FALSE) {
    nonparcondmean <- knnout$regest
+   x <- knnout$x
    y <- knnout$y
    k <- knnout$k
-   tmp <- knnest(y,knnout,k,nearf=vary)
-   plot(knnout$regest,tmp$regest,xlab='mean',ylab='var')
+   # tmp <- knnest(y,knnout,k,nearf=vary)
+   tmp <- kNN(x,y,x,25,smoothingFtn=vary)
+   plot(knnout$regests,tmp$regests,xlab='mean',ylab='var')
    abline(0,1)
    if (returnPts) return(cbind(knnout$regest,tmp$regest))
 }

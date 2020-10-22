@@ -473,10 +473,11 @@ against the estimated conditional mean, both computed nonparametrically:
 Though we ran the plot thinking of the homoscedasticity assumption, and
 indeed we do see larger variance at large mean values, this
 is much more remarkable, showing that there are interesting
-subpopulations within this data.  These may correspond to different
-occupations, something to be investigated.
+subpopulations within this data.  Since there appear to be 6 clusters,
+and there are 6 occupations, the observed pattern may reflect this.
 
-The package includes various other graphical diagnostic functions.
+The package includes various other graphical diagnostic functions,
+such as**nonparvsxplot()**.
 
 By the way, violation of the homoscedasticity assumption won't
 invalidate the estimates in our linear model.  They still will be

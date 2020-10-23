@@ -30,9 +30,9 @@ kNN(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,expandVars=NULL,expandVals=NULL,
    startAt1=TRUE)
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
-meany(predpt,nearxy) 
-vary(predpt,nearxy) 
-loclin(predpt,nearxy) 
+meany(nearIdxs,x,y,predpt) 
+vary(nearIdxs,x,y,predpt) 
+loclin(nearIdxs,x,y,predpt) 
 \method{predict}{knn}(object,...)
 kmin(y,xdata,lossftn=l2,nk=5,nearf=meany) 
 % \method{plot}{kmin}(x,y,...)
@@ -64,7 +64,7 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
   \item{smoothingFtn}{Function to apply to the "Y" values in the 
      set of nearest neighbors.}
   \item{allK}{If TRUE, find regression estimates for all \code{k}
-     through \code{kmax}}
+     through \code{kmax}.  Currently disabled.}
   \item{leave1out}{If TRUE, omit the 1-nearest neighbor from analysis}
   \item{classif}{If TRUE, compute the predicted class labels, not just
      the regression function values}
@@ -168,14 +168,17 @@ x <- rbind(c(1,0),c(2,5),c(0,5),c(3,3),c(6,3))
 y <- c(8,3,10,11,4)
 newx <- c(0,0)
 
-kNN(x,y,newx,scaleX=FALSE,2)
+kNN(x,y,newx,2,scaleX=FALSE)
 # $whichClosest
 #      [,1] [,2]
 # [1,]    1    4
 # $regests
 # [1] 9.5
 
-knnout <- kNN(x,y,NULL,scaleX=FALSE,2)
+kNN(x,y,newx,3,scaleX=FALSE,smoothingFtn=loclin)$regests
+# 7.307692
+
+knnout <- kNN(x,y,NULL,scaleX=FALSE)
 knnout
 
 # $whichClosest

@@ -51,6 +51,10 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 {  
    if (PCAcomps > 0) stop('PCA now must be done separately')
    if (allK) stop('allK option currenttly disable')
+   if (identical(smoothingFtn,loclin) && kmax < 3)
+      stop('loclin requires k >= 3')
+   if (identical(smoothingFtn,vary) && kmax < 2)
+      stop('vary requires k >= 2')
 
    noPreds <- is.null(newx)  # don't predict, just save for future predict
    startA1adjust <- if (startAt1) 0 else 1
@@ -589,20 +593,19 @@ plot.kmin <- function(x,y,...) {
 # note that xy = cbind(x,y) is used globally
 
 # find mean of Y in the neighborhood of predpt; latter not used here
-meany <- function(closestIdxsRow,x,y,predpt) 
+meany <- function(nearIdxs,x,y,predpt) 
 {
-   colMeans(y[closestIdxsRow,,drop=FALSE])
+   colMeans(y[nearIdxs,,drop=FALSE])
 }
 
 # find variance of Y in the neighborhood of predpt; latter not used here
-
-vary <- function(closestIdxsRow,x,y,predpt) {
+vary <- function(nearIdxs,x,y,predpt) {
    if (ncol(y) > 1) stop('vary() must have scalar y')
-   apply(y[closestIdxsRow,,drop=FALSE],2,var)
+   apply(y[nearIdxs,,drop=FALSE],2,var)
 }
 
 # fit linear model to the neighborhood data, and predict at predpt
-loclin <- function(closestIdxsRow,x,y,predpt) {
+loclin <- function(nearIdxs,x,y,predpt) {
    nxcol <- ncol(x)
    nycol <- ncol(y)
    if (nycol > 1) stop('loclin() must have scalar y')
@@ -613,7 +616,7 @@ loclin <- function(closestIdxsRow,x,y,predpt) {
    colnames(predpt) <- xNames
    predpt <- data.frame(predpt)
    colnames(y) <- yNames
-   xy <- data.frame(cbind(x,y))
+   xy <- data.frame(cbind(x,y))[nearIdxs,]
    cmd <- paste0('lmout <- lm(',yNames[1],' ~ .,data=xy)')
    eval(parse(text=cmd))
    predict(lmout,predpt)

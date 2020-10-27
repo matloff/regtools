@@ -344,7 +344,7 @@ boundaryplot <- function(y01,x,regests,pairs=combn(ncol(x),2),
 # 'actual')
 
 confusion <- function(actual,pred) {
-   if (is.factor(actual)) actual <- as.numeric(actual) 
+   # if (is.factor(actual)) actual <- as.numeric(actual) 
    table(actual,pred)
 }
 

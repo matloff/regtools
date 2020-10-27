@@ -610,7 +610,7 @@ predictHoldout <- defmacro(res,
       } else preds <- predict(res,tstx);
       res$holdoutPreds <- preds;
       res$testAcc <- 
-         if (res$classif) mean(preds$predClasses == tst[,ycol])
+         if (res$classif) mean(preds$predClasses != tst[,ycol])
          else mean(abs(preds - tst[,ycol]))
    }
 )

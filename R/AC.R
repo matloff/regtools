@@ -1,4 +1,9 @@
 
+# Missing Values routines; also see polyanNA package
+
+######################################################################
+######################################################################
+
 # code to implement the Available Cases method (also called Pairwise
 # Complete) for handling missing data
 
@@ -252,6 +257,9 @@ tbltofakedf <- function(tbl) {
    as.data.frame(m)
 }
 
+######################################################################
+######################################################################
+
 #############################  misc.  ###############################
 
 # for testing purposes; randomly replacing each element of matrix m by 
@@ -263,4 +271,12 @@ makeNA <- function(m,probna) {
    naidxs <- sample(1:n,nmiss,replace=FALSE)
    m[naidxs] <- NA
    m
+}
+
+# replace NAs by 0s
+
+to0s <- function(x) 
+{
+   x[is.na(x)] <- 0
+   x
 }

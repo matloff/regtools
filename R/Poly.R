@@ -48,7 +48,7 @@ polyGen <- function(x,deg,maxInteractDeg)
       }
    }
 
-   attr(res,'clnames') <- colNames(x)
+   attr(res,'clnames') <- colnames(x)
    res
 }
 

@@ -13,21 +13,20 @@
 
 # value:
 
-#     object of class 'penroseLM',with beta-hat and colnames(x)
+#     object of class 'penroseLM',with beta-hat as 'bh' and colnames(x)
 
 penroseLM <- function(d,yName) 
 {
    require(MASS)
    ycol <- which(names(d) == yName)
-   xnms <- colnames(x)
    x <- cbind(1,as.matrix(d[,-ycol]))
+   xnms <- colnames(x)
    y <- d[,ycol]
+   # MASS::ginv() does Penrose inverse
    res <- list(bh=ginv(x) %*% y, xnms=xnms)
    class(res) <- 'penroseLM'
    res
 }
-
-plm <- penroseLM
 
 # arguments:
 
@@ -44,16 +43,32 @@ predict.penroseLM <- function(object,newx)
 
 ###################  penrosePoly()  #########################
 
+# polynomial regression with Penrose inverse; uses polyreg
+
 penrosePoly <- function(d,yName,deg,maxInteractionDeg=deg) 
 {
    require(polyreg)
    ycol <- which(names(d) == yName)
    x <- as.matrix(d[,-ycol])
    polyout <- getPoly(x,deg=deg,maxInteractionDeg=maxInteractionDeg)
-   xPoly <- polyout$xdata
+   xPoly <- polyout$xdata  # polynomial version of x
    y <- d[,ycol]
    xy <- cbind(xPoly,y)
-   browser()
-   penroseLM(xy,'y')
-
+   res <- list(bh=penroseLM(xy,'y')$bh,
+      deg=deg,maxInteractionDeg=maxInteractionDeg)
+   class(res) <- 'penrosePoly'
+   res
 }
+
+predict.penrosePoly <- function(object,newx) 
+{
+   deg <- object$deg
+   maxInteractionDeg <- object$maxInteractionDeg
+   polyout <- getPoly(newx,deg=deg,maxInteractionDeg=maxInteractionDeg)
+   xPoly <- polyout$xdata  # polynomial version of newx
+   xPoly <- as.matrix(xPoly)
+   xPoly <- cbind(1,xPoly)
+   bh <- object$bh
+   xPoly %*% bh
+}
+

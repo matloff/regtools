@@ -124,6 +124,62 @@ We refer to the class probabilities for given feature
 values as *conditional class probabilities*.  The overall class probabilities,
 e.g. the 0.000172 value above, are *unconditional class probabilities*.
 
+The conditional and unconditional class probabilities are often referred
+to as the *posterior* and *prior* probabilities.  This sounds Bayesian,
+and indeed we do use Bayes' Rule, but there is no subjectivity involved.
+These are real probabilities.  E.g. in a disease classification
+application, there is a certain proportion of people in the population
+who have the disease, which we will estimate from our training data.
+
+## Notation
+
+* c = number of classes
+* Y = class label, 0,1,...,c-1
+* X = vector of features
+* p<sub>i</sub> = P(Y = i) (prior probs.)
+* q<sub>i</sub>(t) = P(Y = i | X = t) (posterior probs.)
+* Y<sub>pred</sub> = the value we predict for Y
+
+## Optimal classification rules
+
+Consider the 2-class setting, with Y = 0,1.  Denote the probability that Y = 1
+for a particular new case to classify by r.
+
+The rule that optimizes the overall probability of correct
+classification is:
+
+Y<sub>pred</sub> = 1 if r >= 0.5
+
+Y<sub>pred</sub> = 0 if r < 0.5
+
+However, it may be that we wish to place different weights on
+false positives and false negatives.  In the credit card fraud case, a
+false negative may mean a major loss, much worse than what we lose with
+a false negative (wasted investigation time, etc.).
+
+Let l<sub>01</sub> be the loss we incur if we guess Y = 0 but Y = 1.
+In the opposite case -- guess 1 by Y = 0, say our loss is 1.0.  (All
+that matter is the ratio of the two losses.  To minimize expected loss,
+the optimal rule can be shown to be (see Appendix A below)
+
+Y<sub>pred</sub> = 1 if r > 1/(1+l<sub>10</sub>)
+
+Y<sub>pred</sub> = 0 if r <= 1/(1+l<sub>10</sub>)
+
+## But mechanical rules are too constraining for many applications
+
+The loss value l<sub>01</sub> may be hard to quantify, and
+in any case, we argue here that a mechanical rule is overly
+constraining.
+
+In 
+[Fraud: a Guide to Its Prevention, Detection and Investigation](https://www.pwc.com.au/consulting/assets/risk-controls/fraud-control-jul08.pdf) 
+by Price Waterhouse Coopers, it is pointed out that
+
+> ... every fraud incident is different, and reactive responses will vary
+> depending on the facts that are unique to each case.
+
+
 ## What your ML algorithm is thinking
 
 ML algorithms take your data literally.  Say you have a two-class
@@ -340,7 +396,7 @@ involving the true values and exploring the results, there is not much
 that we can do.  In essence, the result is a maximum-likelihood kind of
 situation:  Our predicted class will be the one whose (nominal)
 conditional probability makes our feature data most likely given the
-class (see Appendix below), **which is very different from the question
+class (see Appendix B below), **which is very different from the question
 we want to ask, Which class is most likely given the feature set?** 
 We'll get answers ("Hey, the computer said such and such!"), but those
 answers will be of questionable value unless the predictors have very
@@ -404,7 +460,29 @@ realistic ones, and classify using them.
   class probabilities are unknown, recognize that your ML analysis may
 have only a very restricted interpretation and value.
 
-## Appendix: derivation of the adjustment formula
+## Appendix A: derivation of the unequal-loss rule
+
+Say the random variable W takes on the values 0,1, with P(W = 1) = r.
+(In the above, W plays the role of Y, conditioned on X.)  Let's compute
+the expected loss under two strategies:
+
+* We guess W = 0.
+
+Then our loss is 0 P(W = 0) + l<sub>01</sub> P(W = 1) = l<sub>01</sub>
+r.
+
+* We guess W = 1.
+
+Then our loss is 1 P(W = 0) + 0 P(W = 1) = 1-r.
+
+So our optimal stragegy is to guess W = 1 if and only if
+1-r <  l<sub>01</sub> r.  In other words,
+
+> Guess W = 1 if and only if r > 1/(1+l<sub>01</sub>).
+
+
+  
+## Appendix B: derivation of the adjustment formula
 
 (For ease of notation etc., no distinction will be made here between
 sample and population quantities.)
@@ -461,7 +539,7 @@ P(Y = i | X = t)
 can be viewed as the conditional probability of class i vs. all other
 classes.
 
-## Appendix:  What is really happening if you use equal class probabilities?
+## Appendix C:  What is really happening if you use equal class probabilities?
 
 Say we have balanced data, so the q<sub>i</sub> = 1/m for each i.  Then
 in predicting the class of a new case having X = t, Equation 1 becomes

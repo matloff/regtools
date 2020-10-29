@@ -352,7 +352,8 @@ confusion <- function(actual,pred) {
 
 # generates estimated conditional class probabilities from predicted
 # labels; useful for classification methodology that does not inherently
-# generate those probabilities
+# generate those probabilities, or for which those probabilities are
+# biased or otherwise inaccurate
 
 # for a given new case, the k nearest neighbors in the training set are
 # obtained; the predicted class labels for the neighbors are then
@@ -361,14 +362,22 @@ confusion <- function(actual,pred) {
 
 # arguments:
 
-#    x: the feature columns of the training set; must be numeric
+#    x: either the feature columns of the training set (must be
+#       numeric), and/or a vector of scores from which the given
+#       classification method predicts class label, from the training
+#       set
+
 #    fittedY: R factor, predicted classes in the training set
-#    newX: matrix of new cases to be predicted
+
+#    newX: new cases to be predicted, of the form in x
+
 #    classNames: levels(y) from the training set y
+
 #    k: number of neighbors
 
 labelsToProbs <- function(x,newX,fittedY,classNames,k,scaleX=TRUE) 
 {
+   if (is.vector(x)) x <- x <- matrix(x,ncol=1)
    if (!is.numeric(x)) {
       xyc <- getXY(x,yName=NULL,xMustNumeric=TRUE,classif=FALSE,
          factorsInfo=NULL)

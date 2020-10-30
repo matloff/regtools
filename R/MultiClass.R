@@ -411,6 +411,27 @@ labelsToProbs <- function(x,newX,fittedY,classNames,k,scaleX=TRUE)
    tmp
 }
 
+scoresToProbs <- function(scores,newScores,y,classNames,k) 
+{
+   scores <- matrix(scores,ncol=1)
+   newScores <- matrix(newScores,ncol=1)
+   tmp <- FNN::get.knnx(scores,newScores,k)
+   nClass <- length((classNames))
+   doRowI <- function(i)  # do row i of newScores
+   {
+      idxs <- tmp$nn.index[i,]
+      nhbrY <- y[idxs]
+      tblNhbrs <- table(nhbrY)
+      nhbrClasses <- names(tblNhbrs)
+      probs <- rep(0,nClass)
+      names(probs) <- classNames
+      probs[nhbrClasses] = tblNhbrs / k
+      probs
+   }
+   tmp <- t(sapply(1:nrow(newScores),doRowI))
+   tmp
+}
+
 logOddsToProbs <- function(x) 
 {
    u <- exp(-x)

@@ -442,6 +442,15 @@ scoresToProbs <-
    tmp
 }
 
+# calculcate decision values ("scores") for e1071 SVM
+getDValsE1071 <- function(object,newx) 
+{
+   if (!inherits(object,'svm')) stop('not e1071 SVM')
+   class(object) <- 'svm'
+   tmp <- predict(object,newx,decision.values=TRUE)
+   attr(tmp,'decision.values')
+}
+
 logOddsToProbs <- function(x) 
 {
    u <- exp(-x)

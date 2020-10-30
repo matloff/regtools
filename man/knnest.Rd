@@ -56,6 +56,7 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
   \item{newx}{New data points to be predicted.  If NULL in \code{kNN},
      compute regression functions estimates on \code{x} and save for
      future prediction with \code{predict.kNN}}
+  \item{newxK}{Value of k to use during prediction in the second form.}
   \item{scaleX}{If TRUE, call \code{scale} on \code{x} and \code{newx}}
   \item{PCAcomps}{If positive, transform \code{x} and \code{newx} by
      PCA, using the top \code{PCAcomps} principal components.  Disabled.}
@@ -108,23 +109,22 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
    but by setting \code{allK} to TRUE, the user can request that it be
    done for all \code{k} through the specified maximum.
 
-   In the second form, \code{newx} is set to NULL.  No predictions are
-   made; instead, the regression function is estimated on all data
-   points in \code{x}, which are saved in the return value.  Future new cases
-   can then be predicted from this saved object, via \code{predict.kNN} 
-   (called via the generic \code{predict}).  The call form is 
-   \code{predict(knnout,newx,newxK}, with a default value of 1 for
-   \code{newxK}.
+   In the second form, \code{newx} is set to NULL in the call to
+   \code{kNN}.  No predictions are made; instead, the regression function 
+   is estimated on all data points in \code{x}, which are saved in the return 
+   value.  Future new cases can then be predicted from this saved object, 
+   via \code{predict.kNN} (called via the generic \code{predict}).  
+   The call form is \code{predict(knnout,newx,newxK}, with a 
+   default value of 1 for \code{newxK}.  
+
+   In this second form, the closest \code{k} points to the \code{newx} in
+   \code{x} are determined as usual, but instead of averaging their Y
+   values, the average is taken over the fitted regression estimates at
+   those points.  In this manner, there is almost no computational cost
+   in the prediction stage.  
 
    The second form is intended more for production use, so that neighbor
    distances need not be repeatedly recomputed.
-
-   Note that in predicting a new case in this second form, say \code{z},
-   smoothing is done on the fitted values in the training set: The
-   closest \code{k} points in \code{x} are determined as usual, but
-   instead of averaging their Y values, the average is taken over the
-   fitted regression estimates at those points.  In this manner, there
-   is almost no computational cost in the prediction stage.  
 
    In addition, a novel feature allows the user to weight some
    predictors more than others.  This is done by scaling the given

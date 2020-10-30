@@ -1,5 +1,6 @@
-\name{fineTuning}
+\name{fineTuning,knnFineTune}
 \alias{fineTuning}
+\alias{knnFineTune}
 
 \title{Grid Search Plus More}
 
@@ -16,10 +17,18 @@ fineTuning(dataset, pars, regCall, nCombs = NULL, nTst = 500,
     nXval = 1, k = NULL, up = TRUE, dispOrderSmoothed = FALSE,
     showProgress = TRUE) 
 plot.tuner(tunerObject,col='meanAcc',disp=0,jit=0.5) 
+knnFineTune(data,yName,k,expandVars,ws,classif=FALSE,seed=9999)
 }
 
 \arguments{
    \item{dataset}{Data frame etc. containing the data to be analyzed.}
+   \item{data}{The data to be analyzed.}
+   \item{yName}{Quoted name of "Y" in the column names of \code{data}.}
+   \item{expandVars}{Indices of columns in \code{data} to be weighted in
+      distance calculations.}
+   \item{ws}{Weights to be used for \code{expandVars}.}
+   \item{classif}{Set to TRUE for classification problems.}
+   \item{seed}{Seed for random number generation.}
    \item{pars}{R list, showing the desired tuning parameter values.}
    \item{regCall}{Function to be called at each parameter combination,
       performing the model fit etc.}
@@ -56,7 +65,12 @@ will provide the training and test sets \code{dtrn} and \code{dtst}, as
 well as \code{cmbi} ("combination i"), the particular parameter
 combination to be run at this moment.
 
-Each chosen combination is run in \code{nXval} folds.
+Each chosen combination is run in \code{nXval} folds.  All specified
+combinations are run fully, as opposed to a directional "hill descent"
+search that hopes it might eliminate poor combinations early in the process.
+
+The function \code{knnFineTune} is a wrapper for \code{fineTuning} for
+k-NN problems.
 
 }
 

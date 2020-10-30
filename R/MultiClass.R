@@ -411,16 +411,26 @@ labelsToProbs <- function(x,newX,fittedY,classNames,k,scaleX=TRUE)
    tmp
 }
 
-scoresToProbs <- function(scores,newScores,y,classNames,k) 
+scoresToProbs <- 
+   function(trnData,yName,trnScores,newScores,k,scaleX=TRUE) 
 {
-   scores <- matrix(scores,ncol=1)
+   if (!is.data.frame(trnData)) stop('trnData must be a data frame')
+   ycol <- which(names(trnData) == yName)  
+   x <- trnData[,-ycol]
+   y <- trnData[,ycol]
+   if (!is.factor(y)) stop('Y must be an R factor')
+   if (length(levels(y)) > 2) 
+      stop('currently handles 2-class case only')
+   trnScores <- matrix(trnScores,ncol=1)
    newScores <- matrix(newScores,ncol=1)
-   tmp <- FNN::get.knnx(scores,newScores,k)
-   nClass <- length((classNames))
+   tmp <- FNN::get.knnx(trnScores,newScores,k)
+   classNames <- levels(y)
+   nClass <- length(classNames)
    doRowI <- function(i)  # do row i of newScores
    {
       idxs <- tmp$nn.index[i,]
       nhbrY <- y[idxs]
+      nhbrY <- toSuperFactor(nhbrY,levels(y))
       tblNhbrs <- table(nhbrY)
       nhbrClasses <- names(tblNhbrs)
       probs <- rep(0,nClass)

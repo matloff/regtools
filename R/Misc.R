@@ -237,6 +237,24 @@ hasFactors <- function(x)
    FALSE
 }
 
+# say we have a factor f1, then encounter f2, with levels a subset of
+# those of f1; we want to change f2 to have the same levels as f1; seems
+# that this can NOT be done via levels(f2) <- levels(f1)
+toSuperFactor <- function(inFactor,superLevels) 
+{
+   inFactorChars <- as.character(inFactor)
+   extraChars <- setdiff(superLevels,inFactorChars)
+   nExtra <- length(extraChars)
+   if (nExtra == 0) return(inFactor)
+   newInFactorChars <- c(inFactorChars,extraChars)
+   nExtra <- length(extraChars)
+   tmp <- as.factor(newInFactorChars)
+   nTmp <- length(tmp)
+   start <- nTmp - nExtra + 1
+   end <- nTmp
+   tmp[-(start:end)]
+}
+
 #######################################################################
 ###################  misc. data frame/matrix ops  ######################
 #######################################################################

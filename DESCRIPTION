@@ -1,14 +1,15 @@
 Package: regtools
-Version: 1.5.0
+Version: 1.5.1
 Title: Regression and Classification Tools
 Authors@R: c(person("Norm", "Matloff", email = "matloff@cs.ucdavis.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9179-6785")),
            person("Robin", "Yancey", email = "reyancey@ucdavis.edu", role = c("aut")),
-           person("Bochao", "Xin", email = "xinbochao97@outlook.com", role = c("ctb")))
+           person("Bochao", "Xin", email = "xinbochao97@outlook.com",role = c("ctb")),
+           person("Kenneth", "Lee", email = "honlee@ucdavis.edu", role = c("ctb"))
+)
 Maintainer: Norm Matloff <matloff@cs.ucdavis.edu>
 Depends: R (>= 3.5.0),FNN,dummies
 Imports: R.utils,mvtnorm,sandwich
-Suggests: knitr, rmarkdown, OpenImageR, cdparcoord, keras, magick, partools,
-   h2o
+Suggests: knitr, rmarkdown, OpenImageR, cdparcoord, keras, magick, partools
 VignetteBuilder: knitr
 License: GPL (>= 2)
 Description: Tools for linear, nonlinear and nonparametric regression

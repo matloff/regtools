@@ -1,4 +1,7 @@
-\name{avalogtrn,avalogpred,ovalogtrn,ovalogpred,ovaknntrn,predict.ovaknn, boundaryplot,logitClass,linClass,knnClass}
+\name{multiclass routines}
+\alias{boundaryplot}
+\alias{scoresToProbs}
+\alias{getDValsE1071}
 \alias{ovalogtrn}
 \alias{ovalogpred}
 \alias{avalogtrn}
@@ -8,8 +11,6 @@
 \alias{confusion}
 \alias{factorTo012ec}
 \alias{classadjust}
-\alias{boundaryplot}
-\alias{scoresToProbs}
 
 \title{Classification with More Than 2 Classes}
 
@@ -18,6 +19,8 @@ Tools for multiclass classification, parametric and nonparametric.
 }
 
 \usage{
+scoresToProbs(y,trnScores,newScores,k) 
+getDValsE1071(object,newx)
 logitClass(data,yName)
 \method{predict}{logitClass}(object,newx)
 linClass(data,yName)
@@ -30,10 +33,16 @@ avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx,trueclassprobs=NULL)
 classadjust(econdprobs,wrongprob1,trueprob1) 
 boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
-scoresToProbs(y,trnScores,newScores,k) 
 }
 
 \arguments{
+\item{y}{Vector or factor of response variable data in the training set, with
+   codes 0,1,...\code{m}-1, except with \code{scoresToProbs}, where it
+   must be an R factor.}
+\item{trnScores}{Vector/matrix of scores in training set.  In the
+   multiclass case, there will be as many columns as classes.}
+\item{newScores}{Vector/matrix of scores for the cases to be predicted. 
+   In the multiclass case, there will be as many columns as classes.}
 \item{data}{A data frame, containing "X" and "Y" data.}
 \item{yName}{Name of the column in \code{data} corresponding to "Y", the
    class labels.  Must be an R factor.}
@@ -42,6 +51,7 @@ scoresToProbs(y,trnScores,newScores,k)
 \item{newx}{Data frame of one or more new cases to predict.}
 \item{classNames}{Names of the classes, in "levels" order.}
 \item{fittedY}{Predicted classes in the trained model.}
+\item{newx}{Data frame of one or more new cases to predict.}
 \item{newX}{Data frame of one or more new cases to predict.}
 \item{k}{Number of nearest neighbors.}
 \item{scaleX}{Scale the features.}
@@ -57,8 +67,6 @@ scoresToProbs(y,trnScores,newScores,k)
 \item{yname}{Name of the Y column.}
 \item{object}{Needed for consistency with generic.}
 \item{...}{Needed for consistency with generic.}
-\item{y}{Vector or factor of response variable data in the training set, with
-   codes 0,1,...\code{m}-1.}
 \item{xdata}{X and associated neighbor indices. Output of
   \code{preprocessx}.} 
 \item{coefmat}{Output from \code{ovalogtrn} or \code{avalogtrn}.}
@@ -80,45 +88,41 @@ scoresToProbs(y,trnScores,newScores,k)
 These functions aid classification in the multiclass setting.  
 
 The \code{scoresToProbs} function computes conditional probabilities for
-new cases, using  the training scores.  This is useful for
+new cases, using  the training scores, e.g. \code{decision.values} for
+SVM in the \pkg{e1071} package or the outputted conditional
+probabilities from \bold{glm} in a logistic model.  This is useful for
 classification algorithms that lack inherent estimation of these
-probabilities.  This is a new approach.   
+probabilities, or for which the inherent probability estimates are not
+very accurate, say on the edges of the feature space.  This is a new
+approach.   
 
-The function \code{linClass} is a computationally-fast alternative to
-\code{logitClass} in prediction contexts (as opposed to settings in
-which the goal is description, e.g. inference on coefficients). 
-For prediction purposes, the two will typically give very similar
-results.  This is because (a) the logistic function is close to linear
-in a broad range and (b) for prediction, all that matters is whether the
-esimated regression value is above or below a given threshold, e.g. 0.5,
-or in the multiclass, whether a given class has the highest estimated
-value.  Note:  For this function, class labels must start with a letter.
+One needs to have to scores for the new cases to be predicted.  This is
+application/package-specific.  The function \code{getDValsE1071} does
+this in the case of SVM in the \pkg{e1071} package. 
 
-OVA vs. AVA:  The functions \code{logitClass} and \code{linClass} use
-the "One vs. All" approach (OVA) while \code{avatrn} uses "All vs. All"
-(AVA).
+How it works, say for one new case: The score(s) (more than 1 if
+multiclass case) are compared to the training set scores, taking the
+\code{k} nearest neighbors. Among the corresponding Y values, we find the
+proportion for each class.
+
+The function \code{boundaryplot} serves as a visualization technique,
+for the two-class setting.  It draws the boundary between predicted Y =
+1 and predicted Y = 0 data points in 2-dimensional feature space, as
+determined by the argument \code{regests}.  Used to visually assess
+goodness of fit, typically running this function twice, say one for
+\code{glm} then for \code{kNN}.  If there is much discrepancy and the
+analyst wishes to still use glm(), he/she may wish to add polynomial
+terms.
+
+The functions not listed above are largely deprecated, e.g. in favor of
+\code{qeLogit} and the other \code{qe}-series functions.
 
 }
 
 \value{
 
-The "xClass" functions return an object to be used in predicting future
-cases, using a generical \code{predict} call.  The corresponding generic
-\code{predict} functions return a vector of predicted class labels.
-Except for \code{linClass}, the return value also has an R attribute
-\code{probs}, the matrix of estimated class probabilities
-
-The functions \code{ovalogtrn} and \code{avalogtrn} return the
-estimated logit coefficent vectors, one per column. There are
-\code{m} of them in the former case, \code{m}\code{m-1}/2 in the
-latter, in which case the order of the R function \code{combin} is
-used.
-
-The prediction functions, \code{predict.ovalog}, \code{predict.avalog} and
-\code{predict.ovaknn}, return the predicted class codes (integers
-0,1,...) for the points in \code{predx} or \code{predpts}.  The 
-corresponding conditional class probabilities are included as an attribute, 
-accessible via \code{probs}.
+The function \code{scoresToProbs} returns the matrix of conditional
+probabilities for the new cases to be predicted, one column per class.
 
 }
 
@@ -126,11 +130,6 @@ accessible via \code{probs}.
 
 \dontrun{
 
-data(peFactors)
-pef <- peFactors[,c(1,3,5,7:9)]
-lgcout <- logitClass(pef,'occ')
-predict(lgcout,pef[8000,-3])
-# predicts class 102, prob. 0.42
 
 data(oliveoils) 
 oo <- oliveoils[,-1] 

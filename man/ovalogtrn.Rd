@@ -9,7 +9,7 @@
 \alias{factorTo012ec}
 \alias{classadjust}
 \alias{boundaryplot}
-\alias{labelsToProbs}
+\alias{scoresToProbs}
 
 \title{Classification with More Than 2 Classes}
 
@@ -30,8 +30,7 @@ avalogtrn(m,trnxy)
 avalogpred(m,coefmat,predx,trueclassprobs=NULL)
 classadjust(econdprobs,wrongprob1,trueprob1) 
 boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
-labelsToProbs(x,newX,fittedY,classNames,k,scaleX=TRUE)
-
+scoresToProbs(y,trnScores,newScores,k) 
 }
 
 \arguments{
@@ -80,15 +79,10 @@ labelsToProbs(x,newX,fittedY,classNames,k,scaleX=TRUE)
 
 These functions aid classification in the multiclass setting.  
 
-The \code{labelsToProbs} function computes conditional probabilities for
-new cases, using  the training features and the predicted class labels
-in the training set.  This is useful for classification algorithms that
-lack inherent estimation of these probabilities.  This is a new
-approach, which we call \emph{kNNonFit}.
-
-If you have matrix data, convert using \code{as.data.frame}.  Similarly,
-if your entity of class labels is an R vector, convert using
-\code{as.factor}.
+The \code{scoresToProbs} function computes conditional probabilities for
+new cases, using  the training scores.  This is useful for
+classification algorithms that lack inherent estimation of these
+probabilities.  This is a new approach.   
 
 The function \code{linClass} is a computationally-fast alternative to
 \code{logitClass} in prediction contexts (as opposed to settings in

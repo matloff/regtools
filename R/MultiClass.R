@@ -411,13 +411,29 @@ labelsToProbs <- function(x,newX,fittedY,classNames,k,scaleX=TRUE)
    tmp
 }
 
-scoresToProbs <- 
-   function(trnData,yName,trnScores,newScores,k,scaleX=TRUE) 
+
+
+# generates estimated conditional class probabilities from scores;
+# useful for classification methodology that does not inherently
+# generate those probabilities, or for which those probabilities are
+# biased or otherwise inaccurate
+
+# how it works, say for one new case: the score(s) (more than 1 if
+# multiclass case) are compared to the training set scores, taking the k
+# nearest neighbors; among the corresponding Y values, we find the
+# proportion for each class
+
+# arguments:
+
+#    y: R factor of labels in training set
+#    trnScores: vector/matrix of scores in training set
+#    newScores: scores of new case(s)
+#    k: number of nearest neighbors
+
+# value: vector of estimated probabilities for the new cases
+
+scoresToProbs <- function(y,trnScores,newScores,k) 
 {
-   if (!is.data.frame(trnData)) stop('trnData must be a data frame')
-   ycol <- which(names(trnData) == yName)  
-   x <- trnData[,-ycol]
-   y <- trnData[,ycol]
    if (!is.factor(y)) stop('Y must be an R factor')
    if (is.vector(trnScores))
       trnScores <- matrix(trnScores,ncol=1)

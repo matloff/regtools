@@ -29,13 +29,16 @@ S3method(predict,qeNeural)
 S3method(predict,knnRec)
 S3method(predict,anovaRec)
 S3method(predict,mfRec)
+S3method(predict,penroseLM)
+S3method(predict,penrosePoly)
 
 export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    kmin,
    lmac,coef.lmac,vcov.lmac,makeNA,pcac,loglinac,tbltofakedf,
    ovalogtrn,avalogtrn,avalogpred,
    qeLogit,qeLin,qeKNN,qeRF,qeSVM,qeGBoost,qeNeural,
-   knntrn,ovaknntrn,predict.ovaknn,classadjust,labelsToProbs,logOddsToProbs,
+   knntrn,ovaknntrn,predict.ovaknn,classadjust,
+   scoresToProbs,logOddsToProbs,getDValsE1071,
    knnFineTune,kNN,findOverallLoss,MAPE,probIncorrectClass,kNNxv,propMisclass,
    plotExpVars,exploreExpVars,multCols,
    bestKperPoint, parvsnonparplot,nonparvsxplot,nonparvarplot,
@@ -43,13 +46,14 @@ export(knnest,preprocessx,meany, vary,loclin,predict.knn,nlshc,
    l2,l1,
    mm,unscale,mmscale,constCols,catDFRow,
    confusion,factorTo012etc,
+   penroseLM,predict.penroseLM,penrosePoly,predict.penrosePoly, 
    ulist,predict.anovaRec,discretize,
    factorsToDummies,factorToDummies,dummiesToFactor,hasFactors,dummiesToInt,
    xyDataframeToMatrix,dummiesToInt,charsToFactors,
    imgTo2D,imgFilesToMatrix,imgFileToVector,augMatrix,
    stdErrPred,checkNumericNames,prepend,getDFclasses,
    dimRed,dimRedNewX,reduceComps,
-   getMNIST,
+   getMNIST,ZerosToNAs,NAsTo0s,
    knnRec,anovaRec,mfRec,predictMany,getXY,
    fineTuning,fineTuningPar,getNamedArgs,partTrnTst,makeOutdf,
    krsFit,krsFitImg,diagNeural,

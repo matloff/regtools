@@ -419,10 +419,10 @@ scoresToProbs <-
    x <- trnData[,-ycol]
    y <- trnData[,ycol]
    if (!is.factor(y)) stop('Y must be an R factor')
-   if (length(levels(y)) > 2) 
-      stop('currently handles 2-class case only')
-   trnScores <- matrix(trnScores,ncol=1)
-   newScores <- matrix(newScores,ncol=1)
+   if (is.vector(trnScores))
+      trnScores <- matrix(trnScores,ncol=1)
+   if (is.vector(newScores))
+      newScores <- matrix(newScores,ncol=1)
    tmp <- FNN::get.knnx(trnScores,newScores,k)
    classNames <- levels(y)
    nClass <- length(classNames)

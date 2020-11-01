@@ -109,6 +109,11 @@ who have the disease, which we will estimate from our training data.
 * p<sub>i</sub> = P(Y = i) (prior probs.)
 * q<sub>i</sub>(t) = P(Y = i | X = t) (posterior probs.)
 * Y<sub>pred</sub> = the value we predict for Y
+* (X<sub>i</sub>,Y<sub>i</sub>), i=1,2,...,n: training data
+
+2-class case (Y = 0,1):
+* p: P(Y = 1) (probability of class 1)
+* r_i: estimated q<sub>1</sub>(X<sub>i</sub>)    
 
 ## Key issue:  How were the data generated?
 
@@ -150,15 +155,16 @@ with quite different frequencies:
 ## Optimal classification rules
 
 Consider the 2-class setting, with Y = 0,1.  Denote the (conditional)
-probability that Y = 1 for a particular new case to classify by r.  We
-might have an estimate of r from fitting a logistic model, for instance.
+probability that Y = 1 for a particular new case to classify by
+r<sub>i</sub>.  We
+might have an estimate of ri from fitting a logistic model, for instance.
 
 The rule that minimizes the overall probability of 
 misclassification is:
 
-Y<sub>pred</sub> = 1 if r >= 0.5
+Y<sub>pred</sub> = 1 if r<sub>i</sub> >= 0.5
 
-Y<sub>pred</sub> = 0 if r < 0.5
+Y<sub>pred</sub> = 0 if r<sub>i</sub> < 0.5
 
 But note the criterion here, minimizing the overall probability of
 misclassification.  Other criteria are possible.
@@ -174,9 +180,9 @@ In the opposite case -- guess 1 by Y = 0, say our loss is 1.0.  (All
 that matters is the ratio of the two losses.)  To minimize expected loss,
 the optimal rule can be shown to be (see Appendix A below)
 
-Y<sub>pred</sub> = 1 if r > 1/(1+l<sub>10</sub>)
+Y<sub>pred</sub> = 1 if r<sub>i</sub> > 1/(1+l<sub>10</sub>)
 
-Y<sub>pred</sub> = 0 if r <= 1/(1+l<sub>10</sub>)
+Y<sub>pred</sub> = 0 if r<sub>i</sub> <= 1/(1+l<sub>10</sub>)
 
 The loss value l<sub>01</sub> may be hard to quantify, and
 in any case, we argue below that any mechanical rule is overly
@@ -203,10 +209,10 @@ is commonly recommended, you are fooling your ML algorithm.
 ## Artificial Balance Won't Achieve Your Goals
 
 In fooling your algorithm, it will generate the wrong conditional class
-probabilities r in our notation above.  And whether we wish to minimize
-the overall probability of misclassification, or expected loss, or any
-other criterion, the algorithm will (again, directly or indirectly) rely
-on the values of r.  
+probabilities r<sub>i</sub> in our notation above.  And whether we wish
+to minimize the overall probability of misclassification, or expected
+loss, or any other criterion, the algorithm will (again, directly or
+indirectly) rely on the values of r<sub>i</sub>.  
 
 Consider the fraud example, in which the data are highly imbalanced but
 in which wrongly guessing the large class carries heavy penalties for
@@ -223,18 +229,18 @@ l<sub>01</sub>, but in any case, balancing the data will be wrong.
 ## So, what SHOULD be done?
 
 Clearly, one's course of action should center around the conditional
-class probabilities r.  (Note the plural; each new case to be classified
-will have its own value of r.)  So, specifically, how should we use
-them?  We will discuss two approaches:
+class probabilities r<sub>i</sub>.  (Note the plural; each new case to
+be classified will have its own value of r<sub>i</sub>.)  So,
+specifically, how should we use them?  We will discuss two approaches:
 
-1. Use of the ROC curve (but not AUC), which is derived from the r
-   values.
+1. Use of the ROC curve (but not AUC), which is derived from the
+   r<sub>i</sub> values.
 
 2. Informal, nonmechanical consideration of the r values.
 
 Our recommendation will be Approach 2 above.
 
-### Use of the ROC curve
+### Approach 1: use the ROC curve
 
 Here one considers various threshhold values h, where we guess class 1
 if r > h, 0 otherwise.  The value one chooses for h will determine the
@@ -256,9 +262,11 @@ reflects the relative values we place on true and false positives.
 it is a measure of the general predictive ability of your algorithm on
 this data.  This may seem attractive at first, but it is probably
 irrelevant in most applications, as it places equal weight on all
-possible TPR/FPR scenarios; usually we are more interested in some 
+possible TPR/FPR scenarios; usually we are far more interested in some 
 settings than others.  Note too that AUC values for original data vs.
 the artificially balanced data are not comparable.
+
+### Approach 2:  informal, nonmechanical consideration of the r<sub>i</sub>
 
 ### Letter recognition data
 

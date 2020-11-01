@@ -134,7 +134,6 @@ Regression case: vector of predicted values
 
 \dontrun{
 
-library(regtools)  
 data(peFactors)  
 pef <- peFactors[,c(1,3,5,7:9)]  
 # most people in the dataset have at least a Bachelor's degree; so let's
@@ -142,7 +141,9 @@ pef <- peFactors[,c(1,3,5,7:9)]
 pef$educ <- toSubFactor(pef$educ,c('14','16'))  
 svmout <- qeSVM(pef,'occ',holdout=NULL) 
 # as example of prediction, take the 8th case, but change the gender and
-# age to female and 25
+# age to female and 25; note that by setting k to non-null, we are
+# requesting that conditional probabilities be calculated, via
+# scoresToProbs()
 newx <- pef[8,-3] 
 newx$sex <- '2'
 newx$age <- 25

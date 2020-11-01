@@ -226,6 +226,18 @@ our data, we should make the fraud class *larger* than the non-fraud
 class, not of equal size.  How much larger will depend on the value of
 l<sub>01</sub>, but in any case, balancing the data will be wrong.
 
+Frank Harrell 
+[says it well](https://www.fharrell.com/post/classification/):
+
+> For this reason the odd practice of subsampling the controls is used in
+> an attempt to balance the frequencies and get some variation that will
+> lead to sensible looking classifiers (users of regression models would
+> never exclude good data to get an answer). Then they have to, in some
+> ill-defined way, construct the classifier to make up for biasing the
+> sample. It is simply the case that a classifier trained to a 1⁄2 [q =
+> 1/2] prevalence situation will not be applicable to a population with a
+> 1⁄1000 [p = 1/1000] prevalence. 
+
 ## So, what SHOULD be done?
 
 Clearly, one's course of action should center around the conditional
@@ -267,6 +279,32 @@ settings than others.  Note too that AUC values for original data vs.
 the artificially balanced data are not comparable.
 
 ### Approach 2:  informal, nonmechanical consideration of the r<sub>i</sub>
+
+The key point is this:
+
+> Mechanical rules are too constraining for many applications.
+
+Often the required decision is too critical to be left up to a machine.
+For instance, relevant to our fraud example, in
+[Fraud: a Guide to Its Prevention, Detection and Investigation](https://www.pwc.com.au/consulting/assets/risk-controls/fraud-control-jul08.pdf) 
+by Price Waterhouse Coopers, it is pointed out that
+
+> ... every fraud incident is different, and reactive responses will vary
+> depending on the facts that are unique to each case.
+
+A practical, *effective* approach would be to simply look at the
+r<sub>i</sub> directly, "by hand" rather than by computer.  We would
+still set a threshold h, yes, but would use it only as first-stage
+screening, with the second stage being done by humans.  
+
+At that point, the (human) audito would take  into account not only that
+estimated probability but also such factors as the amount of the charge,
+special characteristics not measured in the available features, and so
+on.  The auditor may not give priority, for instance, to a case for
+which the probability is above h but the monetary value of the
+transaction is small.
+   
+
 
 ### Letter recognition data
 
@@ -310,15 +348,6 @@ many of them, but even the small number of cases can cause big damage,
 i.e. we are very worried about false negatives (positive meaning we
 guess the transaction is fraudulent).  Yet **the solution is not to
 force the data to be balanced.** 
-
-## But mechanical rules are too constraining for many applications
-
-In 
-[Fraud: a Guide to Its Prevention, Detection and Investigation](https://www.pwc.com.au/consulting/assets/risk-controls/fraud-control-jul08.pdf) 
-by Price Waterhouse Coopers, it is pointed out that
-
-> ... every fraud incident is different, and reactive responses will vary
-> depending on the facts that are unique to each case.
 
 ## First alternative
 
@@ -464,18 +493,6 @@ and so on does not solve the problem.  One still needs to factor in the
 class probabilities in order to maximize expected utility.
 
 Once again, **balancing the data will not help.**
-
-Frank Harrell 
-[says it well](https://www.fharrell.com/post/classification/):
-
-> For this reason the odd practice of subsampling the controls is used in
-> an attempt to balance the frequencies and get some variation that will
-> lead to sensible looking classifiers (users of regression models would
-> never exclude good data to get an answer). Then they have to, in some
-> ill-defined way, construct the classifier to make up for biasing the
-> sample. It is simply the case that a classifier trained to a 1⁄2 [q =
-> 1/2] prevalence situation will not be applicable to a population with a
-> 1⁄1000 [p = 1/1000] prevalence. 
 
 ## Estimating conditional probabilities with SVM
 

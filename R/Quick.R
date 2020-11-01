@@ -327,7 +327,7 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
    ycol <- which(names(data) == yName)
    svmout$x <- data[,-ycol,drop=FALSE]
    y <- data[,ycol]
-   # svmout$classNames <- xyc$classNames
+   svmout$y <- y
    svmout$classNames <- levels(y)
    svmout$classif <- classif
    svmout$trainRow1 <- getRow1(data,yName)
@@ -345,12 +345,16 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
    classNames <- object$classNames
    x <- object$x
    if (!is.null(k)) {
-      probs <- labelsToProbs(x,newx,svmout$fitted,classNames,k,
-         scaleX=scaleX)
+      y <- object$y
+      trnScores <- object$decision.values
+      newScores <- getDValsE1071(object,newx)
+      probs <- scoresToProbs(y,trnScores,newScores,k)
       res$probs <- probs
    }
    res
 }
+
+prdq <- predict.qeSVM
 
 #########################  qeGBoost()  #################################
 

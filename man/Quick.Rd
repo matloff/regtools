@@ -1,4 +1,4 @@
-\name{qeLogit}
+\name{Quick-Explore Wrappers}
 \alias{qeLogit}
 \alias{qeLin}
 \alias{qeKNN}
@@ -41,7 +41,7 @@ predict.qeLogit(object,newx)
 predict.qeLin(object,newx)
 predict.qeKNN(object,newx,newxK=1)
 predict.qeRF(object,newx)
-predict.qeSVM(object,newx,k=25,scaleX=TRUE)
+\method{predict}{qeSVM}(object,newx,k=25)
 predict.qeGBoostt(object,newx)
 predict.qeNeural(object,newx)
 
@@ -54,7 +54,8 @@ predict.qeNeural(object,newx)
   \item{holdout}{If not NULL, form a holdout set; 2-component vector, 
      c(holdout_size,initial_seed). After fitting to the remaining data,
      evaluate accuracy on the test set.}
-  \item{k}{Number of nearest neighbors} 
+  \item{k}{Number of nearest neighbors.  For \code{predict.qeSVM}, this
+     is for finding conditional probabilities via \code{scoresToProbs}.} 
   \item{scaleX}{Scale the features.} 
   \item{nTree}{Number of trees.} 
   \item{minNodeSize}{Minimum number of data points in a tree node.} 
@@ -133,10 +134,29 @@ Regression case: vector of predicted values
 
 \dontrun{
 
-data(peFactors)
-pe <- peFactors[,c(1,3,5,7:9)]
-
-newx <- data.frame(age=32, educ='13', occ='106', sex='1', wkswrkd=30)
+library(regtools)  
+data(peFactors)  
+pef <- peFactors[,c(1,3,5,7:9)]  
+# most people in the dataset have at least a Bachelor's degree; so let's
+# just consider Master's (code 14) and PhD (code 16) as special
+pef$educ <- toSubFactor(pef$educ,c('14','16'))  
+svmout <- qeSVM(pef,'occ',holdout=NULL) 
+# as example of prediction, take the 8th case, but change the gender and
+# age to female and 25
+newx <- pef[8,-3] 
+newx$sex <- '2'
+newx$age <- 25
+predict(svmout,newx,k=25)
+$predClasses
+#   8 
+# 100 
+# Levels: 100 101 102 106 140 141
+# 
+# $probs
+#       100  101  102  106 140 141
+# [1,] 0.36 0.44 0.16 0.04   0   0
+# so, occupation code 100 is predicted, with a 0.36 conditional
+# probability
 
 # logit
 lgout <- qeLogit(pe,'occ')

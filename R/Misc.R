@@ -78,6 +78,9 @@ mmscale <- function (m,scalePars=NULL)
 
 ####################  factorsToDummies()  ######################
 
+# inputs a data frame, outputs same but with all factor cols expanded to
+# dummies
+
 # arguments
 
 #    dfr: a data frame
@@ -174,7 +177,8 @@ factorToDummies <- function (f,fname,omitLast=FALSE,factorInfo=NULL)
 # variable has k levels, inclLast = FALSE means there are only k-1
 # dummies provided, so the k-th must be generated
 
-dummiesToFactor <- function(dms,inclLast=FALSE) {
+dummiesToFactor <- function(dms,inclLast=FALSE) 
+{
    dms <- as.matrix(dms)
    if (!inclLast) {
       lastCol <- 1 - apply(dms,1,sum)
@@ -194,7 +198,7 @@ dummiesToInt <- function(dms,inclLast=FALSE) {
 # maps a factor to 0,1,2,...,m-1 where m is the number of levels of f
 factorTo012etc <- function(f) as.numeric(f)-1
 
-# inputs an integer vector x and creates
+# inputs an integer vector x and creates dummies for the various values
 intToDummies <- function(x,fname,omitLast=TRUE) 
 {
    tmp <- as.factor(x)
@@ -202,7 +206,6 @@ intToDummies <- function(x,fname,omitLast=TRUE)
 }
 
 # inputs a data frame and converts all character columns to factors
-
 charsToFactors <- function(dtaf) 
 {
    for (i in 1:ncol(dtaf)) {
@@ -239,7 +242,8 @@ hasFactors <- function(x)
 
 # say we have a factor f1, then encounter f2, with levels a subset of
 # those of f1; we want to change f2 to have the same levels as f1; seems
-# that this can NOT be done via levels(f2) <- levels(f1)
+# that this can NOT be done via levels(f2) <- levels(f1); typically used
+# in predict() functions
 toSuperFactor <- function(inFactor,superLevels) 
 {
    inFactorChars <- as.character(inFactor)
@@ -253,6 +257,18 @@ toSuperFactor <- function(inFactor,superLevels)
    start <- nTmp - nExtra + 1
    end <- nTmp
    tmp[-(start:end)]
+}
+
+# here we have a factor f with various levels, but want to lump all
+# levelsl but the ones in saveLevels to a new level Other
+toSubFactor <- function(f,saveLevels,lumpedLevel='other') 
+{
+   lvls <- levels(f)
+   fChar <- as.character(f)
+   other <- setdiff(lvls,saveLevels)
+   whichOther <- which(fChar %in% other)
+   fChar[whichOther] <- lumpedLevel
+   as.factor(fChar)
 }
 
 #######################################################################

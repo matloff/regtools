@@ -81,6 +81,35 @@ This is a well-known
 This dataset is close to balanced, with each letter appearing about 775
 times.
 
+## Terminology 
+
+We refer to the class probabilities for given feature
+values as *conditional class probabilities*, because they are
+probabilities subject to conditions.  If say we wish to classify a
+patient as to whether she has a certain disease or not, and we know her
+blood test value on some measure is 2.39, the latter is the condition.
+Among all patients with that test value, what proportion of them have
+the disease?
+
+The overall class probabilities, e.g. the 0.000172 value above, are
+*unconditional class probabilities*.
+
+The conditional and unconditional class probabilities are often referred
+to as the *posterior* and *prior* probabilities.  This sounds Bayesian,
+and indeed we do use Bayes' Rule, but there is no subjectivity involved.
+These are real probabilities.  E.g. in a disease classification
+application, there is a certain proportion of people in the population
+who have the disease, which we will estimate from our training data.
+
+## Notation
+
+* c = number of classes
+* Y = class label, 0,1,...,c-1
+* X = vector of features
+* p<sub>i</sub> = P(Y = i) (prior probs.)
+* q<sub>i</sub>(t) = P(Y = i | X = t) (posterior probs.)
+* Y<sub>pred</sub> = the value we predict for Y
+
 ## Key issue:  How were the data generated?
 
 The examples above illustrate two important cases:
@@ -118,66 +147,40 @@ with quite different frequencies:
 
 ([source](http://www.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html)).
 
-## Note on terminology 
-
-We refer to the class probabilities for given feature
-values as *conditional class probabilities*.  The overall class probabilities,
-e.g. the 0.000172 value above, are *unconditional class probabilities*.
-
-The conditional and unconditional class probabilities are often referred
-to as the *posterior* and *prior* probabilities.  This sounds Bayesian,
-and indeed we do use Bayes' Rule, but there is no subjectivity involved.
-These are real probabilities.  E.g. in a disease classification
-application, there is a certain proportion of people in the population
-who have the disease, which we will estimate from our training data.
-
-## Notation
-
-* c = number of classes
-* Y = class label, 0,1,...,c-1
-* X = vector of features
-* p<sub>i</sub> = P(Y = i) (prior probs.)
-* q<sub>i</sub>(t) = P(Y = i | X = t) (posterior probs.)
-* Y<sub>pred</sub> = the value we predict for Y
-
 ## Optimal classification rules
 
-Consider the 2-class setting, with Y = 0,1.  Denote the probability that Y = 1
-for a particular new case to classify by r.
+Consider the 2-class setting, with Y = 0,1.  Denote the (conditional)
+probability that Y = 1 for a particular new case to classify by r.  We
+might have an estimate of r from fitting a logistic model, for instance.
 
-The rule that optimizes the overall probability of correct
-classification is:
+The rule that minimizes the overall probability of 
+misclassification is:
 
 Y<sub>pred</sub> = 1 if r >= 0.5
 
 Y<sub>pred</sub> = 0 if r < 0.5
 
-However, it may be that we wish to place different weights on
+But note the criterion here, minimizing the overall probability of
+misclassification.  Other criteria are possible.
+
+It may be that we wish to place different weights on
 false positives and false negatives.  In the credit card fraud case, a
 false negative may mean a major loss, much worse than what we lose with
-a false negative (wasted investigation time, etc.).
+a false negative (wasted investigation time, etc.).  We may define our
+loss in those terms, and seek to minimize expected loss.
 
 Let l<sub>01</sub> be the loss we incur if we guess Y = 0 but Y = 1.
 In the opposite case -- guess 1 by Y = 0, say our loss is 1.0.  (All
-that matter is the ratio of the two losses.  To minimize expected loss,
+that matters is the ratio of the two losses.)  To minimize expected loss,
 the optimal rule can be shown to be (see Appendix A below)
 
 Y<sub>pred</sub> = 1 if r > 1/(1+l<sub>10</sub>)
 
 Y<sub>pred</sub> = 0 if r <= 1/(1+l<sub>10</sub>)
 
-## But mechanical rules are too constraining for many applications
-
 The loss value l<sub>01</sub> may be hard to quantify, and
-in any case, we argue here that a mechanical rule is overly
-constraining.
-
-In 
-[Fraud: a Guide to Its Prevention, Detection and Investigation](https://www.pwc.com.au/consulting/assets/risk-controls/fraud-control-jul08.pdf) 
-by Price Waterhouse Coopers, it is pointed out that
-
-> ... every fraud incident is different, and reactive responses will vary
-> depending on the facts that are unique to each case.
+in any case, we argue below that any mechanical rule is overly
+constraining anyway.
 
 
 ## What your ML algorithm is thinking
@@ -190,35 +193,72 @@ assumption that the true population class probabilities are each about 0.5.
 In the Letters data, since the sampling was actually *designed* to have
 about the same number of instances for each letter, the algorithm you
 use will then assume the true probabilities of the letters are about
-1/26 each.  We know that is false, as the above table shows.
+1/26 each.  We know that is false, as the table shown earlier
+illustrates.
 
 So, if your sampling scheme artificially creates balanced data, as in
 the Letters data, or if you do resampling to make your data balanced, as
-is commonly recommended, you are fooling your ML algorithm.  Though that
-conceivably could be done responsibly, it may actually undermine your
-ability to predict new cases well.
+is commonly recommended, you are fooling your ML algorithm.  
 
-Note too the role of the *overall rate of correct classification*.  To
-maximize that, say in the two-class case, your ML algorithm will guess
-Class 1 for a new case if and only if the estimated conditional
-probability of Class 1 is greater than 0.5.  This rule assumes, though,
-that there are equal costs of the two types of misclassification, i.e.
-that a false positive and false negative should be given equal weight.
+## Artificial Balance Won't Achieve Your Goals
 
-In many applications this is not the case, and the overall rate is of
-lesser interest.  This is especially true in situations in which the
-data is substantially unbalanced, though it should be kept in mind that
-these are two separate issues: imbalance of the data, and relative
-weights of false positives and negatives.
+In fooling your algorithm, it will generate the wrong conditional class
+probabilities r in our notation above.  And whether we wish to minimize
+the overall probability of misclassification, or expected loss, or any
+other criterion, the algorithm will (again, directly or indirectly) rely
+on the values of r.  
 
-We will return to this point later.
+Consider the fraud example, in which the data are highly imbalanced but
+in which wrongly guessing the large class carries heavy penalties for
+us.  Recall our notation l<sub>01</sub> from above.  As noted, this may
+be difficult to quantity, but for the moment, let's suppose we can do
+so.  What are the implications in terms of artificially balancing the
+data?
 
-## Goals and perceptions of problems
+Actually, if we are going to be doing any adjustment of class sizes in
+our data, we should make the fraud class *larger* than the non-fraud
+class, not of equal size.  How much larger will depend on the value of
+l<sub>01</sub>, but in any case, balancing the data will be wrong.
 
-As is often the case, clear, precise statements of problems and goals
-are needed to come up with good, *effective* solutions.  Let's consider
-the two datasets in turn.  It will be easier to discuss the second
-dataset first.
+## So, what SHOULD be done?
+
+Clearly, one's course of action should center around the conditional
+class probabilities r.  (Note the plural; each new case to be classified
+will have its own value of r.)  So, specifically, how should we use
+them?  We will discuss two approaches:
+
+1. Use of the ROC curve (but not AUC), which is derived from the r
+   values.
+
+2. Informal, nonmechanical consideration of the r values.
+
+Our recommendation will be Approach 2 above.
+
+### Use of the ROC curve
+
+Here one considers various threshhold values h, where we guess class 1
+if r > h, 0 otherwise.  The value one chooses for h will determine the
+True Positive Rate and False Positive Rate:
+
+TPR(h) = P(Y<sub>pred</sub> = 1 | Y = 1)
+
+FPR(h) = P(Y<sub>pred</sub> = 1 | Y = 0)
+
+The ROC curve is then a graph of TPR vs. FPR.  As we vary h, it traces
+out the ROC curve.  Some R packages, such as ROCR, colorize the curve,
+with the color showing the value of h.
+
+The idea here is that even if we cannot quantity l<sub>01</sub>, we can
+explore various values of h to produce a decision rule that roughly
+reflects the relative values we place on true and false positives.
+
+*A note on AUC:*  AUC is the total area under the ROC curve.  As such,
+it is a measure of the general predictive ability of your algorithm on
+this data.  This may seem attractive at first, but it is probably
+irrelevant in most applications, as it places equal weight on all
+possible TPR/FPR scenarios; usually we are more interested in some 
+settings than others.  Note too that AUC values for original data vs.
+the artificially balanced data are not comparable.
 
 ### Letter recognition data
 
@@ -262,6 +302,15 @@ many of them, but even the small number of cases can cause big damage,
 i.e. we are very worried about false negatives (positive meaning we
 guess the transaction is fraudulent).  Yet **the solution is not to
 force the data to be balanced.** 
+
+## But mechanical rules are too constraining for many applications
+
+In 
+[Fraud: a Guide to Its Prevention, Detection and Investigation](https://www.pwc.com.au/consulting/assets/risk-controls/fraud-control-jul08.pdf) 
+by Price Waterhouse Coopers, it is pointed out that
+
+> ... every fraud incident is different, and reactive responses will vary
+> depending on the facts that are unique to each case.
 
 ## First alternative
 

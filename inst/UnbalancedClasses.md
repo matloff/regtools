@@ -40,8 +40,7 @@ is useful information, again resulting in reduced predictive power if
 it is ignored.
 
 * There are **principled alternatives to
-resampling,** including an adjustment formula to be presented here.  (See also
-[my book on regression, classification and ML](https://books.google.com/books?id=IHs2DwAAQBAJ&printsec=frontcover&dq=matloff&hl=en&newbks=1&newbks_redir=0&sa=X&ved=2ahUKEwje9LbA5dLmAhVJsZ4KHTvdADIQ6AEwAHoECAQQAg#v=onepage&q=matloff&f=false).)
+resampling,** including an adjustment formula to be presented here.  
 
 In other words: 
 
@@ -80,6 +79,8 @@ This is a well-known
 
 This dataset is close to balanced, with each letter appearing about 775
 times.
+
+The dataset is conveniently available in the `mlbench` package.
 
 ## Terminology 
 
@@ -123,7 +124,7 @@ The examples above illustrate two important cases:
 two-day data collection period was typical, the population class
 probability for fraud will be about what we see in the data, 0.172%.
 
-- The Letters data is *balanced*, but only *artificially so*.  The
+- The LetterRecognition data is *balanced*, but only *artificially so*.  The
 curator of the dataset wanted the data to have about the same number
 of instances of each letter.  But in general English usage, letters occur
 with quite different frequencies:
@@ -150,7 +151,18 @@ with quite different frequencies:
 <br>
 >   Z           0.07
 
-([source](http://www.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html)).
+([source](http://www.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html)).  One can obtain these numbers in `regtools`:
+
+``` r
+> data(ltrfreqs)
+> lf <- ltrfreqs
+> lf <- ltrfreqs[,2] / 100
+> names(lf) <- ltrfreqs[,1]
+# example
+> lf['A']
+     A 
+0.0812 
+```
 
 ## Optimal classification rules
 
@@ -196,14 +208,14 @@ setting, for Classes 0 and 1.  If about 1/2 your data is Class 1, then
 the algorithm, whether directly or indirectly, operates under the
 assumption that the true population class probabilities are each about 0.5.
 
-In the Letters data, since the sampling was actually *designed* to have
+In the LetterRecognition data, since the sampling was actually *designed* to have
 about the same number of instances for each letter, the algorithm you
 use will then assume the true probabilities of the letters are about
 1/26 each.  We know that is false, as the table shown earlier
 illustrates.
 
 So, if your sampling scheme artificially creates balanced data, as in
-the Letters data, or if you do resampling to make your data balanced, as
+the LetterRecognition data, or if you do resampling to make your data balanced, as
 is commonly recommended, you are fooling your ML algorithm.  
 
 ## Artificial Balance Won't Achieve Your Goals
@@ -330,132 +342,33 @@ On the other hand, the SVM method does not produce the r<sub>i</sub>.
 In addition, even the r<sub>i</sub> produced by, e.g. **glm()** may have
 biases on the edges of the data.  Thus an external method is needed.  
 
-Many implementations of SVM use a method known as *Platt scaling*. This
-assumes a logistic model from the regression function of Y (2-class
-case) against the SVM scores.
+A number of implementations of SVM use a method known as *Platt
+scaling*. This assumes a logistic model from the regression function of
+Y (2-class case) against the SVM scores.  In `regtools`, we use a method
+we've developed ourselves, available in the `scoresToProbs()` function.
 
-### Letter recognition data
+### Example: Missed Apppointments Data
 
-For now, we will assume the goal is to maximize the overall rate of
-correct classification.
+## Adjusting the p<sub>i</sub>
 
-Intuitively, if we ignore our knowledge of the class probabilities --
-12.02% etc. --- we are reducing our overall predictive ability, i.e. 
-our overall rate of correct classification.  As noted
+As noted in the LetterRecognition data example, in some cases the data are
+artificially balanced to begin with, due to the sampling design.
+Thus, our estimated values of the p<sub>i</sub> will be wrong from the
+outset.  Can we fix that?
 
-In an experiment in my book (updated here), I sampled from the dataset
-according to the realistic frequencies above, thus producing realistic
-data.  I then fit a logistic model to a training set of 14,000, and used
-it to predict a test set of 6,000, producing 6,000 conditional
-probabilities for each letter.  Finally, I predicted the 6,000 letters,
-first without applying the adjustment formula to those probabilities and
-then with it.
+Here is a related problem:  In an X-ray classification study 
+(study)[https://www.scientificamerican.com/article/rise-of-robot-radiologists]
+from Mount Sinai Hospital
+the classification method worked well on the original hospital data,
+but not in prediction of new cases at other locations.  The study's
+authors found that an important factor underlying the discrepancy was
+that the p<sub>i</sub> vary from one hospital to another.  Here the class
+probabilities really do change, not artificially, but the issues are
+the same, and again an adjustment procedure would be desirable.
 
-Without the adjustment formula, I got a **correct classification
-rate of 69%.**  But then using the formula, **the correct
-classification rate rose to 76%.**
+### The adjustment formula
 
-One can actually do much better on this dataset, either by adding
-quadratic terms to the logit model, or by using a nonparametric method.
-(In my book, I get 97% accuracy using random forests.)  But that is not
-the point; instead, the point is that for any given ML algorithm on
-balanced data, **we can do better by using the adjustment formula** (if,
-of course, the correct class probabilities are known).
-
-As you can see, balanced data can be our enemy, if our goal is overall
-rate of correct classification.
-
-### Credit card fraud data
-
-In the credit card fraud data, the perceived problem is that, if we use
-the data to classify new cases, the extreme imbalance in the data wll
-mean that we will always guess that the new case is not fraudulent.
-
-With this approach, we'd miss all the fraudulent cases.  There aren't
-many of them, but even the small number of cases can cause big damage,
-i.e. we are very worried about false negatives (positive meaning we
-guess the transaction is fraudulent).  Yet **the solution is not to
-force the data to be balanced.** 
-
-## First alternative
-
-We *could* formally assign specific
-numerical relative weights to the two kinds of error, i.e. false
-positives and false negatives.  One could then trick our ML algorithm
-into achieving those weights, via mathematically derivations we won't go
-into here.
-
-## Better alternative
-
-**But it's much easier to take an informal approach:**  We simply calculate
-the conditional probabilities of the classes, given the features, and
-have our code flag any that are above a threshhold we specify.
-(Actually, `mlr3` does mention something similar to this as an alternative
-to artificially balancing the data.)
-
-In the credit card fraud case, we may decide, say, to flag any transaction
-with at least a 25% chance of being fraudulent.  We could then
-investigate these further by hand.
-
-**This is the natural, simple approach,** explainable to anyone
-regardless of whether they have a good background in stat/ML.
-
-The code would look like this
-(using the same data to fit and predict, just an illustration), say for
-**glm()**:
-
-For the **randomForest** package, a bit more work (could write a wrapper
-for it):
-
-``` r
-
-> ccf$Class <- as.factor(ccf$Class)
-> rfout <- randomForest(Class ~ .,data=ccf)
-> predout <- predict(rfout,ccf,type='response')
-> treeguesses <- predout$individual  # class guesses for each tree
-> tgs <- as.matrix(treeguesses)
-# tgs[i,] has guesses for case i, '1's and '0's, from each tree
-> probs <- apply(tgs,1,function(rw) mean(as.numeric(rw)))
-> tocheck <- which(probs > 0.25)
-> head(tocheck)
-[1]   70  542  624 1747 4921 6109
-
-```
-
-Other ML algorithms/packages are similar.  E.g. for boosting, say with
-the **gbm** package, the procedure is similar to that of **glm()** above.
-
-For neural networks, e.g.  with the **neuralnet** package, call
-**compute()** then take the **net.result** component.  The **keras**
-case is a bit more complicated, but still very possible.
-
-The SVM case is different, as we will explain later in this document.
-
-Actually, both `caret` and `mlr3` allow one to extract probabilities in
-this manner.  But again, this should be done instead of forcing balance,
-which is recommended by those packages.
-
-## The adjustment formula
-
-Recall the Letters example.  The sampling design itself was balanced,
-but artificially so.  Each letter had about the same frequency in the
-data, in spite of the fact that the frequencies vary widely in actual
-English.
-
-The adjustment formula allows us to take the output of an ML fitting on
-the Letters data, and convert it to the proper form for the correct
-class probabilities.
-
-In general, this adjustment method is useful in three kinds of settings:
-
-* The data are artificially rebalance.
-
-* The sampling scheme for the data is designed to have balanced class
-  data.
-
-* The class probabilities in some application later change.
-
-For now, we'll assume the two-class setting here, with Class 0
+For simplicity, we'll assume the two-class setting here, with Class 0
 and Class 1. This is the code for adjustment (the function is part of
 the `regtools` package):
 
@@ -473,7 +386,8 @@ classadjust <- function(condprobs,wrongprob1,trueprob1) {
 where 
 
 - `condprobs` is the vector of conditional class probabilities for
-  the new cases, reported by the software
+  the new cases, reported by the software applied to the data with
+incorrect p<sub>i</sub>
 
 - `wrongratio` is the ratio of the numbers of Class 0 to Class 1
   datapoints in our dataset
@@ -540,10 +454,10 @@ does k-Nearest Neighbor analysis of the conditional probability of
 force balance.  Instead, choose a threshhold for conditional
 probabilities, and flag new cases that exceed it.
 
-- If your data is unrealistically balanced, as in the Letters example,
-  and the true unconditional class probabilities are known, use the
-adjustment formula to convert the reported unconditional probabilities to
-realistic ones, and classify using them.
+- If your data is unrealistically balanced, as in the LetterRecognition
+  example, and the true unconditional class probabilities are known, use
+the adjustment formula to convert the reported unconditional
+probabilities to realistic ones, and classify using them.
 
 - If your data is unrealistically balanced but the true unconditional
   class probabilities are unknown, recognize that your ML analysis may
@@ -595,10 +509,10 @@ P(Y = 1 | X = t) = 1 / [1 + {(1-p)/p} f<sub>0</sub>(t) / f<sub>1</sub>(t)]
 (Eqn. 2)
 
 Now suppose the analyst artificially changes the class counts in the
-data (or, as in the Letters example, the data is artificially sampled by
-design), with proportions q and 1-q for the two classes.  In the case of
-artificially equalizing the class proportions, we have q = 0.5.  Then
-the above becomes, in the eyes of your ML algorithm,
+data (or, as in the LetterRecognition example, the data is artificially
+sampled by design), with proportions q and 1-q for the two classes.  In
+the case of artificially equalizing the class proportions, we have q =
+0.5.  Then the above becomes, in the eyes of your ML algorithm,
 
 P(Y = 1 | X = t) = 1 / [1 + {(1-q)/q} f<sub>0</sub>(t) / f<sub>1</sub>(t)]
 <br>

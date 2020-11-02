@@ -297,14 +297,42 @@ r<sub>i</sub> directly, "by hand" rather than by computer.  We would
 still set a threshold h, yes, but would use it only as first-stage
 screening, with the second stage being done by humans.  
 
-At that point, the (human) audito would take  into account not only that
+At that point, the (human) auditor would take  into account not only that
 estimated probability but also such factors as the amount of the charge,
 special characteristics not measured in the available features, and so
 on.  The auditor may not give priority, for instance, to a case for
 which the probability is above h but the monetary value of the
 transaction is small.
    
+## Obtaining the r<sub>i</sub>
 
+Some ML algorithms naturally provide the r<sub>i</sub>, while others do
+not.
+
+Below is an example for the logistic model, for a data frame **ccf**
+containing the credit card fraud data, with class variable **Class**.
+Say we take h = 0.25.  We'll cull out the cases with at least that
+probability of fraud, for preparation of investigation "by hand."
+
+``` r
+> glmout <- glm(Class ~ .,data=ccf,family=binomial)
+> condProbs <- predict(glmout,ccf,type='response')
+> toCheck <- which(condProbs > 0.25)
+> names(toCheck) <- NULL
+> head(toCheck)
+[1]  542 6109 6332 6335 6337 6339
+
+```
+
+So we'd check cases 542, 6109 and so on by hand.
+
+On the other hand, the SVM method does not produce the r<sub>i</sub>.
+In addition, even the r<sub>i</sub> produced by, e.g. **glm()** may have
+biases on the edges of the data.  Thus an external method is needed.  
+
+Many implementations of SVM use a method known as *Platt scaling*. This
+assumes a logistic model from the regression function of Y (2-class
+case) against the SVM scores.
 
 ### Letter recognition data
 
@@ -375,19 +403,6 @@ regardless of whether they have a good background in stat/ML.
 The code would look like this
 (using the same data to fit and predict, just an illustration), say for
 **glm()**:
-
-``` r
-
-> glmout <- glm(Class ~ .,data=ccf,family=binomial)
-> condprobs <- predict(glmout,ccf,type='response')
-> tocheck <- which(condprobs > 0.25)
-> names(tocheck) <- NULL
-> head(tocheck)
-[1]  542 6109 6332 6335 6337 6339
-
-```
-
-So we'd check cases 542, 6109 and so on by hand.
 
 For the **randomForest** package, a bit more work (could write a wrapper
 for it):

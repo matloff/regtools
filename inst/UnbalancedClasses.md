@@ -124,7 +124,11 @@ The examples above illustrate two important cases:
 two-day data collection period was typical, the population class
 probability for fraud will be about what we see in the data, 0.172%.
 
+<<<<<<< HEAD
+- The LettersRecognition  data is *balanced*, but only *artificially so*.  The
+=======
 - The LetterRecognition data is *balanced*, but only *artificially so*.  The
+>>>>>>> e5262e04c8b9ecb079dab2cbc2b92f665346f3a4
 curator of the dataset wanted the data to have about the same number
 of instances of each letter.  But in general English usage, letters occur
 with quite different frequencies:
@@ -342,10 +346,124 @@ On the other hand, the SVM method does not produce the r<sub>i</sub>.
 In addition, even the r<sub>i</sub> produced by, e.g. **glm()** may have
 biases on the edges of the data.  Thus an external method is needed.  
 
+<<<<<<< HEAD
+Many implementations of SVM use a method known as *Platt scaling*. This
+assumes a logistic model from the regression function of Y (2-class
+case) against the SVM scores.
+
+### Letter recognition data
+
+For now, we will assume the goal is to maximize the overall rate of
+correct classification.
+
+Intuitively, if we ignore our knowledge of the class probabilities --
+12.02% etc. --- we are reducing our overall predictive ability, i.e. 
+our overall rate of correct classification.  As noted
+
+In an experiment in my book (updated here), I sampled from the dataset
+according to the realistic frequencies above, thus producing realistic
+data.  I then fit a logistic model to a training set of 14,000, and used
+it to predict a test set of 6,000, producing 6,000 conditional
+probabilities for each letter.  Finally, I predicted the 6,000 letters,
+first without applying the adjustment formula to those probabilities and
+then with it.
+
+Without the adjustment formula, I got a **correct classification
+rate of 69%.**  But then using the formula, **the correct
+classification rate rose to 76%.**
+
+One can actually do much better on this dataset, either by adding
+quadratic terms to the logit model, or by using a nonparametric method.
+(In my book, I get 97% accuracy using random forests.)  But that is not
+the point; instead, the point is that for any given ML algorithm on
+balanced data, **we can do better by using the adjustment formula** (if,
+of course, the correct class probabilities are known).
+
+As you can see, balanced data can be our enemy, if our goal is overall
+rate of correct classification.
+
+### Credit card fraud data
+
+In the credit card fraud data, the perceived problem is that, if we use
+the data to classify new cases, the extreme imbalance in the data wll
+mean that we will always guess that the new case is not fraudulent.
+
+With this approach, we'd miss all the fraudulent cases.  There aren't
+many of them, but even the small number of cases can cause big damage,
+i.e. we are very worried about false negatives (positive meaning we
+guess the transaction is fraudulent).  Yet **the solution is not to
+force the data to be balanced.** 
+
+## First alternative
+
+We *could* formally assign specific
+numerical relative weights to the two kinds of error, i.e. false
+positives and false negatives.  One could then trick our ML algorithm
+into achieving those weights, via mathematically derivations we won't go
+into here.
+
+## Better alternative
+
+**But it's much easier to take an informal approach:**  We simply calculate
+the conditional probabilities of the classes, given the features, and
+have our code flag any that are above a threshhold we specify.
+(Actually, `mlr3` does mention something similar to this as an alternative
+to artificially balancing the data.)
+
+In the credit card fraud case, we may decide, say, to flag any transaction
+with at least a 25% chance of being fraudulent.  We could then
+investigate these further by hand.
+
+**This is the natural, simple approach,** explainable to anyone
+regardless of whether they have a good background in stat/ML.
+
+The code would look like this
+(using the same data to fit and predict, just an illustration), say for
+**glm()**:
+
+For the **randomForest** package, a bit more work (could write a wrapper
+for it):
+
+``` r
+
+> ccf$Class <- as.factor(ccf$Class)
+> rfout <- randomForest(Class ~ .,data=ccf)
+> predout <- predict(rfout,ccf,type='response')
+> treeguesses <- predout$individual  # class guesses for each tree
+> tgs <- as.matrix(treeguesses)
+# tgs[i,] has guesses for case i, '1's and '0's, from each tree
+> probs <- apply(tgs,1,function(rw) mean(as.numeric(rw)))
+> tocheck <- which(probs > 0.25)
+> head(tocheck)
+[1]   70  542  624 1747 4921 6109
+
+```
+
+Other ML algorithms/packages are similar.  E.g. for boosting, say with
+the **gbm** package, the procedure is similar to that of **glm()** above.
+
+For neural networks, e.g.  with the **neuralnet** package, call
+**compute()** then take the **net.result** component.  The **keras**
+case is a bit more complicated, but still very possible.
+
+The SVM case is different, as we will explain later in this document.
+
+Actually, both `caret` and `mlr3` allow one to extract probabilities in
+this manner.  But again, this should be done instead of forcing balance,
+which is recommended by those packages.
+
+## The adjustment formula
+
+Recall the LettersRecognition example.  The sampling design itself was balanced,
+but artificially so.  Each letter had about the same frequency in the
+data, in spite of the fact that the frequencies vary widely in actual
+English.
+=======
 A number of implementations of SVM use a method known as *Platt
 scaling*. This assumes a logistic model from the regression function of
 Y (2-class case) against the SVM scores.  In `regtools`, we use a method
 we've developed ourselves, available in the `scoresToProbs()` function.
+>>>>>>> e5262e04c8b9ecb079dab2cbc2b92f665346f3a4
 
 ### Example: Missed Apppointments Data
 
@@ -454,10 +572,17 @@ does k-Nearest Neighbor analysis of the conditional probability of
 force balance.  Instead, choose a threshhold for conditional
 probabilities, and flag new cases that exceed it.
 
+<<<<<<< HEAD
+- If your data is unrealistically balanced, as in the LettersRecognition example,
+  and the true unconditional class probabilities are known, use the
+adjustment formula to convert the reported unconditional probabilities to
+realistic ones, and classify using them.
+=======
 - If your data is unrealistically balanced, as in the LetterRecognition
   example, and the true unconditional class probabilities are known, use
 the adjustment formula to convert the reported unconditional
 probabilities to realistic ones, and classify using them.
+>>>>>>> e5262e04c8b9ecb079dab2cbc2b92f665346f3a4
 
 - If your data is unrealistically balanced but the true unconditional
   class probabilities are unknown, recognize that your ML analysis may
@@ -509,7 +634,11 @@ P(Y = 1 | X = t) = 1 / [1 + {(1-p)/p} f<sub>0</sub>(t) / f<sub>1</sub>(t)]
 (Eqn. 2)
 
 Now suppose the analyst artificially changes the class counts in the
+<<<<<<< HEAD
+data (or, as in the LettersRecognition example, the data is artificially
+=======
 data (or, as in the LetterRecognition example, the data is artificially
+>>>>>>> e5262e04c8b9ecb079dab2cbc2b92f665346f3a4
 sampled by design), with proportions q and 1-q for the two classes.  In
 the case of artificially equalizing the class proportions, we have q =
 0.5.  Then the above becomes, in the eyes of your ML algorithm,
@@ -523,13 +652,20 @@ indirectly, is P(Y = 1 | X = t).  Moreover, as also noted earlier, even
 `caret` and `mlr3` do make these quantities available for the various t,
 so we can solve for f<sub>0</sub>(t) / f<sub>1</sub>(t):
 
-f<sub>0</sub>(t) / f<sub>1</sub>(t) = (g - 1) q/(1-q)  
+f<sub>0</sub>(t) / f<sub>1</sub>(t) = 
+[g(t)-1] q/(1-q)
 <br>
 (Eqn. 4)
 
 where
 
-g = 1 / P(Y = 1 | X = t)
+g(t) = 1 / P(Y = 1 | X = t)
+
+Keep in mind that the g values are the ones output by our ML algorithm.
+Setting t to the matrix of our feature values, we can plug t into Eqn. 4
+to get the vector of f<sub>0/f<sub>1</sub></sub> values, and plug the
+result into Eqn. 2 to obtain the vector of correct conditional
+probabilities.
 
 We can now substitute in (Eqn. 2) from (Eqn. 4) to get the proper
 conditional probability.

@@ -275,8 +275,17 @@ makeNA <- function(m,probna) {
 
 # replace NAs by 0s
 
-to0s <- function(x) 
+NAsTo0s <- function(x) 
 {
    x[is.na(x)] <- 0
    x
 }
+
+# replace 0s (or other) by NAs 
+
+ZerosToNAs <- function(x,replaceVal=0) 
+{
+   x[x == replaceVal] <- NA
+   x
+}
+

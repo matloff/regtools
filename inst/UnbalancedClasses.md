@@ -124,11 +124,7 @@ The examples above illustrate two important cases:
 two-day data collection period was typical, the population class
 probability for fraud will be about what we see in the data, 0.172%.
 
-<<<<<<< HEAD
-- The LettersRecognition  data is *balanced*, but only *artificially so*.  The
-=======
 - The LetterRecognition data is *balanced*, but only *artificially so*.  The
->>>>>>> e5262e04c8b9ecb079dab2cbc2b92f665346f3a4
 curator of the dataset wanted the data to have about the same number
 of instances of each letter.  But in general English usage, letters occur
 with quite different frequencies:
@@ -346,7 +342,6 @@ On the other hand, the SVM method does not produce the r<sub>i</sub>.
 In addition, even the r<sub>i</sub> produced by, e.g. **glm()** may have
 biases on the edges of the data.  Thus an external method is needed.  
 
-<<<<<<< HEAD
 Many implementations of SVM use a method known as *Platt scaling*. This
 assumes a logistic model from the regression function of Y (2-class
 case) against the SVM scores.
@@ -572,17 +567,10 @@ does k-Nearest Neighbor analysis of the conditional probability of
 force balance.  Instead, choose a threshhold for conditional
 probabilities, and flag new cases that exceed it.
 
-<<<<<<< HEAD
 - If your data is unrealistically balanced, as in the LettersRecognition example,
   and the true unconditional class probabilities are known, use the
 adjustment formula to convert the reported unconditional probabilities to
 realistic ones, and classify using them.
-=======
-- If your data is unrealistically balanced, as in the LetterRecognition
-  example, and the true unconditional class probabilities are known, use
-the adjustment formula to convert the reported unconditional
-probabilities to realistic ones, and classify using them.
->>>>>>> e5262e04c8b9ecb079dab2cbc2b92f665346f3a4
 
 - If your data is unrealistically balanced but the true unconditional
   class probabilities are unknown, recognize that your ML analysis may
@@ -634,11 +622,7 @@ P(Y = 1 | X = t) = 1 / [1 + {(1-p)/p} f<sub>0</sub>(t) / f<sub>1</sub>(t)]
 (Eqn. 2)
 
 Now suppose the analyst artificially changes the class counts in the
-<<<<<<< HEAD
-data (or, as in the LettersRecognition example, the data is artificially
-=======
 data (or, as in the LetterRecognition example, the data is artificially
->>>>>>> e5262e04c8b9ecb079dab2cbc2b92f665346f3a4
 sampled by design), with proportions q and 1-q for the two classes.  In
 the case of artificially equalizing the class proportions, we have q =
 0.5.  Then the above becomes, in the eyes of your ML algorithm,

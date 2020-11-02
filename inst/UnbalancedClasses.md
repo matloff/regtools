@@ -346,121 +346,33 @@ Many implementations of SVM use a method known as *Platt scaling*. This
 assumes a logistic model from the regression function of Y (2-class
 case) against the SVM scores.
 
-### Letter recognition data
+### Example: Missed Apppointments Data
 
-For now, we will assume the goal is to maximize the overall rate of
-correct classification.
-
-Intuitively, if we ignore our knowledge of the class probabilities --
-12.02% etc. --- we are reducing our overall predictive ability, i.e. 
-our overall rate of correct classification.  As noted
-
-In an experiment in my book (updated here), I sampled from the dataset
-according to the realistic frequencies above, thus producing realistic
-data.  I then fit a logistic model to a training set of 14,000, and used
-it to predict a test set of 6,000, producing 6,000 conditional
-probabilities for each letter.  Finally, I predicted the 6,000 letters,
-first without applying the adjustment formula to those probabilities and
-then with it.
-
-Without the adjustment formula, I got a **correct classification
-rate of 69%.**  But then using the formula, **the correct
-classification rate rose to 76%.**
-
-One can actually do much better on this dataset, either by adding
-quadratic terms to the logit model, or by using a nonparametric method.
-(In my book, I get 97% accuracy using random forests.)  But that is not
-the point; instead, the point is that for any given ML algorithm on
-balanced data, **we can do better by using the adjustment formula** (if,
-of course, the correct class probabilities are known).
-
-As you can see, balanced data can be our enemy, if our goal is overall
-rate of correct classification.
-
-### Credit card fraud data
-
-In the credit card fraud data, the perceived problem is that, if we use
-the data to classify new cases, the extreme imbalance in the data wll
-mean that we will always guess that the new case is not fraudulent.
-
-With this approach, we'd miss all the fraudulent cases.  There aren't
-many of them, but even the small number of cases can cause big damage,
-i.e. we are very worried about false negatives (positive meaning we
-guess the transaction is fraudulent).  Yet **the solution is not to
-force the data to be balanced.** 
-
-## First alternative
-
-We *could* formally assign specific
-numerical relative weights to the two kinds of error, i.e. false
-positives and false negatives.  One could then trick our ML algorithm
-into achieving those weights, via mathematically derivations we won't go
-into here.
-
-## Better alternative
-
-**But it's much easier to take an informal approach:**  We simply calculate
-the conditional probabilities of the classes, given the features, and
-have our code flag any that are above a threshhold we specify.
-(Actually, `mlr3` does mention something similar to this as an alternative
-to artificially balancing the data.)
-
-In the credit card fraud case, we may decide, say, to flag any transaction
-with at least a 25% chance of being fraudulent.  We could then
-investigate these further by hand.
-
-**This is the natural, simple approach,** explainable to anyone
-regardless of whether they have a good background in stat/ML.
-
-The code would look like this
-(using the same data to fit and predict, just an illustration), say for
-**glm()**:
-
-For the **randomForest** package, a bit more work (could write a wrapper
-for it):
+This is a Kaggle dataset, on whether patients keep their medical
+appointments.
 
 ``` r
-
-> ccf$Class <- as.factor(ccf$Class)
-> rfout <- randomForest(Class ~ .,data=ccf)
-> predout <- predict(rfout,ccf,type='response')
-> treeguesses <- predout$individual  # class guesses for each tree
-> tgs <- as.matrix(treeguesses)
-# tgs[i,] has guesses for case i, '1's and '0's, from each tree
-> probs <- apply(tgs,1,function(rw) mean(as.numeric(rw)))
-> tocheck <- which(probs > 0.25)
-> head(tocheck)
-[1]   70  542  624 1747 4921 6109
-
+> ma <- read.csv('KaggleV2-May-2016.csv',header=T,stringsAsFactors=T)
+> ma <- ma[,-c(1,2,4,5,7)]
+> svmout <- qeSVM(ma,'No.show',holdout=NULL)
 ```
 
-Other ML algorithms/packages are similar.  E.g. for boosting, say with
-the **gbm** package, the procedure is similar to that of **glm()** above.
+Let's predict a hypothetical patient with the characteristics of patient
+8 in our training data, but who is male:
 
-For neural networks, e.g.  with the **neuralnet** package, call
-**compute()** then take the **net.result** component.  The **keras**
-case is a bit more complicated, but still very possible.
+``` r
+> newx <- ma[8,-9]
+> newx$Gender <- 'M'
+> predict(svmout,newx)
+$predClasses
+ 8 
+No 
+Levels: No Yes
+```
 
-The SVM case is different, as we will explain later in this document.
+We predict him to show up for the appointment.  But what is the
+probability of that?
 
-Actually, both `caret` and `mlr3` allow one to extract probabilities in
-this manner.  But again, this should be done instead of forcing balance,
-which is recommended by those packages.
-
-## The adjustment formula
-
-Recall the LettersRecognition example.  The sampling design itself was balanced,
-but artificially so.  Each letter had about the same frequency in the
-data, in spite of the fact that the frequencies vary widely in actual
-English.
-=======
-A number of implementations of SVM use a method known as *Platt
-scaling*. This assumes a logistic model from the regression function of
-Y (2-class case) against the SVM scores.  In `regtools`, we use a method
-we've developed ourselves, available in the `scoresToProbs()` function.
->>>>>>> e5262e04c8b9ecb079dab2cbc2b92f665346f3a4
-
-### Example: Missed Apppointments Data
 
 ## Adjusting the p<sub>i</sub>
 
@@ -536,22 +448,6 @@ class probabilities in order to maximize expected utility.
 
 Once again, **balancing the data will not help.**
 
-## Estimating conditional probabilities with SVM
-
-This document has recommended making classification decisions on the
-basis of conditional probabilities rather than predicted classes.  But
-some classification algorithms, notably SVM, do not provide these
-probabilities.  How many they be obtained separately?
-
-One popular method for doing this is *Platt scaling*. This involves
-assuming (something like, there are variations) that conditional
-probability of class 1 given the SVM score has the form of a logistic
-function (sigmoid).
-
-The `regtools` function `labelsToProbs` makes no assumptions.  It simply
-does k-Nearest Neighbor analysis of the conditional probability of
-(e.g. SVM-)predicted class 1 given the feature vector X.
-
 ## Summary
 
 - There's really no need to artificially balance your data, and doing so
@@ -605,13 +501,14 @@ sample and population quantities.)
 
 Say there are two classes, labeled 1 and 0.  Let Y denote the label and
 X denote the features, and say we have a new case with X = t.  Then
+the true equation is
 
 P(Y = 1 | X = t) = p f<sub>1</sub>(t) / [p f<sub>1</sub>t) + (1-p)
 f<sub>0</sub>(t)]  
 <br>
 (Eqn. 1)
 
-where p is P(Y = 1), the unconditional probability of Class 1, and
+where p is P(Y = 1), the true unconditional probability of Class 1, and
 f<sub>i</sub>(t) is the conditional density of X within Class i.
 (If X is a discete random variable, substitute a probability for f.)
 
@@ -660,7 +557,40 @@ The general m-class case. classes 0,1,...,m-1, actually reduces to the
 P(Y = i | X = t)
 
 can be viewed as the conditional probability of class i vs. all other
-classes.
+classes.  
+
+For each j = 1,...,c, denote by q<sub>j</sub> and p<sub>j</sub>
+the probabilities assumed by our ML algorithm, and the actual
+probabilities, respecitvely.  For example, if the data are artificially
+balanced, either by resampling or by the original sampling design, we
+have q<sub>j</sub> = 1/c for all j.
+
+To guide our intuition, note first that Eqn. 2 is now
+
+P(Y = j | X = X<sub>i</sub>) =
+1 / 
+[1 + {(1-p<sub>j</sub>)/p<sub>j</sub>}
+[&Sigma;<sub>m &ne; j</sub> f<sub>m</sub>(X<sub>i</sub>)] / f<sub>j</sub>(X<sub>i</sub>)
+<br> 
+Eqn. 5
+
+Now to handle the multiclass case, for each j, j = 1,...,c and
+each i = 1,...,n, do:
+
+1.  Set g<sub>ij</sub> to the reciprocal of the outputted estimated value of
+P(Y = j | X = X<sub>i</sub>), 
+
+g<sub>ij</sub> = 1 / P(Y = j | X = X<sub>i</sub>), 
+
+2.  Set
+
+[&Sigma;<sub>m &ne; j</sub> f<sub>m</sub>(X<sub>i</sub>)] / f<sub>j</sub>(X<sub>i</sub>) =
+[g<sub>ij</sub> - 1] q<sub>j</sub> / (1 - q<sub>j</sub>)
+<br>
+Eqn. 6
+
+3.  Plug the result of Eqn. 6, along with the true p<sub>j</sub> ,into Eqn. 5
+to obtain the true estimated conditional class probabilities.
 
 ## Appendix C:  What is really happening if you use equal class probabilities?
 

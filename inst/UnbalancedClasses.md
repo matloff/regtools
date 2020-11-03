@@ -111,10 +111,11 @@ who have the disease, which we will estimate from our training data.
 * q<sub>i</sub>(t) = P(Y = i | X = t) (posterior probs.)
 * Y<sub>pred</sub> = the value we predict for Y
 * (X<sub>i</sub>,Y<sub>i</sub>), i=1,2,...,n: training data
+* f<sub>i</sub>: (conditional) density of X within class i
 
 2-class case (Y = 0,1):
 * p: P(Y = 1) (probability of class 1)
-* r_i: estimated q<sub>1</sub>(X<sub>i</sub>)    
+* r<sub>i</sub>: estimated q<sub>1</sub>(X<sub>i</sub>)    
 
 ## Key issue:  How were the data generated?
 
@@ -270,12 +271,19 @@ Here one considers various threshhold values h, where we guess class 1
 if r > h, 0 otherwise.  The value one chooses for h will determine the
 True Positive Rate and False Positive Rate:
 
-TPR(h) = P(Y<sub>pred</sub> = 1 | Y = 1)
+TPR(h) = P(Y<sub>pred</sub> = 1 | Y = 1) 
+= &int;<sub>t > h</sub> f<sub>1</sub>(t) dt
 
 FPR(h) = P(Y<sub>pred</sub> = 1 | Y = 0)
+= &int;<sub>t > h</sub> f<sub>0</sub>(t) dt
 
 The ROC curve is then a graph of TPR vs. FPR.  As we vary h, it traces
-out the ROC curve.  Some R packages, such as ROCR, colorize the curve,
+out the ROC curve.  Here is how it can be implemented simply in R:
+
+
+
+
+Some R packages, such as ROCR, colorize the curve,
 with the color showing the value of h.
 
 The idea here is that even if we cannot quantity l<sub>01</sub>, we can

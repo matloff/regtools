@@ -55,20 +55,30 @@ penrosePoly <- function(d,yName,deg,maxInteractionDeg=deg)
    y <- d[,ycol]
    xy <- cbind(xPoly,y)
    res <- list(bh=penroseLM(xy,'y')$bh,
-      deg=deg,maxInteractionDeg=maxInteractionDeg)
+      deg=deg,
+      maxInteractionDeg=maxInteractionDeg,
+      modelFormula=polyout$modelFormula,
+      XtestFormula=polyout$XtestFormula,
+      retainedNames=polyout$retainedNames,
+      standardize=FALSE
+      )
    class(res) <- 'penrosePoly'
    res
 }
 
 predict.penrosePoly <- function(object,newx) 
 {
-   deg <- object$deg
-   maxInteractionDeg <- object$maxInteractionDeg
-   polyout <- getPoly(newx,deg=deg,maxInteractionDeg=maxInteractionDeg)
+   polyout <- getPoly(newx,
+      deg=object$deg,
+      maxInteractDeg = object$maxInteractDeg,
+      modelFormula = object$modelFormula,
+      retainedNames = object$retainedNames)
    xPoly <- polyout$xdata  # polynomial version of newx
    xPoly <- as.matrix(xPoly)
    xPoly <- cbind(1,xPoly)
    bh <- object$bh
    xPoly %*% bh
 }
+
+predpnr <- predict.penrosePoly
 

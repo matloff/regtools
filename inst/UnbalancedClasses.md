@@ -290,7 +290,7 @@ possible TPR/FPR scenarios; usually we are far more interested in some
 settings than others.  Note too that AUC values for original data vs.
 the artificially balanced data are not comparable.
 
-### Approach 2:  informal, nonmechanical consideration of the r<sub>i</sub>
+### Approach 2:  informal, nonmechanical consideration of the r<sub>i</sub> (favored choice)
 
 The key point is this:
 
@@ -344,7 +344,11 @@ biases on the edges of the data.  Thus an external method is needed.
 
 Many implementations of SVM use a method known as *Platt scaling*. This
 assumes a logistic model from the regression function of Y (2-class
-case) against the SVM scores.
+case) against the SVM scores.  In `regtools`, we instead use an method
+we developed, which performs a k-Nearest Neighbors regression of Y
+against the scores.  (In non-SVM cases, the scores can be anything used
+by the ML method at hand to predict Y.)  Our method is implemented in
+the `regtools` function `scoresToProbs()`. 
 
 ### Example: Missed Apppointments Data
 
@@ -373,6 +377,29 @@ Levels: No Yes
 We predict him to show up for the appointment.  But what is the
 probability of that?
 
+``` r
+> predict(svmout,newx,k=75)
+$predClasses
+ 8 
+No 
+Levels: No Yes
+
+$probs
+            No       Yes
+[1,] 0.8133333 0.1866667
+```
+
+What happened here?  Our function `predict.qeSVM` includes this code:
+
+``` r
+    if (!is.null(k)) {
+        y <- object$y
+        trnScores <- object$decision.values
+        newScores <- getDValsE1071(object, newx)
+        probs <- scoresToProbs(y, trnScores, newScores, k)
+        res$probs <- probs
+    }
+```
 
 ## Adjusting the p<sub>i</sub>
 

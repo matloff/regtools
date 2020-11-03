@@ -338,6 +338,7 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
 
 predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
 {
+   require(e1071)
    class(object) <- class(object)[-1]
    newx <- setTrainFactors(object,newx)
    preds <- predict(object,newx)

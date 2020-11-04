@@ -472,3 +472,29 @@ logOddsToProbs <- function(x)
    1 / (1+u)
 }
 
+# arguments:
+
+#    y: labels in training set; a 0s and 1s vector 
+#    scores: values that your ML algorithm predicts from
+
+ROC <- function(y,scores) 
+{
+   n <- length(y)
+   numPos <- sum(y)
+   numNeg <- n - numPos
+   scoreOrder <- order(scores,decreasing=T)
+   tpr <- vector(length = n)
+   fpr <- vector(length = n)
+   for (i in 1:n) {
+      # scoresSorted = sort(scores); h = scoresSorted[i]
+      whichGteH <- scoreOrder[1:i]
+      numTruePos <- sum(y[whichGteH] == 1)
+      numFalsePos <- i - numTruePos
+      tpr[i] <- numTruePos / numPos
+      fpr[i] <- numFalsePos / numNeg
+   }
+   browser()
+   plot(fpr,tpr,type='l',pch=2,cex=0.5)
+   abline(0,1)
+
+}

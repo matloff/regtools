@@ -429,6 +429,10 @@ roc(ma$No.show,svmout$decision.values,plot=T)
 
 ![result](images/ROC45.png)
 
+Oh no!  The dreaded 45-degree line!  Though to some degree this may
+reflect our untuned used of SVM, it's clear that ROC is not helpful
+here. 
+
 
 ## Adjusting the p<sub>i</sub>
 

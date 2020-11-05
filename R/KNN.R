@@ -26,7 +26,8 @@
 #      many components; 0 means no PCA
 #   smoothingFtn: op applied to the "Y"s of nearest neighbors; could be,
 #      say, median instead of mean, even variance
-#   allK: currently disabled
+#   allK: run the analyses for all k through maxK; currently disabled,
+#      but there is kNNallK() for those who wish to use it
 #   leave1out: delete the 1-nearest neighbor (n-fold cross-validation)
 #   classif: if TRUE, consider this a classification problem. 
 #      Then 'ypreds' will be included in the return value.  See also the
@@ -239,7 +240,205 @@ predict.kNN <- function(object,...)
 ###    regests[closestIdxs[,k],]
 }
 
-prdk <- predict.kNN
+# older version of kNN(); current versions disable the allK option,
+# while this one does not
+kNNallK <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
+          expandVars=NULL,expandVals=NULL,
+          smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
+          classif=FALSE,startAt1=TRUE)
+{  
+   noPreds <- is.null(newx)  # don't predict, just save for future predict
+   startA1adjust <- if (startAt1) 0 else 1
+   # general checks 
+   if (identical(smoothingFtn,loclin)) {
+      if (allK) stop('cannot use loclin() yet with allK = TRUE')
+   }
+   # checks on x
+   if (is.vector(x)) x <- matrix(x,ncol=1)
+   if (hasFactors(x)) stop('use factorsToDummies() to create dummies')
+   if (is.data.frame(x)) 
+      x <- as.matrix(x)
+   ccout <- constCols(x) 
+   if (length(ccout) > 0) {
+      warning('X data has constant columns:')
+      print(ccout)
+      if (scaleX) stop('constant columns cannot work with scaling')
+   }
+   # checks on y
+   nYvals <- length(unique(y))
+   if (is.vector(y)) {
+      if (classif && nYvals > 2) 
+         y <- factorsToDummies(as.factor(y),omitLast=FALSE)
+      else y <- matrix(y,ncol=1)
+   }
+   if (!is.vector(y) && !is.matrix(y)) stop('y must be vector or matrix')
+   if (is.matrix(y) && identical(smoothingFtn,mean)) 
+      smoothingFtn <- colMeans
+   if (classif && allK)  
+      stop('for now, in multiclass case, allK must be FALSE')
+   # if (classif && allK) print('stub')
+   #    stop('classif=TRUE can be set only if allK is FALSE')
+   if (ncol(y) > 1 && !allK) classif <- TRUE
+   # checks on newx
+   if (is.factor(newx) || is.data.frame(newx) && hasFactors(newx))
+      stop('change to dummies, factorsToDummies()')
+   if (is.vector(newx)) {
+      nms <- names(newx)
+      # is ti one observation or one predictor?
+      newx <- matrix(newx,ncol=ncol(x))
+      colnames(newx) <- nms
+   }
+   
+   if (is.data.frame(newx)) {
+      newx <- as.matrix(newx)
+   }
+   # at this point, x, y and newx will all be matrices
+
+   if (nrow(y) != nrow(x)) 
+      stop('number of X data points not equal to that of Y')
+
+   if (noPreds) newx <- x
+
+   kmax1 <- kmax + leave1out
+
+   if (scaleX) {
+      x <- scale(x)
+      xcntr <- attr(x,'scaled:center')
+      xscl <- attr(x,'scaled:scale')
+      newx <- scale(newx,center=xcntr,scale=xscl)
+   }
+
+  # expand any specified variables
+   eVars <- !is.null(expandVars)
+   eVals <- !is.null(expandVals)
+   if (eVars || eVals) {
+      if(xor(eVars,eVals)) {
+        stop('expandVars and expandVals must be used together')
+      }
+      if (length(expandVars) != length(expandVals)) {
+          stop('expandVars and expandVals should have the same length')
+      }
+      x <- multCols(x,expandVars,expandVals)
+      newx <- multCols(newx,expandVars,expandVals)  
+   }
+
+   if (PCAcomps > 0) 
+      stop('PCA now must be done separately')
+
+   # find NNs
+   tmp <- FNN::get.knnx(data=x, query=newx, k=kmax1)
+   closestIdxs <- tmp$nn.index
+   if (leave1out) closestIdxs <- closestIdxs[,-1,drop=FALSE]
+
+   # closestIdxs is a matrix; row i gives the indices of the kmax 
+   # closest rows in x to newx[i,]
+
+   # we might want to try various values of k (allK = T), up through
+   # kmax; e.g.  for k = 2 would just use the first 2 columns
+
+   # now, the predictions
+
+   # treat kmax1 = 1 specially, as otherwise get 1x1 matrix issues
+   if (kmax1 == 1) {
+      regests <- y[closestIdxs,]
+   } else {
+      # in fyh(), closestIdxs is a row in closestIdxs, with the first k columns
+      fyh <- function(closestIdxsRow) smoothingFtn(y[closestIdxsRow,,drop=FALSE])
+      if (!allK) {
+         if (identical(smoothingFtn,loclin)) {
+            regests <- loclin(newx,cbind(x,y)[closestIdxs,])
+         } else {
+            regests <- apply(closestIdxs,1,fyh)
+            if (ncol(y) > 1) regests <- t(regests)
+         }
+      } else {
+         regests <- NULL
+         for (k in 1:kmax) 
+            regests <- 
+               if (ncol(y) == 1)
+                 rbind(regests,apply(closestIdxs[,1:k,drop=FALSE],1,fyh))
+               else 
+                 rbind(regests,t(apply(closestIdxs[,1:k,drop=FALSE],1,fyh)))
+      }
+   }
+
+   # start building return value
+
+   tmplist <- list(whichClosest=closestIdxs,regests=regests)
+
+   # MH dists for possible re-run using loclin()
+   if (length(ccout) == 0) {
+      meanx <- rep(0,ncol(x))
+      covx <- cov(x)
+      tried <- try(
+         tmplist$mhdists <- mahalanobis(newx,meanx,covx)
+      )
+      if (is.null(tried) || inherits(tried,'try-error')) {
+         warning('Mahalanobis distances not calculated')
+         tmplist$mhdists <- NULL
+      } 
+   }
+
+   if (classif && !noPreds) {
+      if (ncol(y) > 1) {  # multiclass (> 2) case
+         yp <- apply(regests,1,which.max) - startA1adjust
+         if (!allK) {
+           ypreds <- yp
+         } else ypreds <- matrix(yp,nrow=kmax,byrow=TRUE)
+      } else ypreds <- round(regests)  # 2-class case
+      tmplist$ypreds <- ypreds
+   }
+
+   tmplist$scaleX <- scaleX
+
+   if (scaleX) {
+      tmplist$xcntr <- xcntr
+      tmplist$xscl <- xscl
+   }
+   if (noPreds) {
+      tmplist$x <- x
+   } else {
+      tmplist$x <- NULL
+   }
+   tmplist$leave1out <- leave1out
+   tmplist$startAt1adjust <- startA1adjust
+   tmplist$expandVars <- expandVars
+   class(tmplist) <- 'kNNallk'
+   tmplist
+}
+
+kn2 <- kNN
+
+# actual call is predict(kNNoutput,newx,add1); for each row in newx, the
+# 1-nearest row in kNNoutput$x is found, and the corresponding
+# kNNoutput$regests value returned; should change this to k >= 1
+
+predict.kNNallK <- function(object,...)
+{
+   x <- object$x
+   regests <- object$regests
+   arglist <- list(...)
+   newx <- arglist[[1]]
+   expandVars <- object$expandVars
+   if (!is.null(expandVars)) 
+      stop('separate prediction with expandVars is not yet implemented')
+   if (is.vector(newx)) newx <- matrix(newx,nrow=1)
+   if (is.data.frame(newx)) {
+      newx <- as.matrix(newx)
+   }
+   if (object$scaleX)  newx <- scale(newx,center=object$xcntr,scale=object$xscl)
+   # k <- 1 + object$leave1out
+   k <- 1
+   tmp <- FNN::get.knnx(data=x, query=newx, k=k)
+   if (k == 1) {
+      # note: if k = 1, closestIdxs will be a 1-column matrix
+      closestIdxs <- tmp$nn.index
+   } else closestIdxs <- tmp$nn.index[,-1]
+   if (is.vector(regests)) return(regests[closestIdxs])
+   return(regests[closestIdxs,])
+}
+
+
 
 # n-fold cross validation for kNN(); instead of applying "leave 1 out"
 # to all possible singletons, we do so for a random nSubSam of them;

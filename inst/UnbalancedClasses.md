@@ -427,7 +427,7 @@ But what about ROC?  Using the pROC package, we have
 roc(ma$No.show,svmout$decision.values,plot=T)
 ```
 
-![result](inst/images/ROC45.png)
+![result](images/ROC45.png)
 
 
 ## Adjusting the p<sub>i</sub>

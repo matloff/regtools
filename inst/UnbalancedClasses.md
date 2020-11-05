@@ -20,7 +20,7 @@ and
 All of these sources recommend that you artificially equalize the class
 counts in your data, via various resampling methods.  Say for instance
 we are in the two-class case, and have class sizes of 20000 and 80000
-for class 1 and class 0, respecitvely.  Here are some ways to rebalance.
+for class 1 and class 0, respectively.  Here are some ways to rebalance.
 
 * Randomly discard 60000 data points from class 0.
 
@@ -278,17 +278,20 @@ FPR(h) = P(Y<sub>pred</sub> = 1 | Y = 0)
 = &int;<sub>t > h</sub> f<sub>0</sub>(t) dt
 
 The ROC curve is then a graph of TPR vs. FPR.  As we vary h, it traces
-out the ROC curve.  Here is how it can be implemented simply in R:
-
-
-
-
-Some R packages, such as ROCR, colorize the curve,
+out the ROC curve.  Some R packages, such as ROCR, colorize the curve,
 with the color showing the value of h.
 
 The idea here is that even if we cannot quantity l<sub>01</sub>, we can
-explore various values of h to produce a decision rule that roughly
-reflects the relative values we place on true and false positives.
+at least explore various values of h to produce a decision rule that
+roughly reflects the relative values we place on true and false
+positives.
+
+Often a 45-degree line is superimposed on the ROC graph for comparison.
+To see why, say we are classifying patients as having a certain disease
+or not, say on the basis of a blood test.  For a value of h associated
+with a point on the line, diseased and disease-free patients would have
+the same probability of testing positive, indicating that the test has
+no discriminatory value.
 
 *A note on AUC:*  AUC is the total area under the ROC curve.  As such,
 it is a measure of the general predictive ability of your algorithm on
@@ -360,6 +363,8 @@ the `regtools` function `scoresToProbs()`.
 
 ### Example: Missed Apppointments Data
 
+**Approach 2:**
+
 This is a Kaggle dataset, on whether patients keep their medical
 appointments.
 
@@ -408,6 +413,22 @@ What happened here?  Our function `predict.qeSVM` includes this code:
         res$probs <- probs
     }
 ```
+
+Armed with this probability estimate for the given patient, we can make
+an informal decision as to whether to invest time and effort to make
+sure he does show up, say by phone call reminders, additional text
+messages etc.
+
+**Approach 1:**
+
+But what about ROC?  Using the pROC package, we have
+
+``` r
+roc(ma$No.show,svmout$decision.values,plot=T)
+```
+
+![result](inst/images/ROC45.png)
+
 
 ## Adjusting the p<sub>i</sub>
 

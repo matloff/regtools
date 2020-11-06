@@ -536,8 +536,9 @@ collectForReturn <- function(object,probs)
 getXY <- function(data,yName,xMustNumeric=FALSE,classif,
    factorsInfo=NULL) 
 {
+   if (is.vector(data) && is.nul(yName)) data <- data.frame(data)
    if (!is.data.frame(data))
-      stop('data must be a data frame')
+      stopBrowser('data must be a data frame')
    if (!is.null(yName)) {
       ycol <- which(names(data) == yName)
       y <- data[,ycol]
@@ -591,7 +592,7 @@ splitData <- defmacro(holdout,data,
       set.seed(seed)
       idxs <- sample(1:nrow(data),nHold);
       tst <- data[idxs,];
-      # data <- data[-idxs,]
+      data <- data[-idxs,]
       holdIdxs <- idxs
    }
 )

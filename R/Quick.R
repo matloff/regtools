@@ -494,6 +494,11 @@ predict.qeNeural <- function(object,newx)
    } 
 }
 
+#########################  qePoly()  #################################
+
+qePoly <- penrosePoly 
+predict.qePoly <- predict.penrosePoly
+
 ###################  utilities for qe*()  #########################
 
 # see note on factor features at top of this file
@@ -622,6 +627,7 @@ predictHoldout <- defmacro(res,
 
 ######################  misc.  ###############################0w
 
+# lm() balks if a label begins with a digit; check to see if we have any
 checkNumericNames <- function(nms)
 {
    for (nm in nms) {

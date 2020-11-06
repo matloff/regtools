@@ -68,6 +68,12 @@ penrosePoly <- function(d,yName,deg,maxInteractionDeg=deg)
 
 predict.penrosePoly <- function(object,newx) 
 {
+   if (nrow(newx) == 1) {
+      # problem in getPoly() for case of a 1-row newx, reported to PM;
+      # have this workaround for now
+      oneRow <- TRUE
+      newx <- rbind(newx,newx)
+   } else oneRow <- FALSE
    polyout <- getPoly(newx,
       deg=object$deg,
       maxInteractDeg = object$maxInteractDeg,
@@ -77,7 +83,9 @@ predict.penrosePoly <- function(object,newx)
    xPoly <- as.matrix(xPoly)
    xPoly <- cbind(1,xPoly)
    bh <- object$bh
-   xPoly %*% bh
+   res <- xPoly %*% bh
+   if (oneRow) res <- res[1]
+   res
 }
 
 predpnr <- predict.penrosePoly

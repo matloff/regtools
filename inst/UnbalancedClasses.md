@@ -6,6 +6,33 @@ should modify the data to have equal class counts.  Yet it is shown here
 that this is both unnecessary and often harmful.  Alternatives are
 presented.
 
+## Outline
+
+* Why is imbalance a problem? Always guess the dominant class, etc.
+
+* A popular solution is to artificially balance the data.
+
+* This changes the class probabilities, with undesirable consequences.
+
+* Related problem: the class probabilities may be wrong to begin with,
+  either due to the original sampling scheme or because the
+probabilities may change.
+
+* Two problems will be addressed in this document:
+
+    - What can be done instead of artificially balancing the data?
+
+    - What can we do to adjust data with the wrong class probabilities?
+
+* Solutions:
+
+    - Regarding imbalance, we consider but reject ROC, and instead argue
+      that informal use of conditional probabilities is the best
+solution.
+
+    - Regarding incorrect class probabilities, we develop an adjustment
+      formula.
+
 ## Overview
 
 Illustrations of the (perceived) problems and
@@ -46,7 +73,9 @@ In other words:
 
 > Resampling methods **are both harmful and unnecessay**.
 
-## Motivating example:  Credit card fraud data
+## Motivating Examples  
+
+### Credit card fraud data
 
 This is a 
 [Kaggle dataset](https://www.kaggle.com/mlg-ulb/creditcardfraud).
@@ -63,7 +92,14 @@ Note the phrase, "highly unbalanced."
 Due to privacy concerns, PCA has been used to replace most of the
 features,  though two original features have been retained.
 
-## Motivating example:  Optical letter recognition data
+### Missed appointments data
+
+This is a 
+[Kaggle dataset](https://www.kaggle.com/joniarroba/noshowappointments])
+on whether patients keep their medical appointments.  The imbalance here
+is more mild, with about 20% of the patients being no-shows.
+
+### Optical letter recognition data
 
 This is a well-known
 [UCI Machine Learning Repository dataset](https://archive.ics.uci.edu/ml/datasets/Letter+Recognition).  Again quoting from the site:
@@ -81,6 +117,30 @@ This dataset is close to balanced, with each letter appearing about 775
 times.
 
 The dataset is conveniently available in the `mlbench` package.
+
+### Mt. Sinai Hospital X-ray study
+
+In an X-ray classification study 
+(study)[https://www.scientificamerican.com/article/rise-of-robot-radiologists]
+from Mount Sinai Hospital
+the classification method worked well on the original hospital data,
+but not in prediction of new cases at other locations.  The study's
+authors found that an important factor underlying the discrepancy was
+that the p<sub>i</sub> vary from one hospital to another.  Here the class
+probabilities really do change, not artificially, but the issues are
+the same, and again an adjustment procedure would be desirable.
+
+### Cell phone fraud
+
+In 
+[a study by Fawcett and
+Provost](https://link.springer.com/article/10.1023/A:1009700419189),
+the authors found that
+
+> The level of fraud changes dramat-ically month-to-month because of
+> modifications to work practices (both the carrier’s andthe bandits’). 
+
+
 
 ## Terminology 
 
@@ -373,11 +433,6 @@ the `regtools` function `scoresToProbs()`.
 
 ### Example: Missed Apppointments Data
 
-**Approach 2:**
-
-This is a Kaggle dataset, on whether patients keep their medical
-appointments.
-
 ``` r
 > ma <- read.csv('KaggleV2-May-2016.csv',header=T,stringsAsFactors=T)
 > ma <- ma[,-c(1,2,4,5,7)]
@@ -477,16 +532,6 @@ As noted in the LetterRecognition data example, in some cases the data are
 artificially balanced to begin with, due to the sampling design.
 Thus, our estimated values of the p<sub>i</sub> will be wrong from the
 outset.  Can we fix that?
-
-Here is a related problem:  In an X-ray classification study 
-(study)[https://www.scientificamerican.com/article/rise-of-robot-radiologists]
-from Mount Sinai Hospital
-the classification method worked well on the original hospital data,
-but not in prediction of new cases at other locations.  The study's
-authors found that an important factor underlying the discrepancy was
-that the p<sub>i</sub> vary from one hospital to another.  Here the class
-probabilities really do change, not artificially, but the issues are
-the same, and again an adjustment procedure would be desirable.
 
 ### The adjustment formula
 

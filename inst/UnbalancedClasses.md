@@ -303,10 +303,15 @@ the artificially balanced data are not comparable.
 
 ### Approach 2:  informal, nonmechanical consideration of the r<sub>i</sub> (favored choice)
 
-The key point is this:
+The key points are:
 
-> Mechanical rules are too constraining for many applications.
+* ROC involves macro-level quantities, TPR and FPR. In highly
+  unbalanced settings, we are concerned with the micro-level, rare
+events where the much smaller class occurs.
 
+* Mechanical rules are too constraining for many applications.
+
+This latter point is especially relevant.
 Often the required decision is too critical to be left up to a machine.
 For instance, relevant to our fraud example, in
 [Fraud: a Guide to Its Prevention, Detection and Investigation](https://www.pwc.com.au/consulting/assets/risk-controls/fraud-control-jul08.pdf) 
@@ -326,6 +331,11 @@ special characteristics not measured in the available features, and so
 on.  The auditor may not give priority, for instance, to a case for
 which the probability is above h but the monetary value of the
 transaction is small.
+
+A related issue is that of ranking.  In the credit card fraud example,
+for instance, we may have sufficient audit funding to investigate 100
+transactions per month.  Thus we would rank the r<sub>i</sub>, and cull
+out the top 100 cases.
    
 ## Obtaining the r<sub>i</sub>
 
@@ -419,20 +429,47 @@ an informal decision as to whether to invest time and effort to make
 sure he does show up, say by phone call reminders, additional text
 messages etc.
 
-**Approach 1:**
-
-But what about ROC?  Using the pROC package, we have
+And what about ranking?  We would call **predict()** on our current set
+of new cases, then rank the resulting probabilities.  Just as an example,
+let's take our training set as the "new cases."
 
 ``` r
-roc(ma$No.show,svmout$decision.values,plot=T)
+> preds <- predict(svmout,svmout$x,k=75) 
+> probs <- preds$probs
+> probsOrder <- order(probs) 
+> probsSorted <- probs[probsOrder]
+> head(probsSorted,100)
+  [1] 0.01333333 0.01333333 0.01333333 0.01333333 0.01333333 0.01333333
+  [7] 0.01333333 0.01333333 0.01333333 0.01333333 0.01333333 0.01333333
+ [13] 0.01333333 0.01333333 0.01333333 0.01333333 0.01333333 0.01333333
+ [19] 0.01333333 0.01333333 0.02666667 0.02666667 0.02666667 0.02666667
+ [25] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [31] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [37] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [43] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [49] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [55] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [61] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [67] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [73] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [79] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [85] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [91] 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667 0.02666667
+ [97] 0.02666667 0.02666667 0.02666667 0.02666667
+> head(probsOrder,100)
+  [1] 111857 116081 116105 117394 121485 132575 139922 141078 156201 158322
+ [11] 166633 169521 172965 174563 191263 191534 193848 194199 200048 211445
+ [21] 111474 111529 113535 113572 113577 113579 113582 113584 113585 113590
+ [31] 113593 113598 113617 113634 113636 113637 113640 114420 115955 116040
+ [41] 117506 117538 117540 117542 117543 117546 117548 117551 117555 117562
+ [51] 117565 117628 117634 117638 117639 117640 117641 117648 117651 117663
+ [61] 117693 117715 117718 117773 117842 117843 117845 117847 117849 117853
+ [71] 117856 117956 117962 117966 117969 117970 117971 117979 117982 118010
+ [81] 118013 118015 118018 118021 118024 118026 118027 118037 118038 118041
+ [91] 118043 118048 118112 118125 118127 118130 118131 118133 118138 118139
 ```
 
-![result](images/ROC45.png)
-
-Oh no!  The dreaded 45-degree line!  Though to some degree this may
-reflect our untuned used of SVM, it's clear that ROC is not helpful
-here. 
-
+So we might investigate case numbers 111857, 116081 and so on.
 
 ## Adjusting the p<sub>i</sub>
 

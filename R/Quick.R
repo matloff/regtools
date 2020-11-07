@@ -463,13 +463,14 @@ qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
    krsout$classNames=classNames
    krsout$factorsInfo=factorsInfo
    krsout$x <- x
+   krsout$y <- y
    krsout$trainRow1 <- getRow1(data,yName)
    class(krsout) <- c('qeNeural',class(krsout))
    if (!is.null(holdout)) predictHoldout(krsout)
    krsout
 }
 
-predict.qeNeural <- function(object,newx)
+predict.qeNeural <- function(object,newx=NULL)
 {
    class(object) <- class(object)[-1]
    newx <- setTrainFactors(object,newx)
@@ -496,8 +497,33 @@ predict.qeNeural <- function(object,newx)
 
 #########################  qePoly()  #################################
 
-qePoly <- penrosePoly 
-predict.qePoly <- predict.penrosePoly
+qePoly <- function(data,yName,deg,maxInteractDeg=deg,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+{
+   classif <- is.factor(data[[yName]])
+   if (classif) stop('currently not for classification problems')
+   if (!is.numeric(x)) stop('X must be numeric')
+   if (!is.null(holdout)) splitData(holdout,data)
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol]
+
+   require(polyreg)
+   qeout <- penrosePoly(d=data,yName=yName,deg=deg,maxInteractDeg)
+   qeout$x <- x
+   qeout$y <- y
+   qeout$classif <- classif
+   qeout$trainRow1 <- getRow1(data,yName)
+   class(qeout) <- c('qePoly',class(qeout))
+   if (!is.null(holdout)) predictHoldout(qeout)
+   qeout
+}
+
+predict.qePoly <- function(object,newx)
+{
+   class(object) <- 'penrosePoly'
+   predict(object,newx)
+}
 
 ###################  utilities for qe*()  #########################
 

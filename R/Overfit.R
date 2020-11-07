@@ -45,18 +45,18 @@ predict.penroseLM <- function(object,newx)
 
 # polynomial regression with Penrose inverse; uses polyreg
 
-penrosePoly <- function(d,yName,deg,maxInteractionDeg=deg) 
+penrosePoly <- function(d,yName,deg,maxInteractDeg=deg) 
 {
    require(polyreg)
    ycol <- which(names(d) == yName)
    x <- as.matrix(d[,-ycol])
-   polyout <- getPoly(x,deg=deg,maxInteractionDeg=maxInteractionDeg)
+   polyout <- getPoly(x,deg=deg,maxInteractDeg=maxInteractDeg)
    xPoly <- polyout$xdata  # polynomial version of x
    y <- d[,ycol]
    xy <- cbind(xPoly,y)
    res <- list(bh=penroseLM(xy,'y')$bh,
       deg=deg,
-      maxInteractionDeg=maxInteractionDeg,
+      maxInteractDeg=maxInteractDeg,
       modelFormula=polyout$modelFormula,
       XtestFormula=polyout$XtestFormula,
       retainedNames=polyout$retainedNames,

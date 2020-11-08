@@ -570,7 +570,7 @@ predict.qeLASSO <- function(object,newx)
    colnames(tmp) <- classNames
    maxCols <- apply(tmp,1,which.max)
    predClasses <- object$classNames[maxCols]
-   list(predClasses <- predClasses,probs=tmp)
+   list(predClasses=predClasses,probs=tmp)
 }
 
 ###################  utilities for qe*()  #########################

@@ -14,6 +14,8 @@
 
 # each has a predict() method, again with a fairly uniform interface
 
+# some have plot() methods
+
 # qe*() arguments:
 
 #    data:  dataframe, training set; class labels col is a factor; other
@@ -523,6 +525,54 @@ predict.qePoly <- function(object,newx)
 {
    class(object) <- 'penrosePoly'
    predict(object,newx)
+}
+
+#########################  qeLASSO()  #################################
+
+# for now, "X" must be numeric; if "Y" is a factor, we have a
+# classification problem, otherwise regression
+
+qeLASSO <- function(data,yName,alpha=1,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+{
+   if (!is.data.frame(data)) stop('input must be a data frame')
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol]
+   if (!all(sapply(x,is.numeric))) stop('X must be numeric for now')
+   classif <- is.factor(y)
+   if (!is.null(holdout)) splitData(holdout,data)
+   fam <- if (classif) 'multinomial' else 'gaussian'
+   xm <- as.matrix(x)
+   ym <- as.matrix(y)
+   qeout <- cv.glmnet(x=xm,y=ym,alpha=alpha,family=fam)
+   qeout$x <- x
+   qeout$y <- y
+   qeout$classif <- classif
+   if (classif) qeout$classNames <- levels(y)
+   class(qeout) <- c('qeLASSO',class(qeout))
+   if (!is.null(holdout)) predictHoldout(qeout)
+   qeout
+}
+
+predict.qeLASSO <- function(object,newx) 
+{
+   if (is.vector(newx)) newx <- matrix(newx,ncol=ncol(object$x))
+   if (is.data.frame(newx)) newx <- as.matrix(newx)
+   class(object) <- class(object)[-1]
+   if (!object$classif) return(predict(object,newx))
+   # classif case
+   classNames <- object$classNames
+   tmp <- predict(object,newx,type='response')
+   browser()
+   # tmp <- matrix(tmp,nrow=nrow(newx),ncol=length(classNames))
+   tmp <- tmp[,,1,drop=TRUE]
+   # dropped too far?
+   if (is.vector(tmp)) tmp <- matrix(tmp,ncol=ncol(object$x))
+   colnames(tmp) <- classNames
+   maxCols <- apply(tmp,1,which.max)
+   predClasses <- object$classNames[maxCols]
+   list(predClasses <- predClasses,probs=tmp)
 }
 
 ###################  utilities for qe*()  #########################

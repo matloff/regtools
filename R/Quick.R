@@ -564,8 +564,6 @@ predict.qeLASSO <- function(object,newx)
    # classif case
    classNames <- object$classNames
    tmp <- predict(object,newx,type='response')
-   browser()
-   # tmp <- matrix(tmp,nrow=nrow(newx),ncol=length(classNames))
    tmp <- tmp[,,1,drop=TRUE]
    # dropped too far?
    if (is.vector(tmp)) tmp <- matrix(tmp,ncol=ncol(object$x))

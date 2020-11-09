@@ -71,6 +71,8 @@ regression and classification analysis, and machine learning.
 
    \item dimension reduction: dimRed, dimRedNewX, reduceCols
 
+   \item probability calibration: scoresToProbs
+
    \item loss: l1, l2, MAPE
 
    }
@@ -79,7 +81,8 @@ regression and classification analysis, and machine learning.
 
    \itemize{
 
-   \item qeLogit, qeKNN, qeLin, qeRF, qeGBoost, qeSVM, qeNeural
+   \item qeLogit, qeKNN, qeLin, qeRF, qeGBoost, qeSVM, qeNeural,
+      qeLASSO, qePoly
 
    }
 
@@ -89,7 +92,10 @@ regression and classification analysis, and machine learning.
 
    \item conversion between factors and dummies: dummiesToFactor,
    dummiesToInt, factorsToDummies, factorToDummies, factorTo012etc,
-   dummiesToInt,hasFactors,charsToFactors
+   dummiesToInt, hasFactors, charsToFactors
+
+   \item dealing with superset and subsets of factors: toSuperFactor,
+   toSubFactor
 
    }
 

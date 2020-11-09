@@ -343,8 +343,8 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
    require(e1071)
    class(object) <- class(object)[-1]
    newx <- setTrainFactors(object,newx)
-   preds <- predict(object,newx)
-   res <- list(predClasses=preds)
+   preds <- predict(object,newx,decision.values=TRUE)
+   res <- list(predClasses=preds,dvals=attr(preds,'decision.values'))
    classNames <- object$classNames
    x <- object$x
    if (!is.null(k)) {

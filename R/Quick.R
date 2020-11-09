@@ -305,6 +305,11 @@ predict.qeRF <- function(object,newx)
    res
 }
 
+plot.qeRF <- function(object) 
+{
+   genericPlot(object)
+}
+
 #########################  qeSVM()  #################################
 
 # SVM
@@ -398,7 +403,7 @@ qeGBoost <- function(data,yName,
    {
       tmpDF <- cbind(x,yDumms[,colI])
       names(tmpDF)[nx+1] <- 'yDumm'
-      gbmout <- gbm(yDumm ~ .,data=tmpDF,
+      gbmout <- gbm(yDumm ~ .,data=tmpDF,distribution='multinomial',
          n.trees=nTree,n.minobsinnode=minNodeSize,shrinkage=learnRate)
    }
    outlist$gbmOuts <- lapply(1:nydumms,doGbm)
@@ -429,7 +434,9 @@ predict.qeGBoost <- function(object,newx)
    probs <- (1/sumprobs) * probs
    predClasses <- apply(probs,1,which.max) 
    predClasses <- classNames[predClasses]
-   list(predClasses=predClasses,probs=probs)
+   res <- list(predClasses=predClasses,probs=probs)
+   class(res) <- 'qeGBoost'
+   res
 }
 
 #########################  qeNeural()  #################################
@@ -573,6 +580,11 @@ predict.qeLASSO <- function(object,newx)
    maxCols <- apply(tmp,1,which.max)
    predClasses <- object$classNames[maxCols]
    list(predClasses=predClasses,probs=tmp)
+}
+
+plot.qeLASSO <- function(object) 
+{
+   genericPlot(object)
 }
 
 ###################  utilities for qe*()  #########################
@@ -725,3 +737,11 @@ prepend <- function(s,v)
    as.factor(v)
 }
 
+# plot code for most
+
+genericPlot <- function(object) 
+{
+   obj <- object
+   class(obj) <- class(obj)[-1]  # actually not needed in many cases
+   plot(obj)
+}

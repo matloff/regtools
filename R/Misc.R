@@ -420,3 +420,13 @@ discretize <- function(x,endpts)
    xc
 }
 
+require(gtools)
+
+stopBrowser <- defmacro(msg,expr=
+   {
+   cat(msg,'\n')
+   d <- readline('hit Enter to leave, or d to enter debugger: ')
+   if (d == '') stop('')
+   browser()
+   }
+)

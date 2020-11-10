@@ -14,6 +14,8 @@
 
 # each has a predict() method, again with a fairly uniform interface
 
+# some have plot() methods
+
 # qe*() arguments:
 
 #    data:  dataframe, training set; class labels col is a factor; other
@@ -303,6 +305,11 @@ predict.qeRF <- function(object,newx)
    res
 }
 
+plot.qeRF <- function(object) 
+{
+   genericPlot(object)
+}
+
 #########################  qeSVM()  #################################
 
 # SVM
@@ -341,8 +348,10 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
    require(e1071)
    class(object) <- class(object)[-1]
    newx <- setTrainFactors(object,newx)
-   preds <- predict(object,newx)
-   res <- list(predClasses=preds)
+   preds <- predict(object,newx,decision.values=TRUE)
+   dvals <- attr(preds,'decision.values')
+   colnames(dvals) <- colnames(object$decision.values)
+   res <- list(predClasses=preds,dvals=dvals)
    classNames <- object$classNames
    x <- object$x
    if (!is.null(k)) {
@@ -394,7 +403,7 @@ qeGBoost <- function(data,yName,
    {
       tmpDF <- cbind(x,yDumms[,colI])
       names(tmpDF)[nx+1] <- 'yDumm'
-      gbmout <- gbm(yDumm ~ .,data=tmpDF,
+      gbmout <- gbm(yDumm ~ .,data=tmpDF,distribution='multinomial',
          n.trees=nTree,n.minobsinnode=minNodeSize,shrinkage=learnRate)
    }
    outlist$gbmOuts <- lapply(1:nydumms,doGbm)
@@ -425,7 +434,9 @@ predict.qeGBoost <- function(object,newx)
    probs <- (1/sumprobs) * probs
    predClasses <- apply(probs,1,which.max) 
    predClasses <- classNames[predClasses]
-   list(predClasses=predClasses,probs=probs)
+   res <- list(predClasses=predClasses,probs=probs)
+   class(res) <- 'qeGBoost'
+   res
 }
 
 #########################  qeNeural()  #################################
@@ -463,13 +474,14 @@ qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
    krsout$classNames=classNames
    krsout$factorsInfo=factorsInfo
    krsout$x <- x
+   krsout$y <- y
    krsout$trainRow1 <- getRow1(data,yName)
    class(krsout) <- c('qeNeural',class(krsout))
    if (!is.null(holdout)) predictHoldout(krsout)
    krsout
 }
 
-predict.qeNeural <- function(object,newx)
+predict.qeNeural <- function(object,newx=NULL)
 {
    class(object) <- class(object)[-1]
    newx <- setTrainFactors(object,newx)
@@ -496,8 +508,84 @@ predict.qeNeural <- function(object,newx)
 
 #########################  qePoly()  #################################
 
-qePoly <- penrosePoly 
-predict.qePoly <- predict.penrosePoly
+qePoly <- function(data,yName,deg,maxInteractDeg=deg,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+{
+   classif <- is.factor(data[[yName]])
+   if (classif) stop('currently not for classification problems')
+   if (!is.numeric(x)) stop('X must be numeric')
+   if (!is.null(holdout)) splitData(holdout,data)
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol]
+
+   require(polyreg)
+   qeout <- penrosePoly(d=data,yName=yName,deg=deg,maxInteractDeg)
+   qeout$x <- x
+   qeout$y <- y
+   qeout$classif <- classif
+   qeout$trainRow1 <- getRow1(data,yName)
+   class(qeout) <- c('qePoly',class(qeout))
+   if (!is.null(holdout)) predictHoldout(qeout)
+   qeout
+}
+
+predict.qePoly <- function(object,newx)
+{
+   class(object) <- 'penrosePoly'
+   predict(object,newx)
+}
+
+#########################  qeLASSO()  #################################
+
+# for now, "X" must be numeric; if "Y" is a factor, we have a
+# classification problem, otherwise regression
+
+qeLASSO <- function(data,yName,alpha=1,
+   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+{
+   if (!is.data.frame(data)) stop('input must be a data frame')
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol]
+   if (!all(sapply(x,is.numeric))) stop('X must be numeric for now')
+   classif <- is.factor(y)
+   if (!is.null(holdout)) splitData(holdout,data)
+   fam <- if (classif) 'multinomial' else 'gaussian'
+   xm <- as.matrix(x)
+   ym <- as.matrix(y)
+   qeout <- cv.glmnet(x=xm,y=ym,alpha=alpha,family=fam)
+   qeout$x <- x
+   qeout$y <- y
+   qeout$classif <- classif
+   if (classif) qeout$classNames <- levels(y)
+   class(qeout) <- c('qeLASSO',class(qeout))
+   if (!is.null(holdout)) predictHoldout(qeout)
+   qeout
+}
+
+predict.qeLASSO <- function(object,newx) 
+{
+   if (is.vector(newx)) newx <- matrix(newx,ncol=ncol(object$x))
+   if (is.data.frame(newx)) newx <- as.matrix(newx)
+   class(object) <- class(object)[-1]
+   if (!object$classif) return(predict(object,newx))
+   # classif case
+   classNames <- object$classNames
+   tmp <- predict(object,newx,type='response')
+   tmp <- tmp[,,1,drop=TRUE]
+   # dropped too far?
+   if (is.vector(tmp)) tmp <- matrix(tmp,ncol=ncol(object$x))
+   colnames(tmp) <- classNames
+   maxCols <- apply(tmp,1,which.max)
+   predClasses <- object$classNames[maxCols]
+   list(predClasses=predClasses,probs=tmp)
+}
+
+plot.qeLASSO <- function(object) 
+{
+   genericPlot(object)
+}
 
 ###################  utilities for qe*()  #########################
 
@@ -536,6 +624,7 @@ collectForReturn <- function(object,probs)
 getXY <- function(data,yName,xMustNumeric=FALSE,classif,
    factorsInfo=NULL) 
 {
+   if (is.vector(data) && is.nul(yName)) data <- data.frame(data)
    if (!is.data.frame(data))
       stopBrowser('data must be a data frame')
    if (!is.null(yName)) {
@@ -591,7 +680,7 @@ splitData <- defmacro(holdout,data,
       set.seed(seed)
       idxs <- sample(1:nrow(data),nHold);
       tst <- data[idxs,];
-      # data <- data[-idxs,]
+      data <- data[-idxs,]
       holdIdxs <- idxs
    }
 )
@@ -648,3 +737,11 @@ prepend <- function(s,v)
    as.factor(v)
 }
 
+# plot code for most
+
+genericPlot <- function(object) 
+{
+   obj <- object
+   class(obj) <- class(obj)[-1]  # actually not needed in many cases
+   plot(obj)
+}

@@ -6,6 +6,7 @@
 \alias{qeSVM}
 \alias{qeGBoost}
 \alias{qeNeural}
+\alias{qeLASSO}
 \alias{predict.qeLogit}
 \alias{predict.qeLin}
 \alias{predict.qeKNN}
@@ -37,6 +38,8 @@ qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
    holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
 qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
    holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
+qeLASSO(data,yName,alpha=1,
+   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
 predict.qeLogit(object,newx)
 predict.qeLin(object,newx)
 predict.qeKNN(object,newx,newxK=1)
@@ -63,6 +66,7 @@ predict.qeNeural(object,newx)
   \item{hidden}{Vector of units per hidden layer.  Fractional values
      indicated dropout proportions.} 
   \item{nEpoch}{Number of iterations in neural net.}
+  \item{alpha}{1 for LASSO, 2 for ridge.}
 }
 
 \details{
@@ -135,11 +139,12 @@ Regression case: vector of predicted values
 \dontrun{
 
 data(peFactors)  
-pef <- peFactors[,c(1,3,5,7:9)]  
+pe <- peFactors[,c(1,3,5,7:9)]  
 # most people in the dataset have at least a Bachelor's degree; so let's
 # just consider Master's (code 14) and PhD (code 16) as special
-pef$educ <- toSubFactor(pef$educ,c('14','16'))  
-svmout <- qeSVM(pef,'occ',holdout=NULL) 
+pe$educ <- toSubFactor(pe$educ,c('14','16'))  
+
+svmout <- qeSVM(pe,'occ',holdout=NULL) 
 # as example of prediction, take the 8th case, but change the gender and
 # age to female and 25; note that by setting k to non-null, we are
 # requesting that conditional probabilities be calculated, via

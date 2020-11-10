@@ -537,7 +537,7 @@ getXY <- function(data,yName,xMustNumeric=FALSE,classif,
    factorsInfo=NULL) 
 {
    if (!is.data.frame(data))
-      stop('data must be a data frame')
+      stopBrowser('data must be a data frame')
    if (!is.null(yName)) {
       ycol <- which(names(data) == yName)
       y <- data[,ycol]

@@ -513,11 +513,12 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,
 {
    classif <- is.factor(data[[yName]])
    if (classif) stop('currently not for classification problems')
-   if (!is.numeric(x)) stop('X must be numeric')
-   if (!is.null(holdout)) splitData(holdout,data)
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol]
+   xm <- as.matrix(x)
+   if (!is.numeric(xm)) stop('X must be numeric')
+   if (!is.null(holdout)) splitData(holdout,data)
 
    require(polyreg)
    qeout <- penrosePoly(d=data,yName=yName,deg=deg,maxInteractDeg)

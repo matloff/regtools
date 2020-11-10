@@ -8,7 +8,8 @@ presented.
 
 ## Outline
 
-* Why is imbalance a problem? Always guess the dominant class, etc.
+* Why is imbalance a problem? Our ML algorithm may never predict the
+  small class, making the algorithm rather useless.
 
 * A popular solution is to artificially balance the data.
 
@@ -120,8 +121,8 @@ The dataset is conveniently available in the `mlbench` package.
 
 ### Mt. Sinai Hospital X-ray study
 
-In an X-ray classification study 
-(study)[https://www.scientificamerican.com/article/rise-of-robot-radiologists]
+In an X-ray 
+[classification tudy](https://www.scientificamerican.com/article/rise-of-robot-radiologists)
 from Mount Sinai Hospital
 the classification method worked well on the original hospital data,
 but not in prediction of new cases at other locations.  The study's
@@ -160,7 +161,8 @@ to as the *posterior* and *prior* probabilities.  This sounds Bayesian,
 and indeed we do use Bayes' Rule, but there is no subjectivity involved.
 These are real probabilities.  E.g. in a disease classification
 application, there is a certain proportion of people in the population
-who have the disease, which we will estimate from our training data.
+who have the disease.  This is a prior probability, which we will
+estimate from our training data.
 
 ## Notation
 
@@ -227,31 +229,30 @@ with quite different frequencies:
 
 ## Optimal classification rules
 
-Consider the 2-class setting, with Y = 0,1.  Denote the (conditional)
-probability that Y = 1 for a particular new case to classify by
-r<sub>i</sub>.  We
-might have an estimate of ri from fitting a logistic model, for instance.
+Consider the 2-class setting, with Y = 0,1.  As above, denote the
+(conditional) probability that Y = 1 for a particular new case to
+classify by r<sub>i</sub>.  We might have an estimate of r<sub>i</sub>
+from fitting a logistic model, for instance.
 
-The rule that minimizes the overall probability of 
-misclassification is:
+The rule that minimizes the overall probability of misclassification is:
 
 Y<sub>pred</sub> = 1 if r<sub>i</sub> >= 0.5
 
 Y<sub>pred</sub> = 0 if r<sub>i</sub> < 0.5
 
 But note the criterion here, minimizing the overall probability of
-misclassification.  Other criteria are possible.
+misclassification.  Other criteria are possible.  It may be, for
+instance, that we wish to place different weights on false positives and
+false negatives.  In the credit card fraud case, a false negative may
+mean a major loss, much worse than what we lose with a false positive
+(wasted investigation time, etc.).  We may define our loss in those
+terms, and seek to minimize expected loss.
 
-It may be that we wish to place different weights on
-false positives and false negatives.  In the credit card fraud case, a
-false negative may mean a major loss, much worse than what we lose with
-a false negative (wasted investigation time, etc.).  We may define our
-loss in those terms, and seek to minimize expected loss.
-
-Let l<sub>01</sub> be the loss we incur if we guess Y = 0 but Y = 1.
-In the opposite case -- guess 1 by Y = 0, say our loss is 1.0.  (All
-that matters is the ratio of the two losses.)  To minimize expected loss,
-the optimal rule can be shown to be (see Appendix A below)
+Specifically, let l<sub>01</sub> be the loss we incur if we guess Y = 0
+but Y = 1.  In the opposite case -- guess 1 but Y = 0 -- say our loss is
+1.0.  (All that matters is the ratio of the two losses.)  To minimize
+expected loss, the optimal rule can be shown to be (see Appendix A
+below)
 
 Y<sub>pred</sub> = 1 if r<sub>i</sub> > 1/(1+l<sub>10</sub>)
 
@@ -314,11 +315,11 @@ Frank Harrell
 ## So, what SHOULD be done?
 
 Clearly, one's course of action should center around the conditional
-class probabilities r<sub>i</sub>.  (Note the plural; each new case to
-be classified will have its own value of r<sub>i</sub>.)  So,
-specifically, how should we use them?  We will discuss two approaches:
+class probabilities r<sub>i</sub>.  (Note the plural; each case will
+have its own value of r<sub>i</sub>.)  So, specifically, how should we
+use them?  We will discuss two approaches:
 
-1. Use of the ROC curve (but not AUC), which is derived from the
+1. Use of the ROC curve, which is derived from the
    r<sub>i</sub> values.
 
 2. Informal, nonmechanical consideration of the r values.
@@ -380,17 +381,20 @@ by Price Waterhouse Coopers, it is pointed out that
 > ... every fraud incident is different, and reactive responses will vary
 > depending on the facts that are unique to each case.
 
-A practical, *effective* approach would be to simply look at the
-r<sub>i</sub> directly, "by hand" rather than by computer.  We would
-still set a threshold h, yes, but would use it only as first-stage
-screening, with the second stage being done by humans.  
+A practical, *effective* approach would be to simply look at the r
+values for the new cases directly, "by hand" rather than by computer.
+We would still set a threshold h, yes, but would use it only as
+first-stage screening, with the second stage being done by humans.  
 
-At that point, the (human) auditor would take  into account not only that
-estimated probability but also such factors as the amount of the charge,
-special characteristics not measured in the available features, and so
-on.  The auditor may not give priority, for instance, to a case for
-which the probability is above h but the monetary value of the
-transaction is small.
+At that point, the (human) auditor would take  into account both that
+estimated probability -- now worrying not only that it is larger than h
+but also *how much larger* -- as well as such factors as the amount of
+the charge, special characteristics not measured in the available
+features, and so on.  The auditor may not give priority, for instance,
+to a case for which the probability is above h but the monetary value of
+the transaction is small.  On the other hand, if the probability is far
+above h, the auditor may give this transaction a closer look even if the
+monetary value is small.
 
 A related issue is that of ranking.  In the credit card fraud example,
 for instance, we may have sufficient audit funding to investigate 100

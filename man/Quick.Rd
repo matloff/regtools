@@ -1,4 +1,4 @@
-\name{Quick-Explore Wrappers}
+\name{qe-Series Wrappers}
 \alias{qeLogit}
 \alias{qeLin}
 \alias{qeKNN}
@@ -7,6 +7,7 @@
 \alias{qeGBoost}
 \alias{qeNeural}
 \alias{qeLASSO}
+\alias{qePoly}
 \alias{predict.qeLogit}
 \alias{predict.qeLin}
 \alias{predict.qeKNN}
@@ -14,6 +15,11 @@
 \alias{predict.qeSVM}
 \alias{predict.qeGBoost}
 \alias{predict.qeNeural}
+\alias{predict.qeLASSO}
+\alias{predict.qePoly}
+\alias{plot.RF}
+\alias{plot.SVM}
+\alias{plot.LASSO}
 
 \title{Quick-Explore Regression/Classification Wrappers}
 
@@ -40,13 +46,17 @@ qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
    holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
 qeLASSO(data,yName,alpha=1,
    holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
-predict.qeLogit(object,newx)
-predict.qeLin(object,newx)
-predict.qeKNN(object,newx,newxK=1)
-predict.qeRF(object,newx)
-\method{predict}{qeSVM}(object,newx,k=25)
-predict.qeGBoostt(object,newx)
-predict.qeNeural(object,newx)
+qePoly(data,yName,deg,maxInteractDeg = deg,
+   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
+\method{predict}{qeLogit(object,newx)}
+\method{predict}{qeLin(object,newx)}
+\method{predict}{qeKNN(object,newx,newxK=1)}
+\method{predict}{qeRF(object,newx)}
+\method{predict}{qeSVM(object,newx,k=25)}
+\method{predict}{qeGBoost(object,newx)}
+\method{predict}{qeNeural(object,newx)}
+\method{predict}{qeLASSO(object,newx)}
+\method{predict}{qePoly(object,newx)}
 
 }
 

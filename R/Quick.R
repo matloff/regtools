@@ -334,7 +334,9 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
    ycol <- which(names(data) == yName)
    svmout$x <- data[,-ycol,drop=FALSE]
    y <- data[,ycol]
-   svmout$y <- y
+   svmout$data <- data
+   svmout$yName <- yName
+   svmout$ycol <- ycol
    svmout$classNames <- levels(y)
    svmout$classif <- classif
    svmout$trainRow1 <- getRow1(data,yName)
@@ -353,9 +355,10 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
    colnames(dvals) <- colnames(object$decision.values)
    res <- list(predClasses=preds,dvals=dvals)
    classNames <- object$classNames
-   x <- object$x
+   ycol <- which(names(data) == yName)
+   x <- object$data[,-ycol]
+   y <- object$data[,ycol]
    if (!is.null(k)) {
-      y <- object$y
       trnScores <- object$decision.values
       newScores <- getDValsE1071(object,newx)
       probs <- scoresToProbs(y,trnScores,newScores,k)
@@ -364,7 +367,13 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
    res
 }
 
-prdq <- predict.qeSVM
+plot.qeSVM <- function(object,formula) 
+{
+   classNames <- object$classNames
+   class(object) <- class(object)[-1]
+   formula <- as.formula(formula)
+   plot(object,object$data,formula)
+}
 
 #########################  qeGBoost()  #################################
 
@@ -403,7 +412,7 @@ qeGBoost <- function(data,yName,
    {
       tmpDF <- cbind(x,yDumms[,colI])
       names(tmpDF)[nx+1] <- 'yDumm'
-      gbmout <- gbm(yDumm ~ .,data=tmpDF,distribution='multinomial',
+      gbmout <- gbm(yDumm ~ .,data=tmpDF,distribution='bernoulli',
          n.trees=nTree,n.minobsinnode=minNodeSize,shrinkage=learnRate)
    }
    outlist$gbmOuts <- lapply(1:nydumms,doGbm)

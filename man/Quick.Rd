@@ -157,6 +157,19 @@ pe <- peFactors[,c(1,3,5,7:9)]
 # just consider Master's (code 14) and PhD (code 16) as special
 pe$educ <- toSubFactor(pe$educ,c('14','16'))  
 
+set.seed(9999)
+qeout <- qeLogit(pe,'occ')
+qeout$testAcc
+predict(qeout,pe[8,-3])  # 102, 0.262...
+qeout <- qeLogit(pe[,c(3,5)],'occ',hol> dout=NULL) 
+
+set.seed(9999)
+qeout <- qeSVM(pe,'occ')
+qeout$testAcc
+predict(qeout,pe[8,-3])  # 102, 0.262...
+qeout <- qeSVM(pe[,c(3,5)],'occ',holdout=NULL) 
+predict(qeout,data.frame(wageinc=64000))  # 102, 1.006671...
+
 svmout <- qeSVM(pe,'occ',holdout=NULL) 
 # as example of prediction, take the 8th case, but change the gender and
 # age to female and 25; note that by setting k to non-null, we are

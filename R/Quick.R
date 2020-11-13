@@ -355,7 +355,7 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
    colnames(dvals) <- colnames(object$decision.values)
    res <- list(predClasses=preds,dvals=dvals)
    classNames <- object$classNames
-   ycol <- which(names(data) == yName)
+   ycol <- which(names(data) == object$yName)
    x <- object$data[,-ycol]
    y <- object$data[,ycol]
    if (!is.null(k)) {
@@ -603,7 +603,7 @@ plot.qeLASSO <- function(object)
 setTrainFactors <- function(object,newx) 
 {
    tmp <- rbind(object$trainRow1,newx)
-   newx <- tmp[-1,]
+   newx <- tmp[-1,,drop=FALSE]
    newx
 }
 
@@ -710,7 +710,7 @@ splitData <- defmacro(holdout,data,
 predictHoldout <- defmacro(res,
    expr={
       ycol <- which(names(data) == yName);
-      tstx <- tst[,-ycol];
+      tstx <- tst[,-ycol,drop=FALSE];
       # in k-NN case, we want to use the newxK from qeKNN() here, but
       # allow the user to later call predict.qeKNN() with her own value
       # if desired

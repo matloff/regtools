@@ -532,10 +532,13 @@ So we might investigate case numbers 111857, 116081 and so on.
 
 ## Adjusting the p<sub>i</sub>
 
-As noted in the LetterRecognition data example, in some cases the data are
-artificially balanced to begin with, due to the sampling design.
-Thus, our estimated values of the p<sub>i</sub> will be wrong from the
-outset.  Can we fix that?
+As noted in the LetterRecognition data example, in some cases the data
+are artificially balanced to begin with, due to the sampling design.  Or
+we may have a situation like that of the Mt. Sinai Hospital radiology
+data, in which the class probabilities may change from one site to
+another, or may change over time as in the cell phone fraud example.
+Thus, our estimated values of the p<sub>i</sub> will be wrong.  Can we
+fix that?
 
 ### The adjustment formula
 
@@ -544,12 +547,14 @@ and Class 1. This is the code for adjustment (the function is part of
 the `regtools` package):
 
 ``` r
+classadjust <- function (econdprobs, wrongprob1, trueprob1) 
+{
+    wrongratio <- (1 - wrongprob1)/wrongprob1
+    fratios <- (1/econdprobs - 1) * (1/wrongratio)
+    trueratios <- (1 - trueprob1)/trueprob1
+    1/(1 + trueratios * fratios)
+}
 
-classadjust <- function(condprobs,wrongprob1,trueprob1) {
-   wrongratio <- (1-wrongprob1) / wrongprob1
-   fratios <- (1 / condprobs - 1) * (1 / wrongratio)
-   trueratio <- (1-trueprob1) / trueprob1
-   1 / (1 + trueratio * fratios)
 }
 
 ```
@@ -557,7 +562,7 @@ classadjust <- function(condprobs,wrongprob1,trueprob1) {
 where 
 
 - `condprobs` is the vector of conditional class probabilities for
-  the new cases, reported by the software applied to the data with
+the dataset at hand, reported by the software applied to that data using
 incorrect p<sub>i</sub>
 
 - `wrongratio` is the ratio of the numbers of Class 0 to Class 1
@@ -565,8 +570,8 @@ incorrect p<sub>i</sub>
 
 - `trueratio` is the actual such ratio 
 
-The return value is the set of adjusted conditional class  probabilities
-for the new cases.
+The return value is the set of adjusted conditional class
+probabilities.
 
 For instance, suppose we are in a setting in which there are equal
 numbers of the two classes in our dataset, yet we know the true

@@ -355,7 +355,7 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
    colnames(dvals) <- colnames(object$decision.values)
    res <- list(predClasses=preds,dvals=dvals)
    classNames <- object$classNames
-   ycol <- which(names(data) == object$yName)
+   ycol <- object$ycol
    x <- object$data[,-ycol]
    y <- object$data[,ycol]
    if (!is.null(k)) {

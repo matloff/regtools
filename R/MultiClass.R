@@ -466,6 +466,17 @@ getDValsE1071 <- function(object,newx)
    attr(tmp,'decision.values')
 }
 
+# reliability diagram
+reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE) 
+{
+   breaks <- seq(0,1,1/nBins)
+   probsBinNums <- findInterval(probs,breaks)
+   fittedYCounts <- tapply(probs,probsBinNums,sum)
+   actualYCounts <- tapply(y,probsBinNums,sum)
+   if (plotGraph) plot(fittedYCounts,actualYCounts)
+   cbind(fittedYCounts,actualYCounts)
+}
+
 logOddsToProbs <- function(x) 
 {
    u <- exp(-x)

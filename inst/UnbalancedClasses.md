@@ -381,10 +381,15 @@ by Price Waterhouse Coopers, it is pointed out that
 > ... every fraud incident is different, and reactive responses will vary
 > depending on the facts that are unique to each case.
 
-A practical, *effective* approach would be to simply look at the r
-values for the new cases directly, "by hand" rather than by computer.
-We would still set a threshold h, yes, but would use it only as
-first-stage screening, with the second stage being done by humans.  
+Use of a machine learning algorithm to make a mechanical decision would
+obviate this needed flexibility.
+
+Instead, a practical, *effective* approach would be to simply look at
+the r values for the new cases directly.  In other words, we have the
+algorithm only take the first step, after which we work "by hand" rather
+than by computer.  We would still set a threshold h, yes, but would use
+it only as first-stage screening, with the second stage being done by
+humans.  
 
 At that point, the (human) auditor would take  into account both that
 estimated probability -- now worrying not only that it is larger than h

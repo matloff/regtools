@@ -348,80 +348,23 @@ confusion <- function(actual,pred) {
    table(actual,pred)
 }
 
-#########################  labelsToProbs()  ################################
+#######################################################################
+#######################  calibration  #################################
+#######################################################################
 
-# generates estimated conditional class probabilities from predicted
-# labels; useful for classification methodology that does not inherently
-# generate those probabilities, or for which those probabilities are
-# biased or otherwise inaccurate
+# the *Calib() functions generate estimated conditional class
+# probabilities from scores, e.g.  SVM decision values
 
-# for a given new case, the k nearest neighbors in the training set are
-# obtained; the predicted class labels for the neighbors are then
-# obtained, and the resulting proportions for the different labels are
-# then used as the estimated probabilities
-
-# arguments:
-
-#    x: either the feature columns of the training set (must be
-#       numeric), and/or a vector of scores from which the given
-#       classification method predicts class label, from the training
-#       set
-
-#    fittedY: R factor, predicted classes in the training set
-
-#    newX: new cases to be predicted, of the form in x
-
-#    classNames: levels(y) from the training set y
-
-#    k: number of neighbors
-
-labelsToProbs <- function(x,newX,fittedY,classNames,k,scaleX=TRUE) 
-{
-   if (is.vector(x)) x <- x <- matrix(x,ncol=1)
-   if (!is.numeric(x)) {
-      xyc <- getXY(x,yName=NULL,xMustNumeric=TRUE,classif=FALSE,
-         factorsInfo=NULL)
-      x <- xyc$x
-      xyc <- getXY(newX,yName=NULL,xMustNumeric=TRUE,classif=FALSE,
-         factorsInfo=xyc$factorsInfo)
-      newX <- xyc$x
-   }
-   x <- as.matrix(x)
-   newX <- as.matrix(newX)
-   if (scaleX) {
-      x <- scale(x)
-      ctr <- attr(x,'scaled:center')
-      scl <- attr(x,'scaled:scale')
-      newX <- scale(newX,center=ctr,scale=scl)
-   }
-   tmp <- FNN::get.knnx(x,newX,k)
-   nClass <- length((classNames))
-   doRowI <- function(i)  # do row i of newX
-   {
-      idxs <- tmp$nn.index[i,]
-      nhbrFittedY <- fittedY[idxs]
-      tblNhbrs <- table(nhbrFittedY)
-      nhbrClasses <- names(tblNhbrs)
-      probs <- rep(0,nClass)
-      names(probs) <- classNames
-      probs[nhbrClasses] = tblNhbrs / k
-      probs
-   }
-   tmp <- t(sapply(1:nrow(newX),doRowI))
-   tmp
-}
-
-
-
-# generates estimated conditional class probabilities from scores;
 # useful for classification methodology that does not inherently
 # generate those probabilities, or for which those probabilities are
 # biased or otherwise inaccurate
 
-# how it works, say for one new case: the score(s) (more than 1 if
-# multiclass case) are compared to the training set scores, taking the k
-# nearest neighbors; among the corresponding Y values, we find the
-# proportion for each class
+#########################  knnCalib()  ################################
+
+# for a given new case, the k nearest neighbors in the training set are
+# obtained; the class labels for the neighbors are then obtained, and
+# the resulting proportions for the different labels are then used as
+# the estimated probabilities
 
 # arguments:
 
@@ -432,7 +375,7 @@ labelsToProbs <- function(x,newX,fittedY,classNames,k,scaleX=TRUE)
 
 # value: vector of estimated probabilities for the new cases
 
-scoresToProbs <- function(y,trnScores,newScores,k) 
+knnCalib <- function(y,trnScores,newScores,k) 
 {
    if (!is.factor(y)) stop('Y must be an R factor')
    if (is.vector(trnScores))
@@ -458,10 +401,45 @@ scoresToProbs <- function(y,trnScores,newScores,k)
    tmp
 }
 
-# calculcate decision values ("scores") for e1071 SVM
+scoresToProbs <- knnCalib
+
+
+#########################  plattCalib()  ################################
+
+# run the logit once and save, rather doing running repeatedly, each
+# time we have new predictions to make
+
+# arguments:
+
+#    y: R factor of labels in training set
+#    trnScores: vector/matrix of scores in training set
+
+# value: vector of estimated probabilities for the new cases
+
+prePlattCalib <- function(y,trnScores) 
+{
+
+   if (!is.factor(y)) stop('Y must be an R factor')
+   if (is.vector(trnScores))
+      trnScores <- matrix(trnScores,ncol=1)
+   tsDF <- as.data.frame(trnScores)
+   dta <- cbind(y,tsDF)
+   res <- qeLogit(dta,'y')
+}
+
+plattCalib <- function(prePlattCalibOut,newScores) 
+{
+   if (is.vector(newScores))
+      newScores <- matrix(newScores,ncol=1)
+   tsDF <- as.data.frame(newScores)
+   predict(prePlattCalibOut,tsDF)$probs
+}
+
+# calculcate decision values ("scores") for new cases on previously-fit
+# e1071 SVM
 getDValsE1071 <- function(object,newx) 
 {
-   if (!inherits(object,'svm')) stop('not e1071 SVM')
+   # if (!inherits(object,'svm')) stop('not e1071 SVM')
    tmp <- predict(object,newx,decision.values=TRUE)
    attr(tmp,'decision.values')
 }

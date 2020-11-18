@@ -79,8 +79,7 @@
 
 #    list of glm() output objects, one per class, and some misc.
 
-qeLogit <- function(data,yName,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeLogit <- function(data,yName,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
@@ -321,8 +320,7 @@ plot.qeRF <- function(object)
 
 # value:  see above
  
-qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeSVM <- function(data,yName,gamma=1.0,cost=1.0)
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
@@ -361,7 +359,7 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
    if (!is.null(k)) {
       trnScores <- object$decision.values
       newScores <- getDValsE1071(object,newx)
-      probs <- scoresToProbs(y,trnScores,newScores,k)
+      probs <- knnCalib(y,trnScores,newScores,k)
       res$probs <- probs
    }
    res
@@ -388,8 +386,7 @@ plot.qeSVM <- function(object,formula)
 # value:  see above
  
 qeGBoost <- function(data,yName,
-   nTree=100,minNodeSize=10,learnRate=0.1,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+   nTree=100,minNodeSize=10,learnRate=0.1,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('classification only')
@@ -460,8 +457,7 @@ predict.qeGBoost <- function(object,newx)
 
 # value:  see above
  
-qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    require(keras)
@@ -517,8 +513,7 @@ predict.qeNeural <- function(object,newx=NULL)
 
 #########################  qePoly()  #################################
 
-qePoly <- function(data,yName,deg,maxInteractDeg=deg,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    if (classif) stop('currently not for classification problems')
@@ -551,8 +546,7 @@ predict.qePoly <- function(object,newx)
 # for now, "X" must be numeric; if "Y" is a factor, we have a
 # classification problem, otherwise regression
 
-qeLASSO <- function(data,yName,alpha=1,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeLASSO <- function(data,yName,alpha=1,holdout=NULL)
 {
    if (!is.data.frame(data)) stop('input must be a data frame')
    ycol <- which(names(data) == yName)

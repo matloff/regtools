@@ -32,22 +32,15 @@ for teaching.  For advanced work, analysts should use the methods directly.
 }
 
 \usage{
-qeLogit(data, holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
-qeLin(data,yName, holdout=c(min(1000,round(0.1*nrow(data))),seed=9999)) 
-qeKNN(data,yName,k,scaleX=TRUE,newxK=1,
-   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
-qeRF(data,yName,nTree,minNodeSize,
-   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
-qeSVM(data,yName,gamma=1.0,cost=1.0,
-   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
-qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
-   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
-qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
-   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
-qeLASSO(data,yName,alpha=1,
-   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
-qePoly(data,yName,deg,maxInteractDeg = deg,
-   holdout=c(min(1000,round(0.1*nrow(data))),seed=9999))
+qeLogit(data,holdout=NULL)
+qeLin(data,yName,holdout=NULL)
+qeKNN(data,yName,k,scaleX=TRUE,newxK=1,holdout=NULL)
+qeRF(data,yName,nTree,minNodeSize,holdout=NULL)
+qeSVM(data,yName,gamma=1.0,cost=1.0,holdout=NULL)
+qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,holdout=NULL)
+qeNeural(data,yName,hidden=c(100,100),nEpoch=30,holdout=NULL)
+qeLASSO(data,yName,alpha=1,holdout=NULL)
+qePoly(data,yName,deg,maxInteractDeg = deg,holdout=NULL)
 \method{predict}{qeLogit}(object,newx)
 \method{predict}{qeLin}(object,newx)
 \method{predict}{qeKNN}(object,newx,newxK=1)
@@ -71,7 +64,7 @@ qePoly(data,yName,deg,maxInteractDeg = deg,
      c(holdout_size,initial_seed). After fitting to the remaining data,
      evaluate accuracy on the test set.}
   \item{k}{Number of nearest neighbors.  For \code{predict.qeSVM}, this
-     is for finding conditional probabilities via \code{scoresToProbs}.} 
+     is for finding conditional probabilities via \code{knnCalib}.} 
   \item{scaleX}{Scale the features.} 
   \item{nTree}{Number of trees.} 
   \item{minNodeSize}{Minimum number of data points in a tree node.} 
@@ -100,6 +93,7 @@ qeNeural(data,yColumnName)
 
 The optional \code{holdout} argument triggers formation of a holdout set
 and the corresponding cross-validation evaluation of predictive power.
+Note that the return value will consist of the fit on the training set.
 
 In most cases, the full basket of options in the wrapped function is not
 reflected, and second-level analysis should use the relevant packages
@@ -152,114 +146,71 @@ Regression case: vector of predicted values
 \dontrun{
 
 data(peFactors)  
-pe <- peFactors[,c(1,3,5,7:9)]  
+pef <- peFactors[,c(1,3,5,7:9)]  
 # most people in the dataset have at least a Bachelor's degree; so let's
 # just consider Master's (code 14) and PhD (code 16) as special
-pe$educ <- toSubFactor(pe$educ,c('14','16'))  
+pef$educ <- toSubFactor(pef$educ,c('14','16'))  
 
-set.seed(9999)
-qeout <- qeLogit(pe,'occ')
-qeout$testAcc
-predict(qeout,pe[8,-3])  # 102, 0.262...
-qeout <- qeLogit(pe[,c(3,5)],'occ',hol> dout=NULL) 
-
-set.seed(9999)
-qeout <- qeSVM(pe,'occ')
-qeout$testAcc
-predict(qeout,pe[8,-3])  # 102, 0.262...
-qeout <- qeSVM(pe[,c(3,5)],'occ',holdout=NULL) 
-predict(qeout,data.frame(wageinc=64000))  # 102, 1.006671...
-
-svmout <- qeSVM(pe,'occ',holdout=NULL) 
+# prediction occupation; 6 classes, 100, 101, 102, 106, 140, 141
+svmout <- qeSVM(pef,'occ') 
 # as example of prediction, take the 8th case, but change the gender and
 # age to female and 25; note that by setting k to non-null, we are
 # requesting that conditional probabilities be calculated, via
-# scoresToProbs()
+# knnCalib(), here using 25 nearest neighbors
 newx <- pef[8,-3] 
 newx$sex <- '2'
 newx$age <- 25
 predict(svmout,newx,k=25)
-$predClasses
+# $predClasses
 #   8 
 # 100 
 # Levels: 100 101 102 106 140 141
+# $dvals
+#      102/101    102/100   102/141  102/140  102/106    101/100  101/141
+# 8 -0.7774038 -0.5132022 0.9997894 1.003251 0.999688 -0.4023077 1.000419
+#    101/140   101/106  100/141  100/140  100/106   141/140    141/106   140/106
+# 8 1.000474 0.9997371 1.000088 1.000026 1.000126 0.9460703 -0.4974625 -1.035721
 # 
 # $probs
-#       100  101  102  106 140 141
-# [1,] 0.36 0.44 0.16 0.04   0   0
+#       100  101  102  106 140  141
+# [1,] 0.24 0.52 0.12 0.08   0 0.04
+#
 # so, occupation code 100 is predicted, with a 0.36 conditional
 # probability
 
-# logit
-lgout <- qeLogit(pe,'occ')
-preds <- predict(lgout,pe[,-3])
-mean(preds$predClasses == pe[,3])
-mean(preds$probs[,1])
-mean(pe[,3] == '100')
-predict(lgout,pe[1,-3])
-lgout <- qeLogit(pe,'occ',holdout=c(1000,9999))
-lgout$testAcc  
-
-
-# k-NN
-knnout <- qeKNN(pe,'occ',25)
-preds <- predict(knnout,pe[,-3])
-mean(preds$predClasses == pe[,3])
-mean(preds$pre == '100')
-mean(preds$probs[,1])
-predict(knnout,pe[1,-3])
-knnout <- qeKNN(pe,'wageinc',25)
-preds <- predict(knnout,pe[,-5])
-mean(abs(preds-pe[,5]))
-predict(knnout,pe[1,-5])
-predict(knnout,newx)  # 26791.6
+# if holdout evaluation is desired as well, say 1000 cases, seed 9999:
+> svmout <- qeSVM(pef,'occ',holdout=c(1000,9999)) 
+> svmout$testAcc
+[1] 0.622  # 62% error rate (overall rate for 6 classes)
 
 # RF
-rfout <- qeRF(pe,'occ',25)
-preds <- predict(rfout,pe[,-3])
-mean(preds$predClasses == pe[,3])
-mean(preds$probs[,1])
-mean(preds$predClasses == '100')
-predict(rfout,pe[1,-3])
-rfout <- qeRF(pe,'wageinc',25)
-preds <- predict(rfout,pe[,-5])
-mean(abs(preds-pe[,5]))
-predict(rfout,pe[1,-5])
+set.seed(9999)
+rfout <- qeRF(pef,'occ')
+preds <- predict(rfout,pef[,-3])  # re-predict the data, as a check
+# what proportion were correctly classified?
+mean(preds$predClasses == pef[,3])  # 0.4774 
+# what does the probability model say about P(occ == '100')
+mean(preds$probs[,1]) # 0.2438
+# what does the data say about this?
+mean(pef$occ == '100')  # 0.2286; may be some tail effects
+# what about the model's predictions?
+mean(preds$predClasses == '100')  # 0.2765
+# let's predict wage income
+rfout <- qeRF(pef,'wageinc')
+preds <- predict(rfout,pef[,-5])
+# re-predict first case
+predict(rfout,pef[1,-5])  # 62889.42
 
-# SVM
-svmout <- qeSVM(pe,'occ',25)
-preds <- predict(svmout,pe[,-3])
+# linear
+# lm() doesn't like numeric factor levels, so prepend an 'a'
+pef$occ <- prepend('a',pef$occ)
+lmout <- qeLin(pef,'occ')
+predict(lmout,pef[1,-3])  # occ 100, prob 0.3316
+lmout <- qeLin(pef,'wageinc')
+predict(lmout,pef[1,-5])  # 70857.79
 
-# gboost
-gbmout <- qeGBoost(pe,'occ')
-preds <- predict(gbmout,pe[,-3])
-mean(abs(preds - pe[,5]))
-mean(preds$probs[,1])
-mean(preds$pre == '100')
-predict(gbimout,pe[1,-3])
+# polynomial
 
-# NNs
-nnout <- qeNeural(pe,'wageinc',c(5,5),30)
-predict(nnout,pe[1,-5])
-preds <- predict(nnout,pe[,-5])
-mean(abs(preds-pe[,5]))
-nnout <- qeNeural(pe,'occ',c(5,5),30)
-predict(nnout,pe[1,-3])
-preds <- predict(nnout,pe[,-3])
-mean(preds == pe[,3])
-
-# lin
-pe$occ <- prepend('a',pe$occ)
-lmout <- qeLin(pe,'occ')
-preds <- predict(lmout,pe[,-3])
-mean(preds$predClasses == pe[,3])
-mean(preds$probs[,1])
-mean(pe[,3] == 'a100')
-predict(lgout,pe[1,-3])
-lmout <- qeLin(pe,'wageinc')
-preds <- predict(lmout,pe[,-5])
-mean(abs(preds - pe[,5]))
-predict(lmout,pe[1,-5])
 
 }
 }

@@ -1,5 +1,6 @@
 \name{multiclass routines}
 \alias{boundaryplot}
+\alias{knnCalib}
 \alias{scoresToProbs}
 \alias{getDValsE1071}
 \alias{ovalogtrn}
@@ -19,6 +20,7 @@ Tools for multiclass classification, parametric and nonparametric.
 }
 
 \usage{
+knnCalib(y,trnScores,newScores,k) 
 scoresToProbs(y,trnScores,newScores,k) 
 getDValsE1071(object,newx)
 logitClass(data,yName)
@@ -37,7 +39,7 @@ boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
 
 \arguments{
 \item{y}{Vector or factor of response variable data in the training set, with
-   codes 0,1,...\code{m}-1, except with \code{scoresToProbs}, where it
+   codes 0,1,...\code{m}-1, except with \code{knnCalib}, where it
    must be an R factor.}
 \item{trnScores}{Vector/matrix of scores in training set.  In the
    multiclass case, there will be as many columns as classes.}
@@ -87,14 +89,15 @@ boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
 
 These functions aid classification in the multiclass setting.  
 
-The \code{scoresToProbs} function computes conditional probabilities for
+The \code{knnCalib} function computes conditional probabilities for
 new cases, using  the training scores, e.g. \code{decision.values} for
 SVM in the \pkg{e1071} package or the outputted conditional
 probabilities from \bold{glm} in a logistic model.  This is useful for
 classification algorithms that lack inherent estimation of these
 probabilities, or for which the inherent probability estimates are not
 very accurate, say on the edges of the feature space.  This is a new
-approach.   
+approach.  (The function \code{scoresToProbs} is identical, and is
+deprecated.)
 
 One needs to have to scores for the new cases to be predicted.  This is
 application/package-specific.  The function \code{getDValsE1071} does
@@ -121,7 +124,7 @@ The functions not listed above are largely deprecated, e.g. in favor of
 
 \value{
 
-The function \code{scoresToProbs} returns the matrix of conditional
+The function \code{knnCalib} returns the matrix of conditional
 probabilities for the new cases to be predicted, one column per class.
 
 }

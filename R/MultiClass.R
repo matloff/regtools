@@ -403,35 +403,6 @@ knnCalib <- function(y,trnScores,newScores,k)
 
 scoresToProbs <- knnCalib
 
-# wrapper; calibrate all variables in the training set, taking the test
-# set to be the same as the training set
-
-# arguments
-
-#     qeout: output of a qe*-series function
-#     scores: vector/matrix of scores output from running the
-#        classification method on the training set; will have either c
-#        or c(c-1)/2 columns, where c is the number of classes
-#     calibMethod: currently knnCalib or plattCalib
-#     k: number of nearest neighbors (knnCalib case)
-
-calibWrap <- function(qeout,scores,calibMethod,k=NULL,plotGraph=TRUE) 
-{
-   y <- qeout$data[,qeout$ycol]
-   classNames <- qeout$classNames
-   nClass <- length(classNames)
-   if (calibMethod == 'knnCalib') {
-      probs <- knnCalib(y,scores,scores,k)
-   } else if (calibMethod == 'plattCalib') {
-      preout <- prePlattCalib(y,scores)
-      probs <- plattCalib(preout,scores)
-   } else stop('invalid calibration method')
-   ym <- factorToDummies(y,fname='y')
-   res <- list(probs=probs,ym=ym)
-   class(res) <- 'calibWrap'
-   res
-}
-
 
 #########################  plattCalib()  ################################
 
@@ -464,6 +435,49 @@ plattCalib <- function(prePlattCalibOut,newScores)
    predict(prePlattCalibOut,tsDF)$probs
 }
 
+# wrapper; calibrate all variables in the training set, taking the test
+# set to be the same as the training set
+
+# arguments
+
+#     qeout: output of a qe*-series function
+#     scores: vector/matrix of scores output from running the
+#        classification method on the training set; will have either c
+#        or c(c-1)/2 columns, where c is the number of classes
+#     calibMethod: currently knnCalib or plattCalib
+#     k: number of nearest neighbors (knnCalib case)
+#     plotsPerRow: number of plots per row; 0 means no plotting
+
+calibWrap <- function(qeout,scores,calibMethod,k=NULL,
+   plotsPerRow=2,nBins=0) 
+{
+   y <- qeout$data[,qeout$ycol]
+   classNames <- qeout$classNames
+   nClass <- length(classNames)
+   if (calibMethod == 'knnCalib') {
+      probs <- knnCalib(y,scores,scores,k)
+   } else if (calibMethod == 'plattCalib') {
+      preout <- prePlattCalib(y,scores)
+      probs <- plattCalib(preout,scores)
+   } else stop('invalid calibration method')
+   ym <- factorToDummies(y,fname='y')
+   res <- list(probs=probs,ym=ym)
+   if (plotsPerRow) {
+      nRow <- ceiling(nClass/plotsPerRow)
+      par(mfrow=c(nRow,plotsPerRow))
+      for (rw in 1:nRow) {
+         start <- (rw - 1) * plotsPerRow + 1
+         end <- min(rw * plotsPerRow,nClass)
+         for (cls in start:end) {
+            tmp <- reliabDiagram(ym[,cls],probs[,cls],nBins,TRUE)
+         }
+            browser()
+      }
+      par(mfrow=c(1,1))
+   }
+   res
+}
+
 # calculcate decision values ("scores") for new cases on previously-fit
 # e1071 SVM
 getDValsE1071 <- function(object,newx) 
@@ -473,8 +487,16 @@ getDValsE1071 <- function(object,newx)
    attr(tmp,'decision.values')
 }
 
-# reliability diagram
-reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE) 
+# reliability diagram and associated compilation of statistics
+
+# arguments:
+
+#    y: vector of Y values from training set, 0s and 1s
+#    probs: vector of estimated cond. class probabilities
+#    nBins: number of bins
+#    plotGraph: TRUE means plotting is desired
+
+reliabDiagram <- function(y,probs,nBins,plotGraph) 
 {
    breaks <- seq(0,1,1/nBins)
    probsBinNums <- findInterval(probs,breaks)

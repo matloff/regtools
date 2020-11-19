@@ -415,7 +415,7 @@ scoresToProbs <- knnCalib
 #     calibMethod: currently knnCalib or plattCalib
 #     k: number of nearest neighbors (knnCalib case)
 
-calibWrap <- function(qeout,scores,calibMethod,plotGraph=TRUE,k=NULL) 
+calibWrap <- function(qeout,scores,calibMethod,k=NULL,plotGraph=TRUE) 
 {
    y <- qeout$data[,qeout$ycol]
    classNames <- qeout$classNames
@@ -424,7 +424,7 @@ calibWrap <- function(qeout,scores,calibMethod,plotGraph=TRUE,k=NULL)
       probs <- knnCalib(y,scores,scores,k)
    } else if (calibMethod == 'plattCalib') {
       preout <- prePlattCalib(y,scores)
-      probs <- plattCalib(preout,scores)[,2]
+      probs <- plattCalib(preout,scores)
    } else stop('invalid calibration method')
    ym <- factorToDummies(y,fname='y')
    res <- list(probs=probs,ym=ym)

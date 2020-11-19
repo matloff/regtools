@@ -403,6 +403,35 @@ knnCalib <- function(y,trnScores,newScores,k)
 
 scoresToProbs <- knnCalib
 
+# wrapper; calibrate all variables in the training set, taking the test
+# set to be the same as the training set
+
+# arguments
+
+#     qeout: output of a qe*-series function
+#     scores: vector/matrix of scores output from running the
+#        classification method on the training set; will have either c
+#        or c(c-1)/2 columns, where c is the number of classes
+#     calibMethod: currently knnCalib or plattCalib
+#     k: number of nearest neighbors (knnCalib case)
+
+calibWrap <- function(qeout,scores,calibMethod,plotGraph=TRUE,k=NULL) 
+{
+   y <- qeout$data[,qeout$ycol]
+   classNames <- qeout$classNames
+   nClass <- length(classNames)
+   if (calibMethod == 'knnCalib') {
+      probs <- knnCalib(y,scores,scores,k)
+   } else if (calibMethod == 'plattCalib') {
+      preout <- prePlattCalib(y,scores)
+      probs <- plattCalib(preout,scores)[,2]
+   } else stop('invalid calibration method')
+   ym <- factorToDummies(y,fname='y')
+   res <- list(probs=probs,ym=ym)
+   class(res) <- 'calibWrap'
+   res
+}
+
 
 #########################  plattCalib()  ################################
 
@@ -451,7 +480,10 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE)
    probsBinNums <- findInterval(probs,breaks)
    fittedYCounts <- tapply(probs,probsBinNums,sum)
    actualYCounts <- tapply(y,probsBinNums,sum)
-   if (plotGraph) plot(fittedYCounts,actualYCounts)
+   if (plotGraph) {
+      plot(fittedYCounts,actualYCounts)
+      abline(0,1)
+   }
    cbind(fittedYCounts,actualYCounts)
 }
 
@@ -482,7 +514,6 @@ ROC <- function(y,scores)
       tpr[i] <- numTruePos / numPos
       fpr[i] <- numFalsePos / numNeg
    }
-   browser()
    plot(fpr,tpr,type='l',pch=2,cex=0.5)
    abline(0,1)
 

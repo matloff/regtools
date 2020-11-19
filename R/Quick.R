@@ -148,8 +148,7 @@ predict.qeLogit <- function(object,newx)
 # arguments:  see above
 # value:  object of class 'qeLin' -- lm() output object, plus misc.
 
-qeLin <- function(data,yName,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeLin <- function(data,yName,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
@@ -211,9 +210,7 @@ predict.qeLin <- function(object,newx) {
 
 # see note in kNN() man pg
  
-qeKNN <- function(data,yName,k,scaleX=TRUE,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999),
-   newxK=1)
+qeKNN <- function(data,yName,k,scaleX=TRUE,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
@@ -273,8 +270,7 @@ predict.qeKNN <- function(object,newx,newxK=NULL)
 
 # value:  see above
  
-qeRF <- function(data,yName,nTree=500,minNodeSize=10,
-   holdout=c(min(1000,round(0.1*nrow(data))),9999))
+qeRF <- function(data,yName,nTree=500,minNodeSize=10,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
@@ -320,7 +316,7 @@ plot.qeRF <- function(object)
 
 # value:  see above
  
-qeSVM <- function(data,yName,gamma=1.0,cost=1.0)
+qeSVM <- function(data,yName,gamma=1.0,cost=1.0,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')

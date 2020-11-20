@@ -471,7 +471,6 @@ calibWrap <- function(qeout,scores,calibMethod,k=NULL,
          for (cls in start:end) {
             tmp <- reliabDiagram(ym[,cls],probs[,cls],nBins,TRUE)
          }
-            browser()
       }
       par(mfrow=c(1,1))
    }

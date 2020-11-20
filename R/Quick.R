@@ -515,6 +515,9 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
       factorsInfo <- attr(x,'factorsInfo')
    } else xm <- as.matrix(x)
    if (!is.numeric(xm)) stop('X must be numeric')
+   data <- cbind(xm,y)
+   data <- as.data.frame(data)
+   names(data)[ncol(data)] <- yName
    if (!is.null(holdout)) splitData(holdout,data)
 
    require(polyreg)

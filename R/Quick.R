@@ -230,7 +230,6 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,holdout=NULL)
    if (classif) knnout$classNames <- classNames
    knnout$classif <- classif
    knnout$factorsInfo <- factorsInfo
-   knnout$newxK <- newxK
    knnout$trainRow1 <- getRow1(data,yName)
    class(knnout) <- c('qeKNN','kNN')
    if (!is.null(holdout)) {
@@ -241,18 +240,13 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,holdout=NULL)
    knnout
 }
 
-predict.qeKNN <- function(object,newx,newxK=NULL)
+predict.qeKNN <- function(object,newx,newxK=1)
 {
    class(object) <- 'kNN'
    newx <- setTrainFactors(object,newx)
    classif <- object$classif
    xyc <- getXY(newx,NULL,TRUE,FALSE,object$factorsInfo)
    newx <- as.matrix(xyc$x)
-   if(is.null(newxK)) {
-      tmp <- object$newxK
-      if (!is.null(tmp)) newxK <- tmp
-   }
-   
    preds <- predict(object,newx,newxK)
    if (!object$classif) return(preds)
    if (is.vector(preds)) preds <- matrix(preds,nrow=1)
@@ -516,7 +510,10 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol]
-   xm <- as.matrix(x)
+   if (hasFactors(x)) {
+      xm <- factorsToDummies(x,omitLast=TRUE)
+      factorsInfo <- attr(x,'factorsInfo')
+   } else xm <- as.matrix(x)
    if (!is.numeric(xm)) stop('X must be numeric')
    if (!is.null(holdout)) splitData(holdout,data)
 
@@ -525,6 +522,7 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
    qeout$x <- x
    qeout$y <- y
    qeout$classif <- classif
+   qeout$factorsInfo <- factorsInfo
    qeout$trainRow1 <- getRow1(data,yName)
    class(qeout) <- c('qePoly',class(qeout))
    if (!is.null(holdout)) predictHoldout(qeout)
@@ -534,6 +532,7 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
 predict.qePoly <- function(object,newx)
 {
    class(object) <- 'penrosePoly'
+   newx <- factorsToDummies(newx,omitLast=TRUE,factorsInfo=object$factorsInfo)
    predict(object,newx)
 }
 

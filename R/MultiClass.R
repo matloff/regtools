@@ -449,7 +449,7 @@ plattCalib <- function(prePlattCalibOut,newScores)
 #     plotsPerRow: number of plots per row; 0 means no plotting
 
 calibWrap <- function(qeout,scores,calibMethod,k=NULL,
-   plotsPerRow=2,nBins=0) 
+   plotsPerRow=2,nBins=0,upperLim=1.0) 
 {
    y <- qeout$data[,qeout$ycol]
    classNames <- qeout$classNames
@@ -469,7 +469,8 @@ calibWrap <- function(qeout,scores,calibMethod,k=NULL,
          start <- (rw - 1) * plotsPerRow + 1
          end <- min(rw * plotsPerRow,nClass)
          for (cls in start:end) {
-            tmp <- reliabDiagram(ym[,cls],probs[,cls],nBins,TRUE)
+            tmp <- 
+               reliabDiagram(ym[,cls],probs[,cls],nBins,TRUE,upperLim)
          }
       }
       par(mfrow=c(1,1))
@@ -495,9 +496,9 @@ getDValsE1071 <- function(object,newx)
 #    nBins: number of bins
 #    plotGraph: TRUE means plotting is desired
 
-reliabDiagram <- function(y,probs,nBins,plotGraph) 
+reliabDiagram <- function(y,probs,nBins,plotGraph,upperLim=1.0) 
 {
-   breaks <- seq(0,1,1/nBins)
+   breaks <- seq(0,upperLim,upperLim/nBins)
    probsBinNums <- findInterval(probs,breaks)
    fittedYCounts <- tapply(probs,probsBinNums,sum)
    actualYCounts <- tapply(y,probsBinNums,sum)

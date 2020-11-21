@@ -461,8 +461,12 @@ qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,holdout=NULL)
    y <- data[,ycol]
    if (classif) {
       classNames <- levels(y)
+      yFactor <- y
       y <- as.numeric(as.factor(y)) - 1
-   } else classNames <- NULL
+   } else {
+      classNames <- NULL
+      yFactor <- NULL
+   }
    krsout <- krsFit(x,y,hidden,classif=classif,nClass=length(classNames),
       nEpoch=nEpoch)
    krsout$classif <- classif
@@ -470,13 +474,14 @@ qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,holdout=NULL)
    krsout$factorsInfo=factorsInfo
    krsout$x <- x
    krsout$y <- y
+   krsout$yFactor <- yFactor
    krsout$trainRow1 <- getRow1(data,yName)
    class(krsout) <- c('qeNeural',class(krsout))
    if (!is.null(holdout)) predictHoldout(krsout)
    krsout
 }
 
-predict.qeNeural <- function(object,newx=NULL)
+predict.qeNeural <- function(object,newx=NULL,k=NULL)
 {
    class(object) <- class(object)[-1]
    newx <- setTrainFactors(object,newx)
@@ -489,13 +494,26 @@ predict.qeNeural <- function(object,newx=NULL)
          factorsInfo=object$factorsInfo)
    }
    preds <- predict(object,newx)
+   probs <- attr(preds,'probs')  # may be NULL
    if (kludge1row) preds <- preds[1]
    if (!object$classif) {
       preds
    } else {
       classNames <- object$classNames
       preds <- classNames[preds+1]
-      outlist <- list(predClasses=preds,probs=NULL)
+      if (kludge1row) probs <- probs[1,]
+
+      if (!is.null(k)) {
+         # not ideal, but no apparent easy way to get this during 
+         # training phases
+         trnScores <- predict.krsFit(object,object$x)
+         trnScores <- attr(trnScores,'probs')
+         newScores <- matrix(probs,ncol=length(classNames))
+         origProbs <- probs
+         probs <- knnCalib(object$yFactor,trnScores,newScores,k)
+      }
+
+      outlist <- list(predClasses=preds,probs=probs,origProbs=origProbs)
       outlist
       # not implementing class probs for now
    } 

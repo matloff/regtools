@@ -451,7 +451,8 @@ plattCalib <- function(prePlattCalibOut,newScores)
 calibWrap <- function(qeout,scores,calibMethod,k=NULL,
    plotsPerRow=2,nBins=0,upperLim=1.0) 
 {
-   y <- qeout$data[,qeout$ycol]
+   # y <- qeout$data[,qeout$ycol]
+   y <- qeout$y
    classNames <- qeout$classNames
    nClass <- length(classNames)
    if (calibMethod == 'knnCalib') {

@@ -503,19 +503,18 @@ predict.qeNeural <- function(object,newx=NULL,k=NULL)
       preds <- classNames[preds+1]
       if (kludge1row) probs <- probs[1,]
 
+      origProbs <- probs
       if (!is.null(k)) {
          # not ideal, but no apparent easy way to get this during 
          # training phases
          trnScores <- predict.krsFit(object,object$x)
          trnScores <- attr(trnScores,'probs')
          newScores <- matrix(probs,ncol=length(classNames))
-         origProbs <- probs
          probs <- knnCalib(object$yFactor,trnScores,newScores,k)
       }
 
       outlist <- list(predClasses=preds,probs=probs,origProbs=origProbs)
       outlist
-      # not implementing class probs for now
    } 
 }
 
@@ -724,9 +723,10 @@ predictHoldout <- defmacro(res,
       # in k-NN case, we want to use the newxK from qeKNN() here, but
       # allow the user to later call predict.qeKNN() with her own value
       # if desired
-      if (inherits(res,'kNN')) {
-         preds <- predict(res,tstx,newxK)
-      } else preds <- predict(res,tstx);
+      ## if (inherits(res,'kNN')) {
+      ##    preds <- predict(res,tstx,newxK)
+      ## } else preds <- predict(res,tstx);
+      preds <- predict(res,tstx);
       res$holdoutPreds <- preds;
       res$testAcc <- 
          if (res$classif) mean(preds$predClasses != tst[,ycol])

@@ -449,9 +449,10 @@ plattCalib <- function(prePlattCalibOut,newScores)
 #     plotsPerRow: number of plots per row; 0 means no plotting
 
 calibWrap <- function(qeout,scores,calibMethod,k=NULL,
-   plotsPerRow=2,nBins=0) 
+   plotsPerRow=2,nBins=0,upperLim=1.0) 
 {
-   y <- qeout$data[,qeout$ycol]
+   # y <- qeout$data[,qeout$ycol]
+   y <- qeout$y
    classNames <- qeout$classNames
    nClass <- length(classNames)
    if (calibMethod == 'knnCalib') {
@@ -469,7 +470,8 @@ calibWrap <- function(qeout,scores,calibMethod,k=NULL,
          start <- (rw - 1) * plotsPerRow + 1
          end <- min(rw * plotsPerRow,nClass)
          for (cls in start:end) {
-            tmp <- reliabDiagram(ym[,cls],probs[,cls],nBins,TRUE)
+            tmp <- 
+               reliabDiagram(ym[,cls],probs[,cls],nBins,TRUE)
          }
       }
       par(mfrow=c(1,1))

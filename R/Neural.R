@@ -107,6 +107,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
    # output layer and determine loss ftn etc.
    if (classif) {
       keras::layer_dense(model,units = nClass, activation = "softmax")
+      # keras::layer_dense(model,units = nClass, activation = "sigmoid")
       lossFtn <- 'categorical_crossentropy'
       metrics <- 'accuracy'
    } else {
@@ -145,7 +146,9 @@ predict.krsFit <- function(krsFitOut,newx)
    }
    preds <- predict(model,newx)
    if (krsFitOut$classif) {
+      probs <- preds
       preds <- apply(preds,1,which.max) - 1
+      attr(preds,'probs') <- probs
    } else {
       mm <- krsFitOut$mmScaleY
       if (!is.null(mm))

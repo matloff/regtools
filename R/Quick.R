@@ -107,7 +107,9 @@ qeLogit <- function(data,yName,holdout=NULL)
    outlist$classif <- classif
    outlist$trainRow1 <- getRow1(data,yName)
    class(outlist) <- c('qeLogit')
-   if (!is.null(holdout)) predictHoldout(outlist)
+   if (!is.null(holdout)) {
+      predictHoldout(outlist)
+   }
    outlist
 }
 
@@ -230,7 +232,6 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,holdout=NULL)
    if (classif) knnout$classNames <- classNames
    knnout$classif <- classif
    knnout$factorsInfo <- factorsInfo
-   knnout$newxK <- newxK
    knnout$trainRow1 <- getRow1(data,yName)
    class(knnout) <- c('qeKNN','kNN')
    if (!is.null(holdout)) {
@@ -241,18 +242,13 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,holdout=NULL)
    knnout
 }
 
-predict.qeKNN <- function(object,newx,newxK=NULL)
+predict.qeKNN <- function(object,newx,newxK=1)
 {
    class(object) <- 'kNN'
    newx <- setTrainFactors(object,newx)
    classif <- object$classif
    xyc <- getXY(newx,NULL,TRUE,FALSE,object$factorsInfo)
    newx <- as.matrix(xyc$x)
-   if(is.null(newxK)) {
-      tmp <- object$newxK
-      if (!is.null(tmp)) newxK <- tmp
-   }
-   
    preds <- predict(object,newx,newxK)
    if (!object$classif) return(preds)
    if (is.vector(preds)) preds <- matrix(preds,nrow=1)
@@ -467,8 +463,12 @@ qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,holdout=NULL)
    y <- data[,ycol]
    if (classif) {
       classNames <- levels(y)
+      yFactor <- y
       y <- as.numeric(as.factor(y)) - 1
-   } else classNames <- NULL
+   } else {
+      classNames <- NULL
+      yFactor <- NULL
+   }
    krsout <- krsFit(x,y,hidden,classif=classif,nClass=length(classNames),
       nEpoch=nEpoch)
    krsout$classif <- classif
@@ -476,13 +476,14 @@ qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,holdout=NULL)
    krsout$factorsInfo=factorsInfo
    krsout$x <- x
    krsout$y <- y
+   krsout$yFactor <- yFactor
    krsout$trainRow1 <- getRow1(data,yName)
    class(krsout) <- c('qeNeural',class(krsout))
    if (!is.null(holdout)) predictHoldout(krsout)
    krsout
 }
 
-predict.qeNeural <- function(object,newx=NULL)
+predict.qeNeural <- function(object,newx=NULL,k=NULL)
 {
    class(object) <- class(object)[-1]
    newx <- setTrainFactors(object,newx)
@@ -495,15 +496,27 @@ predict.qeNeural <- function(object,newx=NULL)
          factorsInfo=object$factorsInfo)
    }
    preds <- predict(object,newx)
+   probs <- attr(preds,'probs')  # may be NULL
    if (kludge1row) preds <- preds[1]
    if (!object$classif) {
       preds
    } else {
       classNames <- object$classNames
       preds <- classNames[preds+1]
-      outlist <- list(predClasses=preds,probs=NULL)
+      if (kludge1row) probs <- probs[1,]
+
+      origProbs <- probs
+      if (!is.null(k)) {
+         # not ideal, but no apparent easy way to get this during 
+         # training phases
+         trnScores <- predict.krsFit(object,object$x)
+         trnScores <- attr(trnScores,'probs')
+         newScores <- matrix(probs,ncol=length(classNames))
+         probs <- knnCalib(object$yFactor,trnScores,newScores,k)
+      }
+
+      outlist <- list(predClasses=preds,probs=probs,origProbs=origProbs)
       outlist
-      # not implementing class probs for now
    } 
 }
 
@@ -516,8 +529,17 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol]
-   xm <- as.matrix(x)
+   if (hasFactors(x)) {
+      xm <- factorsToDummies(x,omitLast=TRUE)
+      factorsInfo <- attr(xm,'factorsInfo')
+   } else {
+      xm <- as.matrix(x)
+      factorsInfo <- NULL
+   }
    if (!is.numeric(xm)) stop('X must be numeric')
+   data <- cbind(xm,y)
+   data <- as.data.frame(data)
+   names(data)[ncol(data)] <- yName
    if (!is.null(holdout)) splitData(holdout,data)
 
    require(polyreg)
@@ -525,6 +547,7 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
    qeout$x <- x
    qeout$y <- y
    qeout$classif <- classif
+   qeout$factorsInfo <- factorsInfo
    qeout$trainRow1 <- getRow1(data,yName)
    class(qeout) <- c('qePoly',class(qeout))
    if (!is.null(holdout)) predictHoldout(qeout)
@@ -534,6 +557,7 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
 predict.qePoly <- function(object,newx)
 {
    class(object) <- 'penrosePoly'
+   newx <- factorsToDummies(newx,omitLast=TRUE,factorsInfo=object$factorsInfo)
    predict(object,newx)
 }
 
@@ -704,9 +728,10 @@ predictHoldout <- defmacro(res,
       # in k-NN case, we want to use the newxK from qeKNN() here, but
       # allow the user to later call predict.qeKNN() with her own value
       # if desired
-      if (inherits(res,'kNN')) {
-         preds <- predict(res,tstx,newxK)
-      } else preds <- predict(res,tstx);
+      ## if (inherits(res,'kNN')) {
+      ##    preds <- predict(res,tstx,newxK)
+      ## } else preds <- predict(res,tstx);
+      preds <- predict(res,tstx);
       res$holdoutPreds <- preds;
       res$testAcc <- 
          if (res$classif) mean(preds$predClasses != tst[,ycol])

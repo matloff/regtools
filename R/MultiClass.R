@@ -471,7 +471,7 @@ calibWrap <- function(qeout,scores,calibMethod,k=NULL,
          end <- min(rw * plotsPerRow,nClass)
          for (cls in start:end) {
             tmp <- 
-               reliabDiagram(ym[,cls],probs[,cls],nBins,TRUE,upperLim)
+               reliabDiagram(ym[,cls],probs[,cls],nBins,TRUE)
          }
       }
       par(mfrow=c(1,1))
@@ -497,9 +497,9 @@ getDValsE1071 <- function(object,newx)
 #    nBins: number of bins
 #    plotGraph: TRUE means plotting is desired
 
-reliabDiagram <- function(y,probs,nBins,plotGraph,upperLim=1.0) 
+reliabDiagram <- function(y,probs,nBins,plotGraph) 
 {
-   breaks <- seq(0,upperLim,upperLim/nBins)
+   breaks <- seq(0,1,1/nBins)
    probsBinNums <- findInterval(probs,breaks)
    fittedYCounts <- tapply(probs,probsBinNums,sum)
    actualYCounts <- tapply(y,probsBinNums,sum)

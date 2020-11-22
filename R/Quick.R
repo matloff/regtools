@@ -107,7 +107,9 @@ qeLogit <- function(data,yName,holdout=NULL)
    outlist$classif <- classif
    outlist$trainRow1 <- getRow1(data,yName)
    class(outlist) <- c('qeLogit')
-   if (!is.null(holdout)) predictHoldout(outlist)
+   if (!is.null(holdout)) {
+      predictHoldout(outlist)
+   }
    outlist
 }
 
@@ -529,8 +531,11 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
    x <- data[,-ycol]
    if (hasFactors(x)) {
       xm <- factorsToDummies(x,omitLast=TRUE)
-      factorsInfo <- attr(x,'factorsInfo')
-   } else xm <- as.matrix(x)
+      factorsInfo <- attr(xm,'factorsInfo')
+   } else {
+      xm <- as.matrix(x)
+      factorsInfo <- NULL
+   }
    if (!is.numeric(xm)) stop('X must be numeric')
    data <- cbind(xm,y)
    data <- as.data.frame(data)

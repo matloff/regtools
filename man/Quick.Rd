@@ -212,6 +212,17 @@ predict(lmout,pef[1,-5])  # 70857.79
 # polynomial
 
 
+# MLB data
+
+data(mlb) 
+mlb <- mlb[,3:6] 
+
+qeout <- qeNeural(mlb,'Position') 
+newx <- data.frame(Height=73,Age=25,Weight=200) 
+predict(qeout,newx,k=25) 
+qeout <- qePoly(mlb,'Weight',2)
+predict(qeout,newx)
+
 }
 }
 

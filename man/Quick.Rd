@@ -209,9 +209,6 @@ predict(lmout,pef[1,-3])  # occ 100, prob 0.3316
 lmout <- qeLin(pef,'wageinc')
 predict(lmout,pef[1,-5])  # 70857.79
 
-# polynomial
-
-
 # MLB data
 
 data(mlb) 
@@ -221,8 +218,7 @@ qeout <- qeNeural(mlb,'Position')
 newx <- data.frame(Height=73,Age=25,Weight=200) 
 predict(qeout,newx,k=25) 
 qeout <- qePoly(mlb,'Weight',2)
-newx <- data.frame(as.factor(Position='Catcher'),
-   Height=73,Age=25)sapply(1:ncol(dfr), nnf)
+newx <- data.frame(Position='Catcher',Height=73,Age=25)
 predict(qeout,newx)
 
 }

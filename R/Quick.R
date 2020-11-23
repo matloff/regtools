@@ -525,6 +525,8 @@ predict.qeNeural <- function(object,newx=NULL,k=NULL)
 qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
 {
    classif <- is.factor(data[[yName]])
+   # will need all either numeric or factors; change character cols
+   data <- charsToFactors(data)
    if (classif) stop('currently not for classification problems')
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
@@ -557,9 +559,12 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
 predict.qePoly <- function(object,newx)
 {
    class(object) <- 'penrosePoly'
+   newx <- charsToFactors(newx)
    newx <- factorsToDummies(newx,omitLast=TRUE,factorsInfo=object$factorsInfo)
    predict(object,newx)
 }
+
+prd <- predict.qePoly
 
 #########################  qeLASSO()  #################################
 

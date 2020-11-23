@@ -97,24 +97,24 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
    if (is.factor(dfr)) dfr <- as.data.frame(dfr)
 
    # for now, no input cols other than numeric, factor allowed
-   nnf <- function(i)  (!is.numeric(dfr[,i]) && !is.factor(dfr[,i]))
-   notnumfact <- sapply(1:ncol(dfr),nnf)
-   if (any(notnumfact)) 
-      stop('non-numeric, non-factor columns encountered')
+   ## nnf <- function(i)  (!is.numeric(dfr[,i]) && !is.factor(dfr[,i]))
+   ## notnumfact <- sapply(1:ncol(dfr),nnf)
+   ## if (any(notnumfact)) 
+   ##    stop('non-numeric, non-factor columns encountered')
 
    outDF <- NULL
    nullFI <- is.null(factorsInfo)
    if (nullFI) factorsInfoOut <- list()
    for (i in 1:ncol(dfr)) {
       dfi <- dfr[,i]
-      if (length(levels(dfi)) == 1) {
+      if (length(levels(dfi)) == 1 && length(dfi) > 1) {
          msg <- paste(names(dfr)[i],'constant column: ',i) 
          warning(msg)
       }
       colName <- names(dfr)[i]
       if (!is.factor(dfi)) {
          if (!is.numeric(dfi)) 
-            stop('nonnumeric, nonfactor column encountered')
+            dfi <- as.factor(dfi)
          outDF <- cbind(outDF,dfi) 
          colnames(outDF)[ncol(outDF)] <- colName
       } else {

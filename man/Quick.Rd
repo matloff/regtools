@@ -27,7 +27,8 @@
 Quick access to machine learning methods, with a very simple
 interface.  Intended for convenient initial exploration of a dataset,
 both to gauge the predictive effectiveness of a model and to do simple
-prediction of new cases.  The simplicity also makes the series useful
+prediction of new cases.  Just one call needed to fit, no preliminary
+setup of model etc.  The simplicity also makes the series useful
 for teaching.  For advanced work, analysts may prefer to use 
 the methods directly, in order to utilize specialized options.  
 }
@@ -64,9 +65,8 @@ qePoly(data,yName,deg,maxInteractDeg = deg,
   \item{data}{Dataframe, training set. Classification case is signaled
      via labels column being an R factor.}
   \item{yName}{Name of the class labels column.}
-  \item{holdout}{If not NULL, form a holdout set; 2-component vector, 
-     c(holdout_size,initial_seed). After fitting to the remaining data,
-     evaluate accuracy on the test set.}
+  \item{holdout}{If not NULL, form a holdout set of the specified size.
+     After fitting to the remaining data, evaluate accuracy on the test set.}
   \item{k}{Number of nearest neighbors. In functions other than
      \code{qeKNN} for which this is an argument, it is the number of 
      neighbors to use in finding conditional probabilities via 
@@ -85,31 +85,55 @@ qePoly(data,yName,deg,maxInteractDeg = deg,
 
 As noted, these functions are intended for quick, first-level analysis
 of regression or multiclass classification problems.  Emphasis here is
-on convenience and simplicity. 
+on convenience and simplicity.  Currently k-NN, SVM, random forests,
+gradient boosting, linear model, LASSO and polynomial regression are
+offered. 
 
 The idea is that, given a new dataset, the analyst can quickly and
-easily try fitting a number of models in succession, say first logistic,
-then random forests, then neural networks: 
+easily try fitting a number of models in succession, say first k-NN,
+then random forests: 
 
-\code{
-qeLogit(data,yColumnName,)
-qeRF(data,yColumnName)
-qeNeural(data,yColumnName)
+\preformatted{
+# built-in data on major league baseball players
+> data(mlb)  
+> mlb <- mlb[,3:6]  # position, height, weight, age
+
+# fit models
+> knnout <- qeLogit(mlb,'Weight',25)
+> rfout <- qeRF(mlb,'Weight')
+
+# mean abs. pred. error on holdout set, in pounds
+> knnout$testAcc
+[1] 13.22931
+> rfout$testAcc
+[1] 13.10736
+
+# predict a new case
+> newx <- data.frame(Position='Catcher',Height=73.5,Age=26)
+> predict(knnout,newx)
+       [,1]
+[1,] 204.48
+> predict(rfout,newx)
+      11 
+198.4735 
 }
 
 The optional \code{holdout} argument triggers formation of a holdout set
 and the corresponding cross-validation evaluation of predictive power.
-Note that the return value will consist of the fit on the training set.
+Note that if a holdout is formed, the return value will consist of the
+fit on the training set, not on the full original dataset.
 
 In most cases, the full basket of options in the wrapped function is not
 reflected, and second-level analysis should use the relevant packages
 directly.
 
 The \code{qe*} functions do model fit.  Each of them has a
-\code{predict} method. Arguments are at least: \code{object}, the return
-value of the previously-called \code{*Class} function, and \code{newx},
-a data frame of points to be predicted.  In some cases, there are
-additional algorithm-specific parameters.
+\code{predict} method, and some also have a \code{plot} method.
+Arguments for \code{qe*} are at least: \code{data} and \code{yName};
+arguments for \code{predict} are at least: \code{object}, the return
+value from \code{qe*}, and \code{newx}, a data frame of points to be
+predicted.  In some cases, there are additional algorithm-specific
+parameters; default values are provided.
 
 An additional benefit is that the \code{predict} functions work
 correctly on new cases with R factors.  The proper levels are assigned
@@ -127,7 +151,7 @@ whether the problem was of classification type.
 If a holdout set was requested, an additional returned component will be
 \code{testAcc}, the accuracy on the holdout set.  This will be Mean
 Absolute Prediction Error in the regression case, and proportion of
-correct classification in the classification case.
+misclassified cases in the classification case.
 
 The value returned by the \code{predict} functions is an
 R list with components as follows:

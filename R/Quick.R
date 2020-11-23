@@ -79,7 +79,7 @@
 
 #    list of glm() output objects, one per class, and some misc.
 
-qeLogit <- function(data,yName,holdout=NULL)
+qeLogit <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
@@ -150,7 +150,7 @@ predict.qeLogit <- function(object,newx)
 # arguments:  see above
 # value:  object of class 'qeLin' -- lm() output object, plus misc.
 
-qeLin <- function(data,yName,holdout=NULL)
+qeLin <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
@@ -212,7 +212,8 @@ predict.qeLin <- function(object,newx) {
 
 # see note in kNN() man pg
  
-qeKNN <- function(data,yName,k,scaleX=TRUE,holdout=NULL)
+qeKNN <- function(data,yName,k,scaleX=TRUE,
+   holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
@@ -266,7 +267,8 @@ predict.qeKNN <- function(object,newx,newxK=1)
 
 # value:  see above
  
-qeRF <- function(data,yName,nTree=500,minNodeSize=10,holdout=NULL)
+qeRF <- function(data,yName,nTree=500,minNodeSize=10,
+   holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
@@ -312,7 +314,8 @@ plot.qeRF <- function(object)
 
 # value:  see above
  
-qeSVM <- function(data,yName,gamma=1.0,cost=1.0,holdout=NULL)
+qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
+   holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
@@ -378,7 +381,7 @@ plot.qeSVM <- function(object,formula)
 # value:  see above
  
 qeGBoost <- function(data,yName,
-   nTree=100,minNodeSize=10,learnRate=0.1,holdout=NULL)
+   nTree=100,minNodeSize=10,learnRate=0.1,holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('classification only')
@@ -449,7 +452,8 @@ predict.qeGBoost <- function(object,newx)
 
 # value:  see above
  
-qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,holdout=NULL)
+qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
+   holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
    require(keras)
@@ -522,7 +526,8 @@ predict.qeNeural <- function(object,newx=NULL,k=NULL)
 
 #########################  qePoly()  #################################
 
-qePoly <- function(data,yName,deg,maxInteractDeg=deg,holdout=NULL)
+qePoly <- function(data,yName,deg,maxInteractDeg=deg,
+   holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
    # will need all either numeric or factors; change character cols
@@ -571,7 +576,7 @@ prd <- predict.qePoly
 # for now, "X" must be numeric; if "Y" is a factor, we have a
 # classification problem, otherwise regression
 
-qeLASSO <- function(data,yName,alpha=1,holdout=NULL)
+qeLASSO <- function(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
 {
    if (!is.data.frame(data)) stop('input must be a data frame')
    ycol <- which(names(data) == yName)

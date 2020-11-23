@@ -28,19 +28,23 @@ Quick access to machine learning methods, with a very simple
 interface.  Intended for convenient initial exploration of a dataset,
 both to gauge the predictive effectiveness of a model and to do simple
 prediction of new cases.  The simplicity also makes the series useful
-for teaching.  For advanced work, analysts should use the methods directly.  
+for teaching.  For advanced work, analysts may prefer to use 
+the methods directly, in order to utilize specialized options.  
 }
 
 \usage{
-qeLogit(data,holdout=NULL)
-qeLin(data,yName,holdout=NULL)
-qeKNN(data,yName,k,scaleX=TRUE,newxK=1,holdout=NULL)
-qeRF(data,yName,nTree,minNodeSize,holdout=NULL)
-qeSVM(data,yName,gamma=1.0,cost=1.0,holdout=NULL)
-qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,holdout=NULL)
-qeNeural(data,yName,hidden=c(100,100),nEpoch=30,holdout=NULL)
-qeLASSO(data,yName,alpha=1,holdout=NULL)
-qePoly(data,yName,deg,maxInteractDeg = deg,holdout=NULL)
+qeLogit(data,holdout=floor(min(1000,0.1*nrow(data))))
+qeLin(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
+qeKNN(data,yName,k,scaleX=TRUE,holdout=floor(min(1000,0.1*nrow(data))))
+qeRF(data,yName,nTree,minNodeSize,holdout=floor(min(1000,0.1*nrow(data))))
+qeSVM(data,yName,gamma=1.0,cost=1.0,holdout=floor(min(1000,0.1*nrow(data))))
+qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
+   holdout=floor(min(1000,0.1*nrow(data))))
+qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
+   holdout=floor(min(1000,0.1*nrow(data))))
+qeLASSO(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
+qePoly(data,yName,deg,maxInteractDeg = deg,
+   holdout=floor(min(1000,0.1*nrow(data))))
 \method{predict}{qeLogit}(object,newx)
 \method{predict}{qeLin}(object,newx)
 \method{predict}{qeKNN}(object,newx,newxK=1)
@@ -63,8 +67,10 @@ qePoly(data,yName,deg,maxInteractDeg = deg,holdout=NULL)
   \item{holdout}{If not NULL, form a holdout set; 2-component vector, 
      c(holdout_size,initial_seed). After fitting to the remaining data,
      evaluate accuracy on the test set.}
-  \item{k}{Number of nearest neighbors.  For \code{predict.qeSVM}, this
-     is for finding conditional probabilities via \code{knnCalib}.} 
+  \item{k}{Number of nearest neighbors. In functions other than
+     \code{qeKNN} for which this is an argument, it is the number of 
+     neighbors to use in finding conditional probabilities via 
+     \code{knnCalib}.} 
   \item{scaleX}{Scale the features.} 
   \item{nTree}{Number of trees.} 
   \item{minNodeSize}{Minimum number of data points in a tree node.} 
@@ -86,7 +92,7 @@ easily try fitting a number of models in succession, say first logistic,
 then random forests, then neural networks: 
 
 \code{
-qeLogit(data,yColumnName)
+qeLogit(data,yColumnName,)
 qeRF(data,yColumnName)
 qeNeural(data,yColumnName)
 }

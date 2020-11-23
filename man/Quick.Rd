@@ -221,6 +221,8 @@ qeout <- qeNeural(mlb,'Position')
 newx <- data.frame(Height=73,Age=25,Weight=200) 
 predict(qeout,newx,k=25) 
 qeout <- qePoly(mlb,'Weight',2)
+newx <- data.frame(as.factor(Position='Catcher'),
+   Height=73,Age=25)sapply(1:ncol(dfr), nnf)
 predict(qeout,newx)
 
 }

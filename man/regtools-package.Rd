@@ -55,6 +55,8 @@ regression and classification analysis, and machine learning.
    \item quick convenience classification functions: logitClass,
    knnClass, linClass, rfClass, boostClass
 
+   \item probability calibration: knnCalib, plattCalib, calibWrap
+
    }
 
 \bold{Machine learning:}
@@ -82,7 +84,7 @@ regression and classification analysis, and machine learning.
    \itemize{
 
    \item qeLogit, qeKNN, qeLin, qeRF, qeGBoost, qeSVM, qeNeural,
-      qeLASSO, qePoly
+      qeLASSO, qePoly (and associated predict, plot methods)
 
    }
 
@@ -92,7 +94,7 @@ regression and classification analysis, and machine learning.
 
    \item conversion between factors and dummies: dummiesToFactor,
    dummiesToInt, factorsToDummies, factorToDummies, factorTo012etc,
-   dummiesToInt, hasFactors, charsToFactors
+   dummiesToInt, hasFactors, charsToFactors, makeAllNumeric
 
    \item dealing with superset and subsets of factors: toSuperFactor,
    toSubFactor

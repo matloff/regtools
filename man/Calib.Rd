@@ -2,7 +2,7 @@
 \alias{knnCalib}
 \alias{plattCalib}
 
-\title{}
+\title{Probability Calibration for Classification Problems}
 
 \description{
 

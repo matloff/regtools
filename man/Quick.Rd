@@ -99,11 +99,10 @@ then random forests:
 > mlb <- mlb[,3:6]  # position, height, weight, age
 
 # fit models
-> knnout <- qeKNN(mlb,'Weight',25)
+> knnout <- qeKNN(mlb,'Weight',k=25)
 > rfout <- qeRF(mlb,'Weight')
 
 # mean abs. pred. error on holdout set, in pounds
-> knnout$testAcc
 > knnout$testAcc
 [1] 11.75644
 > rfout$testAcc
@@ -117,6 +116,24 @@ then random forests:
 > predict(rfout,newx)
       11 
 199.1714
+
+# how about some other ML methods?
+> lassout <- qeLASSO(mlb,'Weight')
+> lassout$testAcc
+[1] 14.23122
+# poly reg, degree 3 
+> polyout <- qePoly(mlb,'Weight',3)
+> polyout$testAcc
+[1] 13.55613
+> nnout <- qeNeural(mlb,'Weight')
+# ...
+> nnout$testAcc
+[1] 12.2537
+# try some nondefault hyperparams
+> nnout <- qeNeural(mlb,'Weight',hidden=c(200,200),nEpoch=50)
+> nnout$testAcc
+[1] 15.17982
+
 }
 
 The optional \code{holdout} argument triggers formation of a holdout set
@@ -140,7 +157,15 @@ An additional benefit is that the \code{predict} functions work
 correctly on new cases with R factors.  The proper levels are assigned
 to the new cases.  (Of course, if a new case has a level not in the
 original data, nothing can be done.)
-   
+
+The function \code{qeLin} handles classification problems as
+multivariate-outcome linea models. If one's goal is prediction, it can
+be much faster than \code{qeLogit}, often with comparable accuracy.
+
+The \code{qePoly} function does polynomial regression of the indicated
+degree. In the above example degree 3 means all terms through degree 3,
+e.g. \code{Height * Age^2}.
+
 }
 
 \value{
@@ -174,6 +199,8 @@ Regression case: vector of predicted values
 
 \examples{
 
+# see also 'details' above
+
 \dontrun{
 
 data(peFactors)  
@@ -182,8 +209,8 @@ pef <- peFactors[,c(1,3,5,7:9)]
 # just consider Master's (code 14) and PhD (code 16) as special
 pef$educ <- toSubFactor(pef$educ,c('14','16'))  
 
-# prediction occupation; 6 classes, 100, 101, 102, 106, 140, 141
-svmout <- qeSVM(pef,'occ') 
+# predict occupation; 6 classes, 100, 101, 102, 106, 140, 141, using SVM
+svmout <- qeSVM(pef,'occ',holdout=NULL) 
 # as example of prediction, take the 8th case, but change the gender and
 # age to female and 25; note that by setting k to non-null, we are
 # requesting that conditional probabilities be calculated, via
@@ -214,24 +241,6 @@ predict(svmout,newx,k=25)
 > svmout$testAcc
 [1] 0.622  # 62% error rate (overall rate for 6 classes)
 
-# RF
-set.seed(9999)
-rfout <- qeRF(pef,'occ')
-preds <- predict(rfout,pef[,-3])  # re-predict the data, as a check
-# what proportion were correctly classified?
-mean(preds$predClasses == pef[,3])  # 0.4774 
-# what does the probability model say about P(occ == '100')
-mean(preds$probs[,1]) # 0.2438
-# what does the data say about this?
-mean(pef$occ == '100')  # 0.2286; may be some tail effects
-# what about the model's predictions?
-mean(preds$predClasses == '100')  # 0.2765
-# let's predict wage income
-rfout <- qeRF(pef,'wageinc')
-preds <- predict(rfout,pef[,-5])
-# re-predict first case
-predict(rfout,pef[1,-5])  # 62889.42
-
 # linear
 # lm() doesn't like numeric factor levels, so prepend an 'a'
 pef$occ <- prepend('a',pef$occ)
@@ -240,19 +249,8 @@ predict(lmout,pef[1,-3])  # occ 100, prob 0.3316
 lmout <- qeLin(pef,'wageinc')
 predict(lmout,pef[1,-5])  # 70857.79
 
-# MLB data
-
-data(mlb) 
-mlb <- mlb[,3:6] 
-
-qeout <- qeNeural(mlb,'Position') 
-newx <- data.frame(Height=73,Age=25,Weight=200) 
-predict(qeout,newx,k=25) 
-qeout <- qePoly(mlb,'Weight',2)
-newx <- data.frame(Position='Catcher',Height=73,Age=25)
-predict(qeout,newx)
-
 }
+
 }
 
 \author{

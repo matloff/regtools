@@ -99,23 +99,24 @@ then random forests:
 > mlb <- mlb[,3:6]  # position, height, weight, age
 
 # fit models
-> knnout <- qeLogit(mlb,'Weight',25)
+> knnout <- qeKNN(mlb,'Weight',25)
 > rfout <- qeRF(mlb,'Weight')
 
 # mean abs. pred. error on holdout set, in pounds
 > knnout$testAcc
-[1] 13.22931
+> knnout$testAcc
+[1] 11.75644
 > rfout$testAcc
-[1] 13.10736
+[1] 12.6787
 
 # predict a new case
 > newx <- data.frame(Position='Catcher',Height=73.5,Age=26)
 > predict(knnout,newx)
        [,1]
-[1,] 204.48
+[1,] 204.04
 > predict(rfout,newx)
       11 
-198.4735 
+199.1714
 }
 
 The optional \code{holdout} argument triggers formation of a holdout set

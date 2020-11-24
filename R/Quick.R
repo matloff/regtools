@@ -531,19 +531,20 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,
 {
    classif <- is.factor(data[[yName]])
    # will need all either numeric or factors; change character cols
-   data <- charsToFactors(data)
    if (classif) stop('currently not for classification problems')
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol]
-   if (hasFactors(x)) {
-      xm <- factorsToDummies(x,omitLast=TRUE)
-      factorsInfo <- attr(xm,'factorsInfo')
-   } else {
-      xm <- as.matrix(x)
-      factorsInfo <- NULL
-   }
-   if (!is.numeric(xm)) stop('X must be numeric')
+##    data <- charsToFactors(data)
+##    if (hasFactors(x)) {
+##       xm <- factorsToDummies(x,omitLast=TRUE)
+##       factorsInfo <- attr(xm,'factorsInfo')
+##    } else {
+##       xm <- as.matrix(x)
+##       factorsInfo <- NULL
+##    }
+##    if (!is.numeric(xm)) stop('X must be numeric')
+   makeAllNumeric(x,data)
    data <- cbind(xm,y)
    data <- as.data.frame(data)
    names(data)[ncol(data)] <- yName
@@ -569,7 +570,7 @@ predict.qePoly <- function(object,newx)
    predict(object,newx)
 }
 
-prd <- predict.qePoly
+prdPoly <- predict.qePoly
 
 #########################  qeLASSO()  #################################
 
@@ -578,20 +579,23 @@ prd <- predict.qePoly
 
 qeLASSO <- function(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
 {
-   if (!is.data.frame(data)) stop('input must be a data frame')
+   require(glmnet)
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol]
-   if (!all(sapply(x,is.numeric))) stop('X must be numeric for now')
+   if (!all(sapply(x,is.numeric))) {
+      makeAllNumeric(x,data)
+   } else factorsInfo <- NULL
+   
    classif <- is.factor(y)
    if (!is.null(holdout)) splitData(holdout,data)
    fam <- if (classif) 'multinomial' else 'gaussian'
-   xm <- as.matrix(x)
    ym <- as.matrix(y)
    qeout <- cv.glmnet(x=xm,y=ym,alpha=alpha,family=fam)
    qeout$x <- x
    qeout$y <- y
    qeout$classif <- classif
+   qeout$factorsInfo <- factorsInfo
    if (classif) qeout$classNames <- levels(y)
    class(qeout) <- c('qeLASSO',class(qeout))
    if (!is.null(holdout)) predictHoldout(qeout)
@@ -600,9 +604,10 @@ qeLASSO <- function(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
 
 predict.qeLASSO <- function(object,newx) 
 {
-   if (is.vector(newx)) newx <- matrix(newx,ncol=ncol(object$x))
-   if (is.data.frame(newx)) newx <- as.matrix(newx)
    class(object) <- class(object)[-1]
+   newx <- charsToFactors(newx)
+   newx <- factorsToDummies(newx,omitLast=TRUE,factorsInfo=object$factorsInfo)
+
    if (!object$classif) return(predict(object,newx))
    # classif case
    classNames <- object$classNames
@@ -615,6 +620,8 @@ predict.qeLASSO <- function(object,newx)
    predClasses <- object$classNames[maxCols]
    list(predClasses=predClasses,probs=tmp)
 }
+
+prdLASSO <- predict.qeLASSO
 
 plot.qeLASSO <- function(object) 
 {
@@ -697,7 +704,7 @@ getXY <- function(data,yName,xMustNumeric=FALSE,classif,
 # standard split into training, test sets
 
 # arguments:
-#    holdout: vector of holdout set size, seed
+#    holdout: holdout set size
 #    data: XY data frame
 
 # globals/vale:
@@ -709,15 +716,28 @@ require(gtools)
 
 splitData <- defmacro(holdout,data, 
    expr={
-      nHold <- holdout[1]
-      seed <- holdout[2]
-      set.seed(seed)
+      nHold <- holdout
       idxs <- sample(1:nrow(data),nHold);
       tst <- data[idxs,];
       data <- data[-idxs,]
       holdIdxs <- idxs
    }
 )
+
+# x: change character variables to factors, then all factors to dummies,
+# recording for later use in prediction; put result in xm
+makeAllNumeric <- defmacro(x,data,
+   expr={
+      data <- charsToFactors(data)
+      if (hasFactors(x)) {
+         xm <- factorsToDummies(x,omitLast=TRUE)
+         factorsInfo <- attr(xm,'factorsInfo')
+      } else {
+         xm <- as.matrix(x)
+         factorsInfo <- NULL
+      }
+   }
+) 
 
 # do the predictions in the holdout set
 

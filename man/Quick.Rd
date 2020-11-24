@@ -18,7 +18,6 @@
 \alias{predict.qeLASSO}
 \alias{predict.qePoly}
 \alias{plot.RF}
-\alias{plot.SVM}
 \alias{plot.LASSO}
 
 \title{Quick-Explore Regression/Classification Wrappers}

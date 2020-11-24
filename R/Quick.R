@@ -332,6 +332,7 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
    svmout$ycol <- ycol
    svmout$classNames <- levels(y)
    svmout$classif <- classif
+   svmout$formula <- frml
    svmout$trainRow1 <- getRow1(data,yName)
    class(svmout) <- c('qeSVM',class(svmout))
    if (!is.null(holdout)) predictHoldout(svmout)
@@ -360,13 +361,14 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
    res
 }
 
-plot.qeSVM <- function(object,formula) 
-{
-   classNames <- object$classNames
-   class(object) <- class(object)[-1]
-   formula <- as.formula(formula)
-   plot(object,object$data,formula)
-}
+# plot.qeSVM <- function(object,formula) 
+# {
+#    classNames <- object$classNames
+#    class(object) <- class(object)[-1]
+#    formula <- object$formula
+#    formula <- as.formula(formula)
+#    plot(object,object$data,formula)
+# }
 
 #########################  qeGBoost()  #################################
 

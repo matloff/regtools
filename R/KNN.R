@@ -51,7 +51,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
           classif=FALSE,startAt1=TRUE)
 {  
    if (PCAcomps > 0) stop('PCA now must be done separately')
-   if (allK) stop('allK option currenttly disable')
+   if (allK) stop('allK option currenttly disabled')
    if (identical(smoothingFtn,loclin) && kmax < 3)
       stop('loclin requires k >= 3')
    if (identical(smoothingFtn,vary) && kmax < 2)
@@ -795,6 +795,12 @@ plot.kmin <- function(x,y,...) {
 meany <- function(nearIdxs,x,y,predpt) 
 {
    colMeans(y[nearIdxs,,drop=FALSE])
+}
+
+# find median of Y in the neighborhood of predpt; latter not used here
+mediany <- function(nearIdxs,x,y,predpt) 
+{
+   apply(y[nearIdxs,,drop=FALSE],2,median)
 }
 
 # find variance of Y in the neighborhood of predpt; latter not used here

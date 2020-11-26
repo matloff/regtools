@@ -31,6 +31,7 @@ kNN(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,expandVars=NULL,expandVals=NULL,
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
 meany(nearIdxs,x,y,predpt) 
+mediany(nearIdxs,x,y,predpt) 
 vary(nearIdxs,x,y,predpt) 
 loclin(nearIdxs,x,y,predpt) 
 \method{predict}{knn}(object,...)
@@ -63,7 +64,8 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
   \item{expandVars}{Indices of columns in \code{x} to expand.}
   \item{expandVals}{The corresponding expansion values.}
   \item{smoothingFtn}{Function to apply to the "Y" values in the 
-     set of nearest neighbors.}
+     set of nearest neighbors.  Built-in choices are \code{meany},
+     \code{mediany}, \code{vary} and \code{loclin}.}
   \item{allK}{If TRUE, find regression estimates for all \code{k}
      through \code{kmax}.  Currently disabled.}
   \item{leave1out}{If TRUE, omit the 1-nearest neighbor from analysis}
@@ -134,12 +136,19 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
    playing field" in which all predictors have standard deviation 1.0,
    then scale some of them up or down.
 
-   Another feature of note is to allow local-linear smoothing, by
+   Alternatives are provided to calculating the mean Y in the given
+   neighborhood, such as the median and the variance, the latter of
+   possible use in dealing with heterogeneity in linear models.
+
+   Another choice of note is to allow local-linear smoothing, by
    setting \code{smoothingFtn} to \code{loclin}.  Here the value of the
    regression function at a point is predicted from a linear fit to the
    point's neighbors.  This may be especially helpful to counteract bias
    near the edges of the data.  As in any regression fit, the number of
    predictors should be considerably less than the number of neighbors.
+
+   Custom functions for smoothing can easily be written, say following
+   the pattern of \code{loclin}.
 
    The main alternative to \code{kNN} is \code{qeKNN} in the qe* ("quick
    and easy") series. It is more convenient, e.g. allowing factor

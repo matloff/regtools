@@ -1,6 +1,6 @@
 # regtools 
 
-## Novel tools tools for regression, classification and machine learning
+## Novel tools tools for regression/classification and machine learning
 
 Various tools for Prediction and/or Description goals in regression,
 classification and machine learning.  

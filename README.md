@@ -2,6 +2,10 @@
 
 ## Novel tools tools for regression/classification and machine learning
 
+<div style="text-align: right"> 
+*A model should be as simple as possible, but no simpler* -- Albert Einstein
+</div>
+
 Various tools for Prediction and/or Description goals in regression,
 classification and machine learning.  
 
@@ -19,54 +23,6 @@ CLICK [HERE](#quickstart) for a **regtools** Quick Start!
 </span>
 </font>
 
-## FEATURES
-
-* Advanced tool for tuning-parameter grid search, including plotting,
-  Bonferroni intervals and smoothing.
-
-* Innovative graphical tools for assessing fit in linear and nonlinear
-  parametric models, via nonparametric methods.  Model evaluation,
-examination of quadratic effects, investigation of nonhomogeneity of
-variance.
-
-* Tools for multiclass classification to extend functions that only handle the
-  binary case, e.g. *glm()*.  One vs. All and All vs. All paradigms.  
-
-* Novel adjustment for imbalanced data.
-
-* K-NN regression for general dimensions in predictor and
-  response variables, using k-Nearest Neighbors (k-NN).  Local-linear
-option to deal with edge aliasing.  Allows for user-specified smoothing
-method.  Allows for accelerated exploration of multiple values of **k**
-at once.  Capability to give different variables different weights in
-the distance computation.
-
-* Extension to nonlinear parametric regression of Eicker-White
-technique to handle heteroscedasticity.
-
-* Utilities for conversion of time series data to rectangular form,
-  enabling lagged prediction by **lm()** or other regression model.
-
-* Utilities for conversion between factor and dummy variable forms,
-  useful since among various regression packages, some use factors while
-some others use dummies.  (The **glmnet** package is an example of the
-latter case.)
-
-* Misc. tools, e.g. to reverse the effects of an earlier call to
-  **scale()**.
-
-* Nicer implementation of ridge regression, with more meaningful scaling
-and better plotting.
-
-* Linear regression, PCA and log-linear model estimation in missing-data
-setting, via the Available Cases method.  (For handling missing values
-in Prediction contexts, see
-[our toweranNA package](http://github.com/matloff/toweranNA).)
-
-* Interesting datasets.
-
-A number of examples of use follow below.
-
 ## OVERVIEW: FUNCTION CATEGORIES
 
 See full function list by typing
@@ -77,33 +33,50 @@ See full function list by typing
 
 Here are the main categories:
 
-- Parametric modeling
-- Diagnostic plots
-- Classification
-- Machine learning
-- Dummies and R factors
-- Statistics
-- Matrix
-- Time series
-- Image processing 
-- Text processing
+- Parametric modeling, including novel diagnostic plots
+- Classification, including novel methods for probability calibration 
+- Machine learning, including advanced grid search
+- Dummies and R factors -- many utilities, e.g. conversion among types
+- Time series, image and text processing utilities
 - Recommender systems
-- Misc.
+* Interesting datasets
 
 ## <a name="quickstart">REGTOOLS QUICK START </a> 
 
 Here we will take a quick tour of a subset of **regtools** features,
-using a dataset **prgeng** that is included in the package.  We'll start
-with linear regression, briefly illustrating **regtools**'s novel
-diagnostic tools, then move on the use of machine learning methods on
-this data, again using the data to illustrate various features of
-**regtools**.
+using datasets **mlb** and **prgeng** that are included in 
+the package.  
 
 ### The Data
 
-The dataset consists of data on Silicon Valley programmers and engineers
-in the 2000 US Census.  It is available in several forms.  We'll use the
-data frame version, and use only a few features to keep things simple:
+The **mlb** dataset consists of data on Major Leage baseball players.
+We'll use only a few features, to keep things simple:
+
+``` r
+> data(mlb)
+> head(mlb)
+             Name Team       Position Height
+1   Adam_Donachie  BAL        Catcher     74
+2       Paul_Bako  BAL        Catcher     74
+3 Ramon_Hernandez  BAL        Catcher     72
+4    Kevin_Millar  BAL  First_Baseman     72
+5     Chris_Gomez  BAL  First_Baseman     73
+6   Brian_Roberts  BAL Second_Baseman     69
+  Weight   Age PosCategory
+1    180 22.99     Catcher
+2    215 34.69     Catcher
+3    210 30.78     Catcher
+4    210 35.43   Infielder
+5    188 35.71   Infielder
+6    176 29.39   Infielder
+```
+
+We'll predict player weight (in pounds) and position.
+
+The **prgeng** dataset consists of data on Silicon Valley programmers
+and engineers in the 2000 US Census.  It is available in several forms.
+We'll use the data frame version, and againn use only a few features to
+keep things simple:
 
 ``` r
 > data(peFactors)
@@ -140,36 +113,73 @@ We'll use this example:
 One of the features of **regtools** is its **qe\*()** functions, a set
 of wrappers.  Here 'qe' stands for "quick and easy."  These functions
 provide convenient access to more sophisticated functions, with a *very
-simple*, uniform interface.  For example,  **qeRF()** is a wrapper for
-the **randomForest()** function in the well-known package of the same
-name.
+simple*, uniform interface.  
 
 *Note that the simplicity of the interface is just as important as the
-uniformity.* To run a neural networks fit to our **pef** data above, we
+uniformity.* A single call is all that is needed, no *preparatory calls*
+such as model definition.
+
+The idea is that, given a new dataset, the analyst can quickly and
+easily try fitting a number of models in succession, say first k-Nearest
+Neighbors, then random forests:
+
+``` r
+# fit models
+> knnout <- qeKNN(mlb,'Weight',k=25)
+> rfout <- qeRF(mlb,'Weight')
+
+# mean abs. pred. error on holdout set, in pounds
+> knnout$testAcc
+[1] 11.75644
+> rfout$testAcc
+[1] 12.6787
+
+# predict a new case
+> newx <- data.frame(Position='Catcher',Height=73.5,Age=26)
+> predict(knnout,newx)
+       [,1]
+[1,] 204.04
+> predict(rfout,newx)
+      11
+199.1714
+```
+
+How about some other ML methods?
+
+``` r
+
+> lassout <- qeLASSO(mlb,'Weight')
+> lassout$testAcc
+[1] 14.23122
+
+# poly regression, degree 3
+> polyout <- qePoly(mlb,'Weight',3)
+> polyout$testAcc
+[1] 13.55613
+
+> nnout <- qeNeural(mlb,'Weight')
+# ...
+> nnout$testAcc
+[1] 12.2537
+# try some nondefault hyperparams
+> nnout <- qeNeural(mlb,'Weight',hidden=c(200,200),nEpoch=50)
+> nnout$testAcc
+[1] 15.17982
+```
+
+
+To run a neural networks fit to our **pef** data above, we
 simply call
 
 ``` r
 qeNeural(pef,'wageinc')
 ```
 
-*with no preparation code,* e.g. no defining a model.  Default values are
-used for hyperparameters, but the user can easily explore other values,
-e.g.
-
-``` r
-qeNeural(pef,'wageinc',hidden=c(100,100)))
-```
-
-
-Each function does the model fit, including an optional holdout evaluation,
-with output ready for prediction of new cases via the R generic
-**predict()**, .e.g. **predict.RF()**.  
-
-As noted, these functions are largely convenience wrappers.
-But they do substantially more than the functions they wrap:
+More about the series
 
 * They automatically assess the model on a holdout set, using as loss
   Mean Absolute Prediction Error or Overall Misclassification Rate.
+(Setting **holdout = NULL** turns off this option.)
 
 * They handle R factors correctly in prediction, which some of the
   wrapped functions do not do by themselves (see below).
@@ -194,11 +204,16 @@ Currently available:
 
 * **qeSVM()** SVM, wrapper for **e1071** package
 
-* **qeNeural()** neural networks, wrapper for **regtools** function **krsFit()**, in turn wrapping **keras** package
+* **qeNeural()** neural networks, wrapper for **regtools** function
+  **krsFit()**, in turn wrapping **keras** package
 
-So, let's try a few:
+* **qePoly()** polynomial regreesion, wrapper for the **polyreg**
+  package, providing full polynomial models (powers and cross products),
+and correctly handling dummy variables (powers are *not* formed)
 
-### Linear model
+### Linear model analysis in **regtools**
+
+So, let's try that programmer and engineer dataset.
 
 ``` r
 > lmout <- qeLin(pef,'wageinc') 
@@ -209,9 +224,11 @@ So, let's try a few:
 35034.63   
 ```
 
-The **regtools** package includes some novel diagnostic methods for
-assessing linear regression models.  One of them plots parametric vs.
-k-NN fit:
+
+The fit assessment techniques in **regtools** gauge the fit of
+parametric models by comparing to nonparametric ones.  Since the latter
+are free of model bias, they are very useful in assessing the parametric
+models.  One of them plots parametric vs.  k-NN fit:
 
 ``` r
 > parvsnonparplot(lmout,qeKNN(pef,'wageinc',25))
@@ -227,62 +244,41 @@ analyst wished to use a linear model, she would investigate further
 (always a good idea before resorting to machine learning algorithms),
 possibly adding quadratic terms to the model.
 
-### Random forests
+We saw above an example of one such function, **parvsnonparplot()**.
+Another is **nonparvarplot()**.  Here is the data prep:
 
 ``` r
-> rfout <- qeRF(pef,'wageinc')
-> rfout$testAcc
-[1] 25416.02
+data(peDumms)  # dummy variables version of prgeng
+pe1 <- peDumms[c('age','educ.14','educ.16','sex.1','wageinc','wkswrkd')]
 ```
 
-A bit better than the linear fit, not too surprising in light of what we
-saw in the diagnostic graph above.  And remember, we are using the
-default values of the hyperparameters; we probably can do even better,
-maybe using **regtools**'s advanced grid search (see below).
+We will check the classical assumption of homoscedasticity,
+meaning that the conditional variance of Y given X is constant.  The
+function <b>nonparvarplot()</b> plots the estimated conditional variance
+against the estimated conditional mean, both computed nonparametrically:
 
-Now, let's try the prediction:
+![result](inst/images/PrgengVar.png)
 
-``` r
-> predict(rfout,newx)
-      11 
-39560.77 
-```
+Though we ran the plot thinking of the homoscedasticity assumption, and
+indeed we do see larger variance at large mean values, this
+is much more remarkable, showing that there are interesting
+subpopulations within this data.  Since there appear to be 6 clusters,
+and there are 6 occupations, the observed pattern may reflect this.
 
-Considerably different from what we got with the linear model.  But
-there's more:
+The package includes various other graphical diagnostic functions,
+such as**nonparvsxplot()**.
 
-``` r
-> class(rfout)
-[1] "qeRF"         "randomForest"
-> rfo <- rfout
-> class(rfo) <- "randomForest"
-> predict(rfo,newx)
-Error in predict.randomForest(rfo, newx) : 
-  Type of predictors in new data do not match that of the training data.
-```
-
-Many packages do not handle prediction of fully new cases correctly, as
-we see here.  The **qe\*()** wrappers remedy this.
-
-### Neural networks
-
-Let's do one more.
-
-``` r
-nout <- qeNeural(pef,'wageinc')
-> nnout$testAcc
-[1] 25971.06
-> predict(nnout,newx)
-[1] 35663.24
-```
-
-Again, we should try other combinations of hyperparameters besides the
-defaults.  And we should do a number of runs.  The **regtools** function
-**fineTuning()** does this in an advanced manner, as seen in the next
-section:
+By the way, violation of the homoscedasticity assumption won't
+invalidate the estimates in our linear model.  They still will be
+*statistically consistent*.  But the standard errors we compute, and
+thus the statistical inference we perform, will be affected.  This is
+correctible using the Eicker-White procedure, which for linear models is
+available in the **car** and **sandwich** packages.  Our package here
+also extends this to nonlinear parametric models, in our function
+<b>nlshc()</b> (the validity of this extension is shown in the book).
 
 
-## EXAMPLE:  ADVANCED GRID SEARCH
+## ADVANCED GRID SEARCH
 
 Many statistical/machine learning methods have a number of *tuning
 parameters* (or *hyperparameters*).  The idea of a *grid search* is to
@@ -448,47 +444,7 @@ not just 2 as in the current setting.  It allows one to see at a glance
 which hyperparameter combinations.
 
 
-## EXAMPLE:  PARAMETRIC MODEL FIT ASSESSMENT
-
-The fit assessment techniques in **regtools** gauge the fit of
-parametric models by comparing to nonparametric ones.  Since the latter
-are free of model bias, they are very useful in assessing the parametric
-models.
-
-We saw above an example of one such function, **parvsnonparplot()**.
-Another is **nonparvarplot()**.  Here is the data prep:
-
-``` r
-data(peDumms)  # dummy variables version of prgeng
-pe1 <- peDumms[c('age','educ.14','educ.16','sex.1','wageinc','wkswrkd')]
-```
-
-We will check the classical assumption of homoscedasticity,
-meaning that the conditional variance of Y given X is constant.  The
-function <b>nonparvarplot()</b> plots the estimated conditional variance
-against the estimated conditional mean, both computed nonparametrically:
-
-![result](inst/images/PrgengVar.png)
-
-Though we ran the plot thinking of the homoscedasticity assumption, and
-indeed we do see larger variance at large mean values, this
-is much more remarkable, showing that there are interesting
-subpopulations within this data.  Since there appear to be 6 clusters,
-and there are 6 occupations, the observed pattern may reflect this.
-
-The package includes various other graphical diagnostic functions,
-such as**nonparvsxplot()**.
-
-By the way, violation of the homoscedasticity assumption won't
-invalidate the estimates in our linear model.  They still will be
-*statistically consistent*.  But the standard errors we compute, and
-thus the statistical inference we perform, will be affected.  This is
-correctible using the Eicker-White procedure, which for linear models is
-available in the **car** and **sandwich** packages.  Our package here
-also extends this to nonlinear parametric models, in our function
-<b>nlshc()</b> (the validity of this extension is shown in the book).
-
-## EXAMPLE:  ADJUSTMENT OF CLASS PROBABILITIES IN CLASSIFICATION PROBLEMS
+## ADJUSTMENT OF CLASS PROBABILITIES IN CLASSIFICATION PROBLEMS
 
 The **LetterRecognition** dataset in the **mlbench** package lists
 various geometric measurements of capital English letters, thus another
@@ -500,7 +456,7 @@ here in the **regtools** package.
 We can adjust the analysis accordingly, using the **classadjust()**
 function.
 
-## EXAMPLE:  RECTANGULARIZATION OF TIME SERIES
+## RECTANGULARIZATION OF TIME SERIES
 
 This allows use of ordinary tools like **lm()** for prediction in time
 series data.  Since the goal here is prediction rather than inference,

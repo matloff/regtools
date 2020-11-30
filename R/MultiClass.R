@@ -435,20 +435,21 @@ plattCalib <- function(prePlattCalibOut,newScores)
    predict(prePlattCalibOut,tsDF)$probs
 }
 
-# wrapper; calibrate all variables in the training set, taking the test
-# set to be the same as the training set
+# wrapper; calibrate all variables in the training set, apply to new
+# data
 
 # arguments
 
 #     qeout: output of a qe*-series function
-#     scores: vector/matrix of scores output from running the
+#     trnScores: vector/matrix of scores output from running the
 #        classification method on the training set; will have either c
 #        or c(c-1)/2 columns, where c is the number of classes
+#     newScores: scores for the data to be predicted
 #     calibMethod: currently knnCalib or plattCalib
 #     k: number of nearest neighbors (knnCalib case)
 #     plotsPerRow: number of plots per row; 0 means no plotting
 
-calibWrap <- function(qeout,scores,calibMethod,k=NULL,
+calibWrap <- function(qeout,trnScores,newScores,calibMethod,k=NULL,
    plotsPerRow=2,nBins=0) 
 {
    # y <- qeout$data[,qeout$ycol]
@@ -483,7 +484,13 @@ calibWrap <- function(qeout,scores,calibMethod,k=NULL,
 # e1071 SVM
 getDValsE1071 <- function(object,newx) 
 {
-   # if (!inherits(object,'svm')) stop('not e1071 SVM')
+   # need to strip off non-SVM classes, if any
+   toDelete <- NULL
+   for (i in 1:length(class(object))) {
+      if (!lclass(object)[i] %in% c('svm.formula','svm')) 
+         toDelete <- c(toDelete,i)
+   }
+   if (length(toDelete) > 0) class(object) <- class(object)[-toDelete]
    tmp <- predict(object,newx,decision.values=TRUE)
    attr(tmp,'decision.values')
 }

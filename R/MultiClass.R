@@ -452,15 +452,15 @@ plattCalib <- function(prePlattCalibOut,newScores)
 calibWrap <- function(qeout,trnScores,newScores,calibMethod,k=NULL,
    plotsPerRow=2,nBins=0) 
 {
-   # y <- qeout$data[,qeout$ycol]
-   y <- qeout$y
+   y <- qeout$data[,qeout$ycol]
+   # y <- qeout$y
    classNames <- qeout$classNames
    nClass <- length(classNames)
    if (calibMethod == 'knnCalib') {
-      probs <- knnCalib(y,scores,scores,k)
+      probs <- knnCalib(y,trnScores,newScores,k)
    } else if (calibMethod == 'plattCalib') {
-      preout <- prePlattCalib(y,scores)
-      probs <- plattCalib(preout,scores)
+      preout <- prePlattCalib(y,trnScores)
+      probs <- plattCalib(preout,newScores)
    } else stop('invalid calibration method')
    ym <- factorToDummies(y,fname='y')
    res <- list(probs=probs,ym=ym)
@@ -484,10 +484,11 @@ calibWrap <- function(qeout,trnScores,newScores,calibMethod,k=NULL,
 # e1071 SVM
 getDValsE1071 <- function(object,newx) 
 {
+   require(e1071)
    # need to strip off non-SVM classes, if any
    toDelete <- NULL
    for (i in 1:length(class(object))) {
-      if (!lclass(object)[i] %in% c('svm.formula','svm')) 
+      if (!class(object)[i] %in% c('svm.formula','svm')) 
          toDelete <- c(toDelete,i)
    }
    if (length(toDelete) > 0) class(object) <- class(object)[-toDelete]

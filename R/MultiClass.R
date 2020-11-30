@@ -449,20 +449,18 @@ plattCalib <- function(prePlattCalibOut,newScores)
 #     k: number of nearest neighbors (knnCalib case)
 #     plotsPerRow: number of plots per row; 0 means no plotting
 
-calibWrap <- function(qeout,trnScores,newScores,calibMethod,k=NULL,
+calibWrap <- function(trnY,tstY,trnScores,newScores,calibMethod,k=NULL,
    plotsPerRow=2,nBins=0) 
 {
-   y <- qeout$data[,qeout$ycol]
-   # y <- qeout$y
-   classNames <- qeout$classNames
+   classNames <- levels(trnY)
    nClass <- length(classNames)
    if (calibMethod == 'knnCalib') {
-      probs <- knnCalib(y,trnScores,newScores,k)
+      probs <- knnCalib(trnY,trnScores,newScores,k)
    } else if (calibMethod == 'plattCalib') {
-      preout <- prePlattCalib(y,trnScores)
+      preout <- prePlattCalib(trnY,trnScores)
       probs <- plattCalib(preout,newScores)
    } else stop('invalid calibration method')
-   ym <- factorToDummies(y,fname='y')
+   ym <- factorToDummies(tstY,fname='y')
    res <- list(probs=probs,ym=ym)
    if (plotsPerRow) {
       nRow <- ceiling(nClass/plotsPerRow)

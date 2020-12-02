@@ -411,10 +411,7 @@ scoresToProbs <- knnCalib
 
 # arguments:
 
-#    y: R factor of labels in training set
-#    trnScores: vector/matrix of scores in training set
-
-# value: vector of estimated probabilities for the new cases
+#    y, trnScores, newScores, value as above
 
 prePlattCalib <- function(y,trnScores) 
 {
@@ -434,6 +431,50 @@ plattCalib <- function(prePlattCalibOut,newScores)
    tsDF <- as.data.frame(newScores)
    predict(prePlattCalibOut,tsDF)$probs
 }
+
+# isotonic regression, AVA
+
+# y, trnScores, newScores, value as above
+
+ExperimentalisoCalib <- function(y,trnScores,newScores)
+{
+stop('under construction')
+   require(Iso)
+   # find estimated regression function of yy on xx, at the values
+   # newxx
+   predictISO <- function(xx,yy,newxx)  # xx, yy, newxx numeric vectors
+   {
+      xo <- order(xx)
+      xs <- xx[xo]  # sorted xx
+      ys <- yy[xo]  # yy sorted according to xx
+      newxxs <- matrix(newxx[xo],ncol=1)  # same for newxx
+      isoout <- pava(ys)
+      # get est. reg. ftn. value for each newxx; could interpolate for
+      # improved accuracy, but good enough here
+      minspots <- apply(newxxs,1,
+         function(newxxsi) which.min(abs(newxxsi - xs)))
+      isoout[minspots]
+   }
+   yn <- as.numeric(y)
+   do1Pair <- function(ij) 
+   {
+      # require Iso
+      # get pair
+      i <- ij[1]
+      j <- ij[2]
+      # which has y = i or j?
+      idxs <- which(yn == i | yn == j)
+      # form subsets
+      ys <- yn[idxs] - 1  # yn is 1s and 2s
+      trnscores <- trnScores[idxs]
+      # return probs for this pair
+      predictISO(trnscores,ys,newScores)
+   }
+   pairs <- combn(length(levels(y)),2)
+   apply(pairs,2,do1Pair)
+}
+
+#########################  calibWrap()  ################################
 
 # wrapper; calibrate all variables in the training set, apply to new
 # data

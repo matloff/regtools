@@ -182,7 +182,7 @@ More about the series
 (Setting **holdout = NULL** turns off this option.)
 
 * They handle R factors correctly in prediction, which some of the
-  wrapped functions do not do by themselves (see below).
+  wrapped functions do not do by themselves (more on this point below).
 
 Call form for all **qe\*()** functions:
 
@@ -207,9 +207,27 @@ Currently available:
 * **qeNeural()** neural networks, wrapper for **regtools** function
   **krsFit()**, in turn wrapping **keras** package
 
-* **qePoly()** polynomial regreesion, wrapper for the **polyreg**
+* **qeLASSO()** LASSO/ridge, wrapper for **glmnet** package
+
+* **qePoly()** polynomial regression, wrapper for the **polyreg**
   package, providing full polynomial models (powers and cross products),
 and correctly handling dummy variables (powers are *not* formed)
+
+The classification case is specified by there being an R factor in the
+second argument.
+
+### What the above examples wrap
+
+``` r
+# qeKNN()
+regtools::kNN(xm, y, newx = NULL, k, scaleX = scaleX, classif = classif)
+# qeRF()
+randomForest::randomForest(frml, 
+   data = data, ntree = nTree, nodesize = minNodeSize)
+# qeSVM()
+svm(frml, data = data, cost = cost, gamma = gamma, decision.values = TRUE)
+# qeLASSO()
+cv.glmnet(x = xm, y = ym, alpha = alpha, family = fam)
 
 ### Linear model analysis in **regtools**
 

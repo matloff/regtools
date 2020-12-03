@@ -216,7 +216,9 @@ and correctly handling dummy variables (powers are *not* formed)
 The classification case is specified by there being an R factor in the
 second argument.
 
-### What the above examples wrap
+### What the qe-series functions wrap
+
+Actual calls in the qe*-series functions.
 
 ``` r
 # qeKNN()
@@ -228,6 +230,15 @@ randomForest::randomForest(frml,
 svm(frml, data = data, cost = cost, gamma = gamma, decision.values = TRUE)
 # qeLASSO()
 cv.glmnet(x = xm, y = ym, alpha = alpha, family = fam)
+# qeGBoost()
+gbm::gbm(yDumm ~ .,data=tmpDF,distribution='bernoulli',  # used as OVA
+         n.trees=nTree,n.minobsinnode=minNodeSize,shrinkage=learnRate)
+# qeNeural()
+krsFit(x,y,hidden,classif=classif,nClass=length(classNames),
+      nEpoch=nEpoch)  # regtools wrapper to keras package
+# qeLogit()
+glm(yDumm ~ .,data=tmpDF,family=binomial)  # used with OVA
+```
 
 ### Linear model analysis in **regtools**
 

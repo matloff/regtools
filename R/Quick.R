@@ -79,7 +79,8 @@
 
 #    list of glm() output objects, one per class, and some misc.
 
-qeLogit <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
+qeLogit <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))),
+   pcaProp=NULL)
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
@@ -87,6 +88,15 @@ qeLogit <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
    xyc <- getXY(data,yName,classif=TRUE) 
    xy <- xyc$xy
    x <- xyc$x
+   if (!is.null(pcaProp)) {
+      stop('PCA not implemented yet')
+      ncx <- ncol(x)
+      tmp <- doPCA(x,pcaProp)
+      x <- tmp$newx
+      ncnewx <- ncol(x)
+      xy <- xy[,-((ncnewx+1):ncx)]
+      pcaout <- tmp$pcaout
+   } else pcaout <- NULL
    yDumms <- xyc$yDumms
    y <- xyc$y
    classNames <- xyc$classNames
@@ -106,6 +116,7 @@ qeLogit <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
    outlist$glmOuts <- lapply(1:nydumms,doGlm)
    outlist$classif <- classif
    outlist$trainRow1 <- getRow1(data,yName)
+   outlist$pcaout <- pcaout
    class(outlist) <- c('qeLogit')
    if (!is.null(holdout)) {
       predictHoldout(outlist)

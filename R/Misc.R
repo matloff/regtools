@@ -422,6 +422,8 @@ discretize <- function(x,endpts)
 
 require(gtools)
 
+# use this after doing error checking, giving the user the choice of
+# leaving, or continuing in the debugger
 stopBrowser <- defmacro(msg,expr=
    {
    cat(msg,'\n')
@@ -430,3 +432,19 @@ stopBrowser <- defmacro(msg,expr=
    browser()
    }
 )
+
+# call prcomp(x,pcaProp), transform x to the PCs for the top pcaProp
+# proportion of variance
+
+doPCA <- function(x,pcaProp) 
+{
+   tmp <- prcomp(x,scale.=TRUE)
+   newx <- predict(tmp,x)
+   pcVars <- tmp$sdev^2
+   ncx <- ncol(x)
+   csums <- cumsum(pcVars) 
+   csums <- csums / csums[ncx]
+   numPCs <- min(which(csums >= pcaProp))
+   newx <- newx[,1:numPCs]
+   list(newx=newx,pcaout=tmp)
+}

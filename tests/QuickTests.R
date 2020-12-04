@@ -57,3 +57,20 @@ table(mlb$Pos) / sum(table(mlb$Pos))
 
 # kNN worse than always guessing Relief_Pitcher, RF about the same
 
+set.seed(9999)
+
+lgout <- qeLogit(mlb,'Position')
+lgout$testAcc
+# [1] 0.6732673
+newx <- data.frame(Height=73.5,Age=26,Weight=200)
+predict(lgout,newx)
+# $predClasses
+# [1] "Relief_Pitcher"
+# 
+# $probs
+#         Catcher First_Baseman Outfielder Relief_Pitcher Second_Baseman
+# [1,] 0.06527784    0.05201025   0.214516      0.3336662     0.03421254
+#       Shortstop Starting_Pitcher Third_Baseman
+# [1,] 0.03345139        0.2252583    0.04160745
+
+

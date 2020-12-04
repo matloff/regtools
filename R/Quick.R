@@ -631,6 +631,31 @@ plot.qeLASSO <- function(object)
    genericPlot(object)
 }
 
+# pca*-series, PCA wrappers for the qe*-series, including for prediction
+
+# could instead make PCA an argument in each qe*(), but this is cleaner
+
+# the additional argument is pcaProp, the proportion of variance desired
+# for the principal components
+
+pcaKNN <- function(pcaProp,data,yName,k,scaleX=TRUE,
+   holdout=floor(min(1000,0.1*nrow(data))))
+{
+   stop('under construction')
+   if (!is.numeric(x)) {
+      x <- charsToFactors(x)
+      x <- factorsToDummies(x,omitLast=TRUE)
+      factorsInfo <- attr(x,'factorsInfo')
+   } else factorsInfo <- NULL
+   pcaout <- prcomp(x,scale.=TRUE)
+   x <- predict(pcaout,x)
+   xNames <- names(x)
+   newData <- as.data.frame(x)
+   names(newData) <- xNames
+   y <- data$yName
+   newData$yName <- y
+}
+
 ###################  utilities for qe*()  #########################
 
 # see note on factor features at top of this file

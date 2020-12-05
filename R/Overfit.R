@@ -90,3 +90,15 @@ predict.penrosePoly <- function(object,newx)
 
 predpnr <- predict.penrosePoly
 
+###################  ridgePoly()  #########################
+
+# according to Hastie et al, "properly tuned" ridge regression beats
+# mininum norm
+
+# polynomial regression with Penrose inverse; uses polyreg
+
+ridgePoly <- function(d,yName,deg,maxInteractDeg=deg) 
+{
+stop('under construction')
+}
+

@@ -250,7 +250,10 @@ predict.qeKNN <- function(object,newx,newxK=1)
    if (!allNumeric(newx)) newx <- setTrainFactors(object,newx)
    classif <- object$classif
    xyc <- getXY(newx,NULL,TRUE,FALSE,object$factorsInfo)
-   newx <- as.matrix(xyc$x)
+   if (is.vector(newx)) {
+      nr <- 1
+   } else nr <- nrow(newx)
+   newx <- matrix(xyc$x,nrow=nr)
    preds <- predict(object,newx,newxK)
    if (!object$classif) return(preds)
    if (is.vector(preds)) preds <- matrix(preds,nrow=1)
@@ -661,7 +664,7 @@ pcaKNN <- function(pcaProp,data,yName,k,holdout=floor(min(1000,0.1*nrow(data))))
    ncx <- ncol(newx)
    csums <- cumsum(pcVars)
    csums <- csums/csums[ncx]
-   numPCs <- max(which(csums >= pcaProp))
+   numPCs <- min(which(csums >= pcaProp))
    newx <- newx[,1:numPCs]
    newData <- as.data.frame(newx)
    names(newData) <- xNames[1:numPCs]

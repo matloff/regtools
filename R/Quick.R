@@ -681,8 +681,13 @@ predict.pcaKNN <- function(object,newx,newxK=1)
       newx <- charsToFactors(newx)
       newx <- factorsToDummies(newx,omitLast=TRUE,
          factorsInfo=object$factorsInfo)
-   } 
+   }
+   if (is.vector(newx)) {
+      newxNames <- names(newx)
+      newx <- matrix(newx,nrow=1)
+   } else newxNames <- colnames(newx)
    newx <- as.data.frame(newx)
+   colnames(newx) <- newxNames
    predict.qeKNN(object,newx=newx,newxK=newxK)
 }
 

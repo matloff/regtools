@@ -723,7 +723,7 @@ collectForReturn <- function(object,probs)
 getXY <- function(data,yName,xMustNumeric=FALSE,classif,
    factorsInfo=NULL) 
 {
-   if (is.vector(data) && is.nul(yName)) data <- data.frame(data)
+   if (is.vector(data) && is.null(yName)) data <- data.frame(data)
    if (!is.data.frame(data))
       stopBrowser('data must be a data frame')
    if (!is.null(yName)) {

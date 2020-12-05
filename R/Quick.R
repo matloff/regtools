@@ -79,8 +79,7 @@
 
 #    list of glm() output objects, one per class, and some misc.
 
-qeLogit <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))),
-   pcaProp=NULL)
+qeLogit <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
    if (!classif) stop('for classification problems only')
@@ -216,6 +215,7 @@ predict.qeLin <- function(object,newx) {
 qeKNN <- function(data,yName,k,scaleX=TRUE,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
+   trainRow1 <- getRow1(data,yName)
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
    xyc <- getXY(data,yName,xMustNumeric=TRUE,classif=classif)
@@ -234,7 +234,7 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,
    if (classif) knnout$classNames <- classNames
    knnout$classif <- classif
    knnout$factorsInfo <- factorsInfo
-   knnout$trainRow1 <- getRow1(data,yName)
+   knnout$trainRow1 <- trainRow1
    class(knnout) <- c('qeKNN','kNN')
    if (!is.null(holdout)) {
       predictHoldout(knnout)
@@ -638,22 +638,52 @@ plot.qeLASSO <- function(object)
 # the additional argument is pcaProp, the proportion of variance desired
 # for the principal components
 
-pcaKNN <- function(pcaProp,data,yName,k,scaleX=TRUE,
-   holdout=floor(min(1000,0.1*nrow(data))))
+pcaKNN <- function(pcaProp,data,yName,k,holdout=floor(min(1000,0.1*nrow(data))))
 {
-   stop('under construction')
-   if (!is.numeric(x)) {
+   # stop('under construction')
+   # eventual return value
+   res <- list()
+   res$scaleX <- FALSE  # already scaled via prcomp()
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol]
+   if (!allNumeric(x)) {
       x <- charsToFactors(x)
       x <- factorsToDummies(x,omitLast=TRUE)
       factorsInfo <- attr(x,'factorsInfo')
    } else factorsInfo <- NULL
+   res$factorsInfo <- factorsInfo
    pcaout <- prcomp(x,scale.=TRUE)
-   x <- predict(pcaout,x)
-   xNames <- names(x)
-   newData <- as.data.frame(x)
-   names(newData) <- xNames
-   y <- data$yName
-   newData$yName <- y
+   res$pcaout <- pcaout
+   newx <- predict(pcaout,x)
+   xNames <- names(newx)
+   pcVars <- pcaout$sdev^2
+   ncx <- ncol(newx)
+   csums <- cumsum(pcVars)
+   csums <- csums/csums[ncx]
+   numPCs <- max(which(csums >= pcaProp))
+   newx <- newx[,1:numPCs]
+   newData <- as.data.frame(newx)
+   names(newData) <- xNames[1:numPCs]
+   y <- data[[yName]]
+   newData[[yName]] <- y
+   qeKNNout <-qeKNN(newData,yName,k=k,holdout=holdout)
+   res$qeKNNout <- qeKNNout
+   res$trainRow1 <- qeKNNout$trainRow1
+   class(res) <- 'pcaKNN'
+   res
+}
+
+predict.pcaKNN <- function(object,newx,newxK=1)
+{
+   class(object) <- class(object)[-1]
+   if (!allNumeric(newx)) {
+      newx <- charsToFactors(newx)
+      newx <- factorsToDummies(newx,omitLast=TRUE,
+         factorsInfo=object$factorsInfo)
+   } 
+   newx <- as.data.frame(newx)
+   predict.qeKNN(object,newx=newx,newxK=newxK)
 }
 
 ###################  utilities for qe*()  #########################

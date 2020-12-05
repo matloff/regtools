@@ -316,7 +316,14 @@ getDFclasses <- function(dframe) {
    tmp
 }
 
+# check whether all elements of a list, including a data frame, are
+# numeric
 
+allNumeric <- function(lst) 
+{
+   tmp <- sapply(lst,is.numeric)
+   all(tmp) 
+}
 
 ######################  misc. lm() routines  #######################
 

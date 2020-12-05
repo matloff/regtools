@@ -247,7 +247,7 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,
 predict.qeKNN <- function(object,newx,newxK=1)
 {
    class(object) <- 'kNN'
-   newx <- setTrainFactors(object,newx)
+   if (!allNumeric(newx)) newx <- setTrainFactors(object,newx)
    classif <- object$classif
    xyc <- getXY(newx,NULL,TRUE,FALSE,object$factorsInfo)
    newx <- as.matrix(xyc$x)

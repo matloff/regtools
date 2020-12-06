@@ -650,12 +650,16 @@ pcaKNN <- function(pcaProp,data,yName,k,holdout=floor(min(1000,0.1*nrow(data))))
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol]
+###    if (!allNumeric(x)) {
+###       x <- charsToFactors(x)
+###       x <- factorsToDummies(x,omitLast=TRUE)
+###       factorsInfo <- attr(x,'factorsInfo')
+###    } else factorsInfo <- NULL
    if (!allNumeric(x)) {
-      x <- charsToFactors(x)
-      x <- factorsToDummies(x,omitLast=TRUE)
+      x <- toAllNumeric(x)
       factorsInfo <- attr(x,'factorsInfo')
    } else factorsInfo <- NULL
-   ### if (!allNumeric(x)) NEWmakeAllNumeric(x)
+   
    res$factorsInfo <- factorsInfo
    pcaout <- prcomp(x,scale.=TRUE)
    res$pcaout <- pcaout
@@ -685,7 +689,7 @@ predict.pcaKNN <- function(object,newx,newxK=1)
    class(object) <- class(object)[-1]
    if (!allNumeric(newx)) {
       newx <- charsToFactors(newx)
-      newx <- factorsToDummies(newx,omitLast=true,
+      newx <- factorsToDummies(newx,omitLast=TRUE,
          factorsInfo=object$factorsInfo)
    }
    if (is.vector(newx)) {
@@ -796,6 +800,7 @@ splitData <- defmacro(holdout,data,
    }
 )
 
+# deprecated, gradually moving to toAllNumeric()
 # x: 
 #    change character variables to factors, then all factors to dummies,
 #    recording factorInfo for later use in prediction; put result in xm
@@ -809,23 +814,6 @@ makeAllNumeric <- defmacro(x,data,
          factorsInfo <- attr(xm,'factorsInfo')
       } else {
          xm <- as.matrix(x)
-         factorsInfo <- NULL
-      }
-   }
-) 
-
-# w: 
-#    change character variables to factors, then all factors to dummies,
-#    recording factorInfo for later use in prediction; put result in wm
-# factorsInfo:
-#    will be set to the byproduct of factorsToDummies(), if any
-NEWmakeAllNumeric <- defmacro(w,
-   expr={
-      w <- charsToFactors(w)
-      if (hasFactors(w)) {
-         wm <- factorsToDummies(w,omitLast=TRUE)
-         factorsInfo <- attr(wm,'factorsInfo')
-      } else {
          factorsInfo <- NULL
       }
    }

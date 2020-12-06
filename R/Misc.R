@@ -271,6 +271,22 @@ toSubFactor <- function(f,saveLevels,lumpedLevel='other')
    as.factor(fChar)
 }
 
+# w: 
+#    change character variables to factors, then all factors to dummies,
+#    recording factorInfo for later use in prediction; put result in wm
+# factorsInfo:
+#    will be set to the byproduct of factorsToDummies(), if any
+toAllNumeric <- function(w,r)
+{
+   w <- charsToFactors(w)
+   if (hasFactors(w)) {
+      wm <- factorsToDummies(w,omitLast=TRUE)
+   } else {
+      wm <- w
+   }
+   
+} 
+
 #######################################################################
 ###################  misc. data frame/matrix ops  ######################
 #######################################################################

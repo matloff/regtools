@@ -665,12 +665,14 @@ pcaKNN <- function(pcaProp,data,yName,k,holdout=floor(min(1000,0.1*nrow(data))))
    csums <- cumsum(pcVars)
    csums <- csums/csums[ncx]
    numPCs <- min(which(csums >= pcaProp))
+   res$numPCs <- numPCs
    newx <- newx[,1:numPCs]
    newData <- as.data.frame(newx)
    names(newData) <- xNames[1:numPCs]
    y <- data[[yName]]
    newData[[yName]] <- y
-   qeKNNout <-qeKNN(newData,yName,k=k,holdout=holdout)
+   # we've already scaled during PCA, don't now 
+   qeKNNout <-qeKNN(newData,yName,k=k,holdout=holdout,scaleX=FALSE)
    res$qeKNNout <- qeKNNout
    res$trainRow1 <- qeKNNout$trainRow1
    class(res) <- 'pcaKNN'
@@ -682,16 +684,19 @@ predict.pcaKNN <- function(object,newx,newxK=1)
    class(object) <- class(object)[-1]
    if (!allNumeric(newx)) {
       newx <- charsToFactors(newx)
-      newx <- factorsToDummies(newx,omitLast=TRUE,
+      newx <- factorsToDummies(newx,omitLast=true,
          factorsInfo=object$factorsInfo)
    }
    if (is.vector(newx)) {
-      newxNames <- names(newx)
+      newxnames <- names(newx)
       newx <- matrix(newx,nrow=1)
    } else newxNames <- colnames(newx)
+   newx <- predict(object$pcaout,newx)
+   numPCs <- object$numPCs
+   newx <- newx[,1:numPCs,drop=FALSE]
    newx <- as.data.frame(newx)
-   colnames(newx) <- newxNames
-   predict.qeKNN(object,newx=newx,newxK=newxK)
+   colnames(newx) <- newxNames[1:numPCs]
+   predict(object$qeKNNout,newx=newx,newxK=newxK)
 }
 
 ###################  utilities for qe*()  #########################

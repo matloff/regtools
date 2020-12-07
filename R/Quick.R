@@ -215,6 +215,7 @@ predict.qeLin <- function(object,newx) {
 qeKNN <- function(data,yName,k,scaleX=TRUE,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
+   trainRow1 <- getRow1(data,yName)
    classif <- is.factor(data[[yName]])
    if (!is.null(holdout)) splitData(holdout,data)
    xyc <- getXY(data,yName,xMustNumeric=TRUE,classif=classif)
@@ -233,7 +234,7 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,
    if (classif) knnout$classNames <- classNames
    knnout$classif <- classif
    knnout$factorsInfo <- factorsInfo
-   knnout$trainRow1 <- getRow1(data,yName)
+   knnout$trainRow1 <- trainRow1
    class(knnout) <- c('qeKNN','kNN')
    if (!is.null(holdout)) {
       predictHoldout(knnout)
@@ -246,10 +247,13 @@ qeKNN <- function(data,yName,k,scaleX=TRUE,
 predict.qeKNN <- function(object,newx,newxK=1)
 {
    class(object) <- 'kNN'
-   newx <- setTrainFactors(object,newx)
+   if (!allNumeric(newx)) newx <- setTrainFactors(object,newx)
    classif <- object$classif
    xyc <- getXY(newx,NULL,TRUE,FALSE,object$factorsInfo)
-   newx <- as.matrix(xyc$x)
+   if (is.vector(newx)) {
+      nr <- 1
+   } else nr <- nrow(newx)
+   newx <- matrix(xyc$x,nrow=nr)
    preds <- predict(object,newx,newxK)
    if (!object$classif) return(preds)
    if (is.vector(preds)) preds <- matrix(preds,nrow=1)
@@ -630,6 +634,62 @@ plot.qeLASSO <- function(object)
    genericPlot(object)
 }
 
+# pca*-series, PCA wrappers for the qe*-series, including for prediction
+
+# could instead make PCA an argument in each qe*(), but this is cleaner
+
+# the additional argument is pcaProp, the proportion of variance desired
+# for the principal components
+
+pcaKNN <- function(pcaProp,data,yName,k,holdout=floor(min(1000,0.1*nrow(data))))
+{
+   # stop('under construction')
+   # eventual return value
+   res <- list()
+   res$scaleX <- FALSE  # already scaled via prcomp()
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol]
+   if (!allNumeric(x)) {
+      x <- toAllNumeric(x)
+      factorsInfo <- attr(x,'factorsInfo')
+   } else factorsInfo <- NULL
+   res$factorsInfo <- factorsInfo
+   
+   tmp <- doPCA(x,pcaProp)
+   newData <- tmp$newData
+   pcaout <- tmp$pcaout
+   numPCs <- tmp$numPCs
+   y <- data[[yName]]
+   newData[[yName]] <- y
+   # we've already scaled during PCA, don't now 
+   qeKNNout <-qeKNN(newData,yName,k=k,holdout=holdout,scaleX=FALSE)
+   res$qeKNNout <- qeKNNout
+   res$trainRow1 <- qeKNNout$trainRow1
+   class(res) <- 'pcaKNN'
+   res
+}
+
+predict.pcaKNN <- function(object,newx,newxK=1)
+{
+   class(object) <- class(object)[-1]
+   if (!allNumeric(newx)) {
+      newx <- charsToFactors(newx)
+      newx <- factorsToDummies(newx,omitLast=TRUE,
+         factorsInfo=object$factorsInfo)
+   }
+   if (is.vector(newx)) {
+      newxnames <- names(newx)
+      newx <- matrix(newx,nrow=1)
+   } else newxNames <- colnames(newx)
+   newx <- predict(object$pcaout,newx)
+   numPCs <- object$numPCs
+   newx <- newx[,1:numPCs,drop=FALSE]
+   newx <- as.data.frame(newx)
+   colnames(newx) <- newxNames[1:numPCs]
+   predict(object$qeKNNout,newx=newx,newxK=newxK)
+}
+
 ###################  utilities for qe*()  #########################
 
 # see note on factor features at top of this file
@@ -667,7 +727,7 @@ collectForReturn <- function(object,probs)
 getXY <- function(data,yName,xMustNumeric=FALSE,classif,
    factorsInfo=NULL) 
 {
-   if (is.vector(data) && is.nul(yName)) data <- data.frame(data)
+   if (is.vector(data) && is.null(yName)) data <- data.frame(data)
    if (!is.data.frame(data))
       stopBrowser('data must be a data frame')
    if (!is.null(yName)) {
@@ -726,8 +786,12 @@ splitData <- defmacro(holdout,data,
    }
 )
 
-# x: change character variables to factors, then all factors to dummies,
-# recording for later use in prediction; put result in xm
+# deprecated, gradually moving to toAllNumeric()
+# x: 
+#    change character variables to factors, then all factors to dummies,
+#    recording factorInfo for later use in prediction; put result in xm
+# data: 
+#    if character, change to factor
 makeAllNumeric <- defmacro(x,data,
    expr={
       data <- charsToFactors(data)

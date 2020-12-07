@@ -271,6 +271,22 @@ toSubFactor <- function(f,saveLevels,lumpedLevel='other')
    as.factor(fChar)
 }
 
+# w: 
+#    change character variables to factors, then all factors to dummies,
+#    recording factorInfo for later use in prediction; put result in wm
+# factorsInfo:
+#    will be set to the byproduct of factorsToDummies(), if any
+toAllNumeric <- function(w,r)
+{
+   w <- charsToFactors(w)
+   if (hasFactors(w)) {
+      wm <- factorsToDummies(w,omitLast=TRUE)
+   } else {
+      wm <- w
+   }
+   
+} 
+
 #######################################################################
 ###################  misc. data frame/matrix ops  ######################
 #######################################################################
@@ -316,7 +332,14 @@ getDFclasses <- function(dframe) {
    tmp
 }
 
+# check whether all elements of a list, including a data frame, are
+# numeric
 
+allNumeric <- function(lst) 
+{
+   tmp <- sapply(lst,is.numeric)
+   all(tmp) 
+}
 
 ######################  misc. lm() routines  #######################
 
@@ -422,6 +445,8 @@ discretize <- function(x,endpts)
 
 require(gtools)
 
+# use this after doing error checking, giving the user the choice of
+# leaving, or continuing in the debugger
 stopBrowser <- defmacro(msg,expr=
    {
    cat(msg,'\n')
@@ -430,3 +455,22 @@ stopBrowser <- defmacro(msg,expr=
    browser()
    }
 )
+
+# call prcomp(x,pcaProp), transform x to the PCs for the top pcaProp
+# proportion of variance
+
+doPCA <- function(x,pcaProp) 
+{
+   xpca <- predict(pcaout,x)
+   xNames <- names(xpca)
+   pcVars <- xpca$sdev^2
+   ncx <- ncol(xpca)
+   csums <- cumsum(pcVars)
+   csums <- csums/csums[ncx]
+   numPCs <- min(which(csums >= pcaProp))
+   xpca <- xpca[,1:numPCs]
+   newData <- as.data.frame(xpca)
+   names(newData) <- xNames[1:numPCs]
+   list(pcaout=pcaout,numPCs=numPCs,newData=newData)
+}
+

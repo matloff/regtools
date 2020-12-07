@@ -411,10 +411,7 @@ scoresToProbs <- knnCalib
 
 # arguments:
 
-#    y: R factor of labels in training set
-#    trnScores: vector/matrix of scores in training set
-
-# value: vector of estimated probabilities for the new cases
+#    y, trnScores, newScores, value as above
 
 prePlattCalib <- function(y,trnScores) 
 {
@@ -435,33 +432,76 @@ plattCalib <- function(prePlattCalibOut,newScores)
    predict(prePlattCalibOut,tsDF)$probs
 }
 
-# wrapper; calibrate all variables in the training set, taking the test
-# set to be the same as the training set
+# isotonic regression, AVA
+
+# y, trnScores, newScores, value as above
+
+ExperimentalisoCalib <- function(y,trnScores,newScores)
+{
+stop('under construction')
+   require(Iso)
+   # find estimated regression function of yy on xx, at the values
+   # newxx
+   predictISO <- function(xx,yy,newxx)  # xx, yy, newxx numeric vectors
+   {
+      xo <- order(xx)
+      xs <- xx[xo]  # sorted xx
+      ys <- yy[xo]  # yy sorted according to xx
+      newxxs <- matrix(newxx[xo],ncol=1)  # same for newxx
+      isoout <- pava(ys)
+      # get est. reg. ftn. value for each newxx; could interpolate for
+      # improved accuracy, but good enough here
+      minspots <- apply(newxxs,1,
+         function(newxxsi) which.min(abs(newxxsi - xs)))
+      isoout[minspots]
+   }
+   yn <- as.numeric(y)
+   do1Pair <- function(ij) 
+   {
+      # require Iso
+      # get pair
+      i <- ij[1]
+      j <- ij[2]
+      # which has y = i or j?
+      idxs <- which(yn == i | yn == j)
+      # form subsets
+      ys <- yn[idxs] - 1  # yn is 1s and 2s
+      trnscores <- trnScores[idxs]
+      # return probs for this pair
+      predictISO(trnscores,ys,newScores)
+   }
+   pairs <- combn(length(levels(y)),2)
+   apply(pairs,2,do1Pair)
+}
+
+#########################  calibWrap()  ################################
+
+# wrapper; calibrate all variables in the training set, apply to new
+# data
 
 # arguments
 
 #     qeout: output of a qe*-series function
-#     scores: vector/matrix of scores output from running the
+#     trnScores: vector/matrix of scores output from running the
 #        classification method on the training set; will have either c
 #        or c(c-1)/2 columns, where c is the number of classes
+#     newScores: scores for the data to be predicted
 #     calibMethod: currently knnCalib or plattCalib
 #     k: number of nearest neighbors (knnCalib case)
 #     plotsPerRow: number of plots per row; 0 means no plotting
 
-calibWrap <- function(qeout,scores,calibMethod,k=NULL,
+calibWrap <- function(trnY,tstY,trnScores,newScores,calibMethod,k=NULL,
    plotsPerRow=2,nBins=0) 
 {
-   # y <- qeout$data[,qeout$ycol]
-   y <- qeout$y
-   classNames <- qeout$classNames
+   classNames <- levels(trnY)
    nClass <- length(classNames)
    if (calibMethod == 'knnCalib') {
-      probs <- knnCalib(y,scores,scores,k)
+      probs <- knnCalib(trnY,trnScores,newScores,k)
    } else if (calibMethod == 'plattCalib') {
-      preout <- prePlattCalib(y,scores)
-      probs <- plattCalib(preout,scores)
+      preout <- prePlattCalib(trnY,trnScores)
+      probs <- plattCalib(preout,newScores)
    } else stop('invalid calibration method')
-   ym <- factorToDummies(y,fname='y')
+   ym <- factorToDummies(tstY,fname='y')
    res <- list(probs=probs,ym=ym)
    if (plotsPerRow) {
       nRow <- ceiling(nClass/plotsPerRow)
@@ -483,7 +523,14 @@ calibWrap <- function(qeout,scores,calibMethod,k=NULL,
 # e1071 SVM
 getDValsE1071 <- function(object,newx) 
 {
-   # if (!inherits(object,'svm')) stop('not e1071 SVM')
+   require(e1071)
+   # need to strip off non-SVM classes, if any
+   toDelete <- NULL
+   for (i in 1:length(class(object))) {
+      if (!class(object)[i] %in% c('svm.formula','svm')) 
+         toDelete <- c(toDelete,i)
+   }
+   if (length(toDelete) > 0) class(object) <- class(object)[-toDelete]
    tmp <- predict(object,newx,decision.values=TRUE)
    attr(tmp,'decision.values')
 }

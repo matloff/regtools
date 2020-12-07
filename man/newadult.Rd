@@ -1,5 +1,6 @@
 \name{newadult}
 \alias{newadult}
+\alias{newAdult}
 
 \title{
 UCI adult income data set, adapted
@@ -27,6 +28,8 @@ The variables are:
 
    \item \code{mar}, 1 for married, 0 for single
 }
+
+Note that the education variable is now numeric.
 
 }
 

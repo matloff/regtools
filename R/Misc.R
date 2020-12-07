@@ -461,13 +461,16 @@ stopBrowser <- defmacro(msg,expr=
 
 doPCA <- function(x,pcaProp) 
 {
-   tmp <- prcomp(x,scale.=TRUE)
-   newx <- predict(tmp,x)
-   pcVars <- tmp$sdev^2
-   ncx <- ncol(x)
-   csums <- cumsum(pcVars) 
-   csums <- csums / csums[ncx]
+   xpca <- predict(pcaout,x)
+   xNames <- names(xpca)
+   pcVars <- xpca$sdev^2
+   ncx <- ncol(xpca)
+   csums <- cumsum(pcVars)
+   csums <- csums/csums[ncx]
    numPCs <- min(which(csums >= pcaProp))
-   newx <- newx[,1:numPCs]
-   list(newx=newx,pcaout=tmp)
+   xpca <- xpca[,1:numPCs]
+   newData <- as.data.frame(xpca)
+   names(newData) <- xNames[1:numPCs]
+   list(pcaout=pcaout,numPCs=numPCs,newData=newData)
 }
+

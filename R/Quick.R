@@ -650,30 +650,16 @@ pcaKNN <- function(pcaProp,data,yName,k,holdout=floor(min(1000,0.1*nrow(data))))
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol]
-###    if (!allNumeric(x)) {
-###       x <- charsToFactors(x)
-###       x <- factorsToDummies(x,omitLast=TRUE)
-###       factorsInfo <- attr(x,'factorsInfo')
-###    } else factorsInfo <- NULL
    if (!allNumeric(x)) {
       x <- toAllNumeric(x)
       factorsInfo <- attr(x,'factorsInfo')
    } else factorsInfo <- NULL
-   
    res$factorsInfo <- factorsInfo
-   pcaout <- prcomp(x,scale.=TRUE)
-   res$pcaout <- pcaout
-   newx <- predict(pcaout,x)
-   xNames <- names(newx)
-   pcVars <- pcaout$sdev^2
-   ncx <- ncol(newx)
-   csums <- cumsum(pcVars)
-   csums <- csums/csums[ncx]
-   numPCs <- min(which(csums >= pcaProp))
-   res$numPCs <- numPCs
-   newx <- newx[,1:numPCs]
-   newData <- as.data.frame(newx)
-   names(newData) <- xNames[1:numPCs]
+   
+   tmp <- doPCA(x,pcaProp)
+   newData <- tmp$newData
+   pcaout <- tmp$pcaout
+   numPCs <- tmp$numPCs
    y <- data[[yName]]
    newData[[yName]] <- y
    # we've already scaled during PCA, don't now 

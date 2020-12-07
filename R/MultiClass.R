@@ -474,6 +474,30 @@ stop('under construction')
    apply(pairs,2,do1Pair)
 }
 
+#########################  isoCalib()  ################################
+
+# wrapper calibrate either training scores or probability by isotonic 
+# regression
+
+# arguments
+
+#    y: R factor of labels in training set
+#    trnScores: vector/matrix of scores in training set
+#    newScores: scores of new case(s)
+#    k: number of nearest neighbors
+
+isoCalib <- function(y,trnScores,newScores)
+{
+   require(CORElearn)
+   model <- calibrate(y, 
+      trnScores, 
+      class1=1,
+      method = "isoReg",
+      assumeProbabilities=F)
+   applyCalibration(newScores, model)
+}
+
+
 #########################  calibWrap()  ################################
 
 # wrapper; calibrate all variables in the training set, apply to new
@@ -588,3 +612,11 @@ ROC <- function(y,scores)
    abline(0,1)
 
 }
+
+
+
+
+
+
+
+

@@ -461,9 +461,10 @@ stopBrowser <- defmacro(msg,expr=
 
 doPCA <- function(x,pcaProp) 
 {
+   pcaout <- prcomp(x,scale.=TRUE)
    xpca <- predict(pcaout,x)
    xNames <- names(xpca)
-   pcVars <- xpca$sdev^2
+   pcVars <- pcaout$sdev^2
    ncx <- ncol(xpca)
    csums <- cumsum(pcVars)
    csums <- csums/csums[ncx]

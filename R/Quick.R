@@ -665,6 +665,8 @@ pcaKNN <- function(pcaProp,data,yName,k,holdout=floor(min(1000,0.1*nrow(data))))
    # we've already scaled during PCA, don't now 
    qeKNNout <-qeKNN(newData,yName,k=k,holdout=holdout,scaleX=FALSE)
    res$qeKNNout <- qeKNNout
+   res$pcaout <- pcaout
+   res$numPCs <- numPCs
    res$trainRow1 <- qeKNNout$trainRow1
    class(res) <- 'pcaKNN'
    res
@@ -688,6 +690,57 @@ predict.pcaKNN <- function(object,newx,newxK=1)
    newx <- as.data.frame(newx)
    colnames(newx) <- newxNames[1:numPCs]
    predict(object$qeKNNout,newx=newx,newxK=newxK)
+}
+
+pcaSVM <- function(pcaProp,data,yName,gamma=1,cost=1,
+   holdout=floor(min(1000,0.1*nrow(data))))
+{
+   # stop('under construction')
+   # eventual return value
+   res <- list()
+   res$scaleX <- FALSE  # already scaled via prcomp()
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol]
+   if (!allNumeric(x)) {
+      x <- toAllNumeric(x)
+      factorsInfo <- attr(x,'factorsInfo')
+   } else factorsInfo <- NULL
+   res$factorsInfo <- factorsInfo
+   
+   tmp <- doPCA(x,pcaProp)
+   newData <- tmp$newData
+   pcaout <- tmp$pcaout
+   numPCs <- tmp$numPCs
+   y <- data[[yName]]
+   newData[[yName]] <- y
+   # we've already scaled during PCA, don't now 
+   qeSVMout <-qeKNN(newData,yName,gamma=gamma,cost=cost,
+      holdout=holdout,scaleX=FALSE)
+   res$qeSVMout <- qeSVMout
+   res$trainRow1 <- qeSVMout$trainRow1
+   class(res) <- 'pcaSVM'
+   res
+}
+
+predict.pcaSVM <- function(object,newx,newxK=1)
+{
+   class(object) <- class(object)[-1]
+   if (!allNumeric(newx)) {
+      newx <- charsToFactors(newx)
+      newx <- factorsToDummies(newx,omitLast=TRUE,
+         factorsInfo=object$factorsInfo)
+   }
+   if (is.vector(newx)) {
+      newxnames <- names(newx)
+      newx <- matrix(newx,nrow=1)
+   } else newxNames <- colnames(newx)
+   newx <- predict(object$pcaout,newx)
+   numPCs <- object$numPCs
+   newx <- newx[,1:numPCs,drop=FALSE]
+   newx <- as.data.frame(newx)
+   colnames(newx) <- newxNames[1:numPCs]
+   predict(object$qeSVMout,newx=newx,newxK=newxK)
 }
 
 ###################  utilities for qe*()  #########################

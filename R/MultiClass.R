@@ -701,7 +701,33 @@ ROC <- function(y,scores)
 
 }
 
+#########################  multi_calibWrap()  ################################
 
+# wrapper; it plots relibability diagram for each algorithm 
+# 
+# arguments:
+# formula: a formula like: class ~ Lin_Platt+Quad_Platt+KNN+IsoReg+BBQ+JOUSBoost
+# where class is the test labels and the right side is the probability output
+# by each algorithm
+# df (data.frame ): the dataframe that contains all probabilities output 
+# by each calib method and the test labels
+# num_algorithms (numeric): the number of calibration methods
+# title (character): the title of the plot
+
+multi_calibWrap <- function(formula, df, num_algorithms, title)
+{
+   require(caret)
+   require(ggplot2)
+   cal_obj <- calibration(formula,
+                         data = df,
+                         cuts = 10)
+  p <- plot(cal_obj, type = "o", auto.key = list(columns = num_algorithms,
+                                            lines = TRUE,
+                                            points = TRUE),
+            main=title)
+  
+  g <- ggplot(cal_obj)
+}
 
 
 

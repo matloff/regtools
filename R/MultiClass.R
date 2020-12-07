@@ -484,7 +484,6 @@ stop('under construction')
 #    y: R factor of labels in training set
 #    trnScores: vector/matrix of scores in training set
 #    newScores: scores of new case(s)
-#    k: number of nearest neighbors
 
 isoCalib <- function(y,trnScores,newScores)
 {
@@ -497,6 +496,95 @@ isoCalib <- function(y,trnScores,newScores)
    applyCalibration(newScores, model)
 }
 
+#########################  hist_bbq_guess_Calib()  ################################
+
+# wrapper calibrate either training scores or probability by 
+# hist_scaled, 
+# hist_transformed,
+# BBQ_scaled, 
+# BBQ_transformed, 
+# GUESS
+
+# arguments
+
+#    y: R factor of labels in training set;
+#        vector of observed class labels (0/1)
+#    trnScores: vector/matrix of scores in training set
+#    newScores: scores of new case(s)
+#    model_idx : which calibration models should be implemented, 
+#     1=hist_scaled, 2=hist_transformed,3=BBQ_scaled, 
+#     4=BBQ_transformed, 5=GUESS, Default: c(1, 2, 3, 4, 5)
+
+hist_bbq_guess_Calib <- function(y,trnScores, newScores, model_idx=c(1, 2, 3, 4, 5))
+{
+   require(CalibratR)
+   model <- calibrate(y, trnScores, model_idx = model_idx)
+   predict_calibratR(model, new = newScores)
+}
+
+
+#########################  JOUSBoostCalib()  ################################
+
+# wrapper calibrate by JOUSBoost
+# algorithm. The algorithm requires ksvm from kernlab
+# the arguments in ksvm are set according to the default
+# of e1017:::svm()
+
+# arguments
+
+#    y: R factor of labels in training set, 
+#       y must take values in -1, 1
+#    X: standardized train set
+#    newx: standardized test set
+
+JOUSBoostCalib <- function(y,X,newx)
+{
+   require(JOUSBoost)
+   require(kernlab)
+
+   # Use the kernlab svm function with radial kernel
+   # the following follows the JOUSBoost manual 
+   class_func <- function(X, y)
+   {
+      ksvm(X,
+         as.factor(y), 
+         kernel = 'rbfdot',
+         scaled = FALSE, 
+         kpar = list(sigma =  if (is.vector(X)) 1 else 1 / ncol(X)),
+         nu=0.5,
+         C=1)  
+   } 
+   pred_func <- function(obj, X)
+   { 
+      as.numeric(as.character(predict(obj, X))) 
+   }
+
+   jous_obj <- jous(X, y, class_func = class_func,
+      pred_func = pred_func, keep_models = TRUE)
+
+   predict(jous_obj, newx, type = 'prob')
+
+}
+
+#########################  eliteCalib()  ################################
+
+# wrapper calibrate by ELiTe
+# arguments
+
+#    y: vector of corresponding true class. 
+#        1 indicates positive class and 0 indicates negative class.
+#    trnProb: vector of uncalibrated classification scores 
+#        that are real numbers in the interval of [0,1]
+#    newProb: vector of uncalibratd classification probability
+
+eliteCalib <- function(y,trnProb,newProb)
+{
+   require(glmgen)
+   require(ELiTE)
+
+   model <- elite.build(trnProb, y)
+   elite.predict(model, newProb)
+}
 
 #########################  calibWrap()  ################################
 

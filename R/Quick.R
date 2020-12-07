@@ -715,8 +715,8 @@ pcaSVM <- function(pcaProp,data,yName,gamma=1,cost=1,
    y <- data[[yName]]
    newData[[yName]] <- y
    # we've already scaled during PCA, don't now 
-   qeSVMout <-qeKNN(newData,yName,gamma=gamma,cost=cost,
-      holdout=holdout,scaleX=FALSE)
+   qeSVMout <-qeSVM(newData,yName,gamma=gamma,cost=cost,
+      holdout=holdout)
    res$qeSVMout <- qeSVMout
    res$trainRow1 <- qeSVMout$trainRow1
    class(res) <- 'pcaSVM'

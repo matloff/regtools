@@ -1,6 +1,7 @@
 \name{day,day1}
 \alias{day}
 \alias{day1}
+\alias{day2}
 
 \title{
 Bike sharing data.

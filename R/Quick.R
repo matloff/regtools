@@ -695,7 +695,7 @@ predict.pcaKNN <- function(object,newx,newxK=1)
 pcaSVM <- function(pcaProp,data,yName,gamma=1,cost=1,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
-   # stop('under construction')
+   stop('under construction')
    # eventual return value
    res <- list()
    res$scaleX <- FALSE  # already scaled via prcomp()
@@ -712,6 +712,8 @@ pcaSVM <- function(pcaProp,data,yName,gamma=1,cost=1,
    newData <- tmp$newData
    pcaout <- tmp$pcaout
    numPCs <- tmp$numPCs
+   res$pcaout <- pcaout
+   res$numPCs <- numPCs
    y <- data[[yName]]
    newData[[yName]] <- y
    # we've already scaled during PCA, don't now 

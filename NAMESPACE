@@ -22,7 +22,6 @@ S3method(reorder,tuner)
 S3method(predict,krsFit)
 S3method(predict,qeLogit)
 S3method(predict,qeLin)
-S3method(predict,qeKNN)
 S3method(predict,qeRF)
 S3method(predict,qeSVM)
 S3method(predict,qeGBoost)
@@ -37,12 +36,12 @@ S3method(predict,anovaRec)
 S3method(predict,mfRec)
 S3method(predict,penroseLM)
 S3method(predict,penrosePoly)
-S3method(predict,pcaKNN)
+S3method(predict,pcaQE)
 
 export(knnest,preprocessx,meany,mediany,vary,loclin,predict.knn,nlshc,
    kmin,lmac,coef.lmac,vcov.lmac,pcac,loglinac,tbltofakedf,
    makeNA,ZerosToNAs,NAsTo0s,
-   pcaKNN,
+   pcaQE,
    ovalogtrn,avalogtrn,avalogpred,
    knnCalib,plattCalib,reliabDiagram,calibWrap,
    qeLogit,qeLin,qeKNN,qeRF,qeSVM,qeGBoost,qeNeural,qePoly,qeLASSO,

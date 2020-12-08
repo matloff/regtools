@@ -463,7 +463,7 @@ doPCA <- function(x,pcaProp)
 {
    pcaout <- prcomp(x,scale.=TRUE)
    xpca <- predict(pcaout,x)
-   xNames <- names(xpca)
+   xNames <- colnames(xpca)
    pcVars <- pcaout$sdev^2
    ncx <- ncol(xpca)
    csums <- cumsum(pcVars)

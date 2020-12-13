@@ -105,9 +105,9 @@ ridgePoly <- function(d,yName,deg,maxInteractDeg=deg)
    x <- as.matrix(d[,-ycol])
    polyout <- getPoly(x,deg=deg,maxInteractDeg=maxInteractDeg)
    xPoly <- polyout$xdata  # polynomial version of x
+   xPoly <- as.matrix(xPoly)
    y <- d[,ycol]
-   xy <- cbind(xPoly,y)
-   cvgout <- cv.glmnet(x=x,y=y,alpha=0,family='gaussian')
+   cvgout <- cv.glmnet(x=xPoly,y=y,alpha=0,family='gaussian')
    res <- list(cvgout=cvgout,
       deg=deg,
       maxInteractDeg=maxInteractDeg,
@@ -136,9 +136,8 @@ predict.ridgePoly <- function(object,newx)
       retainedNames = object$retainedNames)
    xPoly <- polyout$xdata  # polynomial version of newx
    xPoly <- as.matrix(xPoly)
-   xPoly <- cbind(1,xPoly)
    glmObject <- object$cvgout
-   res <- predict(glmObject,s=glmObject$lambda.min,newx=newx)
+   res <- predict(glmObject,s=glmObject$lambda.min,newx=xPoly)
 #    bh <- object$bh
 #    res <- xPoly %*% bh
    if (oneRow) res <- res[1]

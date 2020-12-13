@@ -99,7 +99,6 @@ predpnr <- predict.penrosePoly
 
 ridgePoly <- function(d,yName,deg,maxInteractDeg=deg) 
 {
-stop('under construction')
    require(polyreg)
    if (!allNumeric(d)) stop('for now, X,Y must be numeric')
    ycol <- which(names(d) == yName)

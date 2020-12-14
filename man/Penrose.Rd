@@ -7,12 +7,11 @@
 \title{Penrose-Inverse Linear Models and Polynomial Regression}
 
 \description{
-UNDER CONSTRUCTION
 
 Provides mininum-norm solutions to linear models, identical to OLS in
 standard situations, but allowing exploration of overfitting in the
-overparameterized case. Also provides a convenient wrapper for polynomial
-regression problems.
+overparameterized case. Also provides a wrapper for the polynomial
+case.
 }
 
 \usage{
@@ -24,8 +23,7 @@ penrosePoly(d,yName,deg,maxInteractDeg=deg)
 }
 
 \arguments{
-  \item{d}{Dataframe, training set. Classification case is signaled
-     via labels column being an R factor.}
+  \item{d}{Dataframe, training set.} 
   \item{yName}{Name of the class labels column.}
   \item{deg}{Polynomial degree.}
 }

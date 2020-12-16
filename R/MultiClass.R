@@ -307,7 +307,7 @@ boundaryplot <- function(y01,x,regests,pairs=combn(ncol(x),2),
 
    # need X numeric for plotting
    if (is.data.frame(x)) {
-      if (hasFactors(x)) stop('x must be numeric')
+      if (hasFactors(x)) stop('x must be nrongkuiumeric')
       x <- as.matrix(x)
       if (mode(x) != 'numeric') stop('x has character data')
    }
@@ -737,6 +737,13 @@ multi_calibWrap <- function(formula, df, num_algorithms, title)
   g <- ggplot(cal_obj)
 }
 
+#########################  crossEntropy()  ################################
+
+# it calculates crossEntropy for probability calibrationn algorithms
+# 
+# arguments:
+# calibWrapOut: output of function calibWrap() 
+
 crossEntropy = function(calibWrapOut) {
    p = calibWrapOut$ym
    phat = calibWrapOut$probs
@@ -746,6 +753,14 @@ crossEntropy = function(calibWrapOut) {
    }  
    return(x)
 }
+
+#########################  KLDivergence()  ################################
+
+# it calculates Kullback_Leibler divergence for probability calibrationn 
+# algorithms
+# 
+# arguments:
+# calibWrapOut: output of function calibWrap() 
 
 KLDivergence = function(calibWrapOut) {
    require(philentropy)
@@ -759,6 +774,71 @@ KLDivergence = function(calibWrapOut) {
    return(x)
 }
 
+#########################  sim4()  ################################
 
+# simulated a dataset of 10 multi-variable normally distributed 
+# ddependent variables and 1 dependent variable of four classes.
+# The true probability of each class for each sample is also 
+# given. 
+#
+# arguments: seed for random number generation (default 2); n for 
+# number of samples (default 11000)
+
+sim4 <- function(seed = 2, n = 11000)
+{
+   set.seed(seed)
+   
+   k <- 10
+   A <- matrix(runif(k^2)*2-1, ncol=k) 
+   Sigma <- t(A) %*% A
+   
+   x = mvrnorm(n = n, mu = rep(0, 10), 
+               Sigma = Sigma)
+   x1 = x[,1]
+   x2 = x[,2]
+   x3 = x[,3]
+   x4 = x[,4]
+   x5 = x[,5]
+   x6 = x[,6]
+   x7 = x[,7]
+   x8 = x[,8]
+   x9 = x[,9]
+   x10 = x[,10]
+   
+   means = rnorm(20, mean = 0, sd = 10)
+   sds = rexp(20, rate = 3)
+   params = c()
+   for (i in 1:20) {
+      param = rnorm(1, mean = means[i], sd = sds[i])
+      params = c(params, param)
+   }
+   p1 = inv.logit(params[1]*x1*x2 + params[2]*x3*x4 + params[3]*x5*x6 + 
+                     params[4]*x7*x8 + params[5]*x9*x10)
+   p2 = inv.logit(params[6]*x1*x3 + params[7]*x4*x5 + params[8]*x6*x7 + 
+                     params[9]*x8*x9 + params[10]*x2*x10)
+   p3 = inv.logit(params[11]*x1*x5*x10 + params[12]*x4*x8)
+   p4 = inv.logit(params[13]*x1 + params[14]*x2 + params[15]*x3 + 
+                     params[16]*x4 + params[17]*x5 + params[18]*x6 + params[19]*x7 +
+                     params[20]*x8)
+   psum = p1 + p2 + p3 + p4
+   p1 = p1/psum
+   p2 = p2/psum
+   p3 = p3/psum
+   p4 = p4/psum
+   ps = data.frame(p1 = p1, p2 = p2, p3 = p3, p4 = p4)
+   
+   y = c()
+   for (i in 1:nrow(ps)) {
+      item = sample(c("1","2","3","4"), 1, prob = ps[i,])
+      y = c(y, item)
+   }
+   
+   sim4 = data.frame(x1 = x1, x2 = x2, x3 = x3, x4 = x4, x5 = x5, x6 = x6,
+                     x7 = x7, x8 = x8, x9 = x9, x10 = x10, y = as.factor(y), 
+                     p1 = p1, p2 = p2, p3 = p3, p4 = p4)
+   sim4.std.cols = c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10")
+   
+   data = list(sim4 = sim4, sim4.std.cols = sim4.std.cols)
+}
 
 

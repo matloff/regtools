@@ -603,7 +603,7 @@ eliteCalib <- function(y,trnProb,newProb)
 #     plotsPerRow: number of plots per row; 0 means no plotting
 
 calibWrap <- function(trnY,tstY,trnScores,newScores,calibMethod,k=NULL,
-   plotsPerRow=2,nBins=0) 
+   plotsPerRow=2,nBins=0,se=FALSE) 
 {
    classNames <- levels(trnY)
    nClass <- length(classNames)
@@ -611,7 +611,15 @@ calibWrap <- function(trnY,tstY,trnScores,newScores,calibMethod,k=NULL,
       probs <- knnCalib(trnY,trnScores,newScores,k)
    } else if (calibMethod == 'plattCalib') {
       preout <- prePlattCalib(trnY,trnScores)
-      probs <- plattCalib(preout,newScores)
+      plattOut <- plattCalib(preout,newScores,se=se)
+      if (se) {
+         probs <- plattOut$probs
+         se <- plattOut$se
+         res <- list(probs=probs,ym=ym, se = se)
+      } else {
+         probs = plattOut  
+         res <- list(probs=probs,ym=ym)
+      }
    } else stop('invalid calibration method')
    ym <- factorToDummies(tstY,fname='y')
    res <- list(probs=probs,ym=ym)
@@ -729,7 +737,27 @@ multi_calibWrap <- function(formula, df, num_algorithms, title)
   g <- ggplot(cal_obj)
 }
 
+crossEntropy = function(calibWrapOut) {
+   p = calibWrapOut$ym
+   phat = calibWrapOut$probs
+   x = 0
+   for (i in 1:nrow(p)) {
+      x = x - sum(p[i,]*log(phat[i,]))
+   }  
+   return(x)
+}
 
+KLDivergence = function(calibWrapOut) {
+   require(philentropy)
+   p = calibWrapOut$ym
+   phat = calibWrapOut$probs
+   x = 0
+   for (i in 1:ncol(p)) {
+      df = rbind(p[i,], phat[i,])
+      x = x + philentropy::KL(df)
+   }
+   return(x)
+}
 
 
 

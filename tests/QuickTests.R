@@ -73,4 +73,11 @@ predict(lgout,newx)
 #       Shortstop Starting_Pitcher Third_Baseman
 # [1,] 0.03345139        0.2252583    0.04160745
 
+# day2
+d2 <- day2[,-(13:14)]
+z <- pcaKNN(0.6,d2,'tot',k=25,holdout=NULL)
+newx <- d2[8,-13]
+predict(z,newx)
+#         [,1]
+# [1,] 1440.44
 

@@ -605,13 +605,14 @@ eliteCalib <- function(y,trnProb,newProb)
 calibWrap <- function(trnY,tstY,trnScores,newScores,calibMethod,k=NULL,
    plotsPerRow=2,nBins=0,se=FALSE) 
 {
+stop('under construction')
    classNames <- levels(trnY)
    nClass <- length(classNames)
    if (calibMethod == 'knnCalib') {
       probs <- knnCalib(trnY,trnScores,newScores,k)
    } else if (calibMethod == 'plattCalib') {
       preout <- prePlattCalib(trnY,trnScores)
-      plattOut <- plattCalib(preout,newScores,se=se)
+      ### plattOut <- plattCalib(preout,newScores,se=se)
       if (se) {
          probs <- plattOut$probs
          se <- plattOut$se

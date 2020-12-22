@@ -18,7 +18,7 @@
 #   nTst: desired size of holdout set
 #   nXval: number of cross-validation runs to perform
 #   up: if TRUE, results table will be printed in increasing order of 'smoothed'
-#   k: k-NN smoothing parameter for the results; if NULL, then no #   smoothing
+#   k: k-NN smoothing parameter for the results; if NULL, then no smoothing
 #   dispOrderSmoothed: if TRUE and k is non-null, then output will be
 #      arranged in order of the 'smoothed' column; otherwise in order of
 #      the meanAcc column
@@ -27,15 +27,15 @@
 #   specCombs: a data frame in which the user specifies which
 #      hyperparameter parameter combinations to evaluate; there both for
 #      completeness but also for use in fineTuningPar(); one labeled
-#      column for eah hyperparameter
+#      column for each hyperparameter
 #   ...: application-specific values needed by regCall() but constant
 #      across combinations
 
 # value:
 
 #   data frame, one column for each element of 'pars', followed by a
-#   meanAcc ("mean accuracy") column; then columns for standard errors,
-#   Bonferroni CI radii and (if k is non-NULL) smoothed versions of
+#   meanAcc ("mean accuracy") column; then columns for CIs,
+#   Bonferroni CIs,and (if k is non-NULL) smoothed versions of
 #   meanAcc
 
 fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
@@ -52,11 +52,6 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    # generate the basic output data frame 
    outdf <- makeOutdf(pars,specCombs)
    nCombs <- nrow(outdf)
-###     outdf <- if (is.null(specCombs)) expand.grid(pars) else specCombs
-###     if (!is.null(nCombs)) {
-###        idxsToKeep <- sample(1:nrow(outdf),nCombs)
-###        outdf <- outdf[idxsToKeep,]
-###     } else nCombs <- nrow(outdf)
 
    meanAcc <- rep(NA,nCombs)
    seAcc <- rep(NA,nCombs)
@@ -98,9 +93,9 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
       if (done) break
    }
    outdf$meanAcc <- meanAcc
-   outdf$seAcc <- seAcc 
-   zval <- -qnorm(0.025/nrow(outdf))
-   outdf$bonfAcc <- zval * seAcc
+   outdf$CI <- meanAcc + 1.65*seAcc 
+   zval <- -qnorm(0.05/nrow(outdf))
+   outdf$bonfCI <- meanAcc + zval * seAcc
    outdf <- outdf[order(meanAcc,decreasing=!up),]
    if (!is.null(k)) 
       outdf <- doSmoothing(outdf,k,pars,meanAcc,dispOrderSmoothed) 

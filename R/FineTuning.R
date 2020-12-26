@@ -222,8 +222,10 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 plot.tuner <- function(tunerObject,col='meanAcc',disp=0,jit=0.05) {
    # require(cdparcoord)
    outdf <- tunerObject$outdf
-   outdf$seAcc <- NULL
-   outdf$bonfAcc <- NULL
+   # outdf$seAcc <- NULL
+   # outdf$bonfAcc <- NULL
+   macol <- which(names(outdf) == 'meanAcc')
+   outdf <- outdf[,1:macol]
    if (jit > 0.0) {
       nc <- ncol(outdf)
       for (i in 1:(nc-3)) {

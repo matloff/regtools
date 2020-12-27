@@ -390,30 +390,38 @@ qeGBoost <- function(data,yName,
    nTree=100,minNodeSize=10,learnRate=0.1,holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
-   if (!classif) stop('classification only')
+   # if (!classif) stop('classification only')
    if (!is.null(holdout)) splitData(holdout,data)
    require(gbm)
-   xyc <- getXY(data,yName,classif=classif) 
-   xy <- xyc$xy
-   x <- xyc$x
-   yDumms <- xyc$yDumms
-   y <- xyc$y
-   classNames <- xyc$classNames
-   nClass <- length(classNames)
-   ncxy <- ncol(xy)
-   nx <- ncol(x)
-   nydumms <- ncxy - nx
-   empirClassProbs <- colMeans(yDumms)
-   outlist <- list(x=x,y=y,classNames=classNames,
-      empirClassProbs=empirClassProbs,classif=classif)
-   doGbm <- function(colI) 
-   {
-      tmpDF <- cbind(x,yDumms[,colI])
-      names(tmpDF)[nx+1] <- 'yDumm'
-      gbmout <- gbm(yDumm ~ .,data=tmpDF,distribution='bernoulli',
-         n.trees=nTree,n.minobsinnode=minNodeSize,shrinkage=learnRate)
+   outlist <- list(classif=classif)
+   if (classif) {   # classification case
+      xyc <- getXY(data,yName,classif=classif) 
+      xy <- xyc$xy
+      x <- xyc$x
+      yDumms <- xyc$yDumms
+      y <- xyc$y
+      classNames <- xyc$classNames
+      nClass <- length(classNames)
+      ncxy <- ncol(xy)
+      nx <- ncol(x)
+      nydumms <- ncxy - nx
+      empirClassProbs <- colMeans(yDumms)
+      outlist <- c(outlist,list(x=x,y=y,classNames=classNames,
+         empirClassProbs=empirClassProbs))
+      doGbm <- function(colI) 
+      {
+         tmpDF <- cbind(x,yDumms[,colI])
+         names(tmpDF)[nx+1] <- 'yDumm'
+         gbmout <- gbm(yDumm ~ .,data=tmpDF,distribution='bernoulli',
+            n.trees=nTree,n.minobsinnode=minNodeSize,shrinkage=learnRate)
+      }
+      outlist$gbmOuts <- lapply(1:nydumms,doGbm)
+   } else {   # regression case
+      cmd <- 
+        paste0('gbmout <- gbm(',yName,' ~ .,data=data,distribution="gaussian")')
+      eval(parse(text=cmd))
+      outlist$gbmOuts <- gbmout
    }
-   outlist$gbmOuts <- lapply(1:nydumms,doGbm)
    outlist$nTree <- nTree
    outlist$trainRow1 <- getRow1(data,yName)
    class(outlist) <- c('qeGBoost')
@@ -426,22 +434,26 @@ qeGBoost <- function(data,yName,
 predict.qeGBoost <- function(object,newx) 
 {
    newx <- setTrainFactors(object,newx)
-   # get probabilities for each class
    gbmOuts <- object$gbmOuts
-   nTree <- object$nTree
-   g <- function(gbmOutsElt) 
-      predict(gbmOutsElt,newx,n.trees=nTree,type='response') 
-   probs <- sapply(gbmOuts,g)
-   if (is.vector(probs)) probs <- matrix(probs,nrow=1)
-   classNames <- object$classNames
-   colnames(probs) <- classNames
-   # separate runs for the m classes will not necessrily sum to 1, so
-   # normalize
-   sumprobs <- apply(probs,1,sum)  
-   probs <- (1/sumprobs) * probs
-   predClasses <- apply(probs,1,which.max) 
-   predClasses <- classNames[predClasses]
-   res <- list(predClasses=predClasses,probs=probs)
+   if (object$classif) {
+      # get probabilities for each class
+      nTree <- object$nTree
+      g <- function(gbmOutsElt) 
+         predict(gbmOutsElt,newx,n.trees=nTree,type='response') 
+      probs <- sapply(gbmOuts,g)
+      if (is.vector(probs)) probs <- matrix(probs,nrow=1)
+      classNames <- object$classNames
+      colnames(probs) <- classNames
+      # separate runs for the m classes will not necessrily sum to 1, so
+      # normalize
+      sumprobs <- apply(probs,1,sum)  
+      probs <- (1/sumprobs) * probs
+      predClasses <- apply(probs,1,which.max) 
+      predClasses <- classNames[predClasses]
+      res <- list(predClasses=predClasses,probs=probs)
+   } else {
+      res <- predict(object$gbmOuts,newx)
+   }
    class(res) <- 'qeGBoost'
    res
 }

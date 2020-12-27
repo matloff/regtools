@@ -417,8 +417,11 @@ qeGBoost <- function(data,yName,
       }
       outlist$gbmOuts <- lapply(1:nydumms,doGbm)
    } else {   # regression case
-      cmd <- 
-        paste0('gbmout <- gbm(',yName,' ~ .,data=data,distribution="gaussian")')
+      cmd <- paste0('gbmout <- gbm(',yName)
+      cmd <- paste0(cmd,' ~ .,data=data,distribution="gaussian",')
+      cmd <- paste0(cmd,'n.trees=',nTree,',')
+      cmd <- paste0(cmd,'n.minobsinnode=',minNodeSize,',')
+      cmd <- paste0(cmd,'shrinkage=',learnRate,')')
       eval(parse(text=cmd))
       outlist$gbmOuts <- gbmout
    }
@@ -431,13 +434,15 @@ qeGBoost <- function(data,yName,
 
 # arguments:  see above
 # value:  object of class 'qeGBoost'; see above for components
-predict.qeGBoost <- function(object,newx) 
+predict.qeGBoost <- function(object,newx,newNTree=NULL) 
 {
    newx <- setTrainFactors(object,newx)
    gbmOuts <- object$gbmOuts
+   if (is.null(newNTree)) {
+      nTree <- object$nTree
+   } else nTree <- newNTree
    if (object$classif) {
       # get probabilities for each class
-      nTree <- object$nTree
       g <- function(gbmOutsElt) 
          predict(gbmOutsElt,newx,n.trees=nTree,type='response') 
       probs <- sapply(gbmOuts,g)
@@ -452,11 +457,13 @@ predict.qeGBoost <- function(object,newx)
       predClasses <- classNames[predClasses]
       res <- list(predClasses=predClasses,probs=probs)
    } else {
-      res <- predict(object$gbmOuts,newx)
+      res <- predict(object$gbmOuts,newx,n.trees=nTree)
    }
    class(res) <- 'qeGBoost'
    res
 }
+
+pred.qebg <- predict.qeGBoost
 
 #########################  qeNeural()  #################################
 

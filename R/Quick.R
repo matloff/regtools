@@ -82,7 +82,7 @@
 qeLogit <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
-   if (!classif) stop('for classification problems only')
+   if (!classif) {print('for classification problems only'); return(NA)}
    if (!is.null(holdout)) splitData(holdout,data)
    xyc <- getXY(data,yName,classif=TRUE) 
    xy <- xyc$xy
@@ -171,12 +171,15 @@ qeLin <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
    lmout$trainRow1 <- getRow1(data,yName)
    class(lmout) <- c('qeLin',class(lmout))
    if (!is.null(holdout)) {
-      ycol <- which(names(data) == yName)
-      preds <- predict(lmout,tst[,-ycol])
-      lmout$holdoutPreds <- preds
-      lmout$testAcc <- 
-         if (classif) mean(preds$predClasses == tst[,ycol])
-         else mean(abs(preds - tst[,ycol]))
+      predictHoldout(lmout)
+###       ycol <- which(names(data) == yName)
+###       preds <- predict(lmout,tst[,-ycol])
+###       lmout$holdoutPreds <- preds
+###       if (classif) {
+###          lmout$testAcc <- mean(preds$predClasses != tst[,ycol])
+###       } else  {
+###          lmout$testAcc <- mean(abs(preds - tst[,ycol]))
+###       }
    }
    lmout
 }
@@ -212,7 +215,7 @@ predict.qeLin <- function(object,newx) {
 
 # see note in kNN() man pg
  
-qeKNN <- function(data,yName,k,scaleX=TRUE,
+qeKNN <- function(data,yName,k=25,scaleX=TRUE,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    trainRow1 <- getRow1(data,yName)
@@ -322,7 +325,7 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
-   if (!classif) stop('for classification problems only')
+   if (!classif) {print('for classification problems only'); return(NA)}
    if (!is.null(holdout)) splitData(holdout,data)
    require(e1071)
    # xyc <- getXY(data,yName,xMustNumeric=FALSE,classif=TRUE)
@@ -386,11 +389,10 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
 
 # value:  see above
  
-qeGBoost <- function(data,yName,
-   nTree=100,minNodeSize=10,learnRate=0.1,holdout=floor(min(1000,0.1*nrow(data))))
+qeGBoost <- function(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
+   holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
-   # if (!classif) stop('classification only')
    if (!is.null(holdout)) splitData(holdout,data)
    require(gbm)
    outlist <- list(classif=classif)
@@ -463,7 +465,13 @@ predict.qeGBoost <- function(object,newx,newNTree=NULL)
    res
 }
 
-pred.qebg <- predict.qeGBoost
+# graph to explore best number of trees
+
+plot.qeGBoost <- function(object) 
+{
+   gbm.perf(object$gbmOuts)
+}
+
 
 #########################  qeNeural()  #################################
 
@@ -551,12 +559,12 @@ predict.qeNeural <- function(object,newx=NULL,k=NULL)
 
 #########################  qePoly()  #################################
 
-qePoly <- function(data,yName,deg,maxInteractDeg=deg,
+qePoly <- function(data,yName,deg=2,maxInteractDeg=deg,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
    # will need all either numeric or factors; change character cols
-   if (classif) stop('currently not for classification problems')
+   if (classif) {print('currently not for classification problems'); return(NA)}
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol]
@@ -663,7 +671,6 @@ plot.qeLASSO <- function(object)
 pcaQE <- function(pcaProp,data,yName,qeName,...,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
-   # stop('under construction')
    # eventual return value
    res <- list()
    res$scaleX <- FALSE  # already scaled via prcomp()
@@ -779,7 +786,7 @@ getXY <- function(data,yName,xMustNumeric=FALSE,classif,
       xClasses <- getDFclasses(x)
       if (any(xClasses=='logical') || any(xClasses=='character')) {
          print('character or logical variables currently not allowed')
-         stop('change to factors')
+         print('change to factors'); return(NA)
       }
       x <- factorsToDummies(x,omitLast=TRUE)
       factorsInfo <- attr(x,'factorsInfo')
@@ -845,6 +852,7 @@ makeAllNumeric <- defmacro(x,data,
 
 # arguments:
 #    res: output of qe*()
+
 # globals (one level up):
 #    tst: the holdout set
 #   ycol: column index of Y in tst
@@ -865,9 +873,13 @@ predictHoldout <- defmacro(res,
       ## } else preds <- predict(res,tstx);
       preds <- predict(res,tstx);
       res$holdoutPreds <- preds;
-      res$testAcc <- 
-         if (res$classif) mean(preds$predClasses != tst[,ycol])
-         else mean(abs(preds - tst[,ycol]))
+      if (res$classif) {
+         res$testAcc <- mean(preds$predClasses != tst[,ycol])
+         res$baseAcc <- 1 - max(table(data[,ycol])) / nrow(data)
+      } else {
+         res$testAcc <- mean(abs(preds - tst[,ycol]))
+         res$baseAcc <-  mean(abs(tst[,ycol] - mean(data[,ycol])))
+      }
    }
 )
 

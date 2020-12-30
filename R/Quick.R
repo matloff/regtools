@@ -172,14 +172,12 @@ qeLin <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
    class(lmout) <- c('qeLin',class(lmout))
    if (!is.null(holdout)) {
       predictHoldout(lmout)
-###       ycol <- which(names(data) == yName)
-###       preds <- predict(lmout,tst[,-ycol])
-###       lmout$holdoutPreds <- preds
-###       if (classif) {
-###          lmout$testAcc <- mean(preds$predClasses != tst[,ycol])
-###       } else  {
-###          lmout$testAcc <- mean(abs(preds - tst[,ycol]))
-###       }
+      if (!classif) {
+         summ <- summary(lmout)
+         lmout$R2 <- summ$r.squared
+         lmout$adjR2 <- summ$adj.r.squared
+         lmout$holdoutR2 <- cor(preds,tst[,ycol])^2
+      }
    }
    lmout
 }
@@ -851,26 +849,27 @@ makeAllNumeric <- defmacro(x,data,
 # do the predictions in the holdout set
 
 # arguments:
-#    res: output of qe*()
+#    res: ultimate output of qe*()
 
-# globals (one level up):
+# global inputs (from the caller):
+
 #    tst: the holdout set
-#   ycol: column index of Y in tst
+#    data: arg in the qe*() function
+#    yName: arg in the qe*() function
 
-#  value:
-#     res, but with the holdout predictions and accuracy as new
-#     components
+# global outputs (creating locals in the caller):
+
+#     res$testAcc: MAPE or class. error in holdout set
+#     res$baseAcc: base MAPE or class. error (no features) in holdout set
+#     res$holdoutPreds: predicted values in the holdout set
+#     preds: ditto 
+#     ycol: index of yName in 'data'
+#     tstx: X portion of holdout data
 
 predictHoldout <- defmacro(res,
    expr={
       ycol <- which(names(data) == yName);
       tstx <- tst[,-ycol,drop=FALSE];
-      # in k-NN case, we want to use the newxK from qeKNN() here, but
-      # allow the user to later call predict.qeKNN() with her own value
-      # if desired
-      ## if (inherits(res,'kNN')) {
-      ##    preds <- predict(res,tstx,newxK)
-      ## } else preds <- predict(res,tstx);
       preds <- predict(res,tstx);
       res$holdoutPreds <- preds;
       if (res$classif) {

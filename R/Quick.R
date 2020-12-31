@@ -565,7 +565,7 @@ qePoly <- function(data,yName,deg=2,maxInteractDeg=deg,
    if (classif) {print('currently not for classification problems'); return(NA)}
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
-   x <- data[,-ycol]
+   x <- data[,-ycol,drop=FALSE]
 ##    data <- charsToFactors(data)
 ##    if (hasFactors(x)) {
 ##       xm <- factorsToDummies(x,omitLast=TRUE)

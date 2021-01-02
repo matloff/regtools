@@ -1,6 +1,6 @@
 
-##################################################################
-##################################################################
+################################################################## 
+################################################################## 
 
 # this qe*() series is inspired ggplot2::qplot; here 'qe' is for
 # "quick-explore"
@@ -602,6 +602,45 @@ predict.qePoly <- function(object,newx)
 }
 
 prdPoly <- predict.qePoly
+
+#########################  qePolyLog()  #################################
+
+# logit form of qePoly
+
+qePolyLog <- function(data,yName,deg=2,maxInteractDeg=deg,
+   holdout=floor(min(1000,0.1*nrow(data))))
+{
+stop('under construction')
+   classif <- is.factor(data[[yName]])
+   # will need all either numeric or factors; change character cols
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol,drop=FALSE]
+   makeAllNumeric(x,data)
+   data <- cbind(xm,y)
+   data <- as.data.frame(data)
+   names(data)[ncol(data)] <- yName
+   if (!is.null(holdout)) splitData(holdout,data)
+
+   require(polyreg)
+   qeout <- polyFit(data,deg,use='glm')
+   qeout$x <- x
+   qeout$y <- y
+   qeout$classif <- classif
+   qeout$factorsInfo <- factorsInfo
+   qeout$trainRow1 <- getRow1(data,yName)
+   class(qeout) <- c('qePoly',class(qeout))
+   if (!is.null(holdout)) predictHoldout(qeout)
+   qeout
+}
+
+predict.qePolyLog <- function(object,newx)
+{
+   class(object) <- 'polyFit'
+   newx <- charsToFactors(newx)
+   newx <- factorsToDummies(newx,omitLast=TRUE,factorsInfo=object$factorsInfo)
+   predict(object,newx)
+}
 
 #########################  qeLASSO()  #################################
 

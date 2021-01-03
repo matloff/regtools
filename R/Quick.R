@@ -611,15 +611,14 @@ qePolyLog <- function(data,yName,deg=2,maxInteractDeg=deg,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
 stop('under construction')
-   classif <- is.factor(data[[yName]])
-   # will need all either numeric or factors; change character cols
+
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol,drop=FALSE]
-   makeAllNumeric(x,data)
-   data <- cbind(xm,y)
-   data <- as.data.frame(data)
-   names(data)[ncol(data)] <- yName
+   classif <- is.factor(data[[yName]])
+   if (classif) y <- factorTo012etc(y)
+   data <- cbind(x,y)
+
    if (!is.null(holdout)) splitData(holdout,data)
 
    require(polyreg)
@@ -627,9 +626,9 @@ stop('under construction')
    qeout$x <- x
    qeout$y <- y
    qeout$classif <- classif
-   qeout$factorsInfo <- factorsInfo
+   qeout$earlierLevels <- attr(y,'earlierLevels')
    qeout$trainRow1 <- getRow1(data,yName)
-   class(qeout) <- c('qePoly',class(qeout))
+   class(qeout) <- c('qePolyLog',class(qeout))
    if (!is.null(holdout)) predictHoldout(qeout)
    qeout
 }
@@ -637,8 +636,6 @@ stop('under construction')
 predict.qePolyLog <- function(object,newx)
 {
    class(object) <- 'polyFit'
-   newx <- charsToFactors(newx)
-   newx <- factorsToDummies(newx,omitLast=TRUE,factorsInfo=object$factorsInfo)
    predict(object,newx)
 }
 

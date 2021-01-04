@@ -610,16 +610,25 @@ prdPoly <- predict.qePoly
 qePolyLog <- function(data,yName,deg=2,maxInteractDeg=deg,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
-stop('under construction')
+# stop('under construction')
 
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol,drop=FALSE]
    classif <- is.factor(data[[yName]])
-   if (classif) y <- factorTo012etc(y)
+   origY <- y
+   if (classif) {
+      y <- factorTo012etc(y)
+      earlierLevels <- attr(y,'earlierLevels')
+   } else earlierLevels <- NULL
+   dataSave <- data
    data <- cbind(x,y)
+   names(data)[ncol(data)] <- yName
 
-   if (!is.null(holdout)) splitData(holdout,data)
+   if (!is.null(holdout)) {
+      splitData(holdout,data)
+      tst[ncol(tst)] <- origY[idxs]
+   }
 
    require(polyreg)
    qeout <- polyFit(data,deg,use='glm')
@@ -629,14 +638,22 @@ stop('under construction')
    qeout$earlierLevels <- attr(y,'earlierLevels')
    qeout$trainRow1 <- getRow1(data,yName)
    class(qeout) <- c('qePolyLog',class(qeout))
-   if (!is.null(holdout)) predictHoldout(qeout)
+   if (!is.null(holdout)) {
+      # need original ycol
+      data <- dataSave
+      data[,ycol] <- y
+      predictHoldout(qeout)
+   }
    qeout
 }
 
 predict.qePolyLog <- function(object,newx)
 {
    class(object) <- 'polyFit'
-   predict(object,newx)
+   predCode <- predict(object,newx)
+   # map back to original Y names
+   tmp <- object$earlierLevels[predCode+1]
+   list(predClasses=tmp)
 }
 
 #########################  qeLASSO()  #################################
@@ -904,7 +921,8 @@ makeAllNumeric <- defmacro(x,data,
 
 predictHoldout <- defmacro(res,
    expr={
-      ycol <- which(names(data) == yName);
+      # ycol <- which(names(data) == yName);
+      ycol <- which(names(tst) == yName);
       tstx <- tst[,-ycol,drop=FALSE];
       preds <- predict(res,tstx);
       res$holdoutPreds <- preds;

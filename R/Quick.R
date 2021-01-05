@@ -936,7 +936,33 @@ predictHoldout <- defmacro(res,
    }
 )
 
-######################  misc.  ###############################0w
+
+######################  qeCompare()  #############################
+
+# arguments
+
+#    data: as in qe*()
+#    yName as in qe*()
+#    qeFtnList: character vector of qe*() functions to be run
+#    nReps: number of repetetions per qe*() function
+#    seed: random number seed, applied to each qe*() function
+
+# compare several qe*(data,yName,qeFtnList,nReps)!
+
+qeCompare <- function(data,yName,qeFtnList,nReps,seed=9999)
+{
+   nQe <- length(qeFtnList)
+   meanAcc <- vector(length=nQe)
+   for (i in 1:length(qeFtnList)) {
+      cmd <- paste0(qeFtnList[i],'(data,yName)')
+      set.seed(seed)
+      ma <- replicate(nReps,eval(parse(text=cmd))$testAcc)
+      meanAcc[i] <- mean(ma)
+   }
+   data.frame(qeFtn=qeFtnList,meanAcc=meanAcc)
+}
+
+#########################  misc.  ################################
 
 # lm() balks if a label begins with a digit; check to see if we have any
 checkNumericNames <- function(nms)
@@ -967,3 +993,4 @@ genericPlot <- function(object)
    class(obj) <- class(obj)[-1]  # actually not needed in many cases
    plot(obj)
 }
+

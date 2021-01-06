@@ -555,9 +555,9 @@ predict.qeNeural <- function(object,newx=NULL,k=NULL)
    } 
 }
 
-#########################  qePoly()  #################################
+#########################  qePolyLin()  #################################
 
-qePoly <- function(data,yName,deg=2,maxInteractDeg=deg,
+qePolyLin <- function(data,yName,deg=2,maxInteractDeg=deg,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
@@ -588,12 +588,12 @@ qePoly <- function(data,yName,deg=2,maxInteractDeg=deg,
    qeout$classif <- classif
    qeout$factorsInfo <- factorsInfo
    qeout$trainRow1 <- getRow1(data,yName)
-   class(qeout) <- c('qePoly',class(qeout))
+   class(qeout) <- c('qePolyLin',class(qeout))
    if (!is.null(holdout)) predictHoldout(qeout)
    qeout
 }
 
-predict.qePoly <- function(object,newx)
+predict.qePolyLin <- function(object,newx)
 {
    class(object) <- 'penrosePoly'
    newx <- charsToFactors(newx)
@@ -601,11 +601,14 @@ predict.qePoly <- function(object,newx)
    predict(object,newx)
 }
 
-prdPoly <- predict.qePoly
+predict.qePoly <- function() 
+{
+   print('use qePolyLin')
+}
 
 #########################  qePolyLog()  #################################
 
-# logit form of qePoly
+# logit form of qePolyLin
 
 qePolyLog <- function(data,yName,deg=2,maxInteractDeg=deg,
    holdout=floor(min(1000,0.1*nrow(data))))
@@ -937,7 +940,7 @@ predictHoldout <- defmacro(res,
 )
 
 
-######################  qeCompare()  #############################
+######################  compareQE()  #############################
 
 # arguments
 
@@ -949,7 +952,7 @@ predictHoldout <- defmacro(res,
 
 # compare several qe*(data,yName,qeFtnList,nReps)!
 
-qeCompare <- function(data,yName,qeFtnList,nReps,seed=9999)
+compareQE <- function(data,yName,qeFtnList,nReps,seed=9999)
 {
    nQe <- length(qeFtnList)
    meanAcc <- vector(length=nQe)

@@ -29,7 +29,7 @@ lassout <- qeLASSO(mlb,'Weight')
 lassout$testAcc
 # [1] 14.23122
 # poly reg, degree 3 
-polyout <- qePoly(mlb,'Weight',3)
+polyout <- qePolyLin(mlb,'Weight',3)
 polyout$testAcc
 # [1] 12.69412
 nnout <- qeNeural(mlb,'Weight')

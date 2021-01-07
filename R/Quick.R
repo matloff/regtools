@@ -1,6 +1,6 @@
 
-##################################################################
-##################################################################
+################################################################## 
+################################################################## 
 
 # this qe*() series is inspired ggplot2::qplot; here 'qe' is for
 # "quick-explore"
@@ -82,7 +82,7 @@
 qeLogit <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
-   if (!classif) stop('for classification problems only')
+   if (!classif) {print('for classification problems only'); return(NA)}
    if (!is.null(holdout)) splitData(holdout,data)
    xyc <- getXY(data,yName,classif=TRUE) 
    xy <- xyc$xy
@@ -171,12 +171,13 @@ qeLin <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
    lmout$trainRow1 <- getRow1(data,yName)
    class(lmout) <- c('qeLin',class(lmout))
    if (!is.null(holdout)) {
-      ycol <- which(names(data) == yName)
-      preds <- predict(lmout,tst[,-ycol])
-      lmout$holdoutPreds <- preds
-      lmout$testAcc <- 
-         if (classif) mean(preds$predClasses == tst[,ycol])
-         else mean(abs(preds - tst[,ycol]))
+      predictHoldout(lmout)
+      if (!classif) {
+         summ <- summary(lmout)
+         lmout$R2 <- summ$r.squared
+         lmout$adjR2 <- summ$adj.r.squared
+         lmout$holdoutR2 <- cor(preds,tst[,ycol])^2
+      }
    }
    lmout
 }
@@ -212,7 +213,7 @@ predict.qeLin <- function(object,newx) {
 
 # see note in kNN() man pg
  
-qeKNN <- function(data,yName,k,scaleX=TRUE,
+qeKNN <- function(data,yName,k=25,scaleX=TRUE,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    trainRow1 <- getRow1(data,yName)
@@ -322,7 +323,7 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
-   if (!classif) stop('for classification problems only')
+   if (!classif) {print('for classification problems only'); return(NA)}
    if (!is.null(holdout)) splitData(holdout,data)
    require(e1071)
    # xyc <- getXY(data,yName,xMustNumeric=FALSE,classif=TRUE)
@@ -386,34 +387,44 @@ predict.qeSVM <- function(object,newx,k=NULL,scaleX=TRUE)
 
 # value:  see above
  
-qeGBoost <- function(data,yName,
-   nTree=100,minNodeSize=10,learnRate=0.1,holdout=floor(min(1000,0.1*nrow(data))))
+qeGBoost <- function(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
+   holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
-   if (!classif) stop('classification only')
    if (!is.null(holdout)) splitData(holdout,data)
    require(gbm)
-   xyc <- getXY(data,yName,classif=classif) 
-   xy <- xyc$xy
-   x <- xyc$x
-   yDumms <- xyc$yDumms
-   y <- xyc$y
-   classNames <- xyc$classNames
-   nClass <- length(classNames)
-   ncxy <- ncol(xy)
-   nx <- ncol(x)
-   nydumms <- ncxy - nx
-   empirClassProbs <- colMeans(yDumms)
-   outlist <- list(x=x,y=y,classNames=classNames,
-      empirClassProbs=empirClassProbs,classif=classif)
-   doGbm <- function(colI) 
-   {
-      tmpDF <- cbind(x,yDumms[,colI])
-      names(tmpDF)[nx+1] <- 'yDumm'
-      gbmout <- gbm(yDumm ~ .,data=tmpDF,distribution='bernoulli',
-         n.trees=nTree,n.minobsinnode=minNodeSize,shrinkage=learnRate)
+   outlist <- list(classif=classif)
+   if (classif) {   # classification case
+      xyc <- getXY(data,yName,classif=classif) 
+      xy <- xyc$xy
+      x <- xyc$x
+      yDumms <- xyc$yDumms
+      y <- xyc$y
+      classNames <- xyc$classNames
+      nClass <- length(classNames)
+      ncxy <- ncol(xy)
+      nx <- ncol(x)
+      nydumms <- ncxy - nx
+      empirClassProbs <- colMeans(yDumms)
+      outlist <- c(outlist,list(x=x,y=y,classNames=classNames,
+         empirClassProbs=empirClassProbs))
+      doGbm <- function(colI) 
+      {
+         tmpDF <- cbind(x,yDumms[,colI])
+         names(tmpDF)[nx+1] <- 'yDumm'
+         gbmout <- gbm(yDumm ~ .,data=tmpDF,distribution='bernoulli',
+            n.trees=nTree,n.minobsinnode=minNodeSize,shrinkage=learnRate)
+      }
+      outlist$gbmOuts <- lapply(1:nydumms,doGbm)
+   } else {   # regression case
+      cmd <- paste0('gbmout <- gbm(',yName)
+      cmd <- paste0(cmd,' ~ .,data=data,distribution="gaussian",')
+      cmd <- paste0(cmd,'n.trees=',nTree,',')
+      cmd <- paste0(cmd,'n.minobsinnode=',minNodeSize,',')
+      cmd <- paste0(cmd,'shrinkage=',learnRate,')')
+      eval(parse(text=cmd))
+      outlist$gbmOuts <- gbmout
    }
-   outlist$gbmOuts <- lapply(1:nydumms,doGbm)
    outlist$nTree <- nTree
    outlist$trainRow1 <- getRow1(data,yName)
    class(outlist) <- c('qeGBoost')
@@ -423,28 +434,42 @@ qeGBoost <- function(data,yName,
 
 # arguments:  see above
 # value:  object of class 'qeGBoost'; see above for components
-predict.qeGBoost <- function(object,newx) 
+predict.qeGBoost <- function(object,newx,newNTree=NULL) 
 {
    newx <- setTrainFactors(object,newx)
-   # get probabilities for each class
    gbmOuts <- object$gbmOuts
-   nTree <- object$nTree
-   g <- function(gbmOutsElt) 
-      predict(gbmOutsElt,newx,n.trees=nTree,type='response') 
-   probs <- sapply(gbmOuts,g)
-   if (is.vector(probs)) probs <- matrix(probs,nrow=1)
-   classNames <- object$classNames
-   colnames(probs) <- classNames
-   # separate runs for the m classes will not necessrily sum to 1, so
-   # normalize
-   sumprobs <- apply(probs,1,sum)  
-   probs <- (1/sumprobs) * probs
-   predClasses <- apply(probs,1,which.max) 
-   predClasses <- classNames[predClasses]
-   res <- list(predClasses=predClasses,probs=probs)
+   if (is.null(newNTree)) {
+      nTree <- object$nTree
+   } else nTree <- newNTree
+   if (object$classif) {
+      # get probabilities for each class
+      g <- function(gbmOutsElt) 
+         predict(gbmOutsElt,newx,n.trees=nTree,type='response') 
+      probs <- sapply(gbmOuts,g)
+      if (is.vector(probs)) probs <- matrix(probs,nrow=1)
+      classNames <- object$classNames
+      colnames(probs) <- classNames
+      # separate runs for the m classes will not necessrily sum to 1, so
+      # normalize
+      sumprobs <- apply(probs,1,sum)  
+      probs <- (1/sumprobs) * probs
+      predClasses <- apply(probs,1,which.max) 
+      predClasses <- classNames[predClasses]
+      res <- list(predClasses=predClasses,probs=probs)
+   } else {
+      res <- predict(object$gbmOuts,newx,n.trees=nTree)
+   }
    class(res) <- 'qeGBoost'
    res
 }
+
+# graph to explore best number of trees
+
+plot.qeGBoost <- function(object) 
+{
+   gbm.perf(object$gbmOuts)
+}
+
 
 #########################  qeNeural()  #################################
 
@@ -530,17 +555,17 @@ predict.qeNeural <- function(object,newx=NULL,k=NULL)
    } 
 }
 
-#########################  qePoly()  #################################
+#########################  qePolyLin()  #################################
 
-qePoly <- function(data,yName,deg,maxInteractDeg=deg,
+qePolyLin <- function(data,yName,deg=2,maxInteractDeg=deg,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
    # will need all either numeric or factors; change character cols
-   if (classif) stop('currently not for classification problems')
+   if (classif) {print('currently not for classification problems'); return(NA)}
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
-   x <- data[,-ycol]
+   x <- data[,-ycol,drop=FALSE]
 ##    data <- charsToFactors(data)
 ##    if (hasFactors(x)) {
 ##       xm <- factorsToDummies(x,omitLast=TRUE)
@@ -563,12 +588,12 @@ qePoly <- function(data,yName,deg,maxInteractDeg=deg,
    qeout$classif <- classif
    qeout$factorsInfo <- factorsInfo
    qeout$trainRow1 <- getRow1(data,yName)
-   class(qeout) <- c('qePoly',class(qeout))
+   class(qeout) <- c('qePolyLin',class(qeout))
    if (!is.null(holdout)) predictHoldout(qeout)
    qeout
 }
 
-predict.qePoly <- function(object,newx)
+predict.qePolyLin <- function(object,newx)
 {
    class(object) <- 'penrosePoly'
    newx <- charsToFactors(newx)
@@ -576,7 +601,63 @@ predict.qePoly <- function(object,newx)
    predict(object,newx)
 }
 
-prdPoly <- predict.qePoly
+predict.qePoly <- function() 
+{
+   print('use qePolyLin')
+}
+
+#########################  qePolyLog()  #################################
+
+# logit form of qePolyLin
+
+qePolyLog <- function(data,yName,deg=2,maxInteractDeg=deg,
+   holdout=floor(min(1000,0.1*nrow(data))))
+{
+# stop('under construction')
+
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol,drop=FALSE]
+   classif <- is.factor(data[[yName]])
+   origY <- y
+   if (classif) {
+      y <- factorTo012etc(y)
+      earlierLevels <- attr(y,'earlierLevels')
+   } else earlierLevels <- NULL
+   dataSave <- data
+   data <- cbind(x,y)
+   names(data)[ncol(data)] <- yName
+
+   if (!is.null(holdout)) {
+      splitData(holdout,data)
+      tst[ncol(tst)] <- origY[idxs]
+   }
+
+   require(polyreg)
+   qeout <- polyFit(data,deg,use='glm')
+   qeout$x <- x
+   qeout$y <- y
+   qeout$classif <- classif
+   qeout$earlierLevels <- attr(y,'earlierLevels')
+   qeout$trainRow1 <- getRow1(data,yName)
+   class(qeout) <- c('qePolyLog',class(qeout))
+   if (!is.null(holdout)) {
+      # need original ycol
+      data <- dataSave
+      data[,ycol] <- y
+      predictHoldout(qeout)
+   }
+   qeout
+}
+
+predict.qePolyLog <- function(object,newx)
+{
+   class(object) <- 'polyFit'
+   predCode <- predict(object,newx)
+   # map back to original Y names
+   tmp <- object$earlierLevels[predCode+1]
+   list(predClasses=tmp)
+}
 
 #########################  qeLASSO()  #################################
 
@@ -644,7 +725,6 @@ plot.qeLASSO <- function(object)
 pcaQE <- function(pcaProp,data,yName,qeName,...,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
-   # stop('under construction')
    # eventual return value
    res <- list()
    res$scaleX <- FALSE  # already scaled via prcomp()
@@ -760,7 +840,7 @@ getXY <- function(data,yName,xMustNumeric=FALSE,classif,
       xClasses <- getDFclasses(x)
       if (any(xClasses=='logical') || any(xClasses=='character')) {
          print('character or logical variables currently not allowed')
-         stop('change to factors')
+         print('change to factors'); return(NA)
       }
       x <- factorsToDummies(x,omitLast=TRUE)
       factorsInfo <- attr(x,'factorsInfo')
@@ -825,34 +905,67 @@ makeAllNumeric <- defmacro(x,data,
 # do the predictions in the holdout set
 
 # arguments:
-#    res: output of qe*()
-# globals (one level up):
-#    tst: the holdout set
-#   ycol: column index of Y in tst
+#    res: ultimate output of qe*()
 
-#  value:
-#     res, but with the holdout predictions and accuracy as new
-#     components
+# global inputs (from the caller):
+
+#    tst: the holdout set
+#    data: arg in the qe*() function
+#    yName: arg in the qe*() function
+
+# global outputs (creating locals in the caller):
+
+#     res$testAcc: MAPE or class. error in holdout set
+#     res$baseAcc: base MAPE or class. error (no features) in holdout set
+#     res$holdoutPreds: predicted values in the holdout set
+#     preds: ditto 
+#     ycol: index of yName in 'data'
+#     tstx: X portion of holdout data
 
 predictHoldout <- defmacro(res,
    expr={
-      ycol <- which(names(data) == yName);
+      # ycol <- which(names(data) == yName);
+      ycol <- which(names(tst) == yName);
       tstx <- tst[,-ycol,drop=FALSE];
-      # in k-NN case, we want to use the newxK from qeKNN() here, but
-      # allow the user to later call predict.qeKNN() with her own value
-      # if desired
-      ## if (inherits(res,'kNN')) {
-      ##    preds <- predict(res,tstx,newxK)
-      ## } else preds <- predict(res,tstx);
       preds <- predict(res,tstx);
       res$holdoutPreds <- preds;
-      res$testAcc <- 
-         if (res$classif) mean(preds$predClasses != tst[,ycol])
-         else mean(abs(preds - tst[,ycol]))
+      if (res$classif) {
+         res$testAcc <- mean(preds$predClasses != tst[,ycol])
+         res$baseAcc <- 1 - max(table(data[,ycol])) / nrow(data)
+      } else {
+         res$testAcc <- mean(abs(preds - tst[,ycol]))
+         res$baseAcc <-  mean(abs(tst[,ycol] - mean(data[,ycol])))
+      }
    }
 )
 
-######################  misc.  ###############################0w
+
+######################  compareQE()  #############################
+
+# arguments
+
+#    data: as in qe*()
+#    yName as in qe*()
+#    qeFtnList: character vector of qe*() functions to be run
+#    nReps: number of repetetions per qe*() function
+#    seed: random number seed, applied to each qe*() function
+
+# compare several qe*(data,yName,qeFtnList,nReps)!
+
+compareQE <- function(data,yName,qeFtnList,nReps,seed=9999)
+{
+   nQe <- length(qeFtnList)
+   meanAcc <- vector(length=nQe)
+   for (i in 1:length(qeFtnList)) {
+      cmd <- paste0(qeFtnList[i],'(data,yName)')
+      set.seed(seed)
+      ma <- replicate(nReps,eval(parse(text=cmd))$testAcc)
+      meanAcc[i] <- mean(ma)
+   }
+   data.frame(qeFtn=qeFtnList,meanAcc=meanAcc)
+}
+
+#########################  misc.  ################################
 
 # lm() balks if a label begins with a digit; check to see if we have any
 checkNumericNames <- function(nms)
@@ -883,3 +996,4 @@ genericPlot <- function(object)
    class(obj) <- class(obj)[-1]  # actually not needed in many cases
    plot(obj)
 }
+

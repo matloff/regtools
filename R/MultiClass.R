@@ -640,6 +640,7 @@ eliteCalib <- function(y,trnScores,newScores)
 calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,k=NULL,
    plotsPerRow=2,nBins=0,se=FALSE) 
 {
+stop('under construction')
    classNames <- levels(trnY)
    nClass <- length(classNames)
    ym <- factorToDummies(tstY,fname='y')
@@ -649,7 +650,7 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,k=NULL
       res <- list(probs=probs,ym=ym)
    } else if (calibMethod == 'plattCalib') {
       preout <- prePlattCalib(trnY,trnScores)
-      plattOut <- plattCalib(preout,newScores,se=se)
+      ### plattOut <- plattCalib(preout,newScores,se=se)
       if (se) {
          probs <- plattOut$probs
          se <- plattOut$se

@@ -27,7 +27,7 @@ models.
 \usage{
 kNN(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,expandVars=NULL,expandVals=NULL,
    smoothingFtn=mean,allK=FALSE,leave1out=FALSE, classif=FALSE,
-   startAt1=TRUE)
+   startAt1=TRUE,saveNhbrs=FALSE,savedNhbrs=NULL))
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
 meany(nearIdxs,x,y,predpt) 
@@ -73,6 +73,11 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
      the regression function values}
   \item{startAt1}{If TRUE, class labels start at 1, else 0.}
   \item{k}{Number of nearest neighbors} 
+  \item{saveNhbrs}{If TRUE, place output of \code{FNN::get.knnx} 
+     into \code{nhbrs} of component in return value}
+  \item{savedNhbrs}{If non-NULL, this is the \code{nhbrs} component 
+     in the return value of a previous call; \code{newx} must be the
+     same in both calls}
   \item{...}{Needed for consistency with generic.  See Details below for
      `arguments.}
   \item{xdata}{X and associated neighbor indices. Output of
@@ -127,6 +132,13 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
 
    The second form is intended more for production use, so that neighbor
    distances need not be repeatedly recomputed.
+
+   Nearest-neighbor computation can be time-consuming.  If more than one
+   value of \code{k} is anticipated, for the same \code{x}, \code{y} and
+   \code{newx}, first run with the largest anticipated value of
+   \code{k}, with \code{saveNhbrs} set to TRUE.  Then for other values
+   of \code{k}, set \code{savedNhbrs} to the \code{nhbrs} component in
+   the return value of the first call.
 
    In addition, a novel feature allows the user to weight some
    predictors more than others.  This is done by scaling the given

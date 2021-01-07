@@ -1,0 +1,28 @@
+
+data(mlb) 
+mlb <- mlb[,c(4,6,5)]  # height, age, weight
+# fit, then predict 75", age 21, and 72", age 32
+knnout <- kNN(mlb[,1:2],mlb[,3],rbind(c(75,21),c(72,32)),25) 
+knnout$regests
+# [1] 201.84 195.72
+
+# fit now, predict later
+knnout <- kNN(mlb[,1:2],mlb[,3],NULL,25) 
+predict(knnout,c(70,28)) 
+# [1] 185.24
+
+# set saveNhbrs to TRUE to avoid re-doing the same computation
+knnout <- kNN(mlb[,1:2],mlb[,3],rbind(c(75,21),c(72,32)),25) 
+knnout$regests
+# [1] 201.84 195.72
+# what about k = 20?; first, the direct way
+knnout <- kNN(mlb[,1:2],mlb[,3],rbind(c(75,21),c(72,32)),20) 
+knnout$regests
+# [1] 202.05 196.05
+# now the computation-reusing way
+knnout25 <- kNN(mlb[,1:2],mlb[,3],rbind(c(75,21),c(72,32)),25,
+   saveNhbrs=TRUE) 
+knnout20 <- kNN(mlb[,1:2],mlb[,3],rbind(c(75,21),c(72,32)),20,
+   savedNhbrs=knnout25$nhbrs) 
+knnout20$regests
+

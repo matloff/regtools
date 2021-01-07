@@ -424,12 +424,34 @@ prePlattCalib <- function(y,trnScores)
    res <- qeLogit(dta,'y')
 }
 
-plattCalib <- function(prePlattCalibOut,newScores) 
+plattCalib <- function(prePlattCalibOut,newScores,se=FALSE) 
 {
-   if (is.vector(newScores))
+   if (is.vector(newScores)) {
       newScores <- matrix(newScores,ncol=1)
+   }
    tsDF <- as.data.frame(newScores)
-   predict(prePlattCalibOut,tsDF)$probs
+   probs <- predict(prePlattCalibOut,tsDF)$probs
+   if(se) {
+      require("RcmdrMisc")
+      SEs = list()
+      for (i in 1:length(levels(as.factor(prePlattCalibOut$y))))
+      {
+         model = prePlattCalibOut$glmOuts[[i]]
+         nscores = ncol(newScores)
+         
+         alg = "1/(1+exp((-1)*(b0"
+         for (j in 1:nscores) {
+            alg = paste(alg,"+b",j,"*",colnames(newScores)[j], sep = "")
+         }
+         alg = paste(alg,")))", sep = "")
+         SE = DeltaMethod(model,alg)$test$SE
+         SEs[[i]] = SE
+      }
+      df.SEs = do.call(rbind, SEs)
+      return(list(probs = probs, se = df.SEs))
+   } else {
+      return(list(probs = probs))
+   }
 }
 
 # isotonic regression, AVA
@@ -493,7 +515,7 @@ isoCalib <- function(y,trnScores,newScores)
       class1=1,
       method = "isoReg",
       assumeProbabilities=F)
-   applyCalibration(newScores, model)
+   CORElearn:::applyCalibration(newScores, model)
 }
 
 #########################  hist_bbq_guess_Calib()  ################################
@@ -518,8 +540,11 @@ isoCalib <- function(y,trnScores,newScores)
 hist_bbq_guess_Calib <- function(y,trnScores, newScores, model_idx=c(1, 2, 3, 4, 5))
 {
    require(CalibratR)
-   model <- calibrate(y, trnScores, model_idx = model_idx)
-   predict_calibratR(model, new = newScores)
+   bbqmod <-  CalibratR:::build_BBQ(y, trnScores)
+   # the paper suggests that However, model averaging 
+   # is typically superior to model selection (Hoeting et al. 1999)
+   # so we use option = 1 for predict_BBQ
+   pred <-  CalibratR:::predict_BBQ(bbqmod, test.scores, 1)
 }
 
 
@@ -573,15 +598,25 @@ JOUSBoostCalib <- function(y,X,newx)
 
 #    y: vector of corresponding true class. 
 #        1 indicates positive class and 0 indicates negative class.
-#    trnProb: vector of uncalibrated classification scores 
-#        that are real numbers in the interval of [0,1]
-#    newProb: vector of uncalibratd classification probability
+#    trnScores: vector of uncalibrated decisions scores for training
+#    newScore: vector of uncalibratd decisions scores for testing
 
-eliteCalib <- function(y,trnProb,newProb)
+eliteCalib <- function(y,trnScores,newScores)
 {
+   #require(devtools)
+   #install_github("statsmaths/glmgen", subdir="R_pkg/glmgen")
    require(glmgen)
-   require(ELiTE)
-
+   #follow instruction on 
+   # https://github.com/pakdaman/calibration/tree/master/ELiTE/R
+   # to install EliTE
+   require(ELiTE) 
+   
+   # translate trnScores into trnProbs in [0,1] and 
+   # newScores into newProbs
+   preout <- prePlattCalib(y,trnScores)
+   trnProb <- plattCalib(preout,trnScores,se=FALSE)$probs
+   newProb <- plattCalib(preout,newScores,se=FALSE)$probs
+   
    model <- elite.build(trnProb, y)
    elite.predict(model, newProb)
 }
@@ -602,27 +637,67 @@ eliteCalib <- function(y,trnProb,newProb)
 #     k: number of nearest neighbors (knnCalib case)
 #     plotsPerRow: number of plots per row; 0 means no plotting
 
-calibWrap <- function(trnY,tstY,trnScores,newScores,calibMethod,k=NULL,
+calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,k=NULL,
    plotsPerRow=2,nBins=0,se=FALSE) 
 {
    classNames <- levels(trnY)
    nClass <- length(classNames)
+   ym <- factorToDummies(tstY,fname='y')
+   
    if (calibMethod == 'knnCalib') {
       probs <- knnCalib(trnY,trnScores,newScores,k)
+      res <- list(probs=probs,ym=ym)
    } else if (calibMethod == 'plattCalib') {
       preout <- prePlattCalib(trnY,trnScores)
       plattOut <- plattCalib(preout,newScores,se=se)
       if (se) {
          probs <- plattOut$probs
          se <- plattOut$se
-         res <- list(probs=probs,ym=ym, se = se)
+         res <- list(probs=probs,ym=ym,se=se)
       } else {
-         probs = plattOut  
+         probs = plattOut$probs
          res <- list(probs=probs,ym=ym)
       }
+   } else if (calibMethod == 'isoCalib') {
+      stop("under construction")
+      for (class in unique(trnY)){
+         
+         # Change it to factor
+         y_binary <- ifelse(trnY==class, 1, 0)
+         y_binary <- as.factor(y_binary)
+         
+         isoMod <- CORElearn::calibrate(y_binary, 
+                                         trnScores, 
+                                         class1=1,
+                                         method = "isoReg",
+                                         assumeProbabilities=F)
+         
+         # the paper suggests that However, model averaging 
+         # is typically superior to model selection (Hoeting et al. 1999)
+         # so we use option = 1 for predict_BBQ
+         pred <-  CORElearn::applyCalibration(newScores, isoMod)
+         
+         isoProbs[[class]] = pred
+      }
+      
+   } else if (calibMethod == 'bbqCalib') {
+      stop("under construction")
+      
+   } else if (calibMethod == 'eliteCalib') {
+      stop("under construction")
+      
+   } else if (calibMethod == 'JOUSCalib') {
+      
+      JOUSprobs = list()
+      for (class in unique(trnY)) {
+         y_binary <- ifelse(trnY==class, 1, -1)
+         JOUSprob = JOUSBoostCalib(y_binary,as.matrix(trnX),as.matrix(tstX))
+         JOUSprobs[[class]] = JOUSprob
+      }
+      JOUSprob = do.call(cbind, JOUSprobs)
+      res <- list(probs=JOUSprob,ym=ym)
    } else stop('invalid calibration method')
-   ym <- factorToDummies(tstY,fname='y')
-   res <- list(probs=probs,ym=ym)
+   
    if (plotsPerRow) {
       nRow <- ceiling(nClass/plotsPerRow)
       par(mfrow=c(nRow,plotsPerRow))
@@ -631,7 +706,7 @@ calibWrap <- function(trnY,tstY,trnScores,newScores,calibMethod,k=NULL,
          end <- min(rw * plotsPerRow,nClass)
          for (cls in start:end) {
             tmp <- 
-               reliabDiagram(ym[,cls],probs[,cls],nBins,TRUE)
+               reliabDiagram(ym[,cls],res$probs[,cls],nBins,TRUE)
          }
       }
       par(mfrow=c(1,1))
@@ -773,72 +848,4 @@ KLDivergence = function(calibWrapOut) {
    }
    return(x)
 }
-
-#########################  sim4()  ################################
-
-# simulated a dataset of 10 multi-variable normally distributed 
-# ddependent variables and 1 dependent variable of four classes.
-# The true probability of each class for each sample is also 
-# given. 
-#
-# arguments: seed for random number generation (default 2); n for 
-# number of samples (default 11000)
-
-sim4 <- function(seed = 2, n = 11000)
-{
-   set.seed(seed)
-   
-   k <- 10
-   A <- matrix(runif(k^2)*2-1, ncol=k) 
-   Sigma <- t(A) %*% A
-   
-   x = mvrnorm(n = n, mu = rep(0, 10), 
-               Sigma = Sigma)
-   x1 = x[,1]
-   x2 = x[,2]
-   x3 = x[,3]
-   x4 = x[,4]
-   x5 = x[,5]
-   x6 = x[,6]
-   x7 = x[,7]
-   x8 = x[,8]
-   x9 = x[,9]
-   x10 = x[,10]
-   
-   means = rnorm(20, mean = 0, sd = 10)
-   sds = rexp(20, rate = 3)
-   params = c()
-   for (i in 1:20) {
-      param = rnorm(1, mean = means[i], sd = sds[i])
-      params = c(params, param)
-   }
-   p1 = inv.logit(params[1]*x1*x2 + params[2]*x3*x4 + params[3]*x5*x6 + 
-                     params[4]*x7*x8 + params[5]*x9*x10)
-   p2 = inv.logit(params[6]*x1*x3 + params[7]*x4*x5 + params[8]*x6*x7 + 
-                     params[9]*x8*x9 + params[10]*x2*x10)
-   p3 = inv.logit(params[11]*x1*x5*x10 + params[12]*x4*x8)
-   p4 = inv.logit(params[13]*x1 + params[14]*x2 + params[15]*x3 + 
-                     params[16]*x4 + params[17]*x5 + params[18]*x6 + params[19]*x7 +
-                     params[20]*x8)
-   psum = p1 + p2 + p3 + p4
-   p1 = p1/psum
-   p2 = p2/psum
-   p3 = p3/psum
-   p4 = p4/psum
-   ps = data.frame(p1 = p1, p2 = p2, p3 = p3, p4 = p4)
-   
-   y = c()
-   for (i in 1:nrow(ps)) {
-      item = sample(c("1","2","3","4"), 1, prob = ps[i,])
-      y = c(y, item)
-   }
-   
-   sim4 = data.frame(x1 = x1, x2 = x2, x3 = x3, x4 = x4, x5 = x5, x6 = x6,
-                     x7 = x7, x8 = x8, x9 = x9, x10 = x10, y = as.factor(y), 
-                     p1 = p1, p2 = p2, p3 = p3, p4 = p4)
-   sim4.std.cols = c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10")
-   
-   data = list(sim4 = sim4, sim4.std.cols = sim4.std.cols)
-}
-
 

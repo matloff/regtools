@@ -56,7 +56,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin,predict.knn,nlshc,
    bestKperPoint, parvsnonparplot,nonparvsxplot,nonparvarplot,
    ridgelm,plot.rlm, boundaryplot,
    l2,l1,prePlattCalib,plattCalib, isoCalib, hist_bbq_guess_Calib,
-   JOUSBoostCalib,eliteCalib 
+   JOUSBoostCalib,eliteCalib,
    mm,unscale,mmscale,constCols,catDFRow,
    confusion,factorTo012etc,allNumeric,
    penroseLM,predict.penroseLM,penrosePoly,predict.penrosePoly,ridgePoly, 

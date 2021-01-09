@@ -7,7 +7,8 @@
 \alias{qeGBoost}
 \alias{qeNeural}
 \alias{qeLASSO}
-\alias{qePoly}
+\alias{qePolyLin}
+\alias{qePolyLog}
 \alias{predict.qeLogit}
 \alias{predict.qeLin}
 \alias{predict.qeKNN}
@@ -16,7 +17,8 @@
 \alias{predict.qeGBoost}
 \alias{predict.qeNeural}
 \alias{predict.qeLASSO}
-\alias{predict.qePoly}
+\alias{predict.qePolyLin}
+\alias{predict.qePolyLog}
 \alias{plot.RF}
 \alias{plot.LASSO}
 
@@ -33,7 +35,7 @@ the methods directly, in order to utilize specialized options.
 }
 
 \usage{
-qeLogit(data,holdout=floor(min(1000,0.1*nrow(data))))
+qeLogit(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
 qeLin(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
 qeKNN(data,yName,k,scaleX=TRUE,holdout=floor(min(1000,0.1*nrow(data))))
 qeRF(data,yName,nTree,minNodeSize,holdout=floor(min(1000,0.1*nrow(data))))
@@ -43,7 +45,9 @@ qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
 qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
    holdout=floor(min(1000,0.1*nrow(data))))
 qeLASSO(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
-qePoly(data,yName,deg,maxInteractDeg = deg,
+qePolyLin(data,yName,deg=2,maxInteractDeg = deg,
+   holdout=floor(min(1000,0.1*nrow(data))))
+qePolyLog(data,yName,deg=2,maxInteractDeg = deg,
    holdout=floor(min(1000,0.1*nrow(data))))
 \method{predict}{qeLogit}(object,newx)
 \method{predict}{qeLin}(object,newx)

@@ -984,7 +984,7 @@ qeCompare <- function(data,yName,qeFtnList,nReps,seed=9999)
    for (i in 1:length(qeFtnList)) {
       cmd <- paste0(qeFtnList[i],'(data,yName)')
       set.seed(seed)
-      ma <- replicate(nReps,eval(parse(text=cmd))$meanAcc)
+      ma <- replicate(nReps,eval(parse(text=cmd))$testAcc)
       meanAcc[i] <- mean(ma,na.rm=TRUE)
    }
    data.frame(qeFtn=qeFtnList,meanAcc=meanAcc)

@@ -81,3 +81,15 @@ predict(z,newx)
 #         [,1]
 # [1,] 1440.44
 
+data(mlb)
+mlb <- mlb[,3:6]
+qeCompare(mlb,'Weight',
+   c('qeLin','qePolyLin','qeKNN','qeRF','qeLASSO','qeNeural'),25)
+#       qeFtn  meanAcc
+# 1     qeLin 13.30490
+# 2 qePolyLin 13.33584
+# 3     qeKNN 13.72708
+# 4      qeRF 13.46515
+# 5   qeLASSO 13.27564
+# 6  qeNeural 14.01487
+

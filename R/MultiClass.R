@@ -587,7 +587,7 @@ JOUSBoostCalib <- function(y,X,newx)
    jous_obj <- jous(X, y, class_func = class_func,
       pred_func = pred_func, keep_models = TRUE)
 
-   predict(jous_obj, newx, type = 'prob')
+   predict(jous_obj, newdata = newx, type = 'prob')
 
 }
 
@@ -640,7 +640,6 @@ eliteCalib <- function(y,trnScores,newScores)
 calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,k=NULL,
    plotsPerRow=2,nBins=0,se=FALSE) 
 {
-stop('under construction')
    classNames <- levels(trnY)
    nClass <- length(classNames)
    ym <- factorToDummies(tstY,fname='y')
@@ -650,7 +649,7 @@ stop('under construction')
       res <- list(probs=probs,ym=ym)
    } else if (calibMethod == 'plattCalib') {
       preout <- prePlattCalib(trnY,trnScores)
-      ### plattOut <- plattCalib(preout,newScores,se=se)
+      plattOut <- plattCalib(preout,newScores,se=se)
       if (se) {
          probs <- plattOut$probs
          se <- plattOut$se

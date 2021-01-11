@@ -587,7 +587,7 @@ JOUSBoostCalib <- function(y,X,newx)
    jous_obj <- jous(X, y, class_func = class_func,
       pred_func = pred_func, keep_models = TRUE)
 
-   predict(jous_obj, newdata = newx, type = 'prob')
+   predict(jous_obj, X = newx, type = 'prob')
 
 }
 
@@ -640,6 +640,7 @@ eliteCalib <- function(y,trnScores,newScores)
 calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,k=NULL,
    plotsPerRow=2,nBins=0,se=FALSE) 
 {
+   require(kernlab)
    classNames <- levels(trnY)
    nClass <- length(classNames)
    ym <- factorToDummies(tstY,fname='y')
@@ -659,43 +660,100 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,k=NULL
          res <- list(probs=probs,ym=ym)
       }
    } else if (calibMethod == 'isoCalib') {
-      stop("under construction")
-      for (class in unique(trnY)){
+
+      isoProbs = list()
+      for (pair in colnames(trnScores)){
+         pred <- isoreg(x = newScores[,which(colnames(newScores) == pair)])
+         isoProbs[[pair]] = pred$yf
+      }
+      
+      isoProb = do.call(cbind, isoProbs)
+      
+      pwc_isoProb = apply(isoProb, 1, PairwiseCoupling, 
+                           K = length(levels(trnY)))
+      pwc_isoProb = t(pwc_isoProb)
+      res <- list(probs=pwc_isoProb,ym=ym)
+      
+   } else if (calibMethod == 'BBQCalib') {
+      require(CalibratR)
+      
+      bbqProbs = list()
+      for (pair in colnames(trnScores)) {
+         g1 = strsplit(pair, "/")[[1]][1]
+         g2 = strsplit(pair, "/")[[1]][2]
+         colidx = which(colnames(trnScores) == pair)
          
-         # Change it to factor
-         y_binary <- ifelse(trnY==class, 1, 0)
-         y_binary <- as.factor(y_binary)
+         y_binary <- ifelse(trnY==g1, 1, 
+                            ifelse(trnY==g2, 0, NA))
          
-         isoMod <- CORElearn::calibrate(y_binary, 
-                                         trnScores, 
-                                         class1=1,
-                                         method = "isoReg",
-                                         assumeProbabilities=F)
+         y_select = y_binary[!is.na(y_binary)]
+         trnScores_select = trnScores[!is.na(y_binary),colidx]
+         newScores_select = newScores[,colidx]
          
+         bbqmod <-  CalibratR:::build_BBQ(y_select, trnScores_select)
          # the paper suggests that However, model averaging 
          # is typically superior to model selection (Hoeting et al. 1999)
          # so we use option = 1 for predict_BBQ
-         pred <-  CORElearn::applyCalibration(newScores, isoMod)
-         
-         isoProbs[[class]] = pred
+         pred <-  CalibratR:::predict_BBQ(bbqmod, newScores_select, 1)
+         bbqProbs[[pair]] = pred$predictions
       }
       
-   } else if (calibMethod == 'bbqCalib') {
-      stop("under construction")
+      bbqProb = do.call(cbind, bbqProbs)
       
-   } else if (calibMethod == 'eliteCalib') {
-      stop("under construction")
+      pwc_bbqProb = apply(bbqProb, 1, PairwiseCoupling, 
+                          K = length(levels(trnY)))
+      pwc_bbqProb = t(pwc_bbqProb)
+      res <- list(probs=pwc_bbqProb,ym=ym)
+      
+   } else if (calibMethod == 'ELiTECalib') {
+      #stop("under construction")
+      require(ELiTE) 
+      #https://github.com/pakdaman/calibration/tree/master/ELiTE/R
+      
+      eliteProbs = list()
+      for (pair in colnames(trnScores)) {
+         g1 = strsplit(pair, "/")[[1]][1]
+         g2 = strsplit(pair, "/")[[1]][2]
+         colidx = which(colnames(trnScores) == pair)
+         
+         y_binary <- ifelse(trnY==g1, 1, 
+                            ifelse(trnY==g2, 0, NA))
+         
+         y_select = y_binary[!is.na(y_binary)]
+         trnScores_select = trnScores[!is.na(y_binary),colidx]
+         newScores_select = newScores[,colidx]
+         
+         elitemod <-  elite.build(y_select, trnScores_select)
+         pred <- elite.predict(elitemod, newScores_select, 1)
+         eliteProbs[[pair]] = pred
+      }
+      
+      eliteProb = do.call(cbind, eliteProbs)
+      
+      pwc_eliteProb = apply(eliteProb, 1, PairwiseCoupling, 
+                          K = length(levels(trnY)))
+      pwc_eliteProb = t(pwc_eliteProb)
+      res <- list(probs=pwc_eliteProb,ym=ym)
       
    } else if (calibMethod == 'JOUSCalib') {
       
       JOUSprobs = list()
-      for (class in unique(trnY)) {
-         y_binary <- ifelse(trnY==class, 1, -1)
-         JOUSprob = JOUSBoostCalib(y_binary,as.matrix(trnX),as.matrix(tstX))
-         JOUSprobs[[class]] = JOUSprob
+      for (pair in colnames(trnScores)) {
+         g1 = strsplit(pair, "/")[[1]][1]
+         g2 = strsplit(pair, "/")[[1]][2]
+         y_binary <- ifelse(trnY==g1, 1, 
+                            ifelse(trnY==g2, -1, NA))
+         y_select = y_binary[!is.na(y_binary)]
+         trnX_select = trnX[!is.na(y_binary),]
+         JOUSprob = JOUSBoostCalib(y_select,as.matrix(trnX_select),as.matrix(tstX))
+         JOUSprobs[[pair]] = JOUSprob
       }
       JOUSprob = do.call(cbind, JOUSprobs)
-      res <- list(probs=JOUSprob,ym=ym)
+      
+      pwc_JOUsprob = apply(JOUSprob, 1, PairwiseCoupling, 
+                           K = length(levels(trnY)))
+      pwc_JOUsprob = t(pwc_JOUsprob)
+      res <- list(probs=pwc_JOUsprob,ym=ym)
    } else stop('invalid calibration method')
    
    if (plotsPerRow) {
@@ -831,7 +889,7 @@ crossEntropy = function(calibWrapOut) {
 
 #########################  KLDivergence()  ################################
 
-# it calculates Kullback_Leibler divergence for probability calibrationn 
+# it calculates Kullback_Leibler divergence for probability calibration 
 # algorithms
 # 
 # arguments:
@@ -849,3 +907,37 @@ KLDivergence = function(calibWrapOut) {
    return(x)
 }
 
+#########################  PairwiseCoupling()  ################################
+
+# it uses pairwise coupling first described in Hastie & Tibshirani 1998 
+# and the algorithm proposed in Wu et al., 2003 to calculate class 
+# probability from pairwise probabilities generated in AVA classifiation.
+# 
+# arguments:
+# K: number of classess
+# probs: pairwise probabilities of one sample
+
+# code credit:
+# Claas Heuer, September 2015
+#
+# Reference: Probability Estimates for Multi-class Classification by Pairwise Coupling, Wu et al. (2003)
+
+PairwiseCoupling = function(K, probs)
+{
+   Q <- matrix(0,K,K)
+   Q[lower.tri(Q)] <- 1 - probs
+   Qt <- t(Q)
+   Q[upper.tri(Q)] <- 1 - Qt[upper.tri(Qt)]
+   diag(Q) <- rowSums(Q)
+   Q <- Q / (K-1)
+   
+   p <- rbeta(K,1,1)
+   p <- p/sum(p)
+   
+   # updating the prob vector until equilibrium is reached
+   for(i in 1:1000) p <- Q%*%p
+   
+   out = round(t(p), digits=4)
+   
+   return(out)
+}

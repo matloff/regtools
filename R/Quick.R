@@ -973,16 +973,24 @@ compareQE <- function(data,yName,qeFtnList,nReps,seed=9999)
 #    yName as in qe*()
 #    qeFtnList: character vector of qe*() functions to be run
 #    nReps: number of repetetions per qe*() function
+#    opts: R list, giving optional arguments for the qe*()
 #    seed: random number seed, applied to each qe*() function
 
 # compare several qe*(data,yName,qeFtnList,nReps)!
 
-qeCompare <- function(data,yName,qeFtnList,nReps,seed=9999)
+qeCompare <- function(data,yName,qeFtnList,nReps,opts=NULL,seed=9999)
 {
    nQe <- length(qeFtnList)
    meanAcc <- vector(length=nQe)
    for (i in 1:length(qeFtnList)) {
-      cmd <- paste0(qeFtnList[i],'(data,yName)')
+      ftn <- qeFtnList[i]
+      cmd <- paste0(ftn,'(data,yName')
+      if (!is.null(opts)) {
+         opt <- opts[[ftn]]
+         if (!is.null(opt)) 
+            cmd <- paste0(cmd,',',opt)
+      }
+      cmd <- paste0(cmd,')')
       cmd <- paste0(cmd,'$testAcc')
       set.seed(seed)
       ma <- replicate(nReps,eval(parse(text=cmd)))

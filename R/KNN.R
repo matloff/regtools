@@ -27,12 +27,16 @@
 #   smoothingFtn: op applied to the "Y"s of nearest neighbors; could be,
 #      say, median instead of mean, even variance
 #   allK: run the analyses for all k through maxK; currently disabled,
-#      but there is kNNallK() for those who wish to use it
+#      but there is kNNallK() for those who wish to use it; also see
+#      saveNhbrs
 #   leave1out: delete the 1-nearest neighbor (n-fold cross-validation)
 #   classif: if TRUE, consider this a classification problem. 
 #      Then 'ypreds' will be included in the return value.  See also the
 #      entry for 'y' above.
 #   startAt1: if classification case, labels 1,2,...; else 0,1,2,...
+#   saveNhbrs: if TRUE, place output of FNN::get.knnx() into nhbrs of
+#      component in return value
+#   savedNhbrs: if non-NULL, this is the nhbrs component of a previous call
 
 # value:
 
@@ -48,7 +52,7 @@
 kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
           expandVars=NULL,expandVals=NULL,
           smoothingFtn=mean,allK=FALSE,leave1out=FALSE,
-          classif=FALSE,startAt1=TRUE)
+          classif=FALSE,startAt1=TRUE,saveNhbrs=FALSE,savedNhbrs=NULL)
 {  
    if (PCAcomps > 0) stop('PCA now must be done separately')
    if (allK) stop('allK option currenttly disabled')
@@ -126,9 +130,13 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 
 
    # find NNs
-   tmp <- FNN::get.knnx(data=x, query=newx, k=kmax1)
-   closestIdxs <- tmp$nn.index
-   if (leave1out) closestIdxs <- closestIdxs[,-1,drop=FALSE]
+   if (is.null(savedNhbrs)) {
+      tmp <- FNN::get.knnx(data=x, query=newx, k=kmax1)
+   } else {
+      tmp <- savedNhbrs
+   }
+   closestIdxs <- tmp$nn.index[,1:(kmax+leave1out)]
+   if (leave1out) closestIdxs <- closestIdxs[,-1,1:kmax,drop=FALSE]
 
    # closestIdxs is a matrix; row i gives the indices of the kmax 
    # closest rows in x to newx[i,]
@@ -155,6 +163,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
 
    tmplist <- list(whichClosest=closestIdxs,regests=regests,scaleX=scaleX,
       classif=classif)
+   tmplist$nhbrs <- if (saveNhbrs) tmp else NULL
 
    # MH dists for possible re-run using loclin()
    if (length(ccout) == 0) {

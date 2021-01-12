@@ -7,7 +7,9 @@
 \alias{qeGBoost}
 \alias{qeNeural}
 \alias{qeLASSO}
-\alias{qePoly}
+\alias{qePolyLin}
+\alias{qePolyLog}
+\alias{qeCompare}
 \alias{predict.qeLogit}
 \alias{predict.qeLin}
 \alias{predict.qeKNN}
@@ -16,7 +18,8 @@
 \alias{predict.qeGBoost}
 \alias{predict.qeNeural}
 \alias{predict.qeLASSO}
-\alias{predict.qePoly}
+\alias{predict.qePolyLin}
+\alias{predict.qePolyLog}
 \alias{plot.RF}
 \alias{plot.LASSO}
 
@@ -33,7 +36,7 @@ the methods directly, in order to utilize specialized options.
 }
 
 \usage{
-qeLogit(data,holdout=floor(min(1000,0.1*nrow(data))))
+qeLogit(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
 qeLin(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
 qeKNN(data,yName,k,scaleX=TRUE,holdout=floor(min(1000,0.1*nrow(data))))
 qeRF(data,yName,nTree,minNodeSize,holdout=floor(min(1000,0.1*nrow(data))))
@@ -43,8 +46,11 @@ qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
 qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
    holdout=floor(min(1000,0.1*nrow(data))))
 qeLASSO(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
-qePoly(data,yName,deg,maxInteractDeg = deg,
+qePolyLin(data,yName,deg=2,maxInteractDeg = deg,
    holdout=floor(min(1000,0.1*nrow(data))))
+qePolyLog(data,yName,deg=2,maxInteractDeg = deg,
+   holdout=floor(min(1000,0.1*nrow(data))))
+qeCompare(data,yName,qeFtnList,nReps,opts=NULL,seed=9999)
 \method{predict}{qeLogit}(object,newx)
 \method{predict}{qeLin}(object,newx)
 \method{predict}{qeKNN}(object,newx,newxK=1)
@@ -57,7 +63,6 @@ qePoly(data,yName,deg,maxInteractDeg = deg,
 \method{plot}{qeLASSO}(object,newx)
 \method{plot}{qeSVM}(object,newx,k=25)
 \method{plot}{qeRF}(object,newx)
-
 }
 
 \arguments{
@@ -78,6 +83,11 @@ qePoly(data,yName,deg,maxInteractDeg = deg,
      indicated dropout proportions.} 
   \item{nEpoch}{Number of iterations in neural net.}
   \item{alpha}{1 for LASSO, 2 for ridge.}
+  \item{qeFtnList}{Character vector of \code{qe*} names.}
+  \item{nReps}{Number of holdout sets to generate.}
+  \item{opts}{R list of optional arguments for none, some or all of th
+     functions in \code{qeFtnList}.}
+  \item{seed}{Seed for random number generation.}
 }
 
 \details{
@@ -121,7 +131,7 @@ then random forests:
 > lassout$testAcc
 [1] 14.23122
 # poly reg, degree 3 
-> polyout <- qePoly(mlb,'Weight',3)
+> polyout <- qePolyLin(mlb,'Weight',3)
 > polyout$testAcc
 [1] 13.55613
 > nnout <- qeNeural(mlb,'Weight')
@@ -161,9 +171,16 @@ The function \code{qeLin} handles classification problems as
 multivariate-outcome linea models. If one's goal is prediction, it can
 be much faster than \code{qeLogit}, often with comparable accuracy.
 
-The \code{qePoly} function does polynomial regression of the indicated
+The \code{qePolyLin} function does polynomial regression of the indicated
 degree. In the above example degree 3 means all terms through degree 3,
-e.g. \code{Height * Age^2}.
+e.g. \code{Height * Age^2}.  Dummy variables are handled properly, e.g.
+no powers of a dummy are generatd.  The logistic polynomial regression version
+is \code{qePolyLog}.
+
+The \code{qeCompare} function does quick-and-easy cross-validated
+comparisons among the \code{qe*} functions.  The same holdout sets are
+generated and used by all the functions.  Default values of
+hyperparameters of those functions can be set via \code{opts}.
 
 }
 
@@ -247,6 +264,19 @@ lmout <- qeLin(pef,'occ')
 predict(lmout,pef[1,-3])  # occ 100, prob 0.3316
 lmout <- qeLin(pef,'wageinc')
 predict(lmout,pef[1,-5])  # 70857.79
+
+qeCompare(mlb,'Weight',c('qeLin','qeKNN','qeRF'),25)
+#   qeFtn  meanAcc
+# 1 qeLin 13.30490
+# 2 qeKNN 13.72708
+# 3  qeRF 13.46515
+qeCompare(mlb,'Weight',c('qeLin','qeKNN','qeRF'),25,
+   list(qeKNN='k=5',qeRF='nTree = 100, minNodeSize = 15'))
+#   qeFtn  meanAcc
+# 1 qeLin 13.30490
+# 2 qeKNN 14.34051
+# 3  qeRF 13.02334
+
 
 }
 

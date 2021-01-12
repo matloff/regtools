@@ -29,7 +29,7 @@ lassout <- qeLASSO(mlb,'Weight')
 lassout$testAcc
 # [1] 14.23122
 # poly reg, degree 3 
-polyout <- qePoly(mlb,'Weight',3)
+polyout <- qePolyLin(mlb,'Weight',3)
 polyout$testAcc
 # [1] 12.69412
 nnout <- qeNeural(mlb,'Weight')
@@ -73,4 +73,23 @@ predict(lgout,newx)
 #       Shortstop Starting_Pitcher Third_Baseman
 # [1,] 0.03345139        0.2252583    0.04160745
 
+# day2
+d2 <- day2[,-(13:14)]
+z <- pcaKNN(0.6,d2,'tot',k=25,holdout=NULL)
+newx <- d2[8,-13]
+predict(z,newx)
+#         [,1]
+# [1,] 1440.44
+
+data(mlb)
+mlb <- mlb[,3:6]
+qeCompare(mlb,'Weight',
+   c('qeLin','qePolyLin','qeKNN','qeRF','qeLASSO','qeNeural'),25)
+#       qeFtn  meanAcc
+# 1     qeLin 13.30490
+# 2 qePolyLin 13.33584
+# 3     qeKNN 13.72708
+# 4      qeRF 13.46515
+# 5   qeLASSO 13.27564
+# 6  qeNeural 14.01487
 

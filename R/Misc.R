@@ -195,8 +195,21 @@ dummiesToInt <- function(dms,inclLast=FALSE) {
   as.numeric(dummiesToFactor(dms=dms,inclLast=inclLast))
 }
 
-# maps a factor to 0,1,2,...,m-1 where m is the number of levels of f
-factorTo012etc <- function(f) as.numeric(f)-1
+# maps a factor to 0,1,2,...,m-1 where m is the number of levels of f;
+# saves the levels in an attribute, e.g. for use in a later predict()
+# setting; if using earlierLevels, then f will be a character vector
+# with values in earlierLevels
+
+factorTo012etc <- function(f,earlierLevels=NULL)  {
+   if (!is.null(earlierLevels)) {
+      checkOneValue <- function(val) which(val == earlierLevels) - 1
+      return(sapply(f,checkOneValue))
+   }
+   tmp <- as.numeric(f)-1
+   attr(tmp,'earlierLevels') <- levels(f)
+   tmp
+}
+
 
 # inputs an integer vector x and creates dummies for the various values
 intToDummies <- function(x,fname,omitLast=TRUE) 
@@ -461,9 +474,10 @@ stopBrowser <- defmacro(msg,expr=
 
 doPCA <- function(x,pcaProp) 
 {
+   pcaout <- prcomp(x,scale.=TRUE)
    xpca <- predict(pcaout,x)
-   xNames <- names(xpca)
-   pcVars <- xpca$sdev^2
+   xNames <- colnames(xpca)
+   pcVars <- pcaout$sdev^2
    ncx <- ncol(xpca)
    csums <- cumsum(pcVars)
    csums <- csums/csums[ncx]

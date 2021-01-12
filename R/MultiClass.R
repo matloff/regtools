@@ -408,6 +408,7 @@ scoresToProbs <- knnCalib
 
 # run the logit once and save, rather doing running repeatedly, each
 # time we have new predictions to make
+# author: kenneth
 
 # arguments:
 
@@ -479,6 +480,8 @@ stop('under construction')
 # wrapper calibrate either training scores or probability by isotonic 
 # regression
 
+# author: kenneth
+
 # arguments
 
 #    y: R factor of labels in training set
@@ -505,6 +508,8 @@ isoCalib <- function(y,trnScores,newScores)
 # BBQ_transformed, 
 # GUESS
 
+# author: kenneth
+
 # arguments
 
 #    y: R factor of labels in training set;
@@ -529,6 +534,8 @@ hist_bbq_guess_Calib <- function(y,trnScores, newScores, model_idx=c(1, 2, 3, 4,
 # algorithm. The algorithm requires ksvm from kernlab
 # the arguments in ksvm are set according to the default
 # of e1017:::svm()
+
+# author: kenneth
 
 # arguments
 
@@ -570,6 +577,8 @@ JOUSBoostCalib <- function(y,X,newx)
 
 # wrapper calibrate by ELiTe
 # arguments
+# author: kenneth
+
 
 #    y: vector of corresponding true class. 
 #        1 indicates positive class and 0 indicates negative class.
@@ -704,7 +713,8 @@ ROC <- function(y,scores)
 #########################  multi_calibWrap()  ################################
 
 # wrapper; it plots relibability diagram for each algorithm 
-# 
+# author: kenneth
+
 # arguments:
 # formula: a formula like: class ~ Lin_Platt+Quad_Platt+KNN+IsoReg+BBQ+JOUSBoost
 # where class is the test labels and the right side is the probability output

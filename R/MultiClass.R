@@ -408,12 +408,14 @@ scoresToProbs <- knnCalib
 
 # run the logit once and save, rather doing running repeatedly, each
 # time we have new predictions to make
+# author: norm, kenneth
 
 # arguments:
 
 #    y, trnScores, newScores, value as above
+#    degree: the degree of polynomial for the logistic model
 
-prePlattCalib <- function(y,trnScores) 
+prePlattCalib <- function(y,trnScores, deg) 
 {
 
    if (!is.factor(y)) stop('Y must be an R factor')
@@ -421,8 +423,9 @@ prePlattCalib <- function(y,trnScores)
       trnScores <- matrix(trnScores,ncol=1)
    tsDF <- as.data.frame(trnScores)
    dta <- cbind(y,tsDF)
-   res <- qeLogit(dta,'y')
+   res <- qePolyLog(dta,'y',deg=deg, maxInteractDeg=0)
 }
+
 
 plattCalib <- function(prePlattCalibOut,newScores,se=FALSE) 
 {
@@ -501,6 +504,8 @@ stop('under construction')
 # wrapper calibrate either training scores or probability by isotonic 
 # regression
 
+# author: kenneth
+
 # arguments
 
 #    y: R factor of labels in training set
@@ -526,6 +531,8 @@ isoCalib <- function(y,trnScores,newScores)
 # BBQ_scaled, 
 # BBQ_transformed, 
 # GUESS
+
+# author: kenneth
 
 # arguments
 
@@ -554,6 +561,8 @@ hist_bbq_guess_Calib <- function(y,trnScores, newScores, model_idx=c(1, 2, 3, 4,
 # algorithm. The algorithm requires ksvm from kernlab
 # the arguments in ksvm are set according to the default
 # of e1017:::svm()
+
+# author: kenneth
 
 # arguments
 
@@ -595,6 +604,8 @@ JOUSBoostCalib <- function(y,X,newx)
 
 # wrapper calibrate by ELiTe
 # arguments
+# author: kenneth
+
 
 #    y: vector of corresponding true class. 
 #        1 indicates positive class and 0 indicates negative class.
@@ -845,7 +856,8 @@ ROC <- function(y,scores)
 #########################  multi_calibWrap()  ################################
 
 # wrapper; it plots relibability diagram for each algorithm 
-# 
+# author: kenneth
+
 # arguments:
 # formula: a formula like: class ~ Lin_Platt+Quad_Platt+KNN+IsoReg+BBQ+JOUSBoost
 # where class is the test labels and the right side is the probability output

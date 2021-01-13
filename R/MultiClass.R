@@ -514,7 +514,7 @@ stop('under construction')
 isoCalib <- function(y,trnScores,newScores)
 {
    require(CORElearn)
-   model <- CORElearn:::calibrate(y, 
+   model <- calibrate(y, 
       trnScores, 
       class1=1,
       method = "isoReg",

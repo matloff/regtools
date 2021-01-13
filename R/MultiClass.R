@@ -426,7 +426,6 @@ prePlattCalib <- function(y,trnScores, deg)
    res <- qePolyLog(dta,'y',deg=deg, maxInteractDeg=0)
 }
 
-
 plattCalib <- function(prePlattCalibOut,newScores,se=FALSE) 
 {
    if (is.vector(newScores)) {

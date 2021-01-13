@@ -426,7 +426,6 @@ prePlattCalib <- function(y,trnScores, deg)
    res <- qePolyLog(dta,'y',deg=deg, maxInteractDeg=0)
 }
 
-
 plattCalib <- function(prePlattCalibOut,newScores,se=FALSE) 
 {
    if (is.vector(newScores)) {
@@ -515,7 +514,7 @@ stop('under construction')
 isoCalib <- function(y,trnScores,newScores)
 {
    require(CORElearn)
-   model <- calibrate(y, 
+   model <- CORElearn:::calibrate(y, 
       trnScores, 
       class1=1,
       method = "isoReg",

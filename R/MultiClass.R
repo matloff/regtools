@@ -408,13 +408,14 @@ scoresToProbs <- knnCalib
 
 # run the logit once and save, rather doing running repeatedly, each
 # time we have new predictions to make
-# author: kenneth
+# author: norm, kenneth
 
 # arguments:
 
 #    y, trnScores, newScores, value as above
+#    degree: the degree of polynomial for the logistic model
 
-prePlattCalib <- function(y,trnScores) 
+prePlattCalib <- function(y,trnScores, deg) 
 {
 
    if (!is.factor(y)) stop('Y must be an R factor')
@@ -422,8 +423,9 @@ prePlattCalib <- function(y,trnScores)
       trnScores <- matrix(trnScores,ncol=1)
    tsDF <- as.data.frame(trnScores)
    dta <- cbind(y,tsDF)
-   res <- qeLogit(dta,'y')
+   res <- qePolyLog(dta,'y',deg=deg, maxInteractDeg=0)
 }
+
 
 plattCalib <- function(prePlattCalibOut,newScores,se=FALSE) 
 {

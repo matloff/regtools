@@ -49,7 +49,7 @@ penrosePoly <- function(d,yName,deg,maxInteractDeg=deg)
 {
    require(polyreg)
    ycol <- which(names(d) == yName)
-   x <- as.matrix(d[,-ycol])
+   x <- as.matrix(d[,-ycol,drop=FALSE])
    polyout <- getPoly(x,deg=deg,maxInteractDeg=maxInteractDeg)
    xPoly <- polyout$xdata  # polynomial version of x
    y <- d[,ycol]

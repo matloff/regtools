@@ -596,6 +596,11 @@ qePolyLin <- function(data,yName,deg=2,maxInteractDeg=deg,
 predict.qePolyLin <- function(object,newx)
 {
    class(object) <- 'penrosePoly'
+   if (ncol(object$x) == 1) {
+      newx <- as.data.frame(newx)
+      names(newx) <- names(object$x)
+   }
+   
    newx <- charsToFactors(newx)
    newx <- factorsToDummies(newx,omitLast=TRUE,factorsInfo=object$factorsInfo)
    predict(object,newx)

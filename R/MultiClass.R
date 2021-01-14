@@ -612,9 +612,8 @@ JOUSBoostCalib <- function(y,X,newx, class_func)
 #########################  eliteCalib()  ################################
 
 # wrapper calibrate by ELiTe
-# arguments
 # author: kenneth
-
+# arguments
 
 #    y: vector of corresponding true class. 
 #        1 indicates positive class and 0 indicates negative class.
@@ -631,16 +630,24 @@ eliteCalib <- function(y,trnScores,newScores)
    # to install EliTE
    require(ELiTE) 
    
-   # translate trnScores into trnProbs in [0,1] and 
-   # newScores into newProbs
-   preout <- prePlattCalib(y,trnScores)
-   trnProb <- plattCalib(preout,trnScores,se=FALSE)$probs
-   newProb <- plattCalib(preout,newScores,se=FALSE)$probs
-   
-   model <- elite.build(trnProb, y)
-   elite.predict(model, newProb)
+   eliteMod <- elite.build(trnScores, y)
+   elite.predict(eliteMod, newScores)
+
 }
 
+#########################  eliteCalib()  ################################
+
+# wrapper of EliTe error measure for calibration
+# author: kenneth
+# arguments
+# y : vector of predictions (classification scores) which is in the interval [0, 1]
+# scores : vector of true class of instances {0,1}
+
+getCalibMeasure <- function(y, scores){
+   require(glmgen)
+   require(ELiTE) 
+   elite.getMeasures(scores, y)
+}
 #########################  calibWrap()  ################################
 
 # wrapper; calibrate all variables in the training set, apply to new

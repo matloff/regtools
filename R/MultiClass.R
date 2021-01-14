@@ -635,19 +635,31 @@ eliteCalib <- function(y,trnScores,newScores)
 
 }
 
-#########################  eliteCalib()  ################################
+#########################  getCalibMeasure()  ################################
 
 # wrapper of EliTe error measure for calibration
 # author: kenneth
 # arguments
-# y : vector of predictions (classification scores) which is in the interval [0, 1]
-# scores : vector of true class of instances {0,1}
+# y : vector of true class of instances {0,1} 
+# scores : vector of predictions (classification scores) which is in the interval [0, 1]
 
 getCalibMeasure <- function(y, scores){
    require(glmgen)
    require(ELiTE) 
-   elite.getMeasures(scores, y)
+   require(philentropy)
+
+   df <- as.data.frame(elite.getMeasures(scores, y))
+
+   # compute cross entropy
+   df$crossEntropy <- 0 - sum(log(scores)*y)
+
+   # computer KL divergence
+   distribution <- data.frame(prob=scores, class=y)
+   df$kl_divergence <- philentropy::KL(distribution)
+   return(df)
 }
+
+
 #########################  calibWrap()  ################################
 
 # wrapper; calibrate all variables in the training set, apply to new
@@ -880,23 +892,37 @@ ROC <- function(y,scores)
 # by each algorithm
 # df (data.frame ): the dataframe that contains all probabilities output 
 # by each calib method and the test labels
+# classvalue: specify the class index (e.g. 0, 1, -1) for calibration
 # num_algorithms (numeric): the number of calibration methods
 # title (character): the title of the plot
 
-multi_calibWrap <- function(formula, df, num_algorithms, title)
-{
-   require(caret)
-   require(ggplot2)
-   cal_obj <- calibration(formula,
+multi_calibWrap <- function(formula, 
+   df, 
+   classvalue, 
+   num_algorithms, 
+   title="Calibration plot"){
+
+  
+  cal_obj <- calibration(formula,
                          data = df,
-                         cuts = 10)
-  p <- plot(cal_obj, type = "o", auto.key = list(columns = num_algorithms,
+                         class=classvalue,
+                         cuts=10)
+
+  p <- plot(cal_obj, type = "o", auto.key = list(rows= num_algorithms,
                                             lines = TRUE,
                                             points = TRUE),
-            main=title)
+            main=title,
+            xlab='Predicted Percentage',
+            ylab='Actual Percentage',
+            ylim = extendrange(c(0, 100)),
+            xlim = extendrange(c(0, 100)))
   
-  g <- ggplot(cal_obj)
+  g <- ggplot(cal_obj)+
+    ggtitle(title)
+  return(list(pplot = p, gplot = g))
+  
 }
+
 
 #########################  crossEntropy()  ################################
 

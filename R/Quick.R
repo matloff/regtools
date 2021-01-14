@@ -594,7 +594,7 @@ qePolyLin <- function(data,yName,deg=2,maxInteractDeg=deg,
 }
 
 predict.qePolyLin <- function(object,newx)
-{
+{  
    class(object) <- 'penrosePoly'
    if (ncol(object$x) == 1) {
       newx <- as.data.frame(newx)

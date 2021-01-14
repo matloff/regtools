@@ -522,14 +522,11 @@ isoCalib <- function(y,trnScores,newScores)
    CORElearn:::applyCalibration(newScores, model)
 }
 
-#########################  hist_bbq_guess_Calib()  ################################
+#########################  bbqCalib()  ################################
 
 # wrapper calibrate either training scores or probability by 
-# hist_scaled, 
-# hist_transformed,
-# BBQ_scaled, 
-# BBQ_transformed, 
-# GUESS
+# Bayesian Binning 
+# reference: https://cran.r-project.org/web/packages/CalibratR/CalibratR.pdf
 
 # author: kenneth
 
@@ -539,19 +536,45 @@ isoCalib <- function(y,trnScores,newScores)
 #        vector of observed class labels (0/1)
 #    trnScores: vector/matrix of scores in training set
 #    newScores: scores of new case(s)
-#    model_idx : which calibration models should be implemented, 
-#     1=hist_scaled, 2=hist_transformed,3=BBQ_scaled, 
-#     4=BBQ_transformed, 5=GUESS, Default: c(1, 2, 3, 4, 5)
 
-hist_bbq_guess_Calib <- function(y,trnScores, newScores, model_idx=c(1, 2, 3, 4, 5))
+
+bbqCalib <- function(y,trnScores, newScores)
 {
    require(CalibratR)
    bbqmod <-  CalibratR:::build_BBQ(y, trnScores)
    # the paper suggests that However, model averaging 
    # is typically superior to model selection (Hoeting et al. 1999)
    # so we use option = 1 for predict_BBQ
-   pred <-  CalibratR:::predict_BBQ(bbqmod, test.scores, 1)
+   CalibratR:::predict_BBQ(bbqmod, test.scores, 1)
 }
+
+#########################  guessCalib()  ################################
+
+# wrapper calibrate either training scores or probability by 
+# a GUESS calibration model 
+# reference: https://cran.r-project.org/web/packages/CalibratR/CalibratR.pdf
+
+# author: kenneth
+
+# arguments
+
+#    y: R factor of labels in training set;
+#        vector of observed class labels (0/1)
+#    trnScores: vector/matrix of scores in training set
+#    newScores: scores of new case(s)
+
+
+guessCalib <- function(y,trnScores, newScores)
+{
+   require(CalibratR)
+   bbqmod <-  CalibratR:::build_GUESS(y, trnScores)
+   # the paper suggests that However, model averaging 
+   # is typically superior to model selection (Hoeting et al. 1999)
+   # so we use option = 1 for predict_BBQ
+   CalibratR:::predict_GUESS(bbqmod, test.scores)
+}
+
+
 
 
 #########################  JOUSBoostCalib()  ################################
@@ -569,24 +592,11 @@ hist_bbq_guess_Calib <- function(y,trnScores, newScores, model_idx=c(1, 2, 3, 4,
 #       y must take values in -1, 1
 #    X: standardized train set
 #    newx: standardized test set
-
-JOUSBoostCalib <- function(y,X,newx)
+#    class_func: 
+JOUSBoostCalib <- function(y,X,newx, class_func)
 {
    require(JOUSBoost)
-   require(kernlab)
 
-   # Use the kernlab svm function with radial kernel
-   # the following follows the JOUSBoost manual 
-   class_func <- function(X, y)
-   {
-      ksvm(X,
-         as.factor(y), 
-         kernel = 'rbfdot',
-         scaled = FALSE, 
-         kpar = list(sigma =  if (is.vector(X)) 1 else 1 / ncol(X)),
-         nu=0.5,
-         C=1)  
-   } 
    pred_func <- function(obj, X)
    { 
       as.numeric(as.character(predict(obj, X))) 

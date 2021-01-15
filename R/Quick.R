@@ -113,6 +113,7 @@ qeLogit <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
    outlist
 }
 
+
 # predict.qeLogit: predict Ys from new Xs
 
 # arguments:  see above
@@ -661,7 +662,13 @@ predict.qePolyLog <- function(object,newx)
    predCode <- predict(object,newx)
    # map back to original Y names
    tmp <- object$earlierLevels[predCode+1]
-   list(predClasses=tmp)
+   g <- function(glmOutsElt) predict(object,newx,type='response') 
+   probs <- sapply(glmOuts,g)
+   if (is.vector(probs)) probs <- matrix(probs,nrow=1)
+   colnames(probs) <- object$earlierLevels
+   sumprobs <- apply(probs,1,sum)  
+   probs <- (1/sumprobs) * probs
+   list(predClasses=tmp, probs=probs)
 }
 
 #########################  qeLASSO()  #################################

@@ -567,15 +567,6 @@ qePolyLin <- function(data,yName,deg=2,maxInteractDeg=deg,
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol,drop=FALSE]
-##    data <- charsToFactors(data)
-##    if (hasFactors(x)) {
-##       xm <- factorsToDummies(x,omitLast=TRUE)
-##       factorsInfo <- attr(xm,'factorsInfo')
-##    } else {
-##       xm <- as.matrix(x)
-##       factorsInfo <- NULL
-##    }
-##    if (!is.numeric(xm)) stop('X must be numeric')
    makeAllNumeric(x,data)
    data <- cbind(xm,y)
    data <- as.data.frame(data)
@@ -663,13 +654,15 @@ predict.qePolyLog <- function(object,newx)
    # map back to original Y names
    tmp <- object$earlierLevels[predCode+1]
    g <- function(glmOutsElt) predict(object,newx,type='response') 
-   probs <- sapply(glmOuts,g)
+   probs <- sapply(object$glmOuts,g)
    if (is.vector(probs)) probs <- matrix(probs,nrow=1)
    colnames(probs) <- object$earlierLevels
    sumprobs <- apply(probs,1,sum)  
    probs <- (1/sumprobs) * probs
    list(predClasses=tmp, probs=probs)
 }
+
+ppl <- predict.qePolyLog
 
 #########################  qeLASSO()  #################################
 

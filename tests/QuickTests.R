@@ -107,12 +107,22 @@ mlb2 <- mlb1
 mlb2$wt2 <- mlb2$Weight^2
 z <- qeLogit(mlb2,'Position',holdout=NULL)
 predict(z,mlb2[8,-1])
+# same as above
 
-
+# what about having only 2 classes?
+catcher <- toSubFactor(mlb$Position,'Catcher')
+mlb3 <- mlb
+mlb3$Position <- catcher
+predict(z,mlb3[8,-1])
+# $predClasses
+# [1] "zzzOther"
+# $probs
+#        Catcher  zzzOther
+# [1,] 0.1533529 0.8466471
 
 # day2
 d2 <- day2[,-(13:14)]
-z <- pcaKNN(0.6,d2,'tot',k=25,holdout=NULL)
+z <- pcaQE(0.6,d2,'tot','qeKNN',k=25,holdout=NULL)
 newx <- d2[8,-13]
 predict(z,newx)
 #         [,1]

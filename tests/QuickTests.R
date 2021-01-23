@@ -24,41 +24,51 @@ predict(rfout,newx)
       11 
 # 199.1714
 
+set.seed(9999)
 # how about some other ML methods?
 lassout <- qeLASSO(mlb,'Weight')
 lassout$testAcc
-# [1] 14.23122
+# [1] 12.31019
 # poly reg, degree 3 
 polyout <- qePolyLin(mlb,'Weight',3)
 polyout$testAcc
-# [1] 12.69412
+# [1] 13.83444
 nnout <- qeNeural(mlb,'Weight')
 # ...
 nnout$testAcc
-# [1] 12.03419
+# [1] 10.23094
 # try some nondefault hyperparams
 nnout <- qeNeural(mlb,'Weight',hidden=c(200,200),nEpoch=50)
 nnout$testAcc
-# [1] 15.8038
+# [1] 13.40559
 
 # predict player position, 6 categories
 knnout <- qeKNN(mlb,'Position',k=25)
 rfout <- qeRF(mlb,'Position')
 knnout$testAcc
-# [1] 0.7425743
+# [1] 0.7524752
 rfout$testAcc
-# [1] 0.6930693
+# [1] 0.6138614
 table(mlb$Pos) / sum(table(mlb$Pos))
-
 #          Catcher    First_Baseman       Outfielder   Relief_Pitcher 
 #       0.07487685       0.05418719       0.19113300       0.31034483 
 #   Second_Baseman        Shortstop Starting_Pitcher    Third_Baseman 
 #       0.05714286       0.05123153       0.21674877       0.04433498 
 
 # kNN worse than always guessing Relief_Pitcher, RF about the same
+z <- qePolyLog(mlb,'Position',holdout=NULL)
+predict(z,mlb[8,-1])
+# $predClasses
+# [1] "Outfielder"
+# $probs
+#      Catcher First_Baseman Outfielder Relief_Pitcher Second_Baseman Shortstop
+# [1,]   0.125         0.125      0.125          0.125          0.125     0.125
+#      Starting_Pitcher Third_Baseman
+# [1,]            0.125         0.125
+z <- qePolyLog(mlb[,c(1,3)],'Position',holdout=NULL)
+predict(z,mlb[8,3])
 
 set.seed(9999)
-
 lgout <- qeLogit(mlb,'Position')
 lgout$testAcc
 # [1] 0.6732673
@@ -81,8 +91,6 @@ predict(z,newx)
 #         [,1]
 # [1,] 1440.44
 
-data(mlb)
-mlb <- mlb[,3:6]
 qeCompare(mlb,'Weight',
    c('qeLin','qePolyLin','qeKNN','qeRF','qeLASSO','qeNeural'),25)
 #       qeFtn  meanAcc

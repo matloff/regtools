@@ -657,9 +657,15 @@ predict.qePolyLog <- function(object,newx)
    # g <- function(glmOutsElt) predict(object,newx,type='response') 
    # probs <- sapply(object$glmOuts,g)
    if (is.vector(probs)) probs <- matrix(probs,nrow=1)
-   colnames(probs) <- object$earlierLevels
-   sumprobs <- apply(probs,1,sum)  
-   probs <- (1/sumprobs) * probs
+   earlierLevels <- object$earlierLevels
+   if (length(earlierLevels) >  2) {
+      colnames(probs) <- object$earlierLevels
+      sumprobs <- apply(probs,1,sum)  
+      probs <- (1/sumprobs) * probs
+   }
+   else {
+      colnames(probs) <- object$earlierLevels[1]
+   }
    list(predClasses=tmp, probs=probs)
 }
 

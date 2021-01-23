@@ -76,12 +76,39 @@ newx <- data.frame(Height=73.5,Age=26,Weight=200)
 predict(lgout,newx)
 # $predClasses
 # [1] "Relief_Pitcher"
-# 
 # $probs
 #         Catcher First_Baseman Outfielder Relief_Pitcher Second_Baseman
 # [1,] 0.06527784    0.05201025   0.214516      0.3336662     0.03421254
 #       Shortstop Starting_Pitcher Third_Baseman
 # [1,] 0.03345139        0.2252583    0.04160745
+
+z <- qePolyLog(mlb,'Position',holdout=NULL)
+predict(z,mlb[8,-1])
+# $predClasses
+# [1] "Outfielder"
+# $probs
+#       Catcher First_Baseman Outfielder Relief_Pitcher Second_Baseman Shortstop
+# [1,] 0.173676    0.04955253  0.1418191     0.06851684     0.04072947 0.2907195
+#      Starting_Pitcher Third_Baseman
+# [1,]       0.07216886     0.1628177
+
+# check via qeLogit()
+mlb1 <- mlb[,c(1,3)]  # Position, Weight only
+z <- qePolyLog(mlb1,'Position',holdout=NULL)
+predict(z,mlb1[8,-1])
+# $predClasses
+# [1] "Relief_Pitcher"
+# $probs
+#         Catcher First_Baseman Outfielder Relief_Pitcher Second_Baseman
+# [1,] 0.09858535    0.05010766 0.03951525     0.03506279     0.05183345
+#      Shortstop Starting_Pitcher Third_Baseman
+# [1,] 0.2148096        0.2074912     0.3025947
+mlb2 <- mlb1
+mlb2$wt2 <- mlb2$Weight^2
+z <- qeLogit(mlb2,'Position',holdout=NULL)
+predict(z,mlb2[8,-1])
+
+
 
 # day2
 d2 <- day2[,-(13:14)]
@@ -100,4 +127,6 @@ qeCompare(mlb,'Weight',
 # 4      qeRF 13.46515
 # 5   qeLASSO 13.27564
 # 6  qeNeural 14.01487
+qeCompare(mlb,'Position',
+   c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural'),25)
 

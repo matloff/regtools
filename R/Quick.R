@@ -610,8 +610,6 @@ predict.qePoly <- function()
 qePolyLog <- function(data,yName,deg=2,maxInteractDeg=deg,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
-# stop('under construction')
-
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol,drop=FALSE]
@@ -651,12 +649,17 @@ predict.qePolyLog <- function(object,newx)
 {
    class(object) <- 'polyFit'
    predCode <- predict(object,newx)
-   # map back to original Y names
+   # map back to original Y names; polyreg starts at 0
    tmp <- object$earlierLevels[predCode+1]
    probs <- attr(predCode,'prob')
-   # g <- function(glmOutsElt) predict(object,newx,type='response') 
-   # probs <- sapply(object$glmOuts,g)
-   if (is.vector(probs)) probs <- matrix(probs,nrow=1)
+   if (is.vector(probs)) {
+      # scenarios:
+      # (a) newx is a single new case to be predicted
+      # (b) there are just 2 classes, treated ast "1" by polyreg
+      if (nrow(newx) == 1)
+         probs <- matrix(probs,nrow=1)
+      else probs <- cbind(probs,1-probs)
+   }
    earlierLevels <- object$earlierLevels
    if (length(earlierLevels) >  2) {
       colnames(probs) <- object$earlierLevels
@@ -664,7 +667,7 @@ predict.qePolyLog <- function(object,newx)
       probs <- (1/sumprobs) * probs
    }
    else {
-      colnames(probs) <- object$earlierLevels[1]
+      colnames(probs) <- object$earlierLevels
    }
    list(predClasses=tmp, probs=probs)
 }

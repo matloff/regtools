@@ -273,8 +273,10 @@ toSuperFactor <- function(inFactor,superLevels)
 }
 
 # here we have a factor f with various levels, but want to lump all
-# levelsl but the ones in saveLevels to a new level Other
-toSubFactor <- function(f,saveLevels,lumpedLevel='other') 
+# levelsl but the ones in saveLevels to a new level, lumpedLevel; the
+# default for the latter is 'zzzOther', chosen to ensure that the lumped
+# level is last
+toSubFactor <- function(f,saveLevels,lumpedLevel='zzzOther') 
 {
    lvls <- levels(f)
    fChar <- as.character(f)

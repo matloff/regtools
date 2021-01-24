@@ -408,23 +408,27 @@ scoresToProbs <- knnCalib
 
 # run the logit once and save, rather doing running repeatedly, each
 # time we have new predictions to make
-# author: norm, kenneth
+# author: Norm, Kenneth
 
 # arguments:
 
 #    y, trnScores, newScores, value as above
 #    degree: the degree of polynomial for the logistic model
 
-prePlattCalib <- function(y,trnScores, deg) 
+prePlattCalib <- function(y,trnScores,deg) 
 {
-
    if (!is.factor(y)) stop('Y must be an R factor')
    if (is.vector(trnScores))
       trnScores <- matrix(trnScores,ncol=1)
    tsDF <- as.data.frame(trnScores)
+   if (nrow(trnScores) != length(y)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
+   }
    dta <- cbind(y,tsDF)
-   res <- qePolyLog(dta,'y',deg=deg, maxInteractDeg=0)
+   res <- qePolyLog(dta,'y',deg=deg,maxInteractDeg=0,holdout=NULL)
 }
+
+ppc <- prePlattCalib
 
 plattCalib <- function(prePlattCalibOut,newScores,se=FALSE) 
 {
@@ -676,8 +680,8 @@ getCalibMeasure <- function(y, scores){
 #     k: number of nearest neighbors (knnCalib case)
 #     plotsPerRow: number of plots per row; 0 means no plotting
 
-calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,k=NULL,
-   plotsPerRow=2,nBins=0,se=FALSE) 
+calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
+   k=NULL,plotsPerRow=2,nBins=0,se=FALSE) 
 {
    require(kernlab)
    classNames <- levels(trnY)
@@ -809,6 +813,21 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,k=NULL
       par(mfrow=c(1,1))
    }
    res
+}
+
+##########################################################################
+########################  e1017 routines  ################################
+##########################################################################
+
+# for those users of the probability calibration functions on output
+# from the e1071 package, here are useful utilities
+
+# replace '/' by '_' in the colnames of the decision values
+
+rmSlashesE1017 <- function(dvals) 
+{
+   colnames(dvals) <- gsub('/','_',colnames(dvals)) 
+   dvals
 }
 
 # calculcate decision values ("scores") for new cases on previously-fit

@@ -681,7 +681,7 @@ getCalibMeasure <- function(y, scores){
 #     plotsPerRow: number of plots per row; 0 means no plotting
 
 calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
-   k=NULL,plotsPerRow=2,nBins=0,se=FALSE) 
+   opts=NULL,plotsPerRow=2,nBins=0,se=FALSE) 
 {
    require(kernlab)
    classNames <- levels(trnY)
@@ -689,10 +689,12 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
    ym <- factorToDummies(tstY,fname='y')
    
    if (calibMethod == 'knnCalib') {
+      k <- opts$k
       probs <- knnCalib(trnY,trnScores,newScores,k)
       res <- list(probs=probs,ym=ym)
    } else if (calibMethod == 'plattCalib') {
-      preout <- prePlattCalib(trnY,trnScores)
+      deg <- opts$deg
+      preout <- prePlattCalib(trnY,trnScores,deg)
       plattOut <- plattCalib(preout,newScores,se=se)
       if (se) {
          probs <- plattOut$probs
@@ -824,7 +826,7 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
 
 # replace '/' by '_' in the colnames of the decision values
 
-rmSlashesE1017 <- function(dvals) 
+rmSlashesE1071 <- function(dvals) 
 {
    colnames(dvals) <- gsub('/','_',colnames(dvals)) 
    dvals

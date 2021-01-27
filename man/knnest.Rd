@@ -239,8 +239,8 @@ kNN(ped[,-10],ped[,10],c(35,1,0,0,1,0,0,0,1,50),25) $regests
 # [1] 66460
 
 # fit, and predict occupation 101 for a 35-year-old man, MS degree, 
-# worked 50 weeks, using 25 nearest neighbors
-z <- kNN(ped[,-c(4:8)],ped[,4],c(35,1,0,1,50),25,classif=TRUE)
+# wage $55K, worked 50 weeks, using 25 nearest neighbors
+z <- kNN(ped[,-c(4:8)],ped[,4],c(35,1,0,1,55,50),25,classif=TRUE)
 z$regests
 # [1] 0.24  24% chance of occupation 101
 z$ypreds

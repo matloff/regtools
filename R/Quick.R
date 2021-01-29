@@ -109,6 +109,7 @@ qeLogit <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
    class(outlist) <- c('qeLogit')
    if (!is.null(holdout)) {
       predictHoldout(outlist)
+      outlist$holdIdxs <- holdIdxs
    }
    outlist
 }
@@ -173,6 +174,7 @@ qeLin <- function(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
    class(lmout) <- c('qeLin',class(lmout))
    if (!is.null(holdout)) {
       predictHoldout(lmout)
+      lmout$holdIdxs <- holdIdxs
       if (!classif) {
          summ <- summary(lmout)
          lmout$R2 <- summ$r.squared
@@ -242,7 +244,6 @@ qeKNN <- function(data,yName,k=25,scaleX=TRUE,
       predictHoldout(knnout)
       knnout$holdIdxs <- holdIdxs
    } else knnout$holdIdxs <- NULL
-   
    knnout
 }
 
@@ -286,7 +287,10 @@ qeRF <- function(data,yName,nTree=500,minNodeSize=10,
    rfout$classif <- classif
    rfout$trainRow1 <- getRow1(data,yName)
    class(rfout) <- c('qeRF','randomForest')
-   if (!is.null(holdout)) predictHoldout(rfout)
+   if (!is.null(holdout)) {
+      predictHoldout(rfout)
+      rfout$holdIdxs <- holdIdxs
+   }
    rfout
 }
 
@@ -341,7 +345,10 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
    svmout$formula <- frml
    svmout$trainRow1 <- getRow1(data,yName)
    class(svmout) <- c('qeSVM',class(svmout))
-   if (!is.null(holdout)) predictHoldout(svmout)
+   if (!is.null(holdout)) {
+      predictHoldout(svmout)
+      svmout$holdIdxs <- holdIdxs
+   }
    svmout
 }
 
@@ -429,7 +436,10 @@ qeGBoost <- function(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
    outlist$nTree <- nTree
    outlist$trainRow1 <- getRow1(data,yName)
    class(outlist) <- c('qeGBoost')
-   if (!is.null(holdout)) predictHoldout(outlist)
+   if (!is.null(holdout)) {
+      predictHoldout(outlist)
+      outlist$holdIdxs <- holdIdxs
+   }
    outlist
 }
 
@@ -515,7 +525,10 @@ qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
    krsout$yFactor <- yFactor
    krsout$trainRow1 <- getRow1(data,yName)
    class(krsout) <- c('qeNeural',class(krsout))
-   if (!is.null(holdout)) predictHoldout(krsout)
+   if (!is.null(holdout)) {
+      predictHoldout(krsout)
+      krsout$holdIdxs <- holdIdxs
+   }
    krsout
 }
 
@@ -581,7 +594,10 @@ qePolyLin <- function(data,yName,deg=2,maxInteractDeg=deg,
    qeout$factorsInfo <- factorsInfo
    qeout$trainRow1 <- getRow1(data,yName)
    class(qeout) <- c('qePolyLin',class(qeout))
-   if (!is.null(holdout)) predictHoldout(qeout)
+   if (!is.null(holdout)) {
+      predictHoldout(qeout)
+      qeout$holdIdxs <- holdIdxs
+   }
    qeout
 }
 
@@ -641,6 +657,7 @@ qePolyLog <- function(data,yName,deg=2,maxInteractDeg=deg,
       data <- dataSave
       data[,ycol] <- y
       predictHoldout(qeout)
+      qeout$holdIdxs <- holdIdxs
    }
    qeout
 }
@@ -700,7 +717,10 @@ qeLASSO <- function(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
    qeout$factorsInfo <- factorsInfo
    if (classif) qeout$classNames <- levels(y)
    class(qeout) <- c('qeLASSO',class(qeout))
-   if (!is.null(holdout)) predictHoldout(qeout)
+   if (!is.null(holdout)) {
+      predictHoldout(qeout)
+      qeout$holdIdxs <- holdIdxs
+   }
    qeout
 }
 
@@ -881,7 +901,7 @@ getXY <- function(data,yName,xMustNumeric=FALSE,classif,
 #    holdout: holdout set size
 #    data: XY data frame
 
-# globals/vale:
+# globals/value:
 #    tst: the generated holdout set
 #    data: the correspondingly reduced training set
 #    holdIdxs: indices of the holdout set in original ata
@@ -1047,3 +1067,7 @@ genericPlot <- function(object)
    plot(obj)
 }
 
+whatSplit <- function(qeObj) 
+{
+
+}

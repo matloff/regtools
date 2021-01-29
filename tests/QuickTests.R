@@ -14,13 +14,16 @@ qeCompare(mlb,'Weight',
 # 6  qeNeural 14.01487  
 # qeNeural will give different numbers for the same seed, around 13.8
 qeCompare(mlb,'Position',
-   c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural'),25)
-      qeFtn   meanAcc
-1   qeLogit 0.6677228
-2 qePolyLog 0.6843564
-3     qeKNN 0.6819802
-4      qeRF 0.6780198
-5  qeNeural 0.6661386
+   c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural','qeSVM','qeGBoost'),25)
+#       qeFtn   meanAcc
+# 1   qeLogit 0.6677228
+# 2 qePolyLog 0.6843564
+# 3     qeKNN 0.6819802
+# 4      qeRF 0.6780198
+# 5  qeNeural 0.6661386
+# 6     qeSVM 0.6542574
+# 7  qeGBoost 0.6657426
+
 data(peFactors)  
 pef <- peFactors[,c(1,3,5,7:9)]  
 qeCompare(pef,'occ',c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural'),25)

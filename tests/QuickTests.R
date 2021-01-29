@@ -23,6 +23,13 @@ qeCompare(mlb,'Position',
 5  qeNeural 0.6661386
 data(peFactors)  
 pef <- peFactors[,c(1,3,5,7:9)]  
+qeCompare(pef,'occ',c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural'),25)
+      qeFtn meanAcc
+1   qeLogit 0.61444
+2 qePolyLog 0.61136
+3     qeKNN 0.62524
+4      qeRF 0.61520
+5  qeNeural 0.61204
 
 
 

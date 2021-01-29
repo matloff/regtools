@@ -30,8 +30,15 @@ qeCompare(pef,'occ',c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural'),25)
 3     qeKNN 0.62524
 4      qeRF 0.61520
 5  qeNeural 0.61204
-
-
+# UCI vertebrae dataset, column_3C
+#  vert <- read.table('~/Datasets/Vertebrae/column_3C.dat',header=FALSE,stringsAsFactors=TRUE)
+#  qeCompare(vert,'V7',c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural'),25)
+#        qeFtn   meanAcc
+#  1   qeLogit 0.1419355
+#  2 qePolyLog 0.1974194
+#  3     qeKNN 0.2193548
+#  4      qeRF 0.1625806
+#  5  qeNeural 0.3393548
 
 set.seed(9999)
 

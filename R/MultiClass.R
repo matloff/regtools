@@ -681,7 +681,7 @@ getCalibMeasure <- function(y, scores){
 #     plotsPerRow: number of plots per row; 0 means no plotting
 
 calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
-   opts=NULL,plotsPerRow=2,nBins=0,se=FALSE) 
+   opts=NULL,plotsPerRow=2,nBins=10,se=FALSE) 
 {
    require(kernlab)
    classNames <- levels(trnY)
@@ -864,6 +864,8 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE)
    fittedYCounts <- tapply(probs,probsBinNums,sum)
    actualYCounts <- tapply(y,probsBinNums,sum)
    if (plotGraph) {
+upLim <- 1.0    # NM, Jan. 29: temporary until add upLim arg, cw, rd
+        ly <- upLim * length(y)
       plot(fittedYCounts,actualYCounts)
       abline(0,1)
    }

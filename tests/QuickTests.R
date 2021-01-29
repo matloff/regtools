@@ -3,6 +3,29 @@
 data(mlb)  
 mlb <- mlb[,3:6]  # position, height, weight, age
 
+qeCompare(mlb,'Weight',
+   c('qeLin','qePolyLin','qeKNN','qeRF','qeLASSO','qeNeural'),25)
+#       qeFtn  meanAcc
+# 1     qeLin 13.30490
+# 2 qePolyLin 13.33584
+# 3     qeKNN 13.72708
+# 4      qeRF 13.46515
+# 5   qeLASSO 13.27564
+# 6  qeNeural 14.01487  
+# qeNeural will give different numbers for the same seed, around 13.8
+qeCompare(mlb,'Position',
+   c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural'),25)
+      qeFtn   meanAcc
+1   qeLogit 0.6677228
+2 qePolyLog 0.6843564
+3     qeKNN 0.6819802
+4      qeRF 0.6780198
+5  qeNeural 0.6661386
+data(peFactors)  
+pef <- peFactors[,c(1,3,5,7:9)]  
+
+
+
 set.seed(9999)
 
 # fit models
@@ -127,16 +150,4 @@ newx <- d2[8,-13]
 predict(z,newx)
 #         [,1]
 # [1,] 1440.44
-
-qeCompare(mlb,'Weight',
-   c('qeLin','qePolyLin','qeKNN','qeRF','qeLASSO','qeNeural'),25)
-#       qeFtn  meanAcc
-# 1     qeLin 13.30490
-# 2 qePolyLin 13.33584
-# 3     qeKNN 13.72708
-# 4      qeRF 13.46515
-# 5   qeLASSO 13.27564
-# 6  qeNeural 14.01487
-qeCompare(mlb,'Position',
-   c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural'),25)
 

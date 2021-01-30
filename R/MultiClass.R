@@ -857,17 +857,16 @@ getDValsE1071 <- function(object,newx)
 #    nBins: number of bins
 #    plotGraph: TRUE means plotting is desired
 
-reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE) 
+reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL) 
 {
    breaks <- seq(0,1,1/nBins)
    probsBinNums <- findInterval(probs,breaks)
    fittedYCounts <- tapply(probs,probsBinNums,sum)
    actualYCounts <- tapply(y,probsBinNums,sum)
    if (plotGraph) {
-upLim <- 1.0    # NM, Jan. 29: temporary until add upLim arg, cw, rd
-        ly <- upLim * length(y)
-      plot(fittedYCounts,actualYCounts)
-      abline(0,1)
+      ly <- length(y)
+      plot(fittedYCounts,actualYCounts,xlim=c(0,ly),ylim=c(0,ly))
+      abline(0,1,col='red')
    }
    cbind(fittedYCounts,actualYCounts)
 }

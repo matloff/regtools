@@ -664,9 +664,37 @@ getCalibMeasure <- function(y, scores){
 }
 
 
-#########################  calibWrap()  ################################
+####################  calibWrap() and preCalibWrap()  #############################
 
-# wrapper; calibrate model in the training set, apply to new data
+# calibWrap() is a wrapper; calibrate model in the training set, apply to test data
+
+# preCalibWrap() can be used on the orginal dataset, to set the holdout
+# set, run the model etc.
+
+preCalibWrap <- defmacro(dta,yName,qeFtn,calibMethod,
+   qeArgs=NULL,holdout=500,nBins=1,expr=
+      {
+         qecall <- paste0('qeout <- ',qeFtn,'(dta,"',yName,'",',qeArgs,',
+            holdout=',holdout,')')
+         eval(parse(text=qecall))
+      
+         tstIdxs <- qeout$holdIdxs
+         trnIdxs <- setdiff(1:nrow(dta),tstIdxs)
+         ycol <- qeout$ycol
+         trnX <- dta[trnIdxs,-ycol]
+         trnY <- dta[trnIdxs,ycol]
+         tstX <- dta[tstIdxs,-ycol]
+         tstY <- dta[tstIdxs,ycol]
+      
+         if (qeFtn == 'qeSVM') {
+            trnScores <- qeout$decision.values
+            tstScores <- getDValsE1071(qeout,tstX)
+            trnScores <- rmSlashesE1071(trnScores)
+            tstScores <- rmSlashesE1071(tstScores)
+         }
+      
+      }
+   )
 
 # arguments
 

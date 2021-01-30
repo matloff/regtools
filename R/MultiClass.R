@@ -678,10 +678,12 @@ getCalibMeasure <- function(y, scores){
 #     newScores: scores for the data to be predicted
 #     calibMethod: currently knnCalib or plattCalib
 #     k: number of nearest neighbors (knnCalib case)
-#     plotsPerRow: number of plots per row; 0 means no plotting
+#     plotsPerRow: number of plots per row; 0 means no trellis plotting
+#     oneAtATime: if TRUE, show the plots one at a time, and give the
+#        user the option to print and/or zoom in
 
 calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
-   opts=NULL,plotsPerRow=2,nBins=10,se=FALSE) 
+   opts=NULL,nBins=10,se=FALSE,plotsPerRow=0,oneAtATime=TRUE) 
 {
    require(kernlab)
    classNames <- levels(trnY)
@@ -813,6 +815,11 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
          }
       }
       par(mfrow=c(1,1))
+   } else if (oneAtATime) {
+      for (cls in 1:nClass) {
+         reliabDiagram(ym[,cls],res$probs[,cls],nBins,TRUE)
+         readline('hit Enter for next plot')
+      }
    }
    res
 }

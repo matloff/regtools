@@ -817,7 +817,7 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
       par(mfrow=c(1,1))
    } else if (oneAtATime) {
       for (cls in 1:nClass) {
-         reliabDiagram(ym[,cls],res$probs[,cls],nBins,TRUE)
+         reliabDiagram(ym[,cls],res$probs[,cls],nBins,TRUE,classNum=cls)
          while (1) {
             print('you can go to the next plot, or zoom, or print to file')
             cmd <- 
@@ -827,8 +827,10 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
             if (length(cmdParts) == 1)
                prToFile(cmd)
             else {
+               if (cmdParts[2] == 'ly') cmdParts[2] <- as.numeric(nrow(ym))
                zoom <- as.numeric(cmdParts)
-               reliabDiagram(ym[,cls],res$probs[,cls],nBins,TRUE,zoom=zoom)
+               reliabDiagram(ym[,cls],res$probs[,cls],nBins,TRUE,zoom=zoom,
+                  classNum=cls)
             }
          }
       }
@@ -876,7 +878,7 @@ getDValsE1071 <- function(object,newx)
 #    nBins: number of bins
 #    plotGraph: TRUE means plotting is desired
 
-reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL) 
+reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL) 
 {
    breaks <- seq(0,1,1/nBins)
    probsBinNums <- findInterval(probs,breaks)
@@ -888,13 +890,17 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL)
          zoomTo <- 1:nBins
          lims <- c(0,ly) 
       } else {
-      browser()
          ftdy <- fittedYCounts
          zoomTo <- which(ftdy >= zoom[1] & ftdy <= zoom[2])
          lims <- zoom
       }
-      plot(fittedYCounts[zoomTo],actualYCounts[zoomTo],xlim=lims,ylim=lims)
+      plot(fittedYCounts[zoomTo],actualYCounts[zoomTo],
+         xlim=lims,ylim=lims,xlab='fittedYCounts',ylab='actualYCounts')
       abline(0,1,col='red')
+      if (!is.null(classNum)) {
+         topLabel <- paste('Class',classNum)
+         title(main=topLabel,col='blue')
+      }
    }
    cbind(fittedYCounts,actualYCounts)
 }

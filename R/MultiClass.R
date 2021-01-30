@@ -370,22 +370,22 @@ confusion <- function(actual,pred) {
 
 #    y: R factor of labels in training set
 #    trnScores: vector/matrix of scores in training set
-#    newScores: scores of new case(s)
+#    tstScores: scores of new case(s)
 #    k: number of nearest neighbors
 
 # value: vector of estimated probabilities for the new cases
 
-knnCalib <- function(y,trnScores,newScores,k) 
+knnCalib <- function(y,trnScores,tstScores,k) 
 {
    if (!is.factor(y)) stop('Y must be an R factor')
    if (is.vector(trnScores))
       trnScores <- matrix(trnScores,ncol=1)
-   if (is.vector(newScores))
-      newScores <- matrix(newScores,ncol=1)
-   tmp <- FNN::get.knnx(trnScores,newScores,k)
+   if (is.vector(tstScores))
+      tstScores <- matrix(tstScores,ncol=1)
+   tmp <- FNN::get.knnx(trnScores,tstScores,k)
    classNames <- levels(y)
    nClass <- length(classNames)
-   doRowI <- function(i)  # do row i of newScores
+   doRowI <- function(i)  # do row i of tstScores
    {
       idxs <- tmp$nn.index[i,]
       nhbrY <- y[idxs]
@@ -397,7 +397,7 @@ knnCalib <- function(y,trnScores,newScores,k)
       probs[nhbrClasses] = tblNhbrs / k
       probs
    }
-   tmp <- t(sapply(1:nrow(newScores),doRowI))
+   tmp <- t(sapply(1:nrow(tstScores),doRowI))
    tmp
 }
 
@@ -412,7 +412,7 @@ scoresToProbs <- knnCalib
 
 # arguments:
 
-#    y, trnScores, newScores, value as above
+#    y, trnScores, tstScores, value as above
 #    degree: the degree of polynomial for the logistic model
 
 prePlattCalib <- function(y,trnScores,deg) 
@@ -430,12 +430,12 @@ prePlattCalib <- function(y,trnScores,deg)
 
 ppc <- prePlattCalib
 
-plattCalib <- function(prePlattCalibOut,newScores,se=FALSE) 
+plattCalib <- function(prePlattCalibOut,tstScores,se=FALSE) 
 {
-   if (is.vector(newScores)) {
-      newScores <- matrix(newScores,ncol=1)
+   if (is.vector(tstScores)) {
+      tstScores <- matrix(tstScores,ncol=1)
    }
-   tsDF <- as.data.frame(newScores)
+   tsDF <- as.data.frame(tstScores)
    probs <- predict(prePlattCalibOut,tsDF)$probs
    if(se) {
       require("RcmdrMisc")
@@ -443,11 +443,11 @@ plattCalib <- function(prePlattCalibOut,newScores,se=FALSE)
       for (i in 1:length(levels(as.factor(prePlattCalibOut$y))))
       {
          model = prePlattCalibOut$glmOuts[[i]]
-         nscores = ncol(newScores)
+         nscores = ncol(tstScores)
          
          alg = "1/(1+exp((-1)*(b0"
          for (j in 1:nscores) {
-            alg = paste(alg,"+b",j,"*",colnames(newScores)[j], sep = "")
+            alg = paste(alg,"+b",j,"*",colnames(tstScores)[j], sep = "")
          }
          alg = paste(alg,")))", sep = "")
          SE = DeltaMethod(model,alg)$test$SE
@@ -666,23 +666,23 @@ getCalibMeasure <- function(y, scores){
 
 #########################  calibWrap()  ################################
 
-# wrapper; calibrate all variables in the training set, apply to new
-# data
+# wrapper; calibrate model in the training set, apply to new data
 
 # arguments
 
-#     qeout: output of a qe*-series function
+#     
 #     trnScores: vector/matrix of scores output from running the
 #        classification method on the training set; will have either c
 #        or c(c-1)/2 columns, where c is the number of classes
-#     newScores: scores for the data to be predicted
+#     tstScores: scores for the data to be predicted
 #     calibMethod: currently knnCalib or plattCalib
-#     k: number of nearest neighbors (knnCalib case)
+#     opts: R list of classification-specific parameters, e.g.
+#        list(k = 50) for knnCalib
 #     plotsPerRow: number of plots per row; 0 means no trellis plotting
 #     oneAtATime: if TRUE, show the plots one at a time, and give the
 #        user the option to print and/or zoom in
 
-calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
+calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
    opts=NULL,nBins=10,se=FALSE,plotsPerRow=0,oneAtATime=TRUE) 
 {
    require(kernlab)
@@ -692,12 +692,12 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
    
    if (calibMethod == 'knnCalib') {
       k <- opts$k
-      probs <- knnCalib(trnY,trnScores,newScores,k)
+      probs <- knnCalib(trnY,trnScores,tstScores,k)
       res <- list(probs=probs,ym=ym)
    } else if (calibMethod == 'plattCalib') {
       deg <- opts$deg
       preout <- prePlattCalib(trnY,trnScores,deg)
-      plattOut <- plattCalib(preout,newScores,se=se)
+      plattOut <- plattCalib(preout,tstScores,se=se)
       if (se) {
          probs <- plattOut$probs
          se <- plattOut$se
@@ -710,7 +710,7 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
 
       isoProbs = list()
       for (pair in colnames(trnScores)){
-         pred <- isoreg(x = newScores[,which(colnames(newScores) == pair)])
+         pred <- isoreg(x = tstScores[,which(colnames(tstScores) == pair)])
          isoProbs[[pair]] = pred$yf
       }
       
@@ -735,13 +735,13 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
          
          y_select = y_binary[!is.na(y_binary)]
          trnScores_select = trnScores[!is.na(y_binary),colidx]
-         newScores_select = newScores[,colidx]
+         tstScores_select = tstScores[,colidx]
          
          bbqmod <-  CalibratR:::build_BBQ(y_select, trnScores_select)
          # the paper suggests that However, model averaging 
          # is typically superior to model selection (Hoeting et al. 1999)
          # so we use option = 1 for predict_BBQ
-         pred <-  CalibratR:::predict_BBQ(bbqmod, newScores_select, 1)
+         pred <-  CalibratR:::predict_BBQ(bbqmod, tstScores_select, 1)
          bbqProbs[[pair]] = pred$predictions
       }
       
@@ -768,10 +768,10 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
          
          y_select = y_binary[!is.na(y_binary)]
          trnScores_select = trnScores[!is.na(y_binary),colidx]
-         newScores_select = newScores[,colidx]
+         tstScores_select = tstScores[,colidx]
          
          elitemod <-  elite.build(y_select, trnScores_select)
-         pred <- elite.predict(elitemod, newScores_select, 1)
+         pred <- elite.predict(elitemod, tstScores_select, 1)
          eliteProbs[[pair]] = pred
       }
       

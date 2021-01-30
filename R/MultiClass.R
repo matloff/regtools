@@ -671,30 +671,28 @@ getCalibMeasure <- function(y, scores){
 # preCalibWrap() can be used on the orginal dataset, to set the holdout
 # set, run the model etc.
 
-preCalibWrap <- defmacro(dta,yName,qeFtn,calibMethod,
-   qeArgs=NULL,holdout=500,nBins=1,expr=
+preCalibWrap <- function(dta,yName,qeFtn,qeArgs=NULL,holdout=500)
       {
          qecall <- paste0('qeout <- ',qeFtn,'(dta,"',yName,'",',qeArgs,',
-            holdout=',holdout,')')
+            holdout=',holdout,')') 
          eval(parse(text=qecall))
       
          tstIdxs <- qeout$holdIdxs
          trnIdxs <- setdiff(1:nrow(dta),tstIdxs)
-         ycol <- qeout$ycol
-         trnX <- dta[trnIdxs,-ycol]
-         trnY <- dta[trnIdxs,ycol]
-         tstX <- dta[tstIdxs,-ycol]
-         tstY <- dta[tstIdxs,ycol]
+         ycol <- which(names(dta) == yName)
+         trnX <<- dta[trnIdxs,-ycol]
+         trnY <<- dta[trnIdxs,ycol]
+         tstX <<- dta[tstIdxs,-ycol]
+         tstY <<- dta[tstIdxs,ycol]
       
          if (qeFtn == 'qeSVM') {
-            trnScores <- qeout$decision.values
-            tstScores <- getDValsE1071(qeout,tstX)
-            trnScores <- rmSlashesE1071(trnScores)
-            tstScores <- rmSlashesE1071(tstScores)
+            trnScores <<- qeout$decision.values
+            tstScores <<- getDValsE1071(qeout,tstX)
+            trnScores <<- rmSlashesE1071(trnScores)
+            tstScores <<- rmSlashesE1071(tstScores)
          }
       
       }
-   )
 
 # arguments
 

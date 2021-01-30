@@ -818,7 +818,19 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,newScores,calibMethod,
    } else if (oneAtATime) {
       for (cls in 1:nClass) {
          reliabDiagram(ym[,cls],res$probs[,cls],nBins,TRUE)
-         readline('hit Enter for next plot')
+         while (1) {
+            print('you can go to the next plot, or zoom, or print to file')
+            cmd <- 
+               readline('hit Enter for next plot, or low hi or fname: ')
+            if (cmd == '') break
+            cmdParts <- pythonBlankSplit(cmd)
+            if (length(cmdParts) == 1)
+               prToFile(cmd)
+            else {
+               zoom <- as.numeric(cmdParts)
+               reliabDiagram(ym[,cls],res$probs[,cls],nBins,TRUE,zoom=zoom)
+            }
+         }
       }
    }
    res
@@ -872,7 +884,16 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL)
    actualYCounts <- tapply(y,probsBinNums,sum)
    if (plotGraph) {
       ly <- length(y)
-      plot(fittedYCounts,actualYCounts,xlim=c(0,ly),ylim=c(0,ly))
+      if (is.null(zoom)) {
+         rng <- 1:nBins
+         lims <- c(0,ly) 
+      } else {
+         startInterval <- floor(zoom[1]*nBins)
+         endInterval <- ceiling(zoom[2]*nBins)
+         rng <- startInterval:endInterval
+         lims <- c(floor(zoom[1]*ly),ceiling(zoom[2]*ly))
+      }
+      plot(fittedYCounts[rng],actualYCounts[rng],xlim=lims,ylim=lims)
       abline(0,1,col='red')
    }
    cbind(fittedYCounts,actualYCounts)

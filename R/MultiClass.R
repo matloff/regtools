@@ -885,15 +885,15 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL)
    if (plotGraph) {
       ly <- length(y)
       if (is.null(zoom)) {
-         rng <- 1:nBins
+         zoomTo <- 1:nBins
          lims <- c(0,ly) 
       } else {
-         startInterval <- floor(zoom[1]*nBins)
-         endInterval <- ceiling(zoom[2]*nBins)
-         rng <- startInterval:endInterval
-         lims <- c(floor(zoom[1]*ly),ceiling(zoom[2]*ly))
+      browser()
+         ftdy <- fittedYCounts
+         zoomTo <- which(ftdy >= zoom[1] & ftdy <= zoom[2])
+         lims <- zoom
       }
-      plot(fittedYCounts[rng],actualYCounts[rng],xlim=lims,ylim=lims)
+      plot(fittedYCounts[zoomTo],actualYCounts[zoomTo],xlim=lims,ylim=lims)
       abline(0,1,col='red')
    }
    cbind(fittedYCounts,actualYCounts)

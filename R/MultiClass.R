@@ -671,7 +671,7 @@ getCalibMeasure <- function(y, scores){
 # preCalibWrap() can be used on the orginal dataset, to set the holdout
 # set, run the model etc.
 
-preCalibWrap <- function(dta,yName,qeFtn,qeArgs=NULL,holdout=500)
+preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
       {
          qecall <- paste0('qeout <- ',qeFtn,'(dta,"',yName,'",',qeArgs,',
             holdout=',holdout,')') 
@@ -709,7 +709,7 @@ preCalibWrap <- function(dta,yName,qeFtn,qeArgs=NULL,holdout=500)
 #        user the option to print and/or zoom in
 
 calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
-   opts=NULL,nBins=10,se=FALSE,plotsPerRow=0,oneAtATime=TRUE) 
+   opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE) 
 {
    require(kernlab)
    classNames <- levels(trnY)
@@ -910,11 +910,11 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL)
    probsBinNums <- findInterval(probs,breaks)
    fittedYCounts <- tapply(probs,probsBinNums,sum)
    actualYCounts <- tapply(y,probsBinNums,sum)
+   axisLimit <- max(max(fittedYCounts),max(actualYCounts))
    if (plotGraph) {
-      ly <- length(y)
       if (is.null(zoom)) {
          zoomTo <- 1:nBins
-         lims <- c(0,ly) 
+         lims <- c(0,axisLimit) 
       } else {
          ftdy <- fittedYCounts
          zoomTo <- which(ftdy >= zoom[1] & ftdy <= zoom[2])

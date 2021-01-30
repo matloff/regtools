@@ -153,7 +153,7 @@ How about some other ML methods?
 [1] 14.23122
 
 # poly regression, degree 3
-> polyout <- qePoly(mlb,'Weight',3)
+> polyout <- qePolyLin(mlb,'Weight',3)
 > polyout$testAcc
 [1] 13.55613
 
@@ -165,14 +165,6 @@ How about some other ML methods?
 > nnout <- qeNeural(mlb,'Weight',hidden=c(200,200),nEpoch=50)
 > nnout$testAcc
 [1] 15.17982
-```
-
-
-To run a neural networks fit to our **pef** data above, we
-simply call
-
-``` r
-qeNeural(pef,'wageinc')
 ```
 
 More about the series
@@ -209,12 +201,44 @@ Currently available:
 
 * **qeLASSO()** LASSO/ridge, wrapper for **glmnet** package
 
-* **qePoly()** polynomial regression, wrapper for the **polyreg**
+* **qePolyLin()** polynomial regression, wrapper for the **polyreg**
   package, providing full polynomial models (powers and cross products),
 and correctly handling dummy variables (powers are *not* formed)
 
+* **qePolyLog()** polynomial logistic regression
+
 The classification case is specified by there being an R factor in the
 second argument.
+
+### Other related functions
+
+* **qeCompare()**
+
+Quick and easy comparison of several ML methods on the same data, e.g.:
+
+``` r
+qeCompare(mlb,'Weight',
+   c('qeLin','qePolyLin','qeKNN','qeRF','qeLASSO','qeNeural'),25)
+#       qeFtn  meanAcc
+# 1     qeLin 13.30490
+# 2 qePolyLin 13.33584
+# 3     qeKNN 13.72708
+# 4      qeRF 13.46515
+# 5   qeLASSO 13.27564
+# 6  qeNeural 14.01487  
+```
+
+* **pcaQE()**
+
+Seamless incorporation of PCA dimension reduction into qe methods, e.g.
+
+``` r
+z <- pcaQE(0.6,d2,'tot','qeKNN',k=25,holdout=NULL)
+newx <- d2[8,-13]
+predict(z,newx)
+#         [,1]
+# [1,] 1440.44
+```
 
 ### What the qe-series functions wrap
 
@@ -226,18 +250,22 @@ regtools::kNN(xm, y, newx = NULL, k, scaleX = scaleX, classif = classif)
 # qeRF()
 randomForest::randomForest(frml, 
    data = data, ntree = nTree, nodesize = minNodeSize)
-# qeSVM()
-svm(frml, data = data, cost = cost, gamma = gamma, decision.values = TRUE)
+# qeSVM()  
+e1071::svm(frml, data = data, cost = cost, gamma = gamma, decision.values = TRUE)
 # qeLASSO()
-cv.glmnet(x = xm, y = ym, alpha = alpha, family = fam)
+glmnet::cv.glmnet(x = xm, y = ym, alpha = alpha, family = fam)
 # qeGBoost()
 gbm::gbm(yDumm ~ .,data=tmpDF,distribution='bernoulli',  # used as OVA
          n.trees=nTree,n.minobsinnode=minNodeSize,shrinkage=learnRate)
-# qeNeural()
-krsFit(x,y,hidden,classif=classif,nClass=length(classNames),
+# qeNeural()  
+regtools::krsFit(x,y,hidden,classif=classif,nClass=length(classNames),
       nEpoch=nEpoch)  # regtools wrapper to keras package
 # qeLogit()
 glm(yDumm ~ .,data=tmpDF,family=binomial)  # used with OVA
+# qePolyLin()
+regtools::penrosePoly(d=data,yName=yName,deg=deg,maxInteractDeg)
+# qePolyLog()
+polyreg::polyFit(data,deg,use="glm")
 ```
 
 ### Linear model analysis in **regtools**

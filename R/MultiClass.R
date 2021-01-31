@@ -932,7 +932,7 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL)
          zoomTo <- which(ftdy >= zoom[1] & ftdy <= zoom[2])
          lims <- zoom
       }
-      plot(fittedYCounts[zoomTo],actualYCounts[zoomTo],type = "o",
+      plot(fittedYCounts[zoomTo],actualYCounts[zoomTo], type="b"
          xlim=lims,ylim=lims,xlab='fittedYCounts',ylab='actualYCounts')
       abline(0,1,col='red')
       if (!is.null(classNum)) {

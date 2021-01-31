@@ -687,11 +687,14 @@ preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
    tstY <- dta[tstIdxs,ycol]
 
    if (qeFtn == 'qeSVM') {
+
       trnScores <- qeout$decision.values
       tstScores <- getDValsE1071(qeout,tstX)
-      trnScores <- rmSlashesE1071(trnScores)
-      tstScores <- rmSlashesE1071(tstScores)
-      startsWithDigit <- function(s) {
+      trnScores <- makeANDconjunction(trnScores,'/')
+      tstScores <- makeANDconjunction(tstScores,'/')
+      
+      # e.g. polyreg feature names can't be numbers, so need to rename
+      startsWithDigit <- function(s) {  
          s <- substr(s,1,1)
          s >= '0' && s <= '9'
       }
@@ -876,20 +879,23 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
    res
 }
 
+# need column names of pairs of features to have 'AND' as delimiter,
+# e.g. 'CatcherANDFirst_Baseman' in the mlb data, replacing the original
+# delimiter, such as '/ for e1071
+
+# replace old delimiter by 'AND' in the colnames of the decision values
+makeANDconjunction <- function(dvals,oldDelim) 
+{
+   colnames(dvals) <- gsub(oldDelim,'AND',colnames(dvals)) 
+   dvals
+}
+
 ##########################################################################
 ########################  e1017 routines  ################################
 ##########################################################################
 
 # for those users of the probability calibration functions on output
 # from the e1071 package, here are useful utilities
-
-# replace '/' by '_' in the colnames of the decision values
-
-rmSlashesE1071 <- function(dvals) 
-{
-   colnames(dvals) <- gsub('/','_',colnames(dvals)) 
-   dvals
-}
 
 # calculcate decision values ("scores") for new cases on previously-fit
 # e1071 SVM

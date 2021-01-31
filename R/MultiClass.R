@@ -672,27 +672,39 @@ getCalibMeasure <- function(y, scores){
 # set, run the model etc.
 
 preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
-      {
-         qecall <- paste0('qeout <- ',qeFtn,'(dta,"',yName,'",',qeArgs,',
-            holdout=',holdout,')') 
-         eval(parse(text=qecall))
-      
-         tstIdxs <- qeout$holdIdxs
-         trnIdxs <- setdiff(1:nrow(dta),tstIdxs)
-         ycol <- which(names(dta) == yName)
-         trnX <<- dta[trnIdxs,-ycol]
-         trnY <<- dta[trnIdxs,ycol]
-         tstX <<- dta[tstIdxs,-ycol]
-         tstY <<- dta[tstIdxs,ycol]
-      
-         if (qeFtn == 'qeSVM') {
-            trnScores <<- qeout$decision.values
-            tstScores <<- getDValsE1071(qeout,tstX)
-            trnScores <<- rmSlashesE1071(trnScores)
-            tstScores <<- rmSlashesE1071(tstScores)
-         }
-      
+{
+   qecall <- paste0('qeout <- ',qeFtn,'(dta,"',yName,'",',qeArgs,',
+      holdout=',holdout,')') 
+   eval(parse(text=qecall))
+
+   tmp <- substitute({
+   tstIdxs <- qeout$holdIdxs
+   trnIdxs <- setdiff(1:nrow(dta),tstIdxs)
+   ycol <- which(names(dta) == yName)
+   trnX <- dta[trnIdxs,-ycol]
+   trnY <- dta[trnIdxs,ycol]
+   tstX <- dta[tstIdxs,-ycol]
+   tstY <- dta[tstIdxs,ycol]
+
+   if (qeFtn == 'qeSVM') {
+      trnScores <- qeout$decision.values
+      tstScores <- getDValsE1071(qeout,tstX)
+      trnScores <- rmSlashesE1071(trnScores)
+      tstScores <- rmSlashesE1071(tstScores)
+      startsWithDigit <- function(s) {
+         s <- substr(s,1,1)
+         s >= '0' && s <= '9'
       }
+      cols <- colnames(trnScores)
+      if (any(sapply(cols,startsWithDigit))) {
+         colnames(trnScores) <- paste0('a',cols)
+         colnames(tstScores) <- colnames(trnScores)
+      }
+   }
+   })
+
+   eval(tmp, parent.frame())
+}
 
 # arguments
 

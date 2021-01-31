@@ -630,11 +630,10 @@ qePolyLog <- function(data,yName,deg=2,maxInteractDeg=deg,
    y <- data[,ycol]
    x <- data[,-ycol,drop=FALSE]
    classif <- is.factor(data[[yName]])
+   if (!classif) stop('for classification problems')
    origY <- y
-   if (classif) {
-      y <- factorTo012etc(y)
-      earlierLevels <- attr(y,'earlierLevels')
-   } else earlierLevels <- NULL
+   y <- factorTo012etc(y)
+   earlierLevels <- attr(y,'earlierLevels')
    dataSave <- data
    data <- cbind(x,y)
    names(data)[ncol(data)] <- yName

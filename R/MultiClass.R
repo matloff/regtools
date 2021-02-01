@@ -700,6 +700,10 @@ preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
       }
       cols <- colnames(trnScores)
       if (any(sapply(cols,startsWithDigit))) {
+         prependPair <- function(s) {
+            tmp <- strsplit(s,'AND')[[1]]
+            paste0('a',tmp[1],'AND','a',tmp[2])
+         }
          colnames(trnScores) <- paste0('a',cols)
          colnames(tstScores) <- colnames(trnScores)
       }

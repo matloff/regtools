@@ -767,8 +767,8 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
       
       bbqProbs = list()
       for (pair in colnames(trnScores)) {
-         g1 = strsplit(pair, "/")[[1]][1]
-         g2 = strsplit(pair, "/")[[1]][2]
+         g1 = strsplit(pair, "AND")[[1]][1]
+         g2 = strsplit(pair, "AND")[[1]][2]
          colidx = which(colnames(trnScores) == pair)
          
          y_binary <- ifelse(trnY==g1, 1, 
@@ -800,8 +800,8 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
       
       eliteProbs = list()
       for (pair in colnames(trnScores)) {
-         g1 = strsplit(pair, "/")[[1]][1]
-         g2 = strsplit(pair, "/")[[1]][2]
+         g1 = strsplit(pair, "AND")[[1]][1]
+         g2 = strsplit(pair, "AND")[[1]][2]
          colidx = which(colnames(trnScores) == pair)
          
          y_binary <- ifelse(trnY==g1, 1, 
@@ -827,8 +827,8 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
       
       JOUSprobs = list()
       for (pair in colnames(trnScores)) {
-         g1 = strsplit(pair, "/")[[1]][1]
-         g2 = strsplit(pair, "/")[[1]][2]
+         g1 = strsplit(pair, "AND")[[1]][1]
+         g2 = strsplit(pair, "AND")[[1]][2]
          y_binary <- ifelse(trnY==g1, 1, 
                             ifelse(trnY==g2, -1, NA))
          y_select = y_binary[!is.na(y_binary)]

@@ -9,6 +9,7 @@
 \alias{qeLASSO}
 \alias{qePolyLin}
 \alias{qePolyLog}
+\alias{qeIso}
 \alias{qeCompare}
 \alias{predict.qeLogit}
 \alias{predict.qeLin}
@@ -20,6 +21,7 @@
 \alias{predict.qeLASSO}
 \alias{predict.qePolyLin}
 \alias{predict.qePolyLog}
+\alias{predict.qeIso}
 \alias{plot.RF}
 \alias{plot.LASSO}
 
@@ -181,6 +183,9 @@ The \code{qeCompare} function does quick-and-easy cross-validated
 comparisons among the \code{qe*} functions.  The same holdout sets are
 generated and used by all the functions.  Default values of
 hyperparameters of those functions can be set via \code{opts}.
+
+The \code{qeIso} function is intended mainly for use as a smoothing
+method in calibration actions.
 
 }
 

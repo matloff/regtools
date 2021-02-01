@@ -3,6 +3,8 @@
 data(mlb)  
 mlb <- mlb[,3:6]  # position, height, weight, age
 
+# note:  qeNeural has its own random number stream (in Python),
+# and thus will give different numbers for the same R seed, around 13.8
 qeCompare(mlb,'Weight',
    c('qeLin','qePolyLin','qeKNN','qeRF','qeLASSO','qeNeural'),25)
 #       qeFtn  meanAcc
@@ -10,9 +12,9 @@ qeCompare(mlb,'Weight',
 # 2 qePolyLin 13.33584
 # 3     qeKNN 13.72708
 # 4      qeRF 13.46515
-# 5   qeLASSO 13.27564
-# 6  qeNeural 14.01487  
-# qeNeural will give different numbers for the same seed, around 13.8
+# 5   qeLASSO 13.34612
+# 6  qeNeural 13.89695
+
 qeCompare(mlb,'Position',
    c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural','qeSVM','qeGBoost'),25)
 #       qeFtn   meanAcc
@@ -20,19 +22,20 @@ qeCompare(mlb,'Position',
 # 2 qePolyLog 0.6843564
 # 3     qeKNN 0.6819802
 # 4      qeRF 0.6780198
-# 5  qeNeural 0.6661386
+# 5  qeNeural 0.6708911
 # 6     qeSVM 0.6542574
 # 7  qeGBoost 0.6657426
+
 
 data(peFactors)  
 pef <- peFactors[,c(1,3,5,7:9)]  
 qeCompare(pef,'occ',c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural'),25)
-      qeFtn meanAcc
-1   qeLogit 0.61444
-2 qePolyLog 0.61136
-3     qeKNN 0.62524
-4      qeRF 0.61520
-5  qeNeural 0.61204
+#       qeFtn meanAcc
+# 1   qeLogit 0.61444
+# 2 qePolyLog 0.61136
+# 3     qeKNN 0.62524
+# 4      qeRF 0.61520
+# 5  qeNeural 0.61204
 # UCI vertebrae dataset, column_3C
 #  vert <- read.table('~/Datasets/Vertebrae/column_3C.dat',header=FALSE,stringsAsFactors=TRUE)
 #  qeCompare(vert,'V7',c('qeLogit','qePolyLog','qeKNN','qeRF','qeNeural'),25)

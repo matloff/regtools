@@ -577,6 +577,7 @@ qePolyLin <- function(data,yName,deg=2,maxInteractDeg=deg,
    classif <- is.factor(data[[yName]])
    # will need all either numeric or factors; change character cols
    if (classif) {print('currently not for classification problems'); return(NA)}
+   if (!is.null(holdout)) splitData(holdout,data)
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol,drop=FALSE]
@@ -584,7 +585,6 @@ qePolyLin <- function(data,yName,deg=2,maxInteractDeg=deg,
    data <- cbind(xm,y)
    data <- as.data.frame(data)
    names(data)[ncol(data)] <- yName
-   if (!is.null(holdout)) splitData(holdout,data)
 
    require(polyreg)
    qeout <- penrosePoly(d=data,yName=yName,deg=deg,maxInteractDeg)
@@ -699,6 +699,7 @@ qeLASSO <- function(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
 {
    require(glmnet)
    ycol <- which(names(data) == yName)
+   if (!is.null(holdout)) splitData(holdout,data)
    y <- data[,ycol]
    x <- data[,-ycol]
    if (!all(sapply(x,is.numeric))) {
@@ -742,11 +743,52 @@ predict.qeLASSO <- function(object,newx)
    list(predClasses=predClasses,probs=tmp)
 }
 
-prdLASSO <- predict.qeLASSO
-
 plot.qeLASSO <- function(object) 
 {
    genericPlot(object)
+}
+
+# isotonic regression
+
+qeIso <- function(data,yName,isoMethod='isoreg', 
+   holdout=floor(min(1000,0.1*nrow(data))))
+{
+   if (!is.null(holdout)) splitData(holdout,data)
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   if (!is.numeric(y)) stop('cannot be used in classification problems')
+   if (ncol(data) > 2) stop('for single features only')
+   x <- data[,-ycol]
+   if (!is.numeric(x)) stop('x must be numeric')
+   xorder <- order(x)
+   xs <- x[xorder]
+   ys <- y[xorder]
+   if (isoMethod == 'isoreg') {
+      isout <- isoreg(xs,ys)
+      isout$regests <- isout$yf[rank(x)]
+   } else if (isoMethod == 'pava') {
+      require(Iso)
+   }
+   if (!is.null(holdout)) {
+      predictHoldout(isout)
+      isout$holdIdxs <- holdIdxs
+   }
+   isout$x <- x
+   isout$xs <- xs
+   isout$y <- y
+   class(isout) <- c('qeIso',class(isout))
+   isout
+}
+
+predict.qeIso <- function(object,newx)
+{
+   require(gtools)
+   # will need to know where newx is within the original x vector
+   xs <- object$xs
+   yf <- object$yf
+   idxs <- findInterval(newx,xs)
+   # could improve using interpolation
+   object$y[idxs]
 }
 
 # pca*-series, PCA wrappers for the qe*-series, including for prediction

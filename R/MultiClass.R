@@ -502,28 +502,117 @@ stop('under construction')
    apply(pairs,2,do1Pair)
 }
 
+
 #########################  isoCalib()  ################################
 
-# wrapper calibrate either training scores or probability by isotonic 
-# regression
 
-# author: kenneth
-
-# arguments
-
-#    y: R factor of labels in training set
-#    trnScores: vector/matrix of scores in training set
-#    newScores: scores of new case(s)
-
-isoCalib <- function(y,trnScores,newScores)
-{
+isoCalib <- function(trnY,
+   trnScores, 
+   tstScores,
+   OVA=TRUE, 
+   scaling_opt=1,   
+   assumeProbabilities=FALSE)
+{  
    require(CORElearn)
-   model <- calibrate(y, 
-      trnScores, 
-      class1=1,
-      method = "isoReg",
-      assumeProbabilities=F)
-   CORElearn:::applyCalibration(newScores, model)
+   require(kernlab)
+   if (!is.factor(trnY)) stop('Y must be an R factor')
+
+   if (nrow(trnScores) != length(trnY)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
+   }
+
+   if (is.vector(trnScores)){
+      trnScores <- matrix(trnScores,ncol=1)
+   }
+
+   # Get all the levels of y
+   classes <- levels(trnY)
+
+   if(OVA){
+      # OVA case and binary case
+
+      # create a empty matrix
+      probMat <- matrix(NA, nrow(tstScores), length(classes))
+
+      for(i in 1:length(classes)){
+         # select the class1
+         class1 <- classes[i]
+         # create 1's and 2's for OVA 
+         transformed_y <- as.factor(ifelse(trnY == class1, 1, 2))
+
+         model <- CORElearn:::calibrate(transformed_y, 
+                  trnScores[,i], 
+                  class1=1,
+                  method = "isoReg",
+                  assumeProbabilities=assumeProbabilities)
+
+         calibratedProbs <- CORElearn:::applyCalibration(tstScores[,i], model)
+         probMat[,i] <- calibratedProbs
+      }
+   }else{
+      # AVA case
+      probMat <- matrix(NA, nrow(tstScores), choose(length(classes), 2))
+
+      counter <- 1
+      for(i in 1: (length(classes)-1)){
+         # Get the class 1 
+         class1 <- classes[i]
+         for(k in (i+1):length(classes)){
+
+            # Get the class 2
+            class2 <- classes[k]
+
+            # Get all corresponding row indicies
+            rowIdx <- which(trnY==class1 | trnY== class2)
+            # Filter y 
+            transformed_y  <- as.factor(ifelse(trnY[rowIdx]==class1, 1, 2))
+
+            # Filter train scores matrix
+            transformed_scores <- trnScores[rowIdx,]
+
+            if(nrow(transformed_scores) > ncol(transformed_scores)){
+               # If we have samples more than decision values
+               # then we apply calibration
+
+               model <- CORElearn:::calibrate(transformed_y, 
+                  transformed_scores, 
+                  class1=1,
+                  method = "isoReg",
+                  assumeProbabilities=assumeProbabilities)
+
+               calibratedProbs <- CORElearn:::applyCalibration(tstScores, model)
+
+            }else{
+               # if not, we only use the corresponding column
+               # for training, assuming the columns follows the order
+               # class1vsclass2, class1vsclass3...class2vsclass3...
+               trn_col_decision_val <- transformed_scores[,counter]
+
+               model <- CORElearn:::calibrate(transformed_y, 
+                  trn_col_decision_val, 
+                  class1=1,
+                  method = "isoReg",
+                  assumeProbabilities=assumeProbabilities)
+
+               # Select the corresponding column for testing
+               calibratedProbs <- CORElearn:::applyCalibration(tstScores[,counter], model)
+            }
+            # Store the probability in a matrix
+            probMat[,counter] <- calibratedProbs
+            counter <- counter + 1
+         }
+      }
+   }
+   if(scaling_opt == 1){
+      # Paircoupling
+      probMat <- couple(probMat)
+   }else{
+      # Simple normalization
+      probMat <- t(apply(probMat, 1 ,function(x) x/sum(x, na.rm=TRUE)))
+   }
+
+   # Return the probability matrix
+   return(probMat)
 }
 
 #########################  bbqCalib()  ################################
@@ -639,6 +728,9 @@ eliteCalib <- function(y,trnScores,newScores)
 
 }
 
+
+
+
 #########################  getCalibMeasure()  ################################
 
 # wrapper of EliTe error measure for calibration
@@ -728,7 +820,7 @@ preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
 #        user the option to print and/or zoom in
 
 calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
-   opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE) 
+   opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE, onevsrest=TRUE) 
 {
    require(kernlab)
    classNames <- levels(trnY)
@@ -753,18 +845,10 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
       }
    } else if (calibMethod == 'isoCalib') {
 
-      isoProbs = list()
-      for (pair in colnames(trnScores)){
-         pred <- isoreg(x = tstScores[,which(colnames(tstScores) == pair)])
-         isoProbs[[pair]] = pred$yf
-      }
-      
-      isoProb = do.call(cbind, isoProbs)
-      
-      pwc_isoProb = apply(isoProb, 1, PairwiseCoupling, 
-                           K = length(levels(trnY)))
-      pwc_isoProb = t(pwc_isoProb)
-      res <- list(probs=pwc_isoProb,ym=ym)
+      # Apply isotonic regression and pairwise coupling
+      isoProb <- isoCalib(trnY, trnScores, tstScores, OVA=onevsrest)
+
+      res <- list(probs=isoProb,ym=ym)
       
    } else if (calibMethod == 'BBQCalib') {
       require(CalibratR)
@@ -983,48 +1067,6 @@ ROC <- function(y,scores)
    plot(fpr,tpr,type='l',pch=2,cex=0.5)
    abline(0,1)
 
-}
-
-#########################  multi_calibWrap()  ################################
-
-# wrapper; it plots relibability diagram for each algorithm 
-# author: kenneth
-
-# arguments:
-# formula: a formula like: class ~ Lin_Platt+Quad_Platt+KNN+IsoReg+BBQ+JOUSBoost
-# where class is the test labels and the right side is the probability output
-# by each algorithm
-# df (data.frame ): the dataframe that contains all probabilities output 
-# by each calib method and the test labels
-# classvalue: specify the class index (e.g. 0, 1, -1) for calibration
-# num_algorithms (numeric): the number of calibration methods
-# title (character): the title of the plot
-
-multi_calibWrap <- function(formula, 
-   df, 
-   classvalue, 
-   num_algorithms, 
-   title="Calibration plot"){
-
-  
-  cal_obj <- calibration(formula,
-                         data = df,
-                         class=classvalue,
-                         cuts=10)
-
-  p <- plot(cal_obj, type = "o", auto.key = list(rows= num_algorithms,
-                                            lines = TRUE,
-                                            points = TRUE),
-            main=title,
-            xlab='Predicted Percentage',
-            ylab='Actual Percentage',
-            ylim = extendrange(c(0, 100)),
-            xlim = extendrange(c(0, 100)))
-  
-  g <- ggplot(cal_obj)+
-    ggtitle(title)
-  return(list(pplot = p, gplot = g))
-  
 }
 
 

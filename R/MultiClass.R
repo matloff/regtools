@@ -502,6 +502,46 @@ stop('under construction')
    apply(pairs,2,do1Pair)
 }
 
+#########################  fit.isoreg()  ################################
+
+
+fit.isoreg <- function(iso, x0)
+{
+  o = iso$o
+  if (is.null(o))
+    o = 1:length(iso$x)
+  x = iso$x[o]
+  y = iso$yf
+  ind = cut(x0, breaks = x, labels = FALSE, include.lowest = TRUE)
+  min.x <- min(x)
+  max.x <- max(x)
+  adjusted.knots <- iso$iKnots[c(1, which(iso$yf[iso$iKnots] > 0))]
+  fits = sapply(seq(along = x0), function(i) {
+    j = ind[i]
+    
+    # Handles the case where unseen data is outside range of the training data
+    if (is.na(j)) {
+      if (x0[i] > max.x) j <- length(x)
+      else if (x0[i] < min.x) j <- 1
+    }
+    # Find the upper and lower parts of the step
+    upper.step.n <- min(which(adjusted.knots > j))
+    upper.step <- adjusted.knots[upper.step.n]
+    lower.step <- ifelse(upper.step.n==1, 1, adjusted.knots[upper.step.n -1] )
+    
+    # Perform a liner interpolation between the start and end of the step
+    denom <- x[upper.step] - x[lower.step]
+    denom <- ifelse(denom == 0, 1, denom)
+    val <- y[lower.step] + (y[upper.step] - y[lower.step]) * (x0[i] - x[lower.step]) / (denom)
+    
+    # Ensure we bound the probabilities to [0, 1]
+    val <- ifelse(val > 1, max.x, val)
+    val <- ifelse(val < 0, min.x, val)
+    val <- ifelse(is.na(val), max.x, val) # handles NA when at right extreme of distribution
+    val
+  })
+  fits
+}
 
 #########################  isoCalib()  ################################
 
@@ -509,11 +549,8 @@ stop('under construction')
 isoCalib <- function(trnY,
    trnScores, 
    tstScores,
-   OVA=TRUE, 
-   scaling_opt=1,   
-   assumeProbabilities=FALSE)
+   OVA=TRUE)
 {  
-   require(CORElearn)
    require(kernlab)
    if (!is.factor(trnY)) stop('Y must be an R factor')
 
@@ -538,16 +575,9 @@ isoCalib <- function(trnY,
          # select the class1
          class1 <- classes[i]
          # create 1's and 2's for OVA 
-         transformed_y <- as.factor(ifelse(trnY == class1, 1, 2))
-
-         model <- CORElearn:::calibrate(transformed_y, 
-                  trnScores[,i], 
-                  class1=1,
-                  method = "isoReg",
-                  assumeProbabilities=assumeProbabilities)
-
-         calibratedProbs <- CORElearn:::applyCalibration(tstScores[,i], model)
-         probMat[,i] <- calibratedProbs
+         isoMod <- isoreg(trnScores[,i], ifelse(trnY == class1, 1, 0))
+         prob <- fit.isoreg(isoMod , tstScores[,i])
+         probMat[,i] <- prob
       }
    }else{
       # AVA case
@@ -565,52 +595,27 @@ isoCalib <- function(trnY,
             # Get all corresponding row indicies
             rowIdx <- which(trnY==class1 | trnY== class2)
             # Filter y 
-            transformed_y  <- as.factor(ifelse(trnY[rowIdx]==class1, 1, 2))
+            transformed_y  <- ifelse(trnY[rowIdx]==class1, 1, 0)
 
             # Filter train scores matrix
-            transformed_scores <- trnScores[rowIdx,]
+            transformed_scores <- trnScores[rowIdx,counter]
 
-            if(nrow(transformed_scores) > ncol(transformed_scores)){
-               # If we have samples more than decision values
-               # then we apply calibration
+      
+            # we only use the corresponding column
+            # for training, assuming the columns follows the order
+            # class1vsclass2, class1vsclass3...class2vsclass3...
 
-               model <- CORElearn:::calibrate(transformed_y, 
-                  transformed_scores, 
-                  class1=1,
-                  method = "isoReg",
-                  assumeProbabilities=assumeProbabilities)
-
-               calibratedProbs <- CORElearn:::applyCalibration(tstScores, model)
-
-            }else{
-               # if not, we only use the corresponding column
-               # for training, assuming the columns follows the order
-               # class1vsclass2, class1vsclass3...class2vsclass3...
-               trn_col_decision_val <- transformed_scores[,counter]
-
-               model <- CORElearn:::calibrate(transformed_y, 
-                  trn_col_decision_val, 
-                  class1=1,
-                  method = "isoReg",
-                  assumeProbabilities=assumeProbabilities)
-
-               # Select the corresponding column for testing
-               calibratedProbs <- CORElearn:::applyCalibration(tstScores[,counter], model)
-            }
+            isoMod <- isoreg(transformed_scores, itransformed_y)
+            prob <- fit.isoreg(isoMod , tstScores[,counter])
+            
             # Store the probability in a matrix
-            probMat[,counter] <- calibratedProbs
+            probMat[,counter] <- prob 
             counter <- counter + 1
          }
       }
    }
-   if(scaling_opt == 1){
-      # Paircoupling
-      probMat <- couple(probMat)
-   }else{
-      # Simple normalization
-      probMat <- t(apply(probMat, 1 ,function(x) x/sum(x, na.rm=TRUE)))
-   }
-
+   # Simple normalization
+   probMat <- t(apply(probMat, 1 ,function(x) x/sum(x, na.rm=TRUE)))
    # Return the probability matrix
    return(probMat)
 }

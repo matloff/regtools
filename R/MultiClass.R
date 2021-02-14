@@ -404,6 +404,220 @@ knnCalib <- function(y,trnScores,tstScores,k)
 scoresToProbs <- knnCalib
 
 
+#########################   ovaCalib() ###################################
+# a wrapper to implement calibration methods via one-vs-all approach
+
+
+ovaCalib <- function(trnY,
+   trnScores, 
+   tstScores,
+   calibMethod,
+   deg=NULL,
+   K= NULL,
+   se=FALSE,
+   class_func = NULL)
+{
+   if (!is.factor(trnY)) stop('Y must be an R factor')
+
+   if (nrow(trnScores) != length(trnY)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
+   }
+
+   if (is.vector(trnScores)){
+      trnScores <- matrix(trnScores,ncol=1)
+   }
+
+   # Get all the levels of y
+   classes <- levels(trnY)
+
+   # create a empty matrix
+   probMat <- matrix(NA, nrow(tstScores), length(classes))
+
+   if (calibMethod == 'knnCalib'){
+      if (is.null(K)) stop('k needs to be provided for k-NN')
+
+      probMat <- knnCalib(trnY, trnScores, tstScores, k=K) 
+
+   }else{
+      for(i in 1:length(classes)){
+         # select the class1
+         class1 <- classes[i]
+         trnDV <- trnScores[,i]
+         tstDV <-  tstScores[,i]
+
+         if(calibMethod == 'plattCalib') {
+
+            # create 1's and 0's for OVA 
+            y <- as.factor(ifelse(trnY == class1, 1, 0))
+
+            prob <- plattCalib(y, trnDV, tstDV, deg, se=se)
+
+         } else if (calibMethod == 'isoCalib') {
+
+            y <- ifelse(trnY == class1, 1, 0)
+
+            prob <- isoCalib(y, trnDV, tstDV)
+
+         } else if (calibMethod == 'guessCalib'){
+
+            y <- ifelse(trnY == class1, 1, 0)
+
+            prob <- guessCalib(y, trnDV, tstDV)
+
+         } else if (calibMethod == 'BBQCalib') {
+
+            # create 1's and 0's for OVA 
+            y <- ifelse(trnY == class1, 1, 0)
+            # the paper suggests that However, model averaging 
+            # is typically superior to model selection (Hoeting et al. 1999)
+            # so we use option = 1 for predict_BBQ
+            prob <- bbqCalib(trnY,trnScores, tstScores, option = 1)
+
+         } else if (calibMethod == 'ELiTECalib') {
+
+            # create 1's and 0's for OVA 
+            y <- ifelse(trnY == class1, 1, 0)
+
+            prob <- eliteCalib(y, trnDV, tstDV)
+
+         } else if (calibMethod == 'JOUSCalib') {
+
+            if (is.null(class_func)) stop('model function cannot be NULL for jousboost')
+
+            y <- as.factor(ifelse(trnY == class1, 1, -1))
+
+            prob <- JOUSBoostCalib(y, trnDV, tstDV, class_func)
+
+         } else stop('invalid calibration method')
+
+         probMat[,i] <- prob
+      }
+
+      # Simple normalization
+      probMat <- t(apply(probMat, 1 ,function(x) x/sum(x, na.rm=TRUE)))
+   }
+
+   # Return the probability matrix
+   return(probMat)
+}
+
+
+
+#########################   avaCalib() ###################################
+# a wrapper to implement calibration methods via all-vs-all approach
+
+
+avaCalib <- function(trnY,
+   trnScores, 
+   tstScores,
+   calibMethod,
+   deg=NULL,
+   K= NULL,
+   se=FALSE,
+   class_func = NULL)
+{
+   if (!is.factor(trnY)) stop('Y must be an R factor')
+
+   if (nrow(trnScores) != length(trnY)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
+   }
+
+   if (is.vector(trnScores)){
+      trnScores <- matrix(trnScores,ncol=1)
+   }
+
+   if (calibMethod == 'knnCalib') {
+
+      if (is.null(K)) stop('k needs to be provided for k-NN')
+
+      probMat <- knnCalib(trnY,trnScores,tstScores, K)
+
+   } else {
+      # AVA case
+      probMat <- matrix(NA, nrow(tstScores), choose(length(classes), 2))
+
+      counter <- 1
+      for(i in 1: (length(classes)-1)){
+         # Get the class 1 
+         class1 <- classes[i]
+         for(k in (i+1):length(classes)){
+            # Get the class 2
+            class2 <- classes[k]
+
+            # Get all corresponding row indicies
+            rowIdx <- which(trnY==class1 | trnY== class2)
+            
+            # Filter train scores matrix
+            trnDV <- trnScores[rowIdx,counter]
+
+            tstDV  <- tstScores[,counter]
+
+         
+            # we only use the corresponding column
+            # for training, assuming the columns follows the order
+            # class1vsclass2, class1vsclass3...class2vsclass3...
+
+            if (calibMethod == 'plattCalib') {
+
+               if (is.null(deg)) stop('Deg needs to be provided for platt')
+
+               # create 1's and 0's for OVA 
+               y  <- as.factor(ifelse(trnY[rowIdx]==class1, 1, 0))
+
+               prob <- plattCalib(y, trnDV, tstDV, deg, se=se)
+
+            } else if (calibMethod == 'isoCalib') {
+
+               y <- ifelse(trnY[rowIdx]==class1, 1, 0)
+
+               prob <- isoCalib(y, trnDV, tstDV)
+
+            } else if (calibMethod == 'guessCalib'){
+
+               y <- ifelse(trnY[rowIdx]==class1, 1, 0)
+
+               prob <- guessCalib(y, trnDV, tstDV)
+
+            } else if (calibMethod == 'BBQCalib') {
+
+               # create 1's and 0's for OVA 
+               y <- ifelse(trnY[rowIdx]==class1, 1, 0)
+               # the paper suggests that However, model averaging 
+               # is typically superior to model selection (Hoeting et al. 1999)
+               # so we use option = 1 for predict_BBQ
+               prob <- bbqCalib(trnY,trnScores, tstScores, option = 1)
+
+            } else if (calibMethod == 'ELiTECalib') {
+
+               # create 1's and 0's for OVA 
+               y <- ifelse(trnY[rowIdx]==class1, 1, 0)
+
+               prob <- eliteCalib(y, trnDV, tstDV)
+
+            } else if (calibMethod == 'JOUSCalib') {
+
+               if (is.null(class_func)) stop('model function cannot be NULL for jousboost')
+
+               y <- as.factor(ifelse(trnY[rowIdx]==class1, 1, -1))
+
+               prob <- JOUSBoostCalib(y, trnDV, tstDV, class_func)
+
+            } else stop('invalid calibration method')
+
+            # Store the probability in a matrix
+            probMat[,counter] <- prob
+            counter <- counter + 1
+         }
+      }
+      # Simple normalization
+      probMat <- t(apply(probMat, 1 ,function(x) x/sum(x, na.rm=TRUE)))
+   } 
+   return(probMat)
+}
+
+
+
+
 #########################  plattCalib()  ################################
 
 # run the logit once and save, rather doing running repeatedly, each
@@ -415,7 +629,7 @@ scoresToProbs <- knnCalib
 #    y, trnScores, tstScores, value as above
 #    degree: the degree of polynomial for the logistic model
 
-prePlattCalib <- function(y,trnScores,deg) 
+fitPlatt <- function(y,trnScores,deg) 
 {
    if (!is.factor(y)) stop('Y must be an R factor')
    if (is.vector(trnScores))
@@ -428,9 +642,9 @@ prePlattCalib <- function(y,trnScores,deg)
    res <- qePolyLog(dta,'y',deg=deg,maxInteractDeg=0,holdout=NULL)
 }
 
-ppc <- prePlattCalib
+ppc <- fitPlatt
 
-plattCalib <- function(prePlattCalibOut,tstScores,se=FALSE) 
+predictPlatt <- function(prePlattCalibOut,tstScores,se=FALSE) 
 {
    if (is.vector(tstScores)) {
       tstScores <- matrix(tstScores,ncol=1)
@@ -459,6 +673,28 @@ plattCalib <- function(prePlattCalibOut,tstScores,se=FALSE)
       return(list(probs = probs))
    }
 }
+
+plattCalib <- function(trnY,
+   trnScores, 
+   tstScores,
+   deg,
+   se=FALSE){ 
+
+   if (!is.factor(trnY)) stop('Y must be an R factor')
+
+   if (nrow(trnScores) != length(trnY)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
+   }
+
+   if (is.vector(trnScores)){
+      trnScores <- matrix(trnScores,ncol=1)
+   }
+
+   plattMod <- fitPlatt(trnScores, trnY, deg=deg)
+   pred <- predictPlatt(plattMod, tstScores, se=se) 
+   return(pred$probs)
+}   
+
 
 # isotonic regression, AVA
 
@@ -507,21 +743,36 @@ stop('under construction')
 
 fit.isoreg <- function(iso, x0)
 {
-  o = iso$o
-  if (is.null(o))
-    o = 1:length(iso$x)
-  x = iso$x[o]
-  y = iso$yf
-  ind = cut(x0, breaks = x, labels = FALSE, include.lowest = TRUE)
-  min.x <- min(x)
-  max.x <- max(x)
-  adjusted.knots <- iso$iKnots[c(1, which(iso$yf[iso$iKnots] > 0))]
-  fits = sapply(seq(along = x0), function(i) {
-    j = ind[i]
-    
-    # Handles the case where unseen data is outside range of the training data
-    if (is.na(j)) {
-      if (x0[i] > max.x) j <- length(x)
+   # rearange the indicies in x values acsending order
+   o = iso$o
+   if (is.null(o))
+      o = 1:length(iso$x)
+   # get the x values according the ordering index
+   x = iso$x[o] # x is now in acsending order
+   # fitted values corresponding to ordered x values.
+   y = iso$yf
+   # divides the range of testing x into intervals by training range
+   #  and include all the break values and return a vector of intervals
+   # to denote which interval the data point belongs to
+   ind = cut(x0, breaks = x, labels = FALSE, include.lowest = TRUE)
+   # get the minimum of training x
+   min.x <- min(x)
+   # get the maximum of training x
+   max.x <- max(x)
+   # Get all the indicies w.r.t jump points that has y greater than 0
+   adjusted.knots <- iso$iKnots[c(1, which(iso$yf[iso$iKnots] > 0))]
+   # Fit each index in testing data
+   fits = sapply(seq(along = x0), function(i) {
+      # get the corresponding intervals
+      j = ind[i]
+      # Handles the case where unseen data is outside range of the training data
+      if (is.na(j)) {
+         # if the data point doesn't belong to any interval
+         # and if the that testing data point is greater 
+         # than maximum of training data point
+         # we assign the interval to be number of elements of training data
+         if (x0[i] > max.x) j <- length(x)
+         # if it is smaller than the minimum of training x, we assign 1
       else if (x0[i] < min.x) j <- 1
     }
     # Find the upper and lower parts of the step
@@ -546,13 +797,8 @@ fit.isoreg <- function(iso, x0)
 #########################  isoCalib()  ################################
 
 
-isoCalib <- function(trnY,
-   trnScores, 
-   tstScores,
-   OVA=TRUE)
+isoCalib <- function(trnY,trnScores,tstScores)
 {  
-   require(kernlab)
-   if (!is.factor(trnY)) stop('Y must be an R factor')
 
    if (nrow(trnScores) != length(trnY)) {
       stop('fewer scores than Ys; did you have nonnull holdout?')
@@ -562,62 +808,10 @@ isoCalib <- function(trnY,
       trnScores <- matrix(trnScores,ncol=1)
    }
 
-   # Get all the levels of y
-   classes <- levels(trnY)
+   isoMod <- isoreg(trnScores, trnY)
+   prob <- fit.isoreg(isoMod , tstScores)
 
-   if(OVA){
-      # OVA case and binary case
-
-      # create a empty matrix
-      probMat <- matrix(NA, nrow(tstScores), length(classes))
-
-      for(i in 1:length(classes)){
-         # select the class1
-         class1 <- classes[i]
-         # create 1's and 2's for OVA 
-         isoMod <- isoreg(trnScores[,i], ifelse(trnY == class1, 1, 0))
-         prob <- fit.isoreg(isoMod , tstScores[,i])
-         probMat[,i] <- prob
-      }
-   }else{
-      # AVA case
-      probMat <- matrix(NA, nrow(tstScores), choose(length(classes), 2))
-
-      counter <- 1
-      for(i in 1: (length(classes)-1)){
-         # Get the class 1 
-         class1 <- classes[i]
-         for(k in (i+1):length(classes)){
-
-            # Get the class 2
-            class2 <- classes[k]
-
-            # Get all corresponding row indicies
-            rowIdx <- which(trnY==class1 | trnY== class2)
-            # Filter y 
-            transformed_y  <- ifelse(trnY[rowIdx]==class1, 1, 0)
-
-            # Filter train scores matrix
-            transformed_scores <- trnScores[rowIdx,counter]
-
-      
-            # we only use the corresponding column
-            # for training, assuming the columns follows the order
-            # class1vsclass2, class1vsclass3...class2vsclass3...
-
-            isoMod <- isoreg(transformed_scores, itransformed_y)
-            prob <- fit.isoreg(isoMod , tstScores[,counter])
-            
-            # Store the probability in a matrix
-            probMat[,counter] <- prob 
-            counter <- counter + 1
-         }
-      }
-   }
-   # Simple normalization
-   probMat <- t(apply(probMat, 1 ,function(x) x/sum(x, na.rm=TRUE)))
-   # Return the probability matrix
-   return(probMat)
+   return(prob)
 }
 
 #########################  bbqCalib()  ################################
@@ -636,14 +830,22 @@ isoCalib <- function(trnY,
 #    newScores: scores of new case(s)
 
 
-bbqCalib <- function(y,trnScores, newScores)
+bbqCalib <- function(trnY,trnScores, tstScores, option=1)
 {
    require(CalibratR)
-   bbqmod <-  CalibratR:::build_BBQ(y, trnScores)
-   # the paper suggests that However, model averaging 
-   # is typically superior to model selection (Hoeting et al. 1999)
-   # so we use option = 1 for predict_BBQ
-   CalibratR:::predict_BBQ(bbqmod, test.scores, 1)
+
+   if (nrow(trnScores) != length(trnY)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
+   }
+
+   if (is.vector(trnScores)){
+      trnScores <- matrix(trnScores,ncol=1)
+   }
+
+   bbqmod <-  CalibratR:::build_BBQ(trnY, trnScores)
+   prob <- CalibratR:::predict_BBQ(bbqmod, tstScores, option)
+
+   return(prob)
 }
 
 #########################  guessCalib()  ################################
@@ -662,14 +864,23 @@ bbqCalib <- function(y,trnScores, newScores)
 #    newScores: scores of new case(s)
 
 
-guessCalib <- function(y,trnScores, newScores)
+guessCalib <- function(trnY,trnScores, tstScores)
 {
    require(CalibratR)
-   bbqmod <-  CalibratR:::build_GUESS(y, trnScores)
-   # the paper suggests that However, model averaging 
-   # is typically superior to model selection (Hoeting et al. 1999)
-   # so we use option = 1 for predict_BBQ
-   CalibratR:::predict_GUESS(bbqmod, test.scores)
+
+   if (nrow(trnScores) != length(trnY)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
+   }
+
+   if (is.vector(trnScores)){
+      trnScores <- matrix(trnScores,ncol=1)
+   }
+
+   GUESSmod <-  CalibratR:::build_GUESS(trnY,trnScores)
+   pred <- CalibratR:::predict_GUESS(GUESSmod, tstScores)
+   prob  <- pred$predictions
+   return(prob)
+
 }
 
 
@@ -686,12 +897,12 @@ guessCalib <- function(y,trnScores, newScores)
 
 # arguments
 
-#    y: R factor of labels in training set, 
+#    trnY: R factor of labels in training set, 
 #       y must take values in -1, 1
-#    X: standardized train set
-#    newx: standardized test set
-#    class_func: 
-JOUSBoostCalib <- function(y,X,newx, class_func)
+#    trnScores: standardized train set
+#    tstScores: standardized test set
+#    class_func: a machine learning model e.g. svm
+JOUSBoostCalib <- function(trnY, trnScores, tstScores, class_func, OVA=TRUE)
 {
    require(JOUSBoost)
 
@@ -700,11 +911,29 @@ JOUSBoostCalib <- function(y,X,newx, class_func)
       as.numeric(as.character(predict(obj, X))) 
    }
 
-   jous_obj <- jous(X, y, class_func = class_func,
-      pred_func = pred_func, keep_models = TRUE)
+   if (!is.factor(trnY)) stop('Y must be an R factor')
 
-   predict(jous_obj, X = newx, type = 'prob')
+   if (nrow(trnScores) != length(trnY)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
+   }
 
+   if (is.vector(trnScores)){
+      trnScores <- matrix(trnScores,ncol=1)
+   }
+
+   if (is.vector(tstScores)){
+      trnScores <- matrix(tstScores,ncol=1)
+   }
+
+   # model building
+   jous_obj <- jous(trnScores, 
+            trnY, 
+            class_func = class_func, 
+            pred_func = pred_func, keep_models = TRUE)
+   # predict
+   prob <- predict(jous_obj, X = tstScores, type = 'prob')
+
+   return(prob)
 }
 
 #########################  eliteCalib()  ################################
@@ -718,7 +947,7 @@ JOUSBoostCalib <- function(y,X,newx, class_func)
 #    trnScores: vector of uncalibrated decisions scores for training
 #    newScore: vector of uncalibratd decisions scores for testing
 
-eliteCalib <- function(y,trnScores,newScores)
+eliteCalib <- function(trnY,trnScores, tstScores, build_opt = "AICc", pred_opt=1)
 {
    #require(devtools)
    #install_github("statsmaths/glmgen", subdir="R_pkg/glmgen")
@@ -728,9 +957,18 @@ eliteCalib <- function(y,trnScores,newScores)
    # to install EliTE
    require(ELiTE) 
    
-   eliteMod <- elite.build(trnScores, y)
-   elite.predict(eliteMod, newScores)
+   if (nrow(trnScores) != length(trnY)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
+   }
 
+   if (is.vector(trnScores)){
+      trnScores <- matrix(trnScores,ncol=1)
+   }
+
+   # use the same function parameter as the elite paper
+   eliteMod <- elite.build(trnScores, trnY, build_opt)
+   prob <- elite.predict(eliteMod, tstScores, pred_opt)
+   return(prob)
 }
 
 
@@ -825,117 +1063,34 @@ preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
 #        user the option to print and/or zoom in
 
 calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
-   opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE, onevsrest=TRUE) 
+   opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE, OVA=TRUE, jous_class_func=NULL) 
 {
    require(kernlab)
    classNames <- levels(trnY)
    nClass <- length(classNames)
    ym <- factorToDummies(tstY,fname='y')
-   
-   if (calibMethod == 'knnCalib') {
-      k <- opts$k
-      probs <- knnCalib(trnY,trnScores,tstScores,k)
-      res <- list(probs=probs,ym=ym)
-   } else if (calibMethod == 'plattCalib') {
-      deg <- opts$deg
-      preout <- prePlattCalib(trnY,trnScores,deg)
-      plattOut <- plattCalib(preout,tstScores,se=se)
-      if (se) {
-         probs <- plattOut$probs
-         se <- plattOut$se
-         res <- list(probs=probs,ym=ym,se=se)
-      } else {
-         probs = plattOut$probs
-         res <- list(probs=probs,ym=ym)
-      }
-   } else if (calibMethod == 'isoCalib') {
+   if(OVA){
+      prob <- ovaCalib(trnY,
+         trnScores, 
+         tstScores,
+         calibMethod,
+         deg=opts$deg,
+         K= opts$k,
+         se=se,
+         class_func = jous_class_func)
+   }else{
+       prob <- avaCalib(trnY,
+         trnScores, 
+         tstScores,
+         calibMethod,
+         deg=opts$deg,
+         K= opts$k,
+         se=se,
+         class_func = jous_class_func)
+    }
+  
+   res <- list(probs=prob)
 
-      # Apply isotonic regression and pairwise coupling
-      isoProb <- isoCalib(trnY, trnScores, tstScores, OVA=onevsrest)
-
-      res <- list(probs=isoProb,ym=ym)
-      
-   } else if (calibMethod == 'BBQCalib') {
-      require(CalibratR)
-      
-      bbqProbs = list()
-      for (pair in colnames(trnScores)) {
-         g1 = strsplit(pair, "AND")[[1]][1]
-         g2 = strsplit(pair, "AND")[[1]][2]
-         colidx = which(colnames(trnScores) == pair)
-         
-         y_binary <- ifelse(trnY==g1, 1, 
-                            ifelse(trnY==g2, 0, NA))
-         
-         y_select = y_binary[!is.na(y_binary)]
-         trnScores_select = trnScores[!is.na(y_binary),colidx]
-         tstScores_select = tstScores[,colidx]
-         
-         bbqmod <-  CalibratR:::build_BBQ(y_select, trnScores_select)
-         # the paper suggests that However, model averaging 
-         # is typically superior to model selection (Hoeting et al. 1999)
-         # so we use option = 1 for predict_BBQ
-         pred <-  CalibratR:::predict_BBQ(bbqmod, tstScores_select, 1)
-         bbqProbs[[pair]] = pred$predictions
-      }
-      
-      bbqProb = do.call(cbind, bbqProbs)
-      
-      pwc_bbqProb = apply(bbqProb, 1, PairwiseCoupling, 
-                          K = length(levels(trnY)))
-      pwc_bbqProb = t(pwc_bbqProb)
-      res <- list(probs=pwc_bbqProb,ym=ym)
-      
-   } else if (calibMethod == 'ELiTECalib') {
-      #stop("under construction")
-      require(ELiTE) 
-      #https://github.com/pakdaman/calibration/tree/master/ELiTE/R
-      
-      eliteProbs = list()
-      for (pair in colnames(trnScores)) {
-         g1 = strsplit(pair, "AND")[[1]][1]
-         g2 = strsplit(pair, "AND")[[1]][2]
-         colidx = which(colnames(trnScores) == pair)
-         
-         y_binary <- ifelse(trnY==g1, 1, 
-                            ifelse(trnY==g2, 0, NA))
-         
-         y_select = y_binary[!is.na(y_binary)]
-         trnScores_select = trnScores[!is.na(y_binary),colidx]
-         tstScores_select = tstScores[,colidx]
-         
-         elitemod <-  elite.build(y_select, trnScores_select)
-         pred <- elite.predict(elitemod, tstScores_select, 1)
-         eliteProbs[[pair]] = pred
-      }
-      
-      eliteProb = do.call(cbind, eliteProbs)
-      
-      pwc_eliteProb = apply(eliteProb, 1, PairwiseCoupling, 
-                          K = length(levels(trnY)))
-      pwc_eliteProb = t(pwc_eliteProb)
-      res <- list(probs=pwc_eliteProb,ym=ym)
-      
-   } else if (calibMethod == 'JOUSCalib') {
-      
-      JOUSprobs = list()
-      for (pair in colnames(trnScores)) {
-         g1 = strsplit(pair, "AND")[[1]][1]
-         g2 = strsplit(pair, "AND")[[1]][2]
-         y_binary <- ifelse(trnY==g1, 1, 
-                            ifelse(trnY==g2, -1, NA))
-         y_select = y_binary[!is.na(y_binary)]
-         trnX_select = trnX[!is.na(y_binary),]
-         JOUSprob = JOUSBoostCalib(y_select,as.matrix(trnX_select),as.matrix(tstX))
-         JOUSprobs[[pair]] = JOUSprob
-      }
-      JOUSprob = do.call(cbind, JOUSprobs)
-      
-      pwc_JOUsprob = apply(JOUSprob, 1, PairwiseCoupling, 
-                           K = length(levels(trnY)))
-      pwc_JOUsprob = t(pwc_JOUsprob)
-      res <- list(probs=pwc_JOUsprob,ym=ym)
-   } else stop('invalid calibration method')
    
    if (plotsPerRow) {
       nRow <- ceiling(nClass/plotsPerRow)

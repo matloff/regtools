@@ -430,15 +430,16 @@ ovaCalib <- function(trnY,
    # Get all the levels of y
    classes <- levels(trnY)
 
-   # create a empty matrix
-   probMat <- matrix(NA, nrow(tstScores), length(classes))
-
    if (calibMethod == 'knnCalib'){
       if (is.null(K)) stop('k needs to be provided for k-NN')
 
       probMat <- knnCalib(trnY, trnScores, tstScores, k=K) 
 
    }else{
+
+      # create a empty matrix
+      probMat <- matrix(NA, nrow(tstScores), length(classes))
+      
       for(i in 1:length(classes)){
          # select the class1
          class1 <- classes[i]
@@ -471,7 +472,7 @@ ovaCalib <- function(trnY,
             # the paper suggests that However, model averaging 
             # is typically superior to model selection (Hoeting et al. 1999)
             # so we use option = 1 for predict_BBQ
-            prob <- bbqCalib(trnY,trnScores, tstScores, option = 1)
+            prob <- bbqCalib(y,trnScores, tstScores, option = 1)
 
          } else if (calibMethod == 'ELiTECalib') {
 
@@ -680,19 +681,9 @@ plattCalib <- function(trnY,
    deg,
    se=FALSE){ 
 
-   if (!is.factor(trnY)) stop('Y must be an R factor')
-
-   if (nrow(trnScores) != length(trnY)) {
-      stop('fewer scores than Ys; did you have nonnull holdout?')
-   }
-
-   if (is.vector(trnScores)){
-      trnScores <- matrix(trnScores,ncol=1)
-   }
-
-   plattMod <- fitPlatt(trnScores, trnY, deg=deg)
+   plattMod <- fitPlatt(trnY, trnScores, deg=deg)
    pred <- predictPlatt(plattMod, tstScores, se=se) 
-   return(pred$probs)
+   return(pred$probs[,2])
 }   
 
 
@@ -800,12 +791,12 @@ fit.isoreg <- function(iso, x0)
 isoCalib <- function(trnY,trnScores,tstScores)
 {  
 
-   if (nrow(trnScores) != length(trnY)) {
-      stop('fewer scores than Ys; did you have nonnull holdout?')
-   }
-
    if (is.vector(trnScores)){
       trnScores <- matrix(trnScores,ncol=1)
+   }
+
+   if (nrow(trnScores) != length(trnY)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
    }
 
    isoMod <- isoreg(trnScores, trnY)
@@ -834,17 +825,9 @@ bbqCalib <- function(trnY,trnScores, tstScores, option=1)
 {
    require(CalibratR)
 
-   if (nrow(trnScores) != length(trnY)) {
-      stop('fewer scores than Ys; did you have nonnull holdout?')
-   }
-
-   if (is.vector(trnScores)){
-      trnScores <- matrix(trnScores,ncol=1)
-   }
-
    bbqmod <-  CalibratR:::build_BBQ(trnY, trnScores)
-   prob <- CalibratR:::predict_BBQ(bbqmod, tstScores, option)
-
+   pred <- CalibratR:::predict_BBQ(bbqmod, tstScores, option)
+   prob <- pred$predictions
    return(prob)
 }
 
@@ -867,14 +850,6 @@ bbqCalib <- function(trnY,trnScores, tstScores, option=1)
 guessCalib <- function(trnY,trnScores, tstScores)
 {
    require(CalibratR)
-
-   if (nrow(trnScores) != length(trnY)) {
-      stop('fewer scores than Ys; did you have nonnull holdout?')
-   }
-
-   if (is.vector(trnScores)){
-      trnScores <- matrix(trnScores,ncol=1)
-   }
 
    GUESSmod <-  CalibratR:::build_GUESS(trnY,trnScores)
    pred <- CalibratR:::predict_GUESS(GUESSmod, tstScores)
@@ -902,7 +877,7 @@ guessCalib <- function(trnY,trnScores, tstScores)
 #    trnScores: standardized train set
 #    tstScores: standardized test set
 #    class_func: a machine learning model e.g. svm
-JOUSBoostCalib <- function(trnY, trnScores, tstScores, class_func, OVA=TRUE)
+JOUSBoostCalib <- function(trnY, trnScores, tstScores, class_func)
 {
    require(JOUSBoost)
 
@@ -913,17 +888,20 @@ JOUSBoostCalib <- function(trnY, trnScores, tstScores, class_func, OVA=TRUE)
 
    if (!is.factor(trnY)) stop('Y must be an R factor')
 
-   if (nrow(trnScores) != length(trnY)) {
-      stop('fewer scores than Ys; did you have nonnull holdout?')
-   }
 
    if (is.vector(trnScores)){
       trnScores <- matrix(trnScores,ncol=1)
    }
 
    if (is.vector(tstScores)){
-      trnScores <- matrix(tstScores,ncol=1)
+      tstScores <- matrix(tstScores,ncol=1)
    }
+
+
+   if (nrow(trnScores) != length(trnY)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
+   }
+
 
    # model building
    jous_obj <- jous(trnScores, 
@@ -956,13 +934,14 @@ eliteCalib <- function(trnY,trnScores, tstScores, build_opt = "AICc", pred_opt=1
    # https://github.com/pakdaman/calibration/tree/master/ELiTE/R
    # to install EliTE
    require(ELiTE) 
-   
-   if (nrow(trnScores) != length(trnY)) {
-      stop('fewer scores than Ys; did you have nonnull holdout?')
-   }
 
    if (is.vector(trnScores)){
       trnScores <- matrix(trnScores,ncol=1)
+   }
+
+   
+   if (nrow(trnScores) != length(trnY)) {
+      stop('fewer scores than Ys; did you have nonnull holdout?')
    }
 
    # use the same function parameter as the elite paper

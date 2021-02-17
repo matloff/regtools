@@ -702,9 +702,7 @@ qeLASSO <- function(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
    if (!is.null(holdout)) splitData(holdout,data)
    y <- data[,ycol]
    x <- data[,-ycol]
-   if (!all(sapply(x,is.numeric))) {
-      makeAllNumeric(x,data)
-   } else factorsInfo <- NULL
+   makeAllNumeric(x,data)
    
    classif <- is.factor(y)
    if (!is.null(holdout)) splitData(holdout,data)

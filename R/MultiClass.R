@@ -472,7 +472,7 @@ ovaCalib <- function(trnY,
             # the paper suggests that However, model averaging 
             # is typically superior to model selection (Hoeting et al. 1999)
             # so we use option = 1 for predict_BBQ
-            prob <- bbqCalib(y,trnScores, tstScores, option = 1)
+            prob <- bbqCalib(y, trnDV, tstDV, option = 1)
 
          } else if (calibMethod == 'ELiTECalib') {
 
@@ -586,7 +586,7 @@ avaCalib <- function(trnY,
                # the paper suggests that However, model averaging 
                # is typically superior to model selection (Hoeting et al. 1999)
                # so we use option = 1 for predict_BBQ
-               prob <- bbqCalib(trnY,trnScores, tstScores, option = 1)
+               prob <- bbqCalib(trnY, trnDV, tstDV, option = 1)
 
             } else if (calibMethod == 'ELiTECalib') {
 
@@ -729,61 +729,6 @@ stop('under construction')
    apply(pairs,2,do1Pair)
 }
 
-#########################  fit.isoreg()  ################################
-
-
-fit.isoreg <- function(iso, x0)
-{
-   # rearange the indicies in x values acsending order
-   o = iso$o
-   if (is.null(o))
-      o = 1:length(iso$x)
-   # get the x values according the ordering index
-   x = iso$x[o] # x is now in acsending order
-   # fitted values corresponding to ordered x values.
-   y = iso$yf
-   # divides the range of testing x into intervals by training range
-   #  and include all the break values and return a vector of intervals
-   # to denote which interval the data point belongs to
-   ind = cut(x0, breaks = x, labels = FALSE, include.lowest = TRUE)
-   # get the minimum of training x
-   min.x <- min(x)
-   # get the maximum of training x
-   max.x <- max(x)
-   # Get all the indicies w.r.t jump points that has y greater than 0
-   adjusted.knots <- iso$iKnots[c(1, which(iso$yf[iso$iKnots] > 0))]
-   # Fit each index in testing data
-   fits = sapply(seq(along = x0), function(i) {
-      # get the corresponding intervals
-      j = ind[i]
-      # Handles the case where unseen data is outside range of the training data
-      if (is.na(j)) {
-         # if the data point doesn't belong to any interval
-         # and if the that testing data point is greater 
-         # than maximum of training data point
-         # we assign the interval to be number of elements of training data
-         if (x0[i] > max.x) j <- length(x)
-         # if it is smaller than the minimum of training x, we assign 1
-      else if (x0[i] < min.x) j <- 1
-    }
-    # Find the upper and lower parts of the step
-    upper.step.n <- min(which(adjusted.knots > j))
-    upper.step <- adjusted.knots[upper.step.n]
-    lower.step <- ifelse(upper.step.n==1, 1, adjusted.knots[upper.step.n -1] )
-    
-    # Perform a liner interpolation between the start and end of the step
-    denom <- x[upper.step] - x[lower.step]
-    denom <- ifelse(denom == 0, 1, denom)
-    val <- y[lower.step] + (y[upper.step] - y[lower.step]) * (x0[i] - x[lower.step]) / (denom)
-    
-    # Ensure we bound the probabilities to [0, 1]
-    val <- ifelse(val > 1, max.x, val)
-    val <- ifelse(val < 0, min.x, val)
-    val <- ifelse(is.na(val), max.x, val) # handles NA when at right extreme of distribution
-    val
-  })
-  fits
-}
 
 #########################  isoCalib()  ################################
 
@@ -799,8 +744,11 @@ isoCalib <- function(trnY,trnScores,tstScores)
       stop('fewer scores than Ys; did you have nonnull holdout?')
    }
 
-   isoMod <- isoreg(trnScores, trnY)
-   prob <- fit.isoreg(isoMod , tstScores)
+   x <- trnScores[order(trnScores)]
+   model <- isoreg(x , trnY)
+   stepf_data <- cbind(model$x, model$yf)
+   step_func <- stepfun(stepf_data[,1], c(0,stepf_data[,2]))
+   prob <- step_func(tstScores)
 
    return(prob)
 }

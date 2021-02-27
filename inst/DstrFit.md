@@ -29,8 +29,8 @@ package:
 ``` r
 > library(mlbench)
 > data(PimaIndiansDiabetes2)
-> pima <- PimaIndiansDiabetes2
-> head(pima)
+> pima <- PimaIndiansDiabetes2  # shorter to type
+> head(pima)  # always look at your data
   pregnant glucose pressure triceps insulin mass pedigree age diabetes
 1        6     148       72      35      NA 33.6    0.627  50      pos
 2        1      85       66      29      NA 26.6    0.351  31      neg
@@ -39,13 +39,13 @@ package:
 5        0     137       40      35     168 43.1    2.288  33      pos
 6        5     116       74      NA      NA 25.6    0.201  30      neg
 > bmi <- pima$mass
-> bmi <- na.exclude(bmi)
+> bmi <- na.exclude(bmi)  # exclude any row with NAs
 ```
 ### Visual inspection
 
 So, let's plot the data.  We'll use R's basic histogram function,
 **hist()**.  A more advanced alternative is **density()**, which plots a
-smooth curve.  In calling **hist(bmi,freqs=FALSE)** (that second
+smooth curve.  In calling **hist(bmi,freq=FALSE)** (that second
 argument means we want area = 1.0), we produce this:
 
 ![alt text](BMIhist.png)
@@ -72,48 +72,69 @@ and will use that here.
 The population k<sup>th</sup> moment of X is defined to be
 E(X<sup>k</sup>).  It can be estimated by its sample analog
 
+M<sub>k</sub> = 
 (1/n) &Sigma;<sub>i=1</sub><sup>n</sup> X<sub>i</sub><sup>k</sup>
 
-where our data are X<sub>1</sub>,...,X<sub>n</sub>.
+where our data are X<sub>1</sub>,...,X<sub>n</sub>.  (The two quantities
+are analogous because E(X<sup>k</sup>) is the average of X<sup>k</sup>
+in the population, while M<sub>k</sub> is the average of X<sup>k</sup>
+in the sample.) So M<sub>1</sub> is simply our sample mean, "X-bar."
+
+One may also use *central* moments, e.g. Var(X) and s<sup>2</sup>.
+Note that s<sup>2</sup> = M<sub>2</sub> - (M<sub>1</sub>)<sup>2</sup>.
 
 The idea of MM is to set the population moments equal to their sample
 analogs.  Since the former are functions of the parameters, we can solve
 for the parameters, which serve actually as our estimated parameters.
 
-If we have m parameters, we form equations corresponding to the first m
+If we have q parameters, we form equations corresponding to the first q
 moments.  For the gamma family with paraemeters r and &lambda;, we use
-the first two moments.  For convenience, we'll use variance ("second
-central moment'') rather than E(X<sup>2</sup>); either one will work.
+the first two moments.  For convenience, we'll use variance 
+rather than E(X<sup>2</sup>).
 
 For the gamma family, EX = r/&lambda; and Var(X) = r/&lambda;<sup>2</sup>.
-Then with the sample mean G ("X-bar" doesn't render well in Markdown on
-some machines)
-and s<sup>2</sup>, we set
-r/&lambda; = G
+So our equations are
+
+M<sub>1</sub> = r<sub>est</sub> / &lambda;<sub>est</sub>
+
+s<sup>2</sup> = r<sub>est</sub> / &lambda;<sub>est</sub><sup>2</sup>
+
+Luckily, these are easy to solve.  We divide the first by the second, yielding
+
+&lambda;<sub>est</sub> = M<sub>1</sub> / s<sup>2</sup>
+
 and
-r/&lambda;<sup>2</sup> = s<sup>2</sup>.
-Solving, we find that our estimates of r and &lambda; are
-<SPAN STYLE="text-decoration:overline">X</SPAN><sup>2</sup> / s<sup>2</sup>
-and
-<SPAN STYLE="text-decoration:overline">X</SPAN> / s<sup>2</sup>.
+
+r<sub>est</sub> = M<sub>1</sub><sup>2</sup> / s<sup>2</sup>
 
 Let's superimpose the fitted gamma density onto the histogram:
 
+``` r
+> curve(dgamma(x,rest,lambest),0,70,add=TRUE)
+```
+
+(The function **curve()** plots a function **x**, which in this case has
+range (070); **add=TRUE** means superimpose this new graph onto the old
+one.)
+
 ![alt text](BMIfitted.png)
 
-Seems to be working.  Let's try comparing CDFs.  Just as a histogram is
+Our fitted parametric density estimate is rather close to the one that
+is model-free, so the parametric model seems pretty good.
+
+Now let's try comparing CDFs.  Just as a histogram is
 a model-free estimate of f<sub>X</sub>, a model-free estimate of
 F<sub>X</sub> is the *empirical CDF*:
 
-F&#770;(t) = proportion of X<sub>i</sub> that are &leq; t.
+F<sub>est</sub>(t) = proportion of X<sub>i</sub> that are &leq; t.
 
 The R function **ecdf** computes this and sets it up for plotting.
-(Actually, **ecdf** returns a function of class **'ecdf**, so calling
+(Actually, **ecdf** returns a function of class **'ecdf'**, so calling
 **plot()** on the return value invokes **plot.ecdf()**.) Let's go ahead:
 
 ``` r
 > plot(ecdf(bmi),pch=19,cex=0.1) 
-> curve(pgamma(x,ch,lh),0,70,add=TRUE) 
+> curve(pgamma(x,ch,lh),0,70,add=TRUE)  # range of data is (0,70)
 ```
 
 ![alt text](BMIfitwell.png)
@@ -121,6 +142,12 @@ The R function **ecdf** computes this and sets it up for plotting.
 The ECDF and the fitted CDF are almost identical, wonderful.  We were
 lucky here; in most real applications, we do not achieve such a close
 fit, even though the fit is usable.
+
+**Related software:**
+
+The **regtools** package includes a function **mm()** for computing
+Method of Moments estimators, and base R has the **mle()** function for
+MLE.
 
 ### Assessing fit
 

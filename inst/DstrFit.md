@@ -50,6 +50,9 @@ argument means we want area = 1.0), we produce this:
 
 ![alt text](BMIhist.png)
 
+Remember, this is a sample estimate of f<sub>X</sub>, so it can be used
+for deciding whether to use a given parametric model.
+
 We see a rather steep rise from 0, quickly reaching a peak, then a
 gradual tapering off toward 0.  This suggests that the gamma
 distribution family may work well.
@@ -74,18 +77,19 @@ E(X<sup>k</sup>).  It can be estimated by its sample analog
 where our data are X<sub>1</sub>,...,X<sub>n</sub>.
 
 The idea of MM is to set the population moments equal to their sample
-analogs.  Since the former are functions of Wthe parameters, we can solve
+analogs.  Since the former are functions of the parameters, we can solve
 for the parameters, which serve actually as our estimated parameters.
 
 If we have m parameters, we form equations corresponding to the first m
 moments.  For the gamma family with paraemeters r and &lambda;, we use
 the first two moments.  For convenience, we'll use variance ("second
-central moment'') rather than E(X<sup>2</sup>).
+central moment'') rather than E(X<sup>2</sup>); either one will work.
 
 For the gamma family, EX = r/&lambda; and Var(X) = r/&lambda;<sup>2</sup>.
-Then with the sample mean <SPAN STYLE="text-decoration:overline">X</SPAN> 
+Then with the sample mean G ("X-bar" doesn't render well in Markdown on
+some machines)
 and s<sup>2</sup>, we set
-r/&lambda; = <SPAN STYLE="text-decoration:overline">X</SPAN> 
+r/&lambda; = G
 and
 r/&lambda;<sup>2</sup> = s<sup>2</sup>.
 Solving, we find that our estimates of r and &lambda; are

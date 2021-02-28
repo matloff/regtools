@@ -52,7 +52,7 @@ to define the model, etc.
 
 ## Example
 
-Let's predict weight from height and age, using two methods, k-Nearestt
+Let's predict weight from height and age, using two methods, k-Nearest
 Neighbor and random forests.
 
 ``` r
@@ -106,17 +106,21 @@ book, *The Art of Machine Learning: Algorithms+Data+R*.
 
 ### k-Nearest Neighbors
 
-*background:* Oriiginally developed by statisticians, starting in the 1960s.
+This method was originally developed by statisticians, starting in the 1950s
+and 60s.
 
-*how it works:* Very intuitive.  To predict, say, the weight of a new
+It's very intuitive.  To predict, say, the weight of a new
 player of height 72 and age 25, we find the k closest players in our 
 training data to (72,25), and average their weights.  This is our
 estimate of m(72,25), and we use it as our prediction.
 
-*qe function*:  **qeKNN()**, wraps **kNN()** in the same package; main
+The **qeKNN()** function wraps **kNN()** in **regtools**.  The main
 hyperparameter is the number of neighbors.
 
-### random forests
+### Random forests
+
+This method was developed mainly by statisticians, starting in the
+1980s.
 
 This is a natural extension of k-NN, in that it too creates a
 neighborhood and averages Y values within the neighborhood.  However, it
@@ -140,4 +144,18 @@ Clearly, the order in which the predictor variables are evaluated
 (height, weight and age above) can matter a lot.  So, more than one tree
 is constructed, with random orders.  The number of trees is another
 hyperparameter.
+
+The **qeRF()** function wraps the function of the same name in the
+**randomForests** package.
+
+## Boosting
+
+This method has been developed both by CS and statistics people.  The
+latter have been involved mainly in gradient boosting, the technique
+used here.
+
+The **qeGBoost()** wraps **gbm()** in the package of the same name.  It
+is tree-based, with hyperparameter similar to the random forests case,
+plus a *learning rate*.  The latter controls the size of iteration
+steps.
 

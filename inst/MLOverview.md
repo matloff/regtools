@@ -1,5 +1,9 @@
 
-#  Overview of Machine Learning Methods
+#  The 5-Page View of Machine Learning 
+
+(The title here alludes to Andriy Burkov's excellent work,
+*The Hundred-Page Machine Learning Book*.  Note too my own 
+forthcoming book, *The Art of Machine Learning: Algorithms+Data+R*.)
 
 Here we give an overview of the most widely used predictive methods in
 statistical/machine learning.  For each one, we present
@@ -99,10 +103,14 @@ and classification settings.  The statistical/machine learning methods
 presented here amount to ways to estimate m(t).  The methods are
 presented below in an order that shows connection between them.
 
-Full description of the methods will be available in my forthcoming
-book, *The Art of Machine Learning: Algorithms+Data+R*.
+The **qe** series function sense whether the user is specifying a
+regression setting or a classification setting, by noting whether the Y
+variable (second argument) is numeric or an R factor.
 
 ## ML predictive methods
+
+We now present the "30,000 foot" view of the major statistical/machine
+learning methods.
 
 ### k-Nearest Neighbors
 
@@ -148,14 +156,185 @@ hyperparameter.
 The **qeRF()** function wraps the function of the same name in the
 **randomForests** package.
 
-## Boosting
+### Boosting
 
 This method has been developed both by CS and statistics people.  The
 latter have been involved mainly in gradient boosting, the technique
 used here.
 
+The basic idea is to iteratively build up a sequence of trees, each of which
+is focused on the data points on which the last predicted poorly.
+
 The **qeGBoost()** wraps **gbm()** in the package of the same name.  It
 is tree-based, with hyperparameter similar to the random forests case,
 plus a *learning rate*.  The latter controls the size of iteration
 steps.
+
+### Linear model
+
+This of course is the classical linear regression model, invented
+200 years ago (!) and developed by statisticians.
+
+For example, a model for mean weight, given height and age, would be
+
+m(height,age) = 
+&beta;<sub>0</sub> +
+&beta;<sub>1</sub> height + 
+&beta;<sub>2</sub> age
+
+for unknown population constants &beta;<sub>i</sub>, which are estimated
+from our training data.
+
+This model is mainly for regression settings, though some analysts use
+it in classification.  If used in conjunction with polynomials (see
+below), this may work as well or better than the logistic model (see
+below).
+
+The function **qeLin()** wraps the ordinary **lm()**.  It does mainly
+the latter, but does some little fixess.
+
+### Logistic model
+
+This is a generalization of the linear model, developed by
+statisticians.
+
+This model is only for classification settings.  Since m(t) is now a
+probability, we need it to have values in the interval [0,1].  This is
+achieved by feeding a linear model into the *logistic function*,
+l(u) = (1 + exp(-u))<sup>-1</sup>.  So for instance, to predict whether a
+player is a catcher (Y = 1 if yes, Y = 0 if no),
+
+P(catcher | height, weight, age) = m(height,weight,age) = 
+1 / [1 + exp{&beta;<sub>0</sub> +
+&beta;<sub>1</sub> height + 
+&beta;<sub>2</sub> age}]
+
+The function **qeLogit()** wraps the ordinary **glm()**, but adds an
+important feature:  **glm()** only handles the 2-class setting, e.g.
+catcher vs. non-catcher.  The **qeLlogit()** handles the c-class
+situation by calling **glm()** one class at a time, generating c
+**glm()** outputs.  When a new case is to be predicted, it is fed into
+each of the c **glm()** outputs, yielding c probabilities.
+It then predicts the new case as whichever class has the highest
+probability.
+
+### Polynomial-linear models
+
+Some people tend to shrink when they become older.  Thus we may wish to
+model a tendency for people to gain weight in middle age but then lose
+weight as seniors, say 
+
+m(height,age) = 
+&beta;<sub>0</sub> +
+&beta;<sub>1</sub> height + 
+&beta;<sub>2</sub> age +
+&beta;<sub>3</sub> age<sup>2</sup>
+
+We may even include a height X age term, allowing for interactions.
+Polynomials of degree 3 and so on could also be considered.
+
+This would seem nonlinear, but that would be true only in the sense of
+being nonlinear in age.  But it is still inear in the
+&beta;<sub>i</sub>, so **qeLin()** can be used, or **qeLogit()**
+for classification settings.
+
+Forming the polynomial terms by hand would be tedious, especially since
+we would also have to do this for predicting new cases.  Instead, we use
+**qePolyLin()** (regression setting) and **qePolyLog()**
+(classification).  They wrap the package **polyreg**.
+
+Polynomial models can in many applications hold their own with the fancy
+ML methods.  One must be careful, though, about overfitting.
+
+### The LASSO
+
+Some deep mathematical theory implies that in linear models it may be
+advantageous to shrink the &beta;<sub>i</sub>.  The LASSO method does
+this in a mathematically rigorous manner.  The LASSO is especially
+popular as a tool for predictor variable selection (see below).
+
+The function **qeLASSO()** wraps **cvglmnet()** in the **glmnet**
+package.  The main hyperparameter controls the amount of shrinkage.
+
+### Support Vector Machines
+
+These were developed originally in the AI community, and later attracted
+interest among statisticians.  They are used mainly in classification
+settings.
+
+Say we are predicting catcher vs. non-catcher, based on height and
+weight.  We might plot a scatter diagram, with height on the horizontal
+axis and weight on the vertical, using red dots for the catchers and
+blue dots for the non-catchers.  We might draw a line that best separates
+the red and blue dots, then predict new cases by observing which side of
+the line they fall on.  This is what SVM does, though with more
+predictors the line become a plane or hyperplane.
+
+The **qeSVM()** function wraps **svm()** in the **e1071** package.  What
+about hyperparameters?  Here are the two main ones:
+
+* **gamma:** This is polynomial degree or another similar criterion.
+
+* **cost:** Ideally, SVM will cleanly separate the data points in the
+  training set by class, e.g. all red dots on one side of the line and
+all green on the other.  For most datasets, this will not occur.  The
+cost variable is roughly saying how many exceptions we are willing to
+accept.
+
+### Neural networks
+
+These were developed almost exclusively in the AI community.
+
+An NN consists of one or more *layers*, each of which consists of a
+number of *neurons*.  Say for concreteness we have 10 neurons per layer.
+The output of the first layer will be 10 linear combinations of the
+predictor variables/features.  Those will be fed into the second layer,
+yielding 10 "linear combinations of linear combinations."
+
+In regression settings, the outputs of the last layer will be averaged
+together to produce our estimated m(t).  In the classification case with
+c classes, our final layer will have c outputs; whichever is largest
+will be our predicted class.
+
+NNs are arguably the most complex of all the methods described here, and
+tend to have many -- even millions -- of hyperparameters, stemming in
+large part because the numbers of layers and neurons per layer may be
+quite large.  The coefficients in all those linear combinations
+(*weights*) are computed iteratively.
+
+The **qeNeural()** function allows specifying the numbers of layers and
+neurons per layer, and the number of iterations.  It wraps **krsFit()**
+from the **regtools** package, which in turn wraps the R **keras**
+package (and there are further wraps involved after that).
+
+## Overfitting
+
+Up to a point, the more complex a model is, the greater its predictive
+power.  But "the Law of Diminishing Returns" takes hold eventually, and
+accuracy will decline.  At the latter point we say we've overfit.
+Though there is currently some controversy on this, it is a key point to
+consider.
+
+All the **qe** functions allow one to randomly partition the data,
+treating one part as the training set, and using the rest, the *holdout*
+set, to treat as new data to get a reliable estimate of the performance
+of the model.  Though a model may predict well on the training set, it
+may do less well on the holdout data, indicating overfitting.
+
+Among other things, this means that if our training data have a very
+large number of predictor variables, we may wish to delete some, or
+possibly combine them, in order to reduce complexity.  
+
+One way to combine them is *Principal Components Analysis* (PCA).  As
+you may have guessed by now, "There's an app for that" -- **qePCA()**.
+
+## Which one to use?
+
+With many datasets, all the above ML methods will give similar results.
+But for some other datasets, it really makes a difference which one we
+use.
+
+So, we should try all of methods of interest with holdout data, then
+compare.  Well, "there's an app" for this too, **qeCompare()**.
+
 

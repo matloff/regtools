@@ -1,5 +1,5 @@
 
-#  The 5-Page Machine Learning Book
+#  The 10-Page Machine Learning Book
 
 (The title here alludes to Andriy Burkov's excellent work,
 *The Hundred-Page Machine Learning Book*.  Note too my own 
@@ -50,8 +50,7 @@ uniform interface, and most importantly, **require no setup.**  To fit
 an SVM model, say, one simply calls **qeSVM()**, no preparation calls to
 define the model etc.
 
-The call
-form is
+The call form is
 
 ``` r
 model fit <- qe<model name>(<data name>,<Y name>)
@@ -96,9 +95,10 @@ discussed later in this document):
 
 (The formation of a holdout set can be suppressed.)
 
-Each **qe** function sets default values for the *tuning parameters*
+Each **qe** function sets default values for the *tuning parameters
+method*
 or *hyperparameters* for the given ML method.  Nondefault values,
-specific to the given ML, can optionally be specified.
+specific to the given ML method, can optionally be specified.
 
 ## Regression and classification problems, regression functions
 
@@ -110,8 +110,8 @@ the player's position (e.g. pitcher) are *classification settings*.
 Somewhat confusingly, both settings make use of the *regression function*,
 m(t) = E(Y | X = t), the mean value of Y in the subpopulation defined by
 X = t.  If say we are predicting weight in the **mlb** data, then for instance
-m(71,28) would be the mean weight among all players of height 71 inches
-and 28 years old.  To predict the weight of a new player, say height 77
+m(71,23) would be the mean weight among all players of height 71 inches
+and 23 years old.  To predict the weight of a new player, say height 77
 and age 19, we use m(77,19).
 
 In classification problems, Y is converted to a set of indicator
@@ -177,10 +177,30 @@ to produce good accuracy.  And one generally wants to avoid having
 neighborhoods (*nodes* in the tree) that don't have many data points;
 this is controlled by a hyperparameter.
 
-Clearly, the order in which the predictor variables are evaluated
-(height, weight and age above) can matter a lot.  So, more than one tree
-is constructed, with random orders.  The number of trees is another
-hyperparameter.
+Here is an example using the UCI Vertebrae dataset.  There are 6
+predictor variables, named V1 through V6 consisting of various bone
+measurements.  There are 3 classes, DH, SL and NO.  A single tree is
+shown.
+
+![alt text](RpartVert.png)
+
+At the root, if the predictor variable V6 in our new case to be
+predicted is < 16, we go left, otherwise right.  Say we go left.
+Then if V4 < 28 in the new case, we go left again, getting to a leaf, in
+which we guess DH.  The 0.74 etc. mean that for the training data that
+happen to fall into that leaf, 74% of them are in class DH, 26% are NO
+and 0% are SL.  So we gues DH.
+
+Clearly, the order in which the predictor variables are evaluated (e.g.
+height, weight and age in the **mlb** data) can matter a lot.  So, more
+than one tree is constructed, with random orders.  The number of trees
+is another hyperparameter.  Each tree gives us a prediction for the
+unknown Y.  In a regression setting, those predictions are averaged to
+get our final prediction.  In a classification setting, we see which
+class was predicted most often among all those trees.
+
+The thresholds used at each node are determined through a complicated
+process, depending on which implemented of RF one uses.
 
 The **qeRF()** function wraps the function of the same name in the
 **randomForests** package.
@@ -188,7 +208,7 @@ The **qeRF()** function wraps the function of the same name in the
 ### Boosting
 
 This method has been developed both by CS and statistics people.  The
-latter have been involved mainly in gradient boosting, the technique
+latter have been involved mainly in *gradient* boosting, the technique
 used here.
 
 The basic idea is to iteratively build up a sequence of trees, each of which
@@ -240,6 +260,8 @@ P(catcher | height, weight, age) = m(height,weight,age) =
 &beta;<sub>2</sub> weight +
 &beta;<sub>3</sub> age)}]
 
+The &beta;<sub>i</sub> are estimated from the sample data.
+
 The function **qeLogit()** wraps the ordinary R function **glm()**, but
 adds an important feature:  **glm()** only handles the 2-class setting,
 e.g.  catcher vs. non-catcher.  The **qeLlogit()** handles the c-class
@@ -276,14 +298,16 @@ we would also have to do this for predicting new cases.  Instead, we use
 (classification).  They make use of the package **polyreg**.
 
 Polynomial models can in many applications hold their own with the fancy
-ML methods.  One must be careful, though, about overfitting.
+ML methods.  One must be careful, though, about overfitting, just as
+with any ML method.
 
 ### The LASSO
 
 Some deep mathematical theory implies that in linear models it may be
-advantageous to shrink the &beta;<sub>i</sub>.  The LASSO method does
-this in a mathematically rigorous manner.  The LASSO is especially
-popular as a tool for predictor variable selection (see below).
+advantageous to shrink the estimated &beta;<sub>i</sub>.  The LASSO
+method does this in a mathematically rigorous manner.  The LASSO is
+especially popular as a tool for predictor variable selection (see
+below).
 
 The function **qeLASSO()** wraps **cvglmnet()** in the **glmnet**
 package.  The main hyperparameter controls the amount of shrinkage.
@@ -300,24 +324,37 @@ axis and weight on the vertical, using red dots for the catchers and
 blue dots for the non-catchers.  We might draw a line that best separates
 the red and blue dots, then predict new cases by observing which side of
 the line they fall on.  This is what SVM does (with more
-predictors the line become a plane or hyperplane).
+predictors, the line become a plane or hyperplane).
 
-The **qeSVM()** function wraps **svm()** in the **e1071** package.  What
-about hyperparameters?  Here are the two main ones:
+Here is an example, using the Iris dataset built in to R:
 
-* **gamma:** This is polynomial degree or another similar criterion.
+![alt text](SVM.png)
 
-* **cost:** Ideally, SVM will cleanly separate the data points in the
-  training set by class, e.g. all red dots on one side of the line and
-all blue on the other.  But for most datasets, this will not occur.  The
-cost variable is roughly saying how many exceptions we are willing to
-accept.
+There are 3 classes, but we are just predicting setosa species vs.
+non-setosa here.  Below the solid line, we predict setosa, otherwise
+non-setosa.  
+
+SVM philosophy is that we'd like a wide buffer separating the classes,
+called the *margin*, denoted by the dashed lines.  Data points lying on
+the edge of the margin are termed *support vectors*, so called because
+if any other data point were to change, the margin would not change.
+
+In most cases, the two classes are not linearly separable.  So we allow
+curved boundaries, implemented through polynomial (or similar)
+transformations to the data.  The degree of the polynomial is a
+hyperparameter, named **gamma** here.
+
+Another hyperparameter is **cost:**  Here we allow some data points to
+be within the margin.  The cost variable is roughly saying how many
+exceptions we are willing to accept.
+
+The **qeSVM()** function wraps **svm()** in the **e1071** package.  
 
 ### Neural networks
 
 These were developed almost exclusively in the AI community.
 
-An NN consists of one or more *layers*, each of which consists of a
+An NN consists of *layers*, each of which consists of a
 number of *neurons*.  Say for concreteness we have 10 neurons per layer.
 The output of the first layer will be 10 linear combinations of the
 predictor variables/features, essentially 10 linear regression models.
@@ -334,6 +371,20 @@ tend to have many -- even millions -- of hyperparameters, stemming in
 large part because the numbers of layers and neurons per layer may be
 quite large.  The coefficients in all those linear combinations
 (*weights*) are computed iteratively.
+
+Here's an example, again with the Vertebrae data:  The predictor
+variables V1, V2 etc. for a new case to be predicted enter on the left,
+and the predictions come out the right; whichever of the 3 outputs
+is largest, that will be our predicted class.
+
+![alt text](VertebraeNN.png)
+
+The first layer consists of V1 through V6.  The second layer, our
+only *hidden* layer here, has three neurons.  Entering on
+the left of each neuron is a linear combination of V1 through V6.  The
+outputs are fed into the third layer; each node there will form a linear
+combination of its inputs, outputting the value of that linear
+combination.
 
 The **qeNeural()** function allows specifying the numbers of layers and
 neurons per layer, and the number of iterations.  It wraps **krsFit()**

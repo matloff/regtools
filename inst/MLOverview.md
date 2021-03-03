@@ -225,7 +225,14 @@ steps.
 This of course is the classical linear regression model, invented
 200 years ago (!) and developed by statisticians.
 
+For motivation, here is a graph of mean weight vs. height for the 
+**mlb** data:
+
 ![alt text](WtVsHt.png)
+
+The means seem to lie near a straight line.  (Remember, though, that
+these are sample means.)  That suggests modeling m(t) is a linear
+function.
 
 For example, a model for mean weight, given height and age, would be
 

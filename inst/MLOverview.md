@@ -225,6 +225,8 @@ steps.
 This of course is the classical linear regression model, invented
 200 years ago (!) and developed by statisticians.
 
+![alt text](WtVsHt.png)
+
 For example, a model for mean weight, given height and age, would be
 
 m(height,age) = 

@@ -211,6 +211,7 @@ predict.qeLin <- function(object,newx) {
 #     k: number of nearest neighbors
 #     scaleX: if TRUE, features will be centered and scaled; note that
 #        this means the features must be numeric
+#     lin: if TRUE, use loclin() rather than mean()
 
 # value:  see above
 
@@ -235,10 +236,8 @@ qeKNN <- function(data,yName,k=25,scaleX=TRUE,
       classNames <- xyc$classNames
    } 
 
-   knnout <- kNN(xm,y,newx=NULL,k,
-      scaleX=scaleX, 
-      smoothingFtn=smoothingFtn, 
-      classif=classif)
+   knnout <- kNN(xm,y,newx=NULL,k,scaleX=scaleX,classif=classif,
+      smoothingFtn=smoothingFtn)
    if (classif) knnout$classNames <- classNames
    knnout$classif <- classif
    knnout$factorsInfo <- factorsInfo
@@ -706,9 +705,7 @@ qeLASSO <- function(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
    if (!is.null(holdout)) splitData(holdout,data)
    y <- data[,ycol]
    x <- data[,-ycol]
-   if (!all(sapply(x,is.numeric))) {
-      makeAllNumeric(x,data)
-   } else factorsInfo <- NULL
+   makeAllNumeric(x,data)
    
    classif <- is.factor(y)
    if (!is.null(holdout)) splitData(holdout,data)

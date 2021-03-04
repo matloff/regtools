@@ -113,7 +113,6 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       xscl <- attr(x,'scaled:scale')
       newx <- scale(newx,center=xcntr,scale=xscl)
    }
-
    # expand any specified variables
    eVars <- !is.null(expandVars)
    eVals <- !is.null(expandVals)
@@ -127,7 +126,6 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       x <- multCols(x,expandVars,expandVals)
       newx <- multCols(newx,expandVars,expandVals)  
    }
-
 
    # find NNs
    if (is.null(savedNhbrs)) {
@@ -147,17 +145,18 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    # now, the predictions
 
    # treat kmax1 = 1 specially, as otherwise get 1x1 matrix issues
+   print(x)
    if (kmax1 == 1) {
       regests <- y[closestIdxs,]
    } else {
       # in fyh(), closestIdxs is a row in closestIdxs, from the first k
       # columns; it will choose rows in x,y, to obtain neighboring x,y
       # values
-      fyh <- function(newxI) 
-         smoothingFtn(closestIdxs[newxI,],x,y,newx[newxI,])
+      fyh <- function(newxI) smoothingFtn(closestIdxs[newxI,],x,y,newx[newxI,])
       regests <- sapply(1:nrow(newx),fyh)
       if (ncol(y) > 1) regests <- t(regests)
    }
+   print(x)
 
    # start building return value
 
@@ -259,7 +258,7 @@ kNNallK <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    noPreds <- is.null(newx)  # don't predict, just save for future predict
    startA1adjust <- if (startAt1) 0 else 1
    # general checks 
-   if (identical(smoothingFtn,loclin)) {
+   if (identical(smoothingFtn,loclin) | identical(smoothingFtn,loclogit)) {
       if (allK) stop('cannot use loclin() yet with allK = TRUE')
    }
    # checks on x
@@ -356,7 +355,9 @@ kNNallK <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       if (!allK) {
          if (identical(smoothingFtn,loclin)) {
             regests <- loclin(newx,cbind(x,y)[closestIdxs,])
-         } else {
+         } else if(identical(smoothingFtn,loclogit)){
+            regests <- loclogit(newx,cbind(x,y)[closestIdxs,])
+         }else {
             regests <- apply(closestIdxs,1,fyh)
             if (ncol(y) > 1) regests <- t(regests)
          }
@@ -835,6 +836,8 @@ loclin <- function(nearIdxs,x,y,predpt) {
    eval(parse(text=cmd))
    predict(lmout,predpt)
 }
+
+
 
 ######################  parvsnonparplot(), etc. ###############################
 

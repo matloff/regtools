@@ -217,6 +217,7 @@ predict.qeLin <- function(object,newx) {
 # see note in kNN() man pg
  
 qeKNN <- function(data,yName,k=25,scaleX=TRUE,
+   smoothingFtn=mean,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    trainRow1 <- getRow1(data,yName)
@@ -234,7 +235,10 @@ qeKNN <- function(data,yName,k=25,scaleX=TRUE,
       classNames <- xyc$classNames
    } 
 
-   knnout <- kNN(xm,y,newx=NULL,k,scaleX=scaleX,classif=classif)
+   knnout <- kNN(xm,y,newx=NULL,k,
+      scaleX=scaleX, 
+      smoothingFtn=smoothingFtn, 
+      classif=classif)
    if (classif) knnout$classNames <- classNames
    knnout$classif <- classif
    knnout$factorsInfo <- factorsInfo

@@ -404,6 +404,7 @@ knnCalib <- function(y,trnScores,tstScores,k)
 scoresToProbs <- knnCalib
 
 
+
 #########################   ovaCalib() ###################################
 # a wrapper to implement calibration methods via one-vs-all approach
 

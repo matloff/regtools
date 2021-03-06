@@ -258,7 +258,10 @@ predict.qeKNN <- function(object,newx,newxK=1)
    xyc <- getXY(newx,NULL,TRUE,FALSE,object$factorsInfo)
    if (is.vector(newx)) {
       nr <- 1
-   } else nr <- nrow(newx)
+   } else{
+      nr <- nrow(newx)
+      newxK <- ncol(newx)
+   } 
    newx <- matrix(xyc$x,nrow=nr)
    preds <- predict(object,newx,newxK)
    if (!object$classif) return(preds)

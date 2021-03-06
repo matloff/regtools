@@ -113,7 +113,6 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       xscl <- attr(x,'scaled:scale')
       newx <- scale(newx,center=xcntr,scale=xscl)
    }
-
    # expand any specified variables
    eVars <- !is.null(expandVars)
    eVals <- !is.null(expandVals)
@@ -127,7 +126,6 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       x <- multCols(x,expandVars,expandVals)
       newx <- multCols(newx,expandVars,expandVals)  
    }
-
 
    # find NNs
    if (is.null(savedNhbrs)) {
@@ -153,8 +151,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       # in fyh(), closestIdxs is a row in closestIdxs, from the first k
       # columns; it will choose rows in x,y, to obtain neighboring x,y
       # values
-      fyh <- function(newxI) 
-         smoothingFtn(closestIdxs[newxI,],x,y,newx[newxI,])
+      fyh <- function(newxI) smoothingFtn(closestIdxs[newxI,],x,y,newx[newxI,])
       regests <- sapply(1:nrow(newx),fyh)
       if (ncol(y) > 1) regests <- t(regests)
    }
@@ -259,7 +256,7 @@ kNNallK <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    noPreds <- is.null(newx)  # don't predict, just save for future predict
    startA1adjust <- if (startAt1) 0 else 1
    # general checks 
-   if (identical(smoothingFtn,loclin)) {
+   if (identical(smoothingFtn,loclin) | identical(smoothingFtn,loclogit)) {
       if (allK) stop('cannot use loclin() yet with allK = TRUE')
    }
    # checks on x
@@ -356,7 +353,7 @@ kNNallK <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       if (!allK) {
          if (identical(smoothingFtn,loclin)) {
             regests <- loclin(newx,cbind(x,y)[closestIdxs,])
-         } else {
+         }else {
             regests <- apply(closestIdxs,1,fyh)
             if (ncol(y) > 1) regests <- t(regests)
          }
@@ -830,11 +827,48 @@ loclin <- function(nearIdxs,x,y,predpt) {
    colnames(predpt) <- xNames
    predpt <- data.frame(predpt)
    colnames(y) <- yNames
+   # Check to see if y is 0,1
+   # if not, we have to tune it to 1, 0
+   if(length(sort(unique(y))) == 2){
+      if(sort(unique(y))[1]== 1 & sort(unique(y))[2]== 2){
+         y <- ifelse(y == 2, 1, 0)
+      }
+   }
    xy <- data.frame(cbind(x,y))[nearIdxs,]
+   
    cmd <- paste0('lmout <- lm(',yNames[1],' ~ .,data=xy)')
    eval(parse(text=cmd))
    predict(lmout,predpt)
 }
+
+loclogit <- function(nearIdxs,x,y,predpt) {
+   nxcol <- ncol(x)
+   nycol <- ncol(y)
+   if (nycol > 1) stop('loclogit() must have scalar y')
+   xNames <- paste0('x',1:nxcol)
+   yNames <- paste0('y',1:nycol)
+   colnames(x) <- xNames
+   predpt <- matrix(predpt,nrow=1)
+   colnames(predpt) <- xNames
+   predpt <- data.frame(predpt)
+   colnames(y) <- yNames
+   # Check to see if y is 0,1
+   # if not, we have to tune it to 1, 0
+   if(length(sort(unique(y))) == 2){
+      if(sort(unique(y))[1]== 1 & sort(unique(y))[2]== 2){
+         y <- as.factor(ifelse(y == 2, 1, 0))
+      }
+   }else{
+      y <- as.factor(y)
+   }
+   xy <- data.frame(cbind(x,y))[nearIdxs,]
+   
+   cmd <- paste0('glmout <- glm(',yNames[1],' ~ .,data=xy, family=binomial)')
+   eval(parse(text=cmd))
+   predict(glmout,predpt, "response")
+}
+
+
 
 ######################  parvsnonparplot(), etc. ###############################
 

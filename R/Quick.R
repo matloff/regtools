@@ -217,7 +217,8 @@ predict.qeLin <- function(object,newx) {
 
 # see note in kNN() man pg
  
-qeKNN <- function(data,yName,k=25,scaleX=TRUE,lin=FALSE,smoothingFtn=mean,
+qeKNN <- function(data,yName,k=25,scaleX=TRUE,
+   smoothingFtn=mean,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    trainRow1 <- getRow1(data,yName)
@@ -257,7 +258,10 @@ predict.qeKNN <- function(object,newx,newxK=1)
    xyc <- getXY(newx,NULL,TRUE,FALSE,object$factorsInfo)
    if (is.vector(newx)) {
       nr <- 1
-   } else nr <- nrow(newx)
+   } else{
+      nr <- nrow(newx)
+      newxK <- ncol(newx)
+   } 
    newx <- matrix(xyc$x,nrow=nr)
    preds <- predict(object,newx,newxK)
    if (!object$classif) return(preds)

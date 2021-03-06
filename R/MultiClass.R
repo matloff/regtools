@@ -375,33 +375,63 @@ confusion <- function(actual,pred) {
 
 # value: vector of estimated probabilities for the new cases
 
-knnCalib <- function(y,trnScores,tstScores,k) 
+knnCalib <- function(y,trnScores,tstScores,k, loclin=FALSE, scaleX=NULL, smoothingFtn=NULL) 
 {
    if (!is.factor(y)) stop('Y must be an R factor')
    if (is.vector(trnScores))
       trnScores <- matrix(trnScores,ncol=1)
    if (is.vector(tstScores))
       tstScores <- matrix(tstScores,ncol=1)
-   tmp <- FNN::get.knnx(trnScores,tstScores,k)
-   classNames <- levels(y)
-   nClass <- length(classNames)
-   doRowI <- function(i)  # do row i of tstScores
-   {
-      idxs <- tmp$nn.index[i,]
-      nhbrY <- y[idxs]
-      nhbrY <- toSuperFactor(nhbrY,levels(y))
-      tblNhbrs <- table(nhbrY)
-      nhbrClasses <- names(tblNhbrs)
-      probs <- rep(0,nClass)
-      names(probs) <- classNames
-      probs[nhbrClasses] = tblNhbrs / k
-      probs
+   if(loclin){
+
+      if(length(levels(y)) > 2){
+         stop('Y must only take binary outcomes for local linear regression')
+      }
+      # combine y and trnScores for training
+      dat = as.data.frame(cbind(y, trnScores))
+      knnout <- qeKNN(dat, colnames(dat)[1], k=k, scaleX=scaleX,
+                  smoothingFtn=smoothingFtn,
+                  holdout=NULL)
+
+      tstS  <- as.data.frame(tstScores)
+      # ensure the test set has the same column names
+
+      colnames(tstS) <- colnames(dat)[2:ncol(dat)]
+      # knn model prediction
+      pred <- predict(knnout, tstS)
+
+      # set all values that are greater than 1 to 1
+      pred[pred > 1] <- 1
+      # set all values that are lower than 0 to 0
+      pred[pred < 0] <- 0
+      pred <- as.vector(pred)
+      pred
+
+   }else{
+
+      tmp <- FNN::get.knnx(trnScores,tstScores,k)
+      classNames <- levels(y)
+      nClass <- length(classNames)
+      doRowI <- function(i)  # do row i of tstScores
+      {
+         idxs <- tmp$nn.index[i,]
+         nhbrY <- y[idxs]
+         nhbrY <- toSuperFactor(nhbrY,levels(y))
+         tblNhbrs <- table(nhbrY)
+         nhbrClasses <- names(tblNhbrs)
+         probs <- rep(0,nClass)
+         names(probs) <- classNames
+         probs[nhbrClasses] = tblNhbrs / k
+         probs
+      }
+      tmp <- t(sapply(1:nrow(tstScores),doRowI))
+      tmp
    }
-   tmp <- t(sapply(1:nrow(tstScores),doRowI))
-   tmp
 }
 
 scoresToProbs <- knnCalib
+
+
 
 
 #########################   ovaCalib() ###################################
@@ -415,7 +445,9 @@ ovaCalib <- function(trnY,
    deg=NULL,
    K= NULL,
    se=FALSE,
-   class_func = NULL)
+   class_func = NULL,
+   scaleX = NULL,
+   smoothingFtn=NULL)
 {
    if (!is.factor(trnY)) stop('Y must be an R factor')
 
@@ -453,7 +485,15 @@ ovaCalib <- function(trnY,
 
             prob <- plattCalib(y, trnDV, tstDV, deg, se=se)
 
-         } else if (calibMethod == 'isoCalib') {
+         } else if (calibMethod == 'locLinknnCalib') {
+
+            # create 1's and 0's for OVA 
+            y <- as.factor(ifelse(trnY == class1, 1, 0))
+
+            prob <- knnCalib(y, trnScores, tstScores, k=K, loclin=TRUE, 
+               scaleX=scaleX, smoothingFtn=smoothingFtn) 
+
+         }else if (calibMethod == 'isoCalib') {
 
             y <- ifelse(trnY == class1, 1, 0)
 
@@ -586,7 +626,7 @@ avaCalib <- function(trnY,
                # the paper suggests that However, model averaging 
                # is typically superior to model selection (Hoeting et al. 1999)
                # so we use option = 1 for predict_BBQ
-               prob <- bbqCalib(trnY, trnDV, tstDV, option = 1)
+               prob <- bbqCalib(y, trnDV, tstDV, option = 1)
 
             } else if (calibMethod == 'ELiTECalib') {
 
@@ -990,7 +1030,8 @@ preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
 #        user the option to print and/or zoom in
 
 calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
-   opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE, OVA=TRUE, jous_class_func=NULL) 
+   opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE, OVA=TRUE, jous_class_func=NULL,
+   smoothingFtn=NULL) 
 {
    require(kernlab)
    classNames <- levels(trnY)
@@ -1004,7 +1045,9 @@ calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
          deg=opts$deg,
          K= opts$k,
          se=se,
-         class_func = jous_class_func)
+         class_func = jous_class_func,
+         scaleX = opts$scaleX,
+         smoothingFtn = smoothingFtn)
    }else{
        prob <- avaCalib(trnY,
          trnScores, 

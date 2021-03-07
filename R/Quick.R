@@ -327,10 +327,13 @@ plot.qeRF <- function(object)
 
 #     gamma: scale param, e.g. sd of radial basis ftn
 #     cost: the SVM "C" parameter penalizing nonseparable data
+#     kernel: the ones offered by e1071::svm(), i.e. 'linear',
+#        'polynomial', 'radial basis' and 'sigmoid'
+#     degree: only specifiable for polynomial kernel
 
 # value:  see above
  
-qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
+qeSVM <- function(data,yName,gamma=1.0,cost=1.0,kernel='radial',degree=2,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
@@ -339,7 +342,9 @@ qeSVM <- function(data,yName,gamma=1.0,cost=1.0,
    require(e1071)
    # xyc <- getXY(data,yName,xMustNumeric=FALSE,classif=TRUE)
    frml <- as.formula(paste(yName,'~ .'))
-   svmout <- svm(frml,data=data,cost=cost,gamma=gamma,decision.values=TRUE)
+   svmout <- svm(frml,data=data,
+      cost=cost,gamma=gamma,kernel=kernel,degree=degree,
+      decision.values=TRUE)
    ycol <- which(names(data) == yName)
    svmout$x <- data[,-ycol,drop=FALSE]
    y <- data[,ycol]

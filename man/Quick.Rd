@@ -42,7 +42,8 @@ qeLogit(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
 qeLin(data,yName,holdout=floor(min(1000,0.1*nrow(data))))
 qeKNN(data,yName,k,scaleX=TRUE,holdout=floor(min(1000,0.1*nrow(data))))
 qeRF(data,yName,nTree,minNodeSize,holdout=floor(min(1000,0.1*nrow(data))))
-qeSVM(data,yName,gamma=1.0,cost=1.0,holdout=floor(min(1000,0.1*nrow(data))))
+qeSVM(data,yName,gamma=1.0,cost=1.0,kernel='radial',degree=2,
+   holdout=floor(min(1000,0.1*nrow(data))))
 qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
    holdout=floor(min(1000,0.1*nrow(data))))
 qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
@@ -85,6 +86,10 @@ qeCompare(data,yName,qeFtnList,nReps,opts=NULL,seed=9999)
      indicated dropout proportions.} 
   \item{nEpoch}{Number of iterations in neural net.}
   \item{alpha}{1 for LASSO, 2 for ridge.}
+  \item{gamma}{Scale parameter in \code{e1071::svm}.}
+  \item{cost}{Cost parameter in \code{e1071::svm}.}
+  \item{kernel}{One of 'linear','radial','polynomial' and 'sigmoid'.}
+  \item{degree}{Degree of SVM polynomial kernel, if any.}
   \item{qeFtnList}{Character vector of \code{qe*} names.}
   \item{nReps}{Number of holdout sets to generate.}
   \item{opts}{R list of optional arguments for none, some or all of th

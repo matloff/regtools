@@ -423,39 +423,20 @@ knnCalib <- function(y,trnScores,tstScores,k, loclin=FALSE, scaleX=NULL, smoothi
       # mean case instead of loclin
       original_class <- levels(y)
 
-      dat <- as.data.frame(cbind(tmp_y, trnScores))
-            
-      dat[[colnames(dat)[1]]] <- as.factor(dat[[colnames(dat)[1]]])
-            
-      levels(dat[[colnames(dat)[1]]]) <- original_class 
+      dat <- as.data.frame(cbind(trnScores, y))
 
-      knnout <- qeKNN(dat, colnames(dat)[1], k=k, scaleX=scaleX, holdout=NULL)
+      yname <- colnames(dat)[ncol(dat)]
+      
+      dat[[yname]] <- as.factor(dat[[yname]])
+      
+      levels(dat[[yname]]) <- original_class 
+
+      knnout <- qeKNN(dat, yname, k=k, scaleX=scaleX, holdout=NULL)
 
       tstS  <- as.data.frame(tstScores)
-      
-      # ensure the test set has the same column names
-      colnames(tstS) <- colnames(dat)[2:ncol(trnScores)]
 
-      probMat <- predict(knnout, tstS)
-
-      # old code for knn
-      # tmp <- FNN::get.knnx(trnScores,tstScores,k)
-      # classNames <- levels(y)
-      # nClass <- length(classNames)
-      # doRowI <- function(i)  # do row i of tstScores
-      # {
-      #    idxs <- tmp$nn.index[i,]
-      #    nhbrY <- y[idxs]
-      #    nhbrY <- toSuperFactor(nhbrY,levels(y))
-      #    tblNhbrs <- table(nhbrY)
-      #    nhbrClasses <- names(tblNhbrs)
-      #    probs <- rep(0,nClass)
-      #    names(probs) <- classNames
-      #    probs[nhbrClasses] = tblNhbrs / k
-      #    probs
-      # }
-      # tmp <- t(sapply(1:nrow(tstScores),doRowI))
-      # tmp
+      out <- predict(knnout, tstS)
+      probMat <- out$probs
    }
    probMat
 }
@@ -984,12 +965,6 @@ getCalibMeasure <- function(y, scores){
 
    df <- as.data.frame(elite.getMeasures(scores, y))
 
-   # compute cross entropy
-   df$crossEntropy <- 0 - sum(log(scores)*y)
-
-   # computer KL divergence
-   distribution <- data.frame(prob=scores, class=y)
-   df$kl_divergence <- philentropy::KL(distribution)
    return(df)
 }
 

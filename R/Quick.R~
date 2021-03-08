@@ -211,7 +211,7 @@ predict.qeLin <- function(object,newx) {
 #     k: number of nearest neighbors
 #     scaleX: if TRUE, features will be centered and scaled; note that
 #        this means the features must be numeric
-#     smoothingFtn: as in kNN(); 'mean' or 'loclin'
+#     lin: if TRUE, use loclin() rather than mean()
 
 # value:  see above
 

@@ -149,6 +149,10 @@ LinkedIn datasets.  At one point in the talk, he mentioned that he had
 been startled by the results at first, because "Everything came out
 significant!"  Of course, he shouldn't have been surprised.
 
+One might argue that these issues could be addressed by paying attention to the power of the test.
+But it is not very meaningful to ask the probability of rejecting a hypothesis that we already know 
+is false.
+
 ## Implication 2
 
 It makes no sense to ask a question that we already know to be

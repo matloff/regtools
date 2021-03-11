@@ -471,6 +471,10 @@ ovaCalib <- function(trnY,
       trnScores <- matrix(trnScores,ncol=1)
    }
 
+   if (is.vector(tstScores)){
+      trnScores <- matrix(tstScores,ncol=1)
+   }
+
    # Get all the levels of y
    classes <- levels(trnY)
 
@@ -730,6 +734,9 @@ plattCalib <- function(trnY,
    deg,
    se=FALSE){ 
 
+   if(is.matrix(trnMat) & is.matrix(tstScores)){
+
+   }
    plattMod <- fitPlatt(trnY, trnScores, deg=deg)
    pred <- predictPlatt(plattMod, tstScores, se=se) 
    return(pred$probs[,2])
@@ -961,13 +968,47 @@ eliteCalib <- function(trnY,trnScores, tstScores, build_opt = "AICc", pred_opt=1
 getCalibMeasure <- function(y, scores){
    require(glmgen)
    require(ELiTE) 
-   require(philentropy)
 
    df <- as.data.frame(elite.getMeasures(scores, y))
 
    return(df)
 }
 
+
+
+#########################  combineMeasures()  ################################
+
+# author: Kenneth
+# arguments
+# y_test (vector): vector of true class of instances
+# algorithm (string): give the name of the algorithm you used e.g. "Platt1"
+# probMat : a matrix with each row being a probability distribution of the classes 
+#           for the sample
+# prev_result: pass dataframe returned by combineMeasures() to combine several
+#              results into one dataframe if any
+
+combineMeasures <- function(y_test, algorithm ,probMat, prev_result=NULL){
+    if (!is.matrix(probMat)) {
+      stop('probMat must be a matrix')
+   }
+   count <- 1
+   ls_result <- list()
+   for(l in levels(y_test)){
+      tmp <- ifelse(y_test==l, 1, 0)
+      res <- getCalibMeasure(tmp, probMat[,count])
+      res$class <- l
+      res$Algorithm <- algorithm
+      ls_result[[count]] <- res
+      count <- count + 1
+   }
+   ls_result <- do.call("rbind", ls_result)
+   if(!is.null(prev_result)){
+      out <- rbind(prev_result, ls_result)
+      return(out)
+   }else{
+      return(ls_result)
+   }
+}
 
 ####################  calibWrap() and preCalibWrap()  #############################
 
@@ -1032,7 +1073,7 @@ preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
 #     oneAtATime: if TRUE, show the plots one at a time, and give the
 #        user the option to print and/or zoom in
 
-calibWrap <- function(trnY,tstY,trnX,tstX,trnScores,tstScores,calibMethod,
+calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
    opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE, OVA=TRUE, jous_class_func=NULL,
    smoothingFtn=NULL) 
 {

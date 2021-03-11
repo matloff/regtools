@@ -53,7 +53,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    knntrn,ovaknntrn,predict.ovaknn,classadjust,
    scoresToProbs,logOddsToProbs,getDValsE1071,makeANDconjunction,
    knnFineTune,kNN,findOverallLoss,MAPE,probIncorrectClass,kNNxv,propMisclass,
-   plotExpVars,exploreExpVars,multCols,kNNallK,
+   plotExpVars,exploreExpVars,multCols,kNNallK, combineMeasures,
    bestKperPoint, parvsnonparplot,nonparvsxplot,nonparvarplot,
    ridgelm,plot.rlm, boundaryplot,
    l2,l1, fitPlatt, predictPlatt, plattCalib, isoCalib, getCalibMeasure,

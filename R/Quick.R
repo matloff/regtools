@@ -492,19 +492,15 @@ plot.qeGBoost <- function(object)
    gbm.perf(object$gbmOuts)
 }
 
-
 #########################  qeNeural()  #################################
 
-# neural networks 
+# neural networks, using TensorFlow/Keras 
 
 # arguments:  see above, plus
 
-#     hidden
-#     minNodeSize: minimum number of data points per tree node
-#     learnRate: learning rate: 
+#     hidden, vector of number of units per layer
+#     nEpoch, number of epochs
 
-# value:  see above
- 
 qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
@@ -544,6 +540,90 @@ qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
 }
 
 predict.qeNeural <- function(object,newx=NULL,k=NULL)
+{
+   class(object) <- class(object)[-1]
+   newx <- setTrainFactors(object,newx)
+   if (nrow(newx) == 1) {  # kludge!; Tensorflow issue
+      kludge1row <- TRUE
+      newx <- rbind(newx,newx)
+   } else kludge1row <- FALSE
+   if (!is.null(object$factorsInfo)) {
+      newx <- factorsToDummies(newx,omitLast=TRUE,
+         factorsInfo=object$factorsInfo)
+   }
+   preds <- predict(object,newx)
+   probs <- attr(preds,'probs')  # may be NULL
+   if (kludge1row) preds <- preds[1]
+   if (!object$classif) {
+      preds
+   } else {
+      classNames <- object$classNames
+      preds <- classNames[preds+1]
+      if (kludge1row) probs <- probs[1,]
+
+      origProbs <- probs
+      if (!is.null(k)) {
+         # not ideal, but no apparent easy way to get this during 
+         # training phases
+         trnScores <- predict.krsFit(object,object$x)
+         trnScores <- attr(trnScores,'probs')
+         newScores <- matrix(probs,ncol=length(classNames))
+         probs <- knnCalib(object$yFactor,trnScores,newScores,k)
+      }
+
+      outlist <- list(predClasses=preds,probs=probs,origProbs=origProbs)
+      outlist
+   } 
+}
+
+#########################  qeNeuralNet()  #################################
+
+# neural networks, wrapping 'neuralnet' package 
+
+# arguments:  see above, plus
+
+#     hidden, vector of units per hiddne layer
+#     nEpoch, number of epochs
+
+qeNeuralNet <- function(data,yName,hidden=c(100,100),nEpoch=30,
+   holdout=floor(min(1000,0.1*nrow(data))))
+{
+   classif <- is.factor(data[[yName]])
+   require(keras)
+   if (!is.null(holdout)) splitData(holdout,data)
+   ycol <- which(names(data) == yName)
+   x <- data[,-ycol]
+   if (!is.numeric(x)) {
+      x <- factorsToDummies(x,omitLast=TRUE)
+      factorsInfo <- attr(x,'factorsInfo')
+   } else factorsInfo <- NULL
+   y <- data[,ycol]
+   if (classif) {
+      classNames <- levels(y)
+      yFactor <- y
+      y <- as.numeric(as.factor(y)) - 1
+   } else {
+      classNames <- NULL
+      yFactor <- NULL
+   }
+   krsout <- krsFit(x,y,hidden,classif=classif,nClass=length(classNames),
+      nEpoch=nEpoch)
+   krsout$classif <- classif
+   krsout$classNames=classNames
+   krsout$factorsInfo=factorsInfo
+   krsout$x <- x
+   krsout$y <- y
+   krsout$yFactor <- yFactor
+   krsout$trainRow1 <- getRow1(data,yName)
+   class(krsout) <- c('qeNeural',class(krsout))
+   if (!is.null(holdout)) {
+      predictHoldout(krsout)
+      krsout$holdIdxs <- holdIdxs
+   }
+   krsout
+}
+
+predict.qeNeuralNet <- function(object,newx=NULL,k=NULL)
 {
    class(object) <- class(object)[-1]
    newx <- setTrainFactors(object,newx)

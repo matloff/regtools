@@ -582,10 +582,9 @@ predict.qeNeural <- function(object,newx=NULL,k=NULL)
 
 # arguments:  see above, plus
 
-#     hidden, vector of units per hiddne layer
-#     nEpoch, number of epochs
+#     hidden, vector of units per hidden layer
 
-qeNeuralNet <- function(data,yName,hidden=c(100,100),nEpoch=30,
+qeNeuralNet <- function(data,yName,hidden=c(5),
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
@@ -608,8 +607,7 @@ qeNeuralNet <- function(data,yName,hidden=c(100,100),nEpoch=30,
    frml <- paste0(yName,' ~ .')
    data <- as.data.frame(cbind(x,y))
    names(data)[ncol(data)] <- yName
-   nnout <- neuralnet(frml,data=data,hidden=hidden,linear.output=linear.output,
-      )
+   nnout <- neuralnet(frml,data=data,hidden=hidden,linear.output=linear.output)
    nnout$classif <- classif
    nnout$classNames=classNames
    nnout$factorsInfo=factorsInfo
@@ -626,7 +624,7 @@ qeNeuralNet <- function(data,yName,hidden=c(100,100),nEpoch=30,
 predict.qeNeuralNet <- function(object,newx=NULL,k=NULL)
 {
    class(object) <- class(object)[-1]
-   newx <- setTrainFactors(object,newx)
+   ### newx <- setTrainFactors(object,newx)
    if (!is.null(object$factorsInfo)) {
       newx <- factorsToDummies(newx,omitLast=TRUE,
          factorsInfo=object$factorsInfo)

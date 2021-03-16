@@ -1123,12 +1123,46 @@ compareQE <- function(data,yName,qeFtnList,nReps,seed=9999)
    data.frame(qeFtn=qeFtnList,meanAcc=meanAcc)
 }
 
+#########################  qeFT()  #############################
+
+# qe*(() wrapper fof fineTuning()
+
+# arguments
+#    data: as in qe*()
+#    yName: as in qe*()
+#    qeftn: quoted name of qe*() function to be used
+#    pars: R list, with named elements specifying values of parameters
+#    nTst: number of parameter combinations (see fineTuning())
+#    nXval: number of cross-val folds per parameter combination (see 
+#       fineTuning())
+
+qeFT <- function(data,yName,qeftn,pars,nTst,nXval)
+{
+
+stop('under construction')
+
+   theCall <- function(dtrn,dtst,cmbi)
+   {
+      cmbiNames <- names(cmbi)
+      qecall <- qeftn
+      qecall <- pasteo(qecall,'(data=data,yName=yName')
+      for (i in 1:length(cmbi)) {
+         qecall <- pasteo(qecall,',',cmbiNames[i],'=cmbi[i]')
+      }
+      qecall <- paste0('qeout <- ',qecall,')')
+      eval(parse(text=qecall))
+   }
+
+}
+
 ######################  qeCompare()  #############################
+
+# compare several qe*(data,yName,qeFtnList,nReps)!
 
 # arguments
 
 #    data: as in qe*()
-#    yName as in qe*()
+#    yName: as in qe*()
 #    qeFtnList: character vector of qe*() functions to be run
 #    nReps: number of repetetions per qe*() function
 #    opts: R list, giving optional arguments for the qe*()

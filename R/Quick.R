@@ -1136,23 +1136,32 @@ compareQE <- function(data,yName,qeFtnList,nReps,seed=9999)
 #    nXval: number of cross-val folds per parameter combination (see 
 #       fineTuning())
 
-qeFT <- function(data,yName,qeftn,pars,nTst,nXval)
+qeFT <- function(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
 {
-
-stop('under construction')
 
    theCall <- function(dtrn,dtst,cmbi)
    {
       cmbiNames <- names(cmbi)
       qecall <- qeftn
-      qecall <- pasteo(qecall,'(data=data,yName=yName')
+      qecall <- paste0(qecall,'(data=data,yName=yName')
       for (i in 1:length(cmbi)) {
-         qecall <- pasteo(qecall,',',cmbiNames[i],'=cmbi[i]')
+         qecall <- paste0(qecall,',',cmbiNames[i],'=',cmbi[i])
       }
-      qecall <- paste0('qeout <- ',qecall,')')
-      eval(parse(text=qecall))
+      qecall <- paste0(qecall,',holdout=NULL)')
+      qeout <- eval(parse(text=qecall))
+      ycol <- which(names(dtst) == yName)
+      if (is.numeric(dtst[-ycol])) {  # regression case
+         preds <- predict(qeout,dtst[,-ycol])
+         prederr <- abs(dtst[,ycol] - preds)
+         return(mean(prederr))
+      } else {  # classification case
+         preds <- predict(qeout,dtst[,-ycol])$predClasses
+         return(mean(preds != dtst[,ycol]))
+      }
    }
 
+   fineTuning(data,pars,theCall,nCombs,nTst=nTst,nXval=nXval,
+      showProgress=showProgress)
 }
 
 ######################  qeCompare()  #############################

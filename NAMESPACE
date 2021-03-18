@@ -48,7 +48,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    ovalogtrn,avalogtrn,avalogpred,
    knnCalib,plattCalib,reliabDiagram,calibWrap,preCalibWrap,
    crossEntropy,KLDivergence,
-   qeLogit,qeLin,qeKNN,qeRF,qeSVM,qeGBoost,qeNeural,qeLASSO,qeCompare,
+   qeLogit,qeLin,qeKNN,qeRF,qeSVM,qeGBoost,qeNeural,qeLASSO,qeCompare,qeFT,
    doPCA,qePolyLin,qePolyLog,ridgePoly,
    knntrn,ovaknntrn,predict.ovaknn,classadjust,
    scoresToProbs,logOddsToProbs,getDValsE1071,makeANDconjunction,

@@ -1150,13 +1150,15 @@ qeFT <- function(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
       qecall <- paste0(qecall,',holdout=NULL)')
       qeout <- eval(parse(text=qecall))
       ycol <- which(names(dtst) == yName)
-      if (is.numeric(dtst[-ycol])) {  # regression case
-         preds <- predict(qeout,dtst[,-ycol])
-         prederr <- abs(dtst[,ycol] - preds)
+      tstY <- dtst[,ycol]
+      tstX <- dtst[,-ycol]
+      if (is.numeric(tstY)) {  # regression case
+         preds <- predict(qeout,tstX)
+         prederr <- abs(tstY - preds)
          return(mean(prederr))
       } else {  # classification case
-         preds <- predict(qeout,dtst[,-ycol])$predClasses
-         return(mean(preds != dtst[,ycol]))
+         preds <- predict(qeout,tstX)$predClasses
+         return(mean(preds != tstY))
       }
    }
 

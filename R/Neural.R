@@ -20,6 +20,7 @@
 #       for dropout
 #    acts: vector of activation functions
 #    conv: convolutional/pooling layers (see below)
+#    xShape: for 2D convolution, the number of rows and columns of (say) image
 #    classif: if TRUE, classification problem, otherwise regression
 #    nClass: in the classification case, number of classes
 #    nEpoch: desired number of epochs
@@ -71,15 +72,17 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
       # convert x to tensor
       x <- matrixToTensor(x,xShape) 
       xShape <- attr(x,'xShape')
+      # first conv layer
       keras::layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
          activation='relu',input_shape=xShape)
+      # remaining conv layers
       for (i in seq(2,length(conv),1)) {
          layer <- conv[[i]]
          if (layer$type == 'pool') {
             keras::layer_max_pooling_2d(model,pool_size = layer$kern)
          } else if (layer$type == 'conv2d') {
-            keras::layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
-               activation='relu')
+            keras::layer_conv_2d(model,filters=layer$filters,
+               kernel_size=layer$kern,activation='relu')
          } else if (layer$type == 'drop') {
             keras::layer_dropout(model,layer$drop)
          } else stop('invalid layer type')
@@ -88,12 +91,12 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
    }
 
    # hidden layers
-   if (is.null(conv)) {
+   if (is.null(conv)) { 
       xShape <- NULL
       keras::layer_dense(model,units = hidden[1], activation = acts[1],
          input_shape = ncol(x)) 
-      firstHidden <- 2
-   } else firstHidden <- 1
+      firstHidden <- 1 # first overall layer will be the first hidden layer
+   } else firstHidden <- 2 # second overall layer will be the first hidden layer
    nHidden <- length(hidden)
    for (i in seq(firstHidden,nHidden,1)) {
       hi <- hidden[i]

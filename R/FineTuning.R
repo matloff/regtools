@@ -114,11 +114,11 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 
 makeOutdf <- function(pars,specCombs=NULL) {
    if (!is.null(specCombs)) return(specCombs)
-   outdf <- expand.grid(pars) 
+   outdf <- expand.grid(pars,stringsAsFactors=FALSE) 
    if (!is.null(pars$nCombs)) {
       idxsToKeep <- sample(1:nrow(outdf),pars$nCombs)
       outdf <- outdf[idxsToKeep,]
-   } 
+   }
    outdf
 }
 

@@ -1075,7 +1075,7 @@ preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
 
 calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
    opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE, OVA=TRUE, jous_class_func=NULL,
-   smoothingFtn=NULL) 
+   smoothingFtn=NULL, style= NULL) 
 {
    require(kernlab)
    classNames <- levels(trnY)
@@ -1118,7 +1118,7 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
          }
       }
       par(mfrow=c(1,1))
-   } else if (oneAtATime) {
+   }else if (oneAtATime) {
       for (cls in 1:nClass) {
          reliabDiagram(ym[,cls],res$probs[,cls],nBins,TRUE,classNum=cls)
          while (1) {
@@ -1137,6 +1137,37 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
             }
          }
       }
+   }else{
+
+      # Author: Kenneth
+      # Plot all in one plot
+      # if it is not one at a time and plots per row are not specified
+
+      # Change the margin
+      # this probably needs to be fixed so that it can scale with num of classes 
+      par(mar=c(5,4,2,6)) 
+
+      reliabDiagram(tstY,res$probs,nBins,TRUE,
+         multiclass=TRUE, multiclassStyle= style)
+         while (1) {
+            print('you can zoom, or print to file')
+            cmd <- 
+               readline('hit Enter for next plot, or low hi or fname: ')
+            if (cmd == '') break
+            cmdParts <- pythonBlankSplit(cmd)
+            if (length(cmdParts) == 1)
+               prToFile(cmd)
+            else {
+               if (cmdParts[2] == 'ly') cmdParts[2] <- as.numeric(nrow(ym))
+               zoom <- as.numeric(cmdParts)
+               reliabDiagram(tstY,res$probs, nBins,TRUE,zoom=zoom, 
+                  multiclass=TRUE, multiclassStyle= style)
+            }
+      }
+
+      # Reset the margin back to default 
+      par(mar=c(5,4,4,2)+0.1) 
+     
    }
    res
 }
@@ -1184,31 +1215,148 @@ getDValsE1071 <- function(object,newx)
 #    nBins: number of bins
 #    plotGraph: TRUE means plotting is desired
 
-reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL) 
+reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL, 
+   multiclass=FALSE, multiclassStyle= 1) 
 {
-   breaks <- seq(0,1,1/nBins)
-   probsBinNums <- findInterval(probs,breaks)
-   fittedYCounts <- tapply(probs,probsBinNums,sum)
-   actualYCounts <- tapply(y,probsBinNums,sum)
-   axisLimit <- max(max(fittedYCounts),max(actualYCounts))
-   if (plotGraph) {
-      if (is.null(zoom)) {
-         zoomTo <- 1:nBins
-         lims <- c(0,axisLimit) 
-      } else {
+   if(multiclass){
+
+      ym <- factorToDummies(y,fname='y')
+      nClass <- length(levels(y))
+      tokencode<- rep(1:25,5)
+      sizecode <- seq(0.1, 1, length.out = nClass)
+
+      # generate colors
+      if(nClass > 8){
+         # requires a lot of colors
+         colorParlette <- colors()[c(seq(5,150,5), 655, seq(360, 655,5))]
+      }else{
+         # get the most distinct 8 colors default
+         colorParlette <- 1:8
+      }
+
+      record = list()
+      for(class in 1:nClass){
+
+         probsBinNums <- findInterval(probs[,class],breaks)
+         fittedYCounts <- tapply(probs[,class],probsBinNums,sum)
+         actualYCounts <- tapply(ym[,class],probsBinNums,sum)
+         axisLimit <- max(max(fittedYCounts),max(actualYCounts))
+
+         # record the counts
+         record[[levels(y)[class]]] <- cbind(fittedYCounts, actualYCounts)
+
+         color <- colorParlette[class]
+         size <- sizecode[class]
+         token <- tokencode[class]
+
+         if(plotGraph){
+            
+            if (nClass > 25 & multiclassStyle == 2){
+               print("Repeated tokens will be used for over 25 classes")
+            }
+
+            if (is.null(zoom)) {
+               zoomTo <- 1:nBins
+               lims <- c(0,axisLimit) 
+            }else {
+               ftdy <- fittedYCounts
+               zoomTo <- which(ftdy >= zoom[1] & ftdy <= zoom[2])
+               lims <- zoom
+            }
+
+            if (class == 1){
+               if (multiclassStyle == 1){
+
+                  # Style 1: color and size varying
+                  plot(fittedYCounts[zoomTo], actualYCounts[zoomTo], 
+                     col = rep(color, length(fittedYCounts[zoomTo])), pch = 1, 
+                     cex = rep(size, length(fittedYCounts[zoomTo])),
+                     xlim=lims,ylim=lims, xlab='fittedYCounts', ylab='actualYCounts')
+
+               }else if(multiclassStyle == 2){
+
+                  #Style 2: black dots with varying tokens
+                  plot(fittedYCounts[zoomTo], actualYCounts[zoomTo], 
+                     pch = rep(token , length(fittedYCounts[zoomTo])), 
+                     xlim=lims,ylim=lims, xlab='fittedYCounts', ylab='actualYCounts')
+
+               }else{
+                  # Style 3: color and size fixed
+                  plot(fittedYCounts[zoomTo], actualYCounts[zoomTo], 
+                     col = rep(color, length(fittedYCounts[zoomTo])), pch = 1, 
+                     xlim=lims,ylim=lims, xlab='fittedYCounts', ylab='actualYCounts')
+               }
+            }else{
+               if (multiclassStyle == 1){
+                  points(fittedYCounts[zoomTo], actualYCounts[zoomTo], 
+                     col =rep(color, length(fittedYCounts[zoomTo])), pch = 1, 
+                     cex = rep(size, length(fittedYCounts[zoomTo])))
+               
+               }else if(multiclassStyle == 2){
+                  
+                  points(fittedYCounts[zoomTo], actualYCounts[zoomTo], 
+                     pch = rep(token, length(fittedYCounts[zoomTo])))
+
+               }else{
+                  points(fittedYCounts[zoomTo], actualYCounts[zoomTo], 
+                     col =rep(color, length(fittedYCounts[zoomTo])), pch = 1)
+               }
+            }
+         }
+      }
+      if (plotGraph){
+         # determine the size of the font
+         if(nClass <= 20){
+            fontsize = 1
+         }else if(nClass > 20 & nClass <= 30){
+            fontsize = 0.7
+         }else if(nClass > 30 & nClass <= 40){
+            fontsize = 0.5
+         }else{
+            fontsize = 0.2
+         }
+
+         if (multiclassStyle == 1 | multiclassStyle == 3){
+            # a dash diagonal line
+            abline(0,1, lty=2)
+            legend("topleft", legend = levels(y), col = colorParlette[1:nClass], pch = 19,
+                  inset=c(1,0), xpd=TRUE, bty="n", cex = fontsize)
+         }else{
+            abline(0,1,col='red')
+            legend("topleft", legend = levels(y), pch = tokencode[1:nClass],
+               inset=c(1,0), xpd=TRUE, bty="n", cex = fontsize)
+         }
+      }
+
+   record
+
+   }else{
+      breaks <- seq(0,1,1/nBins)
+      probsBinNums <- findInterval(probs,breaks)
+      fittedYCounts <- tapply(probs,probsBinNums,sum)
+      actualYCounts <- tapply(y,probsBinNums,sum)
+      axisLimit <- max(max(fittedYCounts),max(actualYCounts))
+      if (plotGraph) {
+         if (is.null(zoom)) {
+            zoomTo <- 1:nBins
+            lims <- c(0,axisLimit) 
+      }else {
          ftdy <- fittedYCounts
          zoomTo <- which(ftdy >= zoom[1] & ftdy <= zoom[2])
          lims <- zoom
       }
-      plot(fittedYCounts[zoomTo],actualYCounts[zoomTo],
-         xlim=lims,ylim=lims,xlab='fittedYCounts',ylab='actualYCounts')
-      abline(0,1,col='red')
-      if (!is.null(classNum)) {
-         topLabel <- paste('Class',classNum)
-         title(main=topLabel,col='blue')
+
+         plot(fittedYCounts[zoomTo],actualYCounts[zoomTo],
+            xlim=lims,ylim=lims,xlab='fittedYCounts',ylab='actualYCounts')
+         abline(0,1,col='red')
+         if (!is.null(classNum)) {
+            topLabel <- paste('Class',classNum)
+            title(main=topLabel,col='blue')
+         }
       }
+   
+      cbind(fittedYCounts,actualYCounts)
    }
-   cbind(fittedYCounts,actualYCounts)
 }
 
 logOddsToProbs <- function(x) 

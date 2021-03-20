@@ -1145,7 +1145,12 @@ qeFT <- function(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
       qecall <- qeftn
       qecall <- paste0(qecall,'(data=data,yName=yName')
       for (i in 1:length(cmbi)) {
-         qecall <- paste0(qecall,',',cmbiNames[i],'=',cmbi[i])
+         tmp <- unlist(cmbi[i])
+         if (!is.numeric(tmp)) {
+            # make sure that a character parameter remains quoted
+            tmp <- paste0('"',tmp,'"')
+         }
+         qecall <- paste0(qecall,',',cmbiNames[i],'=',tmp)
       }
       qecall <- paste0(qecall,',holdout=NULL)')
       qeout <- eval(parse(text=qecall))
@@ -1162,7 +1167,7 @@ qeFT <- function(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
       }
    }
 
-   fineTuning(data,pars,theCall,nCombs,nTst=nTst,nXval=nXval,
+   fineTuning(data,pars,theCall,nCombs=nCombs,nTst=nTst,nXval=nXval,
       showProgress=showProgress)
 }
 

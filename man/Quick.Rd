@@ -11,6 +11,7 @@
 \alias{qePolyLog}
 \alias{qeIso}
 \alias{qeCompare}
+\alias{qeFT}
 \alias{predict.qeLogit}
 \alias{predict.qeLin}
 \alias{predict.qeKNN}
@@ -54,6 +55,7 @@ qePolyLin(data,yName,deg=2,maxInteractDeg = deg,
 qePolyLog(data,yName,deg=2,maxInteractDeg = deg,
    holdout=floor(min(1000,0.1*nrow(data))))
 qeCompare(data,yName,qeFtnList,nReps,opts=NULL,seed=9999)
+qeFT(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
 \method{predict}{qeLogit}(object,newx)
 \method{predict}{qeLin}(object,newx)
 \method{predict}{qeKNN}(object,newx,newxK=1)
@@ -96,6 +98,16 @@ qeCompare(data,yName,qeFtnList,nReps,opts=NULL,seed=9999)
   \item{opts}{R list of optional arguments for none, some or all of th
      functions in \code{qeFtnList}.}
   \item{seed}{Seed for random number generation.}
+  \item{qeftn}{Quoted string, specifying the name of a qe-series
+     machine learning method.}
+  \item{pars}{R list of hyperparameter ranges.  See \code{\link{fineTuning}}.}
+  \item{nCombs}{Number of hyperparameter combinations to run.  
+     See \code{\link{fineTuning}}.}
+  \item{nTsts}{Size of test sets.  See \code{\link{fineTuning}}.}
+  \item{nXval}{Number of cross-validations to run.  
+     See \code{\link{fineTuning}}.}
+  \item{showProgress}{If TRUE, show results as they arise.  
+     See \code{\link{fineTuning}}.}
 }
 
 \details{

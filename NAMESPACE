@@ -38,13 +38,13 @@ S3method(predict,mfRec)
 S3method(predict,penroseLM)
 S3method(predict,penrosePoly)
 S3method(predict,qeIso)
-S3method(predict,pcaQE)
+S3method(predict,qePCA)
 S3method(predict,ridgePoly)
 
 export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc,
    kmin,lmac,coef.lmac,vcov.lmac,pcac,loglinac,tbltofakedf,
    makeNA,ZerosToNAs,NAsTo0s,
-   pcaQE,compareQE,
+   qePCA,compareQE,
    ovalogtrn,avalogtrn,avalogpred,
    knnCalib,plattCalib,reliabDiagram,calibWrap,preCalibWrap,
    crossEntropy,KLDivergence,

@@ -498,12 +498,17 @@ plot.qeGBoost <- function(object)
 
 # arguments:  see above, plus
 
-#     hidden, vector of number of units per layer
+#     hidden, vector of number of units per layer, numeric or string
+#        (numbers sep by commas)
 #     nEpoch, number of epochs
 
 qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
+   # for use with qeRT(), hidden could be a string
+   if (is.character(hidden)) 
+      hidden <- as.numeric(strsplit(hidden,',')[[1]])
+
    classif <- is.factor(data[[yName]])
    require(keras)
    if (!is.null(holdout)) splitData(holdout,data)
@@ -879,7 +884,7 @@ predict.qeIso <- function(object,newx)
 # the additional argument is pcaProp, the proportion of variance desired
 # for the principal components
 
-pcaQE <- function(pcaProp,data,yName,qeName,...,
+qePCA <- function(pcaProp,data,yName,qeName,...,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    # eventual return value
@@ -920,11 +925,11 @@ pcaQE <- function(pcaProp,data,yName,qeName,...,
    res$pcaout <- pcaout
    res$numPCs <- numPCs
    res$trainRow1 <- qeOut$trainRow1
-   class(res) <- 'pcaQE'
+   class(res) <- 'qePCA'
    res
 }
 
-predict.pcaQE <- function(object,newx)
+predict.qePCA <- function(object,newx)
 {
    class(object) <- class(object)[-1]
    if (!allNumeric(newx)) {
@@ -1145,7 +1150,12 @@ qeFT <- function(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
       qecall <- qeftn
       qecall <- paste0(qecall,'(data=data,yName=yName')
       for (i in 1:length(cmbi)) {
-         qecall <- paste0(qecall,',',cmbiNames[i],'=',cmbi[i])
+         tmp <- unlist(cmbi[i])
+         if (!is.numeric(tmp)) {
+            # make sure that a character parameter remains quoted
+            tmp <- paste0('"',tmp,'"')
+         }
+         qecall <- paste0(qecall,',',cmbiNames[i],'=',tmp)
       }
       qecall <- paste0(qecall,',holdout=NULL)')
       qeout <- eval(parse(text=qecall))

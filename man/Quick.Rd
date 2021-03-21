@@ -86,7 +86,8 @@ qeFT(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
   \item{minNodeSize}{Minimum number of data points in a tree node.} 
   \item{learnRate}{Learning rate.} 
   \item{hidden}{Vector of units per hidden layer.  Fractional values
-     indicated dropout proportions.} 
+     indicated dropout proportions.  Can be specified as a string, e.g.
+     '100,50', for use with \code{qeFT}.} 
   \item{nEpoch}{Number of iterations in neural net.}
   \item{alpha}{1 for LASSO, 2 for ridge.}
   \item{gamma}{Scale parameter in \code{e1071::svm}.}

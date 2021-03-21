@@ -118,7 +118,7 @@ makeOutdf <- function(pars,specCombs=NULL) {
    if (!is.null(pars$nCombs)) {
       idxsToKeep <- sample(1:nrow(outdf),pars$nCombs)
       outdf <- outdf[idxsToKeep,]
-   } 
+   }
    outdf
 }
 

@@ -1172,7 +1172,7 @@ qeFT <- function(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
       }
    }
 
-   fineTuning(data,pars,theCall,nCombs,nTst=nTst,nXval=nXval,
+   fineTuning(data,pars,theCall,nCombs=nCombs,nTst=nTst,nXval=nXval,
       showProgress=showProgress)
 }
 

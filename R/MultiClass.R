@@ -734,7 +734,7 @@ plattCalib <- function(trnY,
    deg,
    se=FALSE){ 
 
-   if(is.matrix(trnMat) & is.matrix(tstScores)){
+   if(is.matrix(trnScores) & is.matrix(tstScores)){
 
    }
    plattMod <- fitPlatt(trnY, trnScores, deg=deg)

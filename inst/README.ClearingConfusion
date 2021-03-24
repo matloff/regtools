@@ -1,0 +1,18 @@
+
+A number of the files here comprise our Clearing the Confusion series,
+clarifying many topics that are widely misunderstood in statistics.
+Cufrrently we have:
+
+ChoosingKinKFoldCV.md:  Choosing the number of folds in k-fold
+   cross-validation.
+
+NoPVals.md:  Why p-values should not be used.
+
+ScalingInPCA.md:  Arguing that use of scaling prior to PCA is problematic.
+
+PoissonReg.md:  Why Poisson regression should be used only in some
+   restrictive settings.
+
+UnbalancedClasses.md:  Don't artificially balance data in classification
+   problems.
+

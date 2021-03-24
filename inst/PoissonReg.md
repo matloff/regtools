@@ -15,17 +15,15 @@ treatment here is somewhat critical.  There are two main themes:
 * Unlike the linear and logistic cases, there is no theoretical or
   modeling justification for PR.
 
-* Though many analysts exponentiate the regression coefficients returned
-  by **glm()** in the Poisson case, i.e. run them through the **exp()**
-function, there are reasons arguing against this practice.  The two
-types of coefficients are not comparable.
+* PR changes the nature of the &beta; coefficients in major ways that
+  may not be desirable.
 
 ## Notation
 
 Y: the response variable
 
 X<sub>1</sub>, X<sub>2</sub>,...,X<sub>p</sub>:  the predictor
-variables/features
+variables
 
 X: (X<sub>1</sub>, X<sub>2</sub>,...,X<sub>p</sub>)
 
@@ -44,6 +42,9 @@ given X is constant in X (homoscedasticity).
 Key point:  *All the assumptions of this model hold if (X,Y) has a
 multivariate normal distribution.*
 
+In other words, the multivariate normal model implies the classic linear
+model.
+
 **logistic model:** For binary Y, the logistic model is
 
 P(Y = 1 | X) = 1 / [1 + exp{-(
@@ -56,9 +57,9 @@ P(Y = 1 | X) = 1 / [1 + exp{-(
 Key point:  *This assumption holds if X | Y = i is multivariate normal
 with covariance matrix independent of i.* 
 
-(Those assumptions, by the way, are exactly those of Fisher linear
+Those assumptions, by the way, are exactly those of Fisher linear
 discriminant analysis.  In other words, LDA settings imply the logistic
-model.)
+model.
 
 -----------------
 
@@ -67,7 +68,7 @@ models are no exception.  But multivariate data is indeed often roughly
 mound-shaped, i.e. multivariate Gaussian-like, making the above
 theoretical models reasonable choices for consideration. 
 
-## Reasons cited for using "exponential PR*
+## Reasons cited for using "exponential" PR
 
 When Y has the form of counts, a Poisson model naturally comes to mind.
 However, unlike the linear and logistic cases, *there is no theoretical
@@ -128,9 +129,10 @@ most cases it is not homoscedastic either.  However, neither of these is
 a major problem.
 
 For large n, the Central Limit Theorem (applied in large-sample theory)
-shows that nor-normality of the distribution of Y given X is not
+shows that non-normality of the distribution of Y given X is not
 relevant.  For small n, Gaussian linear model theory is not reliable,
-since no variable in the real world is normally distributed.  
+since no variable in the real world is normally distributed.  One can
+and should still do inference, of course, but not take it so literally. 
 
 As to heteroscedastic variance of Y given X, one can use the *sandwich
 estimator*.  See for instance the **car** and **sandwich** packages in
@@ -138,7 +140,8 @@ CRAN.
 
 ## Recommendations
 
-One can of course try both models, doing model fit assessment if the
-goal is Description or doing cross-validated assessment of predictive
-ability if the goal is Prediction.  But again, in the Description case,
-one must take care in interpeting the coefficients of the two models.
+One can of course try both models, LP and EP, doing model fit assessment
+if the goal is Description or doing cross-validated assessment of
+predictive ability if the goal is Prediction.  But again, in the
+Description case, one must take care in interpeting the coefficients of
+the two models.

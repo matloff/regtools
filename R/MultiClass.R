@@ -459,7 +459,8 @@ ovaCalib <- function(trnY,
    se=FALSE,
    class_func = NULL,
    scaleX = NULL,
-   smoothingFtn=NULL)
+   smoothingFtn=NULL,
+   isProb = FALSE)
 {
    if (!is.factor(trnY)) stop('Y must be an R factor')
 
@@ -508,9 +509,9 @@ ovaCalib <- function(trnY,
 
          } else if (calibMethod == 'isoCalib') {
 
-            y <- ifelse(trnY == class1, 1, 0)
+            y <- as.factor(ifelse(trnY == class1, 1, 2))
 
-            prob <- isoCalib(y, trnDV, tstDV)
+            prob <- isoCalib(y, trnDV, tstDV, isProb)
 
          } else if (calibMethod == 'guessCalib'){
 
@@ -568,7 +569,8 @@ avaCalib <- function(trnY,
    deg=NULL,
    K= NULL,
    se=FALSE,
-   class_func = NULL)
+   class_func = NULL,
+   isProb = NULL)
 {
    if (!is.factor(trnY)) stop('Y must be an R factor')
 
@@ -624,7 +626,7 @@ avaCalib <- function(trnY,
 
                y <- ifelse(trnY[rowIdx]==class1, 1, 0)
 
-               prob <- isoCalib(y, trnDV, tstDV)
+               prob <- isoCalib(y, trnDV, tstDV, isProb)
 
             } else if (calibMethod == 'guessCalib'){
 
@@ -647,14 +649,6 @@ avaCalib <- function(trnY,
                y <- ifelse(trnY[rowIdx]==class1, 1, 0)
 
                prob <- eliteCalib(y, trnDV, tstDV)
-
-            } else if (calibMethod == 'JOUSCalib') {
-
-               if (is.null(class_func)) stop('model function cannot be NULL for jousboost')
-
-               y <- as.factor(ifelse(trnY[rowIdx]==class1, 1, -1))
-
-               prob <- JOUSBoostCalib(y, trnDV, tstDV, class_func)
 
             } else stop('invalid calibration method')
 
@@ -788,9 +782,21 @@ stop('under construction')
 
 #########################  isoCalib()  ################################
 
+# wrapper calibrate either training scores or probability by 
+# isotonic regression in binary case
 
-isoCalib <- function(trnY,trnScores,tstScores)
+# author: kenneth
+
+# arguments
+#   trnY: the training labels
+#   trnScores (vector): the training scores output by the classifier
+#   tstScores (vector): the test scores
+#   isProb (boolean): a boolean value to determine whether scores are probabilities
+
+
+isoCalib <- function(trnY,trnScores,tstScores, isProb)
 {  
+   require(CORElearn)
 
    if (is.vector(trnScores)){
       trnScores <- matrix(trnScores,ncol=1)
@@ -800,13 +806,18 @@ isoCalib <- function(trnY,trnScores,tstScores)
       stop('fewer scores than Ys; did you have nonnull holdout?')
    }
 
-   x <- trnScores[order(trnScores)]
-   model <- isoreg(x , trnY)
-   stepf_data <- cbind(model$x, model$yf)
-   step_func <- stepfun(stepf_data[,1], c(0,stepf_data[,2]))
-   prob <- step_func(tstScores)
+   if (length(levels(trnY)) != 2){
+      stop('This function can only handle binary case. For multiclass case, please use ovaCalib()')
+   }
 
-   return(prob)
+   # change the name of the levels for calibrate()
+   levels(trnY) <- c("1","2")
+
+   calibration <- CORElearn::calibrate(trnY, trnScores, class1=1,
+      method="isoReg", assumeProbabilities=isProb)
+   # apply the calibration to the testing set
+   calibratedProbs <- CORElearn::applyCalibration(tstScores, calibration)
+   return(calibratedProbs)
 }
 
 #########################  bbqCalib()  ################################
@@ -864,60 +875,6 @@ guessCalib <- function(trnY,trnScores, tstScores)
 
 
 
-
-#########################  JOUSBoostCalib()  ################################
-
-# wrapper calibrate by JOUSBoost
-# algorithm. The algorithm requires ksvm from kernlab
-# the arguments in ksvm are set according to the default
-# of e1017:::svm()
-
-# author: kenneth
-
-# arguments
-
-#    trnY: R factor of labels in training set, 
-#       y must take values in -1, 1
-#    trnScores: standardized train set
-#    tstScores: standardized test set
-#    class_func: a machine learning model e.g. svm
-JOUSBoostCalib <- function(trnY, trnScores, tstScores, class_func)
-{
-   require(JOUSBoost)
-
-   pred_func <- function(obj, X)
-   { 
-      as.numeric(as.character(predict(obj, X))) 
-   }
-
-   if (!is.factor(trnY)) stop('Y must be an R factor')
-
-
-   if (is.vector(trnScores)){
-      trnScores <- matrix(trnScores,ncol=1)
-   }
-
-   if (is.vector(tstScores)){
-      tstScores <- matrix(tstScores,ncol=1)
-   }
-
-
-   if (nrow(trnScores) != length(trnY)) {
-      stop('fewer scores than Ys; did you have nonnull holdout?')
-   }
-
-
-   # model building
-   jous_obj <- jous(trnScores, 
-            trnY, 
-            class_func = class_func, 
-            pred_func = pred_func, keep_models = TRUE)
-   # predict
-   prob <- predict(jous_obj, X = tstScores, type = 'prob')
-
-   return(prob)
-}
-
 #########################  eliteCalib()  ################################
 
 # wrapper calibrate by ELiTe
@@ -966,12 +923,25 @@ eliteCalib <- function(trnY,trnScores, tstScores, build_opt = "AICc", pred_opt=1
 # scores : vector of predictions (classification scores) which is in the interval [0, 1]
 
 getCalibMeasure <- function(y, scores){
-   require(glmgen)
-   require(ELiTE) 
 
-   df <- as.data.frame(elite.getMeasures(scores, y))
-
-   return(df)
+  require(glmgen)
+  require(ELiTE) 
+  require(PRROC)
+  
+  df <- as.data.frame(elite.getMeasures(scores, y))
+  
+  # change the colname names so that we state AUROC clearly
+  colnames(df) <- c("RMSE","AUROC","ACC","MCE","ECE")
+  
+  # Compute the area under precision and recall curve
+  tmp_df <- data.frame(predictions = scores, labels = y)
+  pr <- PRROC::pr.curve(scores.class0=tmp_df[tmp_df$labels=="1",]$predictions,
+                 scores.class1=tmp_df[tmp_df$labels=="0",]$predictions,
+                 curve=F)
+  # Add to the dataframe
+  df$AUPRC  <- pr$auc.integral
+  
+  return(df)
 }
 
 
@@ -988,26 +958,27 @@ getCalibMeasure <- function(y, scores){
 #              results into one dataframe if any
 
 combineMeasures <- function(y_test, algorithm ,probMat, prev_result=NULL){
-    if (!is.matrix(probMat)) {
-      stop('probMat must be a matrix')
-   }
-   count <- 1
-   ls_result <- list()
-   for(l in levels(y_test)){
-      tmp <- ifelse(y_test==l, 1, 0)
-      res <- getCalibMeasure(tmp, probMat[,count])
-      res$class <- l
-      res$Algorithm <- algorithm
-      ls_result[[count]] <- res
-      count <- count + 1
-   }
-   ls_result <- do.call("rbind", ls_result)
-   if(!is.null(prev_result)){
-      out <- rbind(prev_result, ls_result)
-      return(out)
-   }else{
-      return(ls_result)
-   }
+   
+   if (!is.matrix(probMat)) {
+    stop('probMat must be a matrix')
+ }
+  count <- 1
+  ls_result <- list()
+  for(l in levels(y_test)){
+    tmp <- ifelse(y_test==l, 1, 0)
+    res <- getCalibMeasure(tmp, probMat[,count])
+    res$class <- l
+    res$Algorithm <- algorithm
+    ls_result[[count]] <- res
+    count <- count + 1
+  }
+  ls_result <- do.call("rbind", ls_result)
+  if(!is.null(prev_result)){
+    out <- rbind(prev_result, ls_result)
+    return(out)
+  }else{
+    return(ls_result)
+  }
 }
 
 ####################  calibWrap() and preCalibWrap()  #############################
@@ -1074,8 +1045,8 @@ preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
 #        user the option to print and/or zoom in
 
 calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
-   opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE, OVA=TRUE, jous_class_func=NULL,
-   smoothingFtn=NULL, style= NULL) 
+   opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE, OVA=TRUE, 
+   isProb = FALSE, jous_class_func=NULL, smoothingFtn=NULL, style= NULL) 
 {
    require(kernlab)
    classNames <- levels(trnY)
@@ -1091,7 +1062,8 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
          se=se,
          class_func = jous_class_func,
          scaleX = opts$scaleX,
-         smoothingFtn = smoothingFtn)
+         smoothingFtn = smoothingFtn,
+         isProb = isProb)
    }else{
        prob <- avaCalib(trnY,
          trnScores, 
@@ -1100,7 +1072,8 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
          deg=opts$deg,
          K= opts$k,
          se=se,
-         class_func = jous_class_func)
+         class_func = jous_class_func,
+         isProb = isProb)
     }
   
    res <- list(probs=prob)
@@ -1224,6 +1197,7 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL,
       nClass <- length(levels(y))
       tokencode<- rep(1:25,5)
       sizecode <- seq(0.1, 1, length.out = nClass)
+      breaks <- seq(0,1,1/nBins)
 
       # generate colors
       if(nClass > 8){
@@ -1238,9 +1212,9 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL,
       for(class in 1:nClass){
 
          probsBinNums <- findInterval(probs[,class],breaks)
-         fittedYCounts <- tapply(probs[,class],probsBinNums,sum)
-         actualYCounts <- tapply(ym[,class],probsBinNums,sum)
-         axisLimit <- max(max(fittedYCounts),max(actualYCounts))
+         fittedYCounts <- tapply(probs[,class],probsBinNums,mean)
+         actualYCounts <- tapply(ym[,class],probsBinNums,mean)
+         axisLimit <- 1
 
          # record the counts
          record[[levels(y)[class]]] <- cbind(fittedYCounts, actualYCounts)
@@ -1250,7 +1224,7 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL,
          token <- tokencode[class]
 
          if(plotGraph){
-            
+
             if (nClass > 25 & multiclassStyle == 2){
                print("Repeated tokens will be used for over 25 classes")
             }
@@ -1271,20 +1245,23 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL,
                   plot(fittedYCounts[zoomTo], actualYCounts[zoomTo], 
                      col = rep(color, length(fittedYCounts[zoomTo])), pch = 1, 
                      cex = rep(size, length(fittedYCounts[zoomTo])),
-                     xlim=lims,ylim=lims, xlab='fittedYCounts', ylab='actualYCounts')
+                     xlim=lims,ylim=lims, xlab='Predicted Probability', 
+                     ylab='Actual Probability')
 
                }else if(multiclassStyle == 2){
 
                   #Style 2: black dots with varying tokens
                   plot(fittedYCounts[zoomTo], actualYCounts[zoomTo], 
                      pch = rep(token , length(fittedYCounts[zoomTo])), 
-                     xlim=lims,ylim=lims, xlab='fittedYCounts', ylab='actualYCounts')
+                     xlim=lims,ylim=lims, xlab='Predicted Probability', 
+                     ylab='Actual Probability')
 
                }else{
                   # Style 3: color and size fixed
                   plot(fittedYCounts[zoomTo], actualYCounts[zoomTo], 
                      col = rep(color, length(fittedYCounts[zoomTo])), pch = 1, 
-                     xlim=lims,ylim=lims, xlab='fittedYCounts', ylab='actualYCounts')
+                     xlim=lims,ylim=lims, xlab='Predicted Probability', 
+                     ylab='Actual Probability')
                }
             }else{
                if (multiclassStyle == 1){

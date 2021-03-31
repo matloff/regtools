@@ -32,6 +32,7 @@ S3method(predict,qePolyLog)
 S3method(predict,qeLASSO)
 S3method(plot,qeLASSO)
 S3method(plot,qeRF)
+S3method(predict,qePolyLASSO)
 S3method(predict,knnRec)
 S3method(predict,anovaRec)
 S3method(predict,mfRec)
@@ -49,7 +50,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    knnCalib,plattCalib,reliabDiagram,calibWrap,preCalibWrap,
    crossEntropy,KLDivergence,
    qeLogit,qeLin,qeKNN,qeRF,qeSVM,qeGBoost,qeNeural,qeLASSO,qeCompare,qeFT,
-   doPCA,qePolyLin,qePolyLog,ridgePoly,
+   doPCA,qePolyLin,qePolyLog,ridgePoly,qePolyLASSO,
    knntrn,ovaknntrn,predict.ovaknn,classadjust,
    scoresToProbs,logOddsToProbs,getDValsE1071,makeANDconjunction,
    knnFineTune,kNN,findOverallLoss,MAPE,probIncorrectClass,kNNxv,propMisclass,

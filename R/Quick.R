@@ -663,7 +663,6 @@ qePolyLin <- function(data,yName,deg=2,maxInteractDeg=deg,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    classif <- is.factor(data[[yName]])
-   # will need all either numeric or factors; change character cols
    if (classif) {print('currently not for classification problems'); return(NA)}
    if (!is.null(holdout)) splitData(holdout,data)
    ycol <- which(names(data) == yName)
@@ -705,6 +704,56 @@ predict.qePolyLin <- function(object,newx)
 predict.qePoly <- function() 
 {
    print('use qePolyLin')
+}
+
+#########################  qePolyLASSO()  #################################
+
+qePolyLASSO <- function(data,yName,deg=2,maxInteractDeg=deg,alpha=0,
+   holdout=floor(min(1000,0.1*nrow(data))))
+{
+   classif <- is.factor(data[[yName]])
+   if (!is.null(holdout)) splitData(holdout,data)
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol,drop=FALSE]
+   require(polyreg)
+   polyout <- getPoly(x,deg)
+   require(glmnet)
+   glmx <- as.matrix(polyout$xdata)
+   fam <- if (classif) 'multinomial' else 'gaussian'
+   glmout <- cv.glmnet(glmx,y,alpha=alpha,family=fam)
+   res <- list(polyout=polyout,glmout=glmout,
+      deg=deg,maxInteractDeg=maxInteractDeg,classif=classif,
+      classNames=levels(y))
+   class(res) <- 'qePolyLASSO'
+   if (!is.null(holdout)) {
+      predictHoldout(res)
+      res$holdIdxs <- holdIdxs
+   }
+   res
+}
+
+predict.qePolyLASSO <- function(object,newx)
+{
+   if (nrow(newx) == 1) {
+       oneRow <- TRUE
+       newx <- rbind(newx, newx)
+   }
+   else oneRow <- FALSE
+   fittedPolyOut <- object$polyout
+   polyout <- getPoly(newx,deg=object$deg,
+      maxInteractDeg=object$maxInteractDeg, 
+      modelFormula=object$modelFormula,
+      retainedNames=fittedPolyOut$retainedNames)
+   fittedGlm <- object$glmout
+   newx <- as.matrix(polyout$xdata)
+   preds <- predict(fittedGlm,newx,type='response')
+   if (object$classif) {
+      probs <- preds
+      maxCols <- apply(preds,1,which.max)
+      predClasses <- object$classNames[maxCols]
+      list(predClasses=predClasses,probs=probs)
+   } else preds
 }
 
 #########################  qePolyLog()  #################################

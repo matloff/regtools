@@ -501,8 +501,10 @@ plot.qeGBoost <- function(object)
 #     hidden, vector of number of units per layer, numeric or string
 #        (numbers sep by commas)
 #     nEpoch, number of epochs
+#     acts,conv,xShape:  as in krsFit
 
 qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
+   acts=rep("relu",length(hidden)),conv=NULL,xShape=NULL,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    # for use with qeRT(), hidden could be a string

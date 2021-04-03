@@ -48,6 +48,7 @@ qeSVM(data,yName,gamma=1.0,cost=1.0,kernel='radial',degree=2,
 qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
    holdout=floor(min(1000,0.1*nrow(data))))
 qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
+   acts=rep("relu",length(hidden)),conv=NULL,xShape=NULL,
    holdout=floor(min(1000,0.1*nrow(data))))
 qeLASSO(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
 qePolyLin(data,yName,deg=2,maxInteractDeg = deg,

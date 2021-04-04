@@ -1197,7 +1197,7 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
    nClass <- length(classNames)
    ym <- factorToDummies(tstY,fname='y')
    if(OVA){
-      
+
       prob <- ovaCalib(trnY,
          trnScores, 
          tstScores,
@@ -1259,10 +1259,6 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
       # Plot all in one plot
       # if it is not one at a time and plots per row are not specified
 
-      # Change the margin
-      # this probably needs to be fixed so that it can scale with num of classes 
-      par(mar=c(5,4,2,6)) 
-
       reliabDiagram(tstY,res$probs,nBins,TRUE,
          multiclass=TRUE, multiclassStyle= style)
          while (1) {
@@ -1281,8 +1277,6 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
             }
       }
 
-      # Reset the margin back to default 
-      par(mar=c(5,4,4,2)+0.1) 
      
    }
    res
@@ -1343,7 +1337,10 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL,
    multiclass=FALSE, multiclassStyle= 1) 
 {
    if(multiclass){
-
+      # Change the margin
+      # this probably needs to be fixed so that it can scale with num of classes 
+      par(mar=c(5,4,2,6)) 
+      
       ym <- factorToDummies(y,fname='y')
       nClass <- length(levels(y))
       tokencode<- rep(1:25,5)
@@ -1455,7 +1452,8 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL,
                inset=c(1,0), xpd=TRUE, bty="n", cex = fontsize)
          }
       }
-
+   # Reset the margin back to default 
+   par(mar=c(5,4,4,2)+0.1) 
    record
 
    }else{

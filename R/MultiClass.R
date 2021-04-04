@@ -364,14 +364,16 @@ confusion <- function(actual,pred) {
 # for a given new case, the k nearest neighbors in the training set are
 # obtained; the class labels for the neighbors are then obtained, and
 # the resulting proportions for the different labels are then used as
-# the estimated probabilities
+# the estimated probabilities for the binary class. 
 
 # arguments:
 
-#    y: R factor of labels in training set
-#    trnScores: vector/matrix of scores in training set
-#    tstScores: scores of new case(s)
-#    k: number of nearest neighbors
+#    y (factor): R factor of labels in training set
+#    trnScores (matrix): vector/matrix of scores in training set
+#    tstScores (matrix): scores of new case(s)
+#    k (int): number of nearest neighbors
+#    loclin (boolean): indicate whether local linear regression should be applied
+#    smoothingFtn (function): a smoothing function whether it should be applied.
 
 # value: vector of estimated probabilities for the new cases
 
@@ -449,15 +451,36 @@ scoresToProbs <- knnCalib
 #########################   ovaCalib() ###################################
 # a wrapper to implement calibration methods via one-vs-all approach
 
+# arguments:
+
+   # trnY(factor): the training labels 
+   # trnScores(matrix): a matrix of decision values or probabilities given by the classifier
+                        # for the training sample
+   # tstScores(matrix): a matrix of decision values or probabilities given by the classifier
+                        # for the testing sample
+
+   # calibMethod(str): a string that indicate which calibration method to use. 
+   #                    options: "knnCalib", 
+   #                             "locLinknnCalib", 
+   #                             "plattCalib",
+   #                             "isoCalib",
+   #                             "BBQCalib",
+   #                             "ELiTECalib",
+   # deg (int): an intege to indicate the degree of polynomial for platt scaling
+   # K (int): an integer to indicate the number of nearest neighbor
+   # scaleX (boolean): to determine whether we should standardize the data before using k-NN
+   # smoothingFtn (function): a smoothing function whether it should be applied.
+   # isProb (boolean): indicate whether the scores are probabilities
+
+# value: matrix of estimated probabilities for the new cases
 
 ovaCalib <- function(trnY,
    trnScores, 
    tstScores,
    calibMethod,
    deg=NULL,
-   K= NULL,
    se=FALSE,
-   class_func = NULL,
+   K= NULL,
    scaleX = NULL,
    smoothingFtn=NULL,
    isProb = FALSE)
@@ -473,11 +496,13 @@ ovaCalib <- function(trnY,
    }
 
    if (is.vector(tstScores)){
-      trnScores <- matrix(tstScores,ncol=1)
+      tstScores <- matrix(tstScores,ncol=1)
    }
 
    # Get all the levels of y
    classes <- levels(trnY)
+
+   # Compute posterior probabilities matrix probMat 
 
    if (calibMethod == 'knnCalib'){
       if (is.null(K)) stop('k needs to be provided for k-NN')
@@ -493,31 +518,45 @@ ovaCalib <- function(trnY,
 
       # create a empty matrix
       probMat <- matrix(NA, nrow(tstScores), length(classes))
-      
+      if(se){
+         seMat <-matrix(NA, ncol(tstScores), length(classes))
+      }
       for(i in 1:length(classes)){
          # select the class1
          class1 <- classes[i]
          trnDV <- trnScores[,i]
          tstDV <-  tstScores[,i]
 
+         # Compute posterior probabilities vector prob for class i
+
          if(calibMethod == 'plattCalib') {
 
             # create 1's and 0's for OVA 
             y <- as.factor(ifelse(trnY == class1, 1, 0))
+            if(se){
 
-            prob <- plattCalib(y, trnDV, tstDV, deg, se=se)
+               result <- plattCalib(y, trnDV, tstDV, deg, se=se)
+               prob <- result$probs
+               seMat[,i] <- result$SE
+
+            }else{
+               prob <- plattCalib(y, trnDV, tstDV, deg, se=se)
+
+            }
 
          } else if (calibMethod == 'isoCalib') {
 
+            # this package CORElearn uses y as 1 and 2
             y <- as.factor(ifelse(trnY == class1, 1, 2))
 
             prob <- isoCalib(y, trnDV, tstDV, isProb)
 
-         } else if (calibMethod == 'guessCalib'){
+         # GUESS can only take values within [0,1] as the scores
+         # } else if (calibMethod == 'guessCalib'){
 
-            y <- ifelse(trnY == class1, 1, 0)
+         #    y <- ifelse(trnY == class1, 1, 0)
 
-            prob <- guessCalib(y, trnDV, tstDV)
+         #    prob <- guessCalib(y, trnDV, tstDV)
 
          } else if (calibMethod == 'BBQCalib') {
 
@@ -535,32 +574,51 @@ ovaCalib <- function(trnY,
 
             prob <- eliteCalib(y, trnDV, tstDV)
 
-         } else if (calibMethod == 'JOUSCalib') {
-
-            if (is.null(class_func)) stop('model function cannot be NULL for jousboost')
-
-            y <- as.factor(ifelse(trnY == class1, 1, -1))
-
-            prob <- JOUSBoostCalib(y, trnDV, tstDV, class_func)
-
          } else stop('invalid calibration method')
 
          probMat[,i] <- prob
+
       }
 
       # Simple normalization
       probMat <- t(apply(probMat, 1 ,function(x) x/sum(x, na.rm=TRUE)))
    }
-
-   # Return the probability matrix
-   return(probMat)
+   if(se){
+      list(probMat= probMat, seMat= seMat)
+   }else{
+      # Return the probability matrix
+      probMat
+   }
 }
 
 
 
 #########################   avaCalib() ###################################
 # a wrapper to implement calibration methods via all-vs-all approach
+# this is experimental, not fully tested!
 
+# arguments:
+
+   # trnY(factor): the training labels 
+   # trnScores(matrix): a matrix of decision values or probabilities given by the classifier
+                        # for the training sample
+   # tstScores(matrix): a matrix of decision values or probabilities given by the classifier
+                        # for the testing sample
+
+   # calibMethod(str): a string that indicate which calibration method to use. 
+   #                    options: "knnCalib", 
+   #                             "locLinknnCalib", 
+   #                             "plattCalib",
+   #                             "isoCalib",
+   #                             "BBQCalib",
+   #                             "ELiTECalib",
+   # deg (int): an integer to indicate the degree of polynomial for platt scaling
+   # K (int): an integer to indicate the number of nearest neighbor
+   # scaleX (boolean): to determine whether we should standardize the data before using k-NN
+   # smoothingFtn (function): a smoothing function whether it should be applied.
+   # isProb (boolean): indicate whether the scores are probabilities
+
+# value: matrix of estimated probabilities for the new cases
 
 avaCalib <- function(trnY,
    trnScores, 
@@ -568,8 +626,7 @@ avaCalib <- function(trnY,
    calibMethod,
    deg=NULL,
    K= NULL,
-   se=FALSE,
-   class_func = NULL,
+   se = FALSE, 
    isProb = NULL)
 {
    if (!is.factor(trnY)) stop('Y must be an R factor')
@@ -589,9 +646,14 @@ avaCalib <- function(trnY,
       probMat <- knnCalib(trnY,trnScores,tstScores, K)
 
    } else {
+      # Get all the levels of y
+      classes <- levels(trnY)
       # AVA case
       probMat <- matrix(NA, nrow(tstScores), choose(length(classes), 2))
 
+      if(se){
+         seMat <- matrix(NA, ncol(tstScores), choose(length(classes), 2))
+      }
       counter <- 1
       for(i in 1: (length(classes)-1)){
          # Get the class 1 
@@ -620,19 +682,21 @@ avaCalib <- function(trnY,
                # create 1's and 0's for OVA 
                y  <- as.factor(ifelse(trnY[rowIdx]==class1, 1, 0))
 
-               prob <- plattCalib(y, trnDV, tstDV, deg, se=se)
+               if(se){
+
+                  result <- plattCalib(y, trnDV, tstDV, deg, se=se)
+                  prob <- result$probs
+                  seMat[,i] <- result$SE
+
+               }else{
+                  prob <- plattCalib(y, trnDV, tstDV, deg, se=se)
+               }
 
             } else if (calibMethod == 'isoCalib') {
 
                y <- ifelse(trnY[rowIdx]==class1, 1, 0)
 
                prob <- isoCalib(y, trnDV, tstDV, isProb)
-
-            } else if (calibMethod == 'guessCalib'){
-
-               y <- ifelse(trnY[rowIdx]==class1, 1, 0)
-
-               prob <- guessCalib(y, trnDV, tstDV)
 
             } else if (calibMethod == 'BBQCalib') {
 
@@ -660,22 +724,30 @@ avaCalib <- function(trnY,
       # Simple normalization
       probMat <- t(apply(probMat, 1 ,function(x) x/sum(x, na.rm=TRUE)))
    } 
-   return(probMat)
+    if(se){
+      list(probMat= probMat, seMat= seMat)
+   }else{
+      # Return the probability matrix
+      probMat
+   }
 }
 
 
 
 
-#########################  plattCalib()  ################################
+#########################  fitPlatt()  ################################
 
 # run the logit once and save, rather doing running repeatedly, each
 # time we have new predictions to make
-# author: Norm, Kenneth
 
 # arguments:
 
-#    y, trnScores, tstScores, value as above
-#    degree: the degree of polynomial for the logistic model
+#    y (factor): the training labels
+#    trnScores(matrix): a vector of decision values or probabilities 
+#                       given by the classifier for the training sample
+#    degree(int): an integer to indicate the degree of polynomial for the logistic model
+
+# value: a logistic model
 
 fitPlatt <- function(y,trnScores,deg) 
 {
@@ -691,6 +763,23 @@ fitPlatt <- function(y,trnScores,deg)
 }
 
 ppc <- fitPlatt
+
+#########################  predictPlatt()  ################################
+
+# Taking the logistic model and predict on the test scores given the classifier
+
+# arguments:
+
+#    prePlattCalibOut (object): the logisitc model produced by fitPlatt()
+#    tstScores(vector): a vector of decision values or probabilities given 
+#                       by the classifier for the testing sample
+#    se(boolean): to determine whether we want to compute 
+#                 the standard error through the delta method
+
+# values:
+#        a list that contains the following
+#           1. prob: a vector of probabilities
+#           2. se: a vector of standard errors if se is set to TRUE
 
 predictPlatt <- function(prePlattCalibOut,tstScores,se=FALSE) 
 {
@@ -709,7 +798,12 @@ predictPlatt <- function(prePlattCalibOut,tstScores,se=FALSE)
          
          alg = "1/(1+exp((-1)*(b0"
          for (j in 1:nscores) {
-            alg = paste(alg,"+b",j,"*",colnames(tstScores)[j], sep = "")
+            if (j != nscores){
+               alg = paste(alg,"+b",j,"*",colnames(tstScores)[j], sep = "")
+            }
+            else{
+               alg = paste(alg,"+b",j,colnames(tstScores)[j], sep = "")
+            }
          }
          alg = paste(alg,")))", sep = "")
          SE = DeltaMethod(model,alg)$test$SE
@@ -722,18 +816,42 @@ predictPlatt <- function(prePlattCalibOut,tstScores,se=FALSE)
    }
 }
 
+#########################  plattCalib()  ################################
+# apply ploynomial platt scaling to the posterior probabilities or decision values 
+# from SVM or other algorithms
+
+# arguments:
+
+   # trnY(factor): the training labels 
+   # trnScores(matrix): a matrix of decision values or probabilities given by the classifier
+                        # for the training sample
+   # tstScores(matrix): a matrix of decision values or probabilities given by the classifier
+                        # for the test sample
+   # deg (int): an integer to indicate the degree of polynomial for platt scaling
+   # se (bool): to determine whether standard errors should be computed via delta method
+
+# values:
+#        a list that contains the following
+#           1. prob: a vector of probabilities
+#           2. se: a vector of standard errors if se is set to TRUE
+
 plattCalib <- function(trnY,
    trnScores, 
    tstScores,
    deg,
    se=FALSE){ 
 
-   if(is.matrix(trnScores) & is.matrix(tstScores)){
-
+   if(length(levels(trnY)) > 2){
+      stop("For multi-class case, please use ovaCalib()")
    }
+
    plattMod <- fitPlatt(trnY, trnScores, deg=deg)
    pred <- predictPlatt(plattMod, tstScores, se=se) 
-   return(pred$probs[,2])
+   if(se){
+      list(probs = pred$probs[,2], SE = pred$se)
+   }else{
+      pred$probs[,2]
+   }
 }   
 
 
@@ -785,8 +903,6 @@ stop('under construction')
 # wrapper calibrate either training scores or probability by 
 # isotonic regression in binary case
 
-# author: kenneth
-
 # arguments
 #   trnY: the training labels
 #   trnScores (vector): the training scores output by the classifier
@@ -798,6 +914,7 @@ isoCalib <- function(trnY,trnScores,tstScores, isProb)
 {  
    require(CORElearn)
 
+   # note this package uses PAV-based isotonic regression
    if (is.vector(trnScores)){
       trnScores <- matrix(trnScores,ncol=1)
    }
@@ -817,7 +934,7 @@ isoCalib <- function(trnY,trnScores,tstScores, isProb)
       method="isoReg", assumeProbabilities=isProb)
    # apply the calibration to the testing set
    calibratedProbs <- CORElearn::applyCalibration(tstScores, calibration)
-   return(calibratedProbs)
+   calibratedProbs
 }
 
 #########################  bbqCalib()  ################################
@@ -826,15 +943,16 @@ isoCalib <- function(trnY,trnScores,tstScores, isProb)
 # Bayesian Binning 
 # reference: https://cran.r-project.org/web/packages/CalibratR/CalibratR.pdf
 
-# author: kenneth
-
 # arguments
 
 #    y: R factor of labels in training set;
 #        vector of observed class labels (0/1)
 #    trnScores: vector/matrix of scores in training set
-#    newScores: scores of new case(s)
+#    tstScores: scores of new case(s)
+#    option either 1 or 0; averaging=1, selecting=0
 
+# values:
+#        prob: a vector of probabilities
 
 bbqCalib <- function(trnY,trnScores, tstScores, option=1)
 {
@@ -843,7 +961,7 @@ bbqCalib <- function(trnY,trnScores, tstScores, option=1)
    bbqmod <-  CalibratR:::build_BBQ(trnY, trnScores)
    pred <- CalibratR:::predict_BBQ(bbqmod, tstScores, option)
    prob <- pred$predictions
-   return(prob)
+   prob
 }
 
 #########################  guessCalib()  ################################
@@ -852,26 +970,24 @@ bbqCalib <- function(trnY,trnScores, tstScores, option=1)
 # a GUESS calibration model 
 # reference: https://cran.r-project.org/web/packages/CalibratR/CalibratR.pdf
 
-# author: kenneth
-
 # arguments
 
 #    y: R factor of labels in training set;
 #        vector of observed class labels (0/1)
 #    trnScores: vector/matrix of scores in training set
-#    newScores: scores of new case(s)
+#    tstScores: scores of new case(s)
 
 
-guessCalib <- function(trnY,trnScores, tstScores)
-{
-   require(CalibratR)
+# guessCalib <- function(trnY,trnScores, tstScores)
+# {
+#    require(CalibratR)
 
-   GUESSmod <-  CalibratR:::build_GUESS(trnY,trnScores)
-   pred <- CalibratR:::predict_GUESS(GUESSmod, tstScores)
-   prob  <- pred$predictions
-   return(prob)
+#    GUESSmod <-  CalibratR:::build_GUESS(trnY,trnScores)
+#    pred <- CalibratR:::predict_GUESS(GUESSmod, tstScores)
+#    prob  <- pred$predictions
+#    return(prob)
 
-}
+# }
 
 
 
@@ -884,7 +1000,13 @@ guessCalib <- function(trnY,trnScores, tstScores)
 #    y: vector of corresponding true class. 
 #        1 indicates positive class and 0 indicates negative class.
 #    trnScores: vector of uncalibrated decisions scores for training
-#    newScore: vector of uncalibratd decisions scores for testing
+#    tstScore: vector of uncalibratd decisions scores for testing
+#    build_opt: 'AIC', or 'AICc' scoring functions (the Elite paper uses AICc).
+#    pred_opt:  set it to 1  for running model averaging, 
+#                or to 0 for running model selection
+
+# values:
+#        prob: a vector of probabilities
 
 eliteCalib <- function(trnY,trnScores, tstScores, build_opt = "AICc", pred_opt=1)
 {
@@ -908,21 +1030,23 @@ eliteCalib <- function(trnY,trnScores, tstScores, build_opt = "AICc", pred_opt=1
    # use the same function parameter as the elite paper
    eliteMod <- elite.build(trnScores, trnY, build_opt)
    prob <- elite.predict(eliteMod, tstScores, pred_opt)
-   return(prob)
+   prob
 }
 
 
 
 
-#########################  getCalibMeasure()  ################################
+#########################  getCalibMeasures()  ################################
 
 # wrapper of EliTe error measure for calibration
-# author: kenneth
 # arguments
-# y : vector of true class of instances {0,1} 
-# scores : vector of predictions (classification scores) which is in the interval [0, 1]
+#     y : vector of true class of instances {0,1} 
+#     scores : vector of predictions (classification scores) which is in the interval [0, 1]
 
-getCalibMeasure <- function(y, scores){
+# values:
+#     df: a dataframe that shows RMSE, AUROC, ACC, MCE, ECE 
+
+getCalibMeasures <- function(y, scores){
 
   require(glmgen)
   require(ELiTE) 
@@ -941,23 +1065,32 @@ getCalibMeasure <- function(y, scores){
   # Add to the dataframe
   df$AUPRC  <- pr$auc.integral
   
-  return(df)
+  df
 }
 
 
 
 #########################  combineMeasures()  ################################
 
-# author: Kenneth
+# the function extends getCalibMeasures to handle multi-class case when
+# the test label has more than 2 classes. It also combines results
+# from combineMeasures() for comparing different algorithms by passing the
+# output of combinMeasures() to the argument called "prev_result" in the
+# function 
+
 # arguments
 # y_test (vector): vector of true class of instances
 # algorithm (string): give the name of the algorithm you used e.g. "Platt1"
 # probMat : a matrix with each row being a probability distribution of the classes 
-#           for the sample
+#           from the test data
 # prev_result: pass dataframe returned by combineMeasures() to combine several
 #              results into one dataframe if any
 
-combineMeasures <- function(y_test, algorithm ,probMat, prev_result=NULL){
+# values:
+#  df (dataframe): a dataframe that lists all metrics for the given test labels
+#                 and the calibrated probability matrix 
+
+combineMeasures <- function(y_test, algorithm, probMat, prev_result=NULL){
    
    if (!is.matrix(probMat)) {
     stop('probMat must be a matrix')
@@ -966,7 +1099,7 @@ combineMeasures <- function(y_test, algorithm ,probMat, prev_result=NULL){
   ls_result <- list()
   for(l in levels(y_test)){
     tmp <- ifelse(y_test==l, 1, 0)
-    res <- getCalibMeasure(tmp, probMat[,count])
+    res <- getCalibMeasures(tmp, probMat[,count])
     res$class <- l
     res$Algorithm <- algorithm
     ls_result[[count]] <- res
@@ -1030,6 +1163,9 @@ preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
    eval(tmp, parent.frame())
 }
 
+# Now, we have functions that will plot the reliability diagrams and compute
+# the calibrated probability matrix for test data.
+
 # arguments
 
 #     
@@ -1042,17 +1178,26 @@ preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
 #        list(k = 50) for knnCalib
 #     plotsPerRow: number of plots per row; 0 means no trellis plotting
 #     oneAtATime: if TRUE, show the plots one at a time, and give the
-#        user the option to print and/or zoom in
+#        user the option to print and/or zoom in.
+#     OVA (bool): a boolean value to denote whether this is one-vs-all approach
+#               if set to False, it will use all-vs-all approach  
+#     isProb (bool): a boolean value to denote whether scores are probabiltiies
+#     smoothingFtn (function): a smoothing function whether it should be applied.
+#     style: 1 or 2 to denote which multicalss reliability diagram style
+#             you prefer
+#  values:
+#        1. a list that contains a probability matrix 
+#        2. it also returns the reliability diagrams for each class
 
 calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
    opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE, OVA=TRUE, 
-   isProb = FALSE, jous_class_func=NULL, smoothingFtn=NULL, style= NULL) 
+   isProb = FALSE, smoothingFtn=NULL, style= NULL) 
 {
-   require(kernlab)
    classNames <- levels(trnY)
    nClass <- length(classNames)
    ym <- factorToDummies(tstY,fname='y')
    if(OVA){
+      
       prob <- ovaCalib(trnY,
          trnScores, 
          tstScores,
@@ -1060,10 +1205,10 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
          deg=opts$deg,
          K= opts$k,
          se=se,
-         class_func = jous_class_func,
          scaleX = opts$scaleX,
          smoothingFtn = smoothingFtn,
          isProb = isProb)
+
    }else{
        prob <- avaCalib(trnY,
          trnScores, 
@@ -1072,7 +1217,6 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
          deg=opts$deg,
          K= opts$k,
          se=se,
-         class_func = jous_class_func,
          isProb = isProb)
     }
   
@@ -1112,7 +1256,6 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
       }
    }else{
 
-      # Author: Kenneth
       # Plot all in one plot
       # if it is not one at a time and plots per row are not specified
 
@@ -1187,6 +1330,14 @@ getDValsE1071 <- function(object,newx)
 #    probs: vector of estimated cond. class probabilities
 #    nBins: number of bins
 #    plotGraph: TRUE means plotting is desired
+#    zoom: a tuple of values to set the limit of the axis e.g. (0, 100)
+#    classNum (int): an integet to specify the class number in the title of the plot
+#    multiclass (bool): determine whether it is a multiclass case.
+#    multiclassStyle: 1 or 2 to denote which multicalss reliability diagram style
+#             you prefer
+#    
+# values:
+#    one reliability diagram
 
 reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL, 
    multiclass=FALSE, multiclassStyle= 1) 

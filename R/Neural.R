@@ -19,6 +19,7 @@
 #    hidden: vector of number of units per hidden layer, or proportions
 #       for dropout
 #    acts: vector of activation functions
+#    learnRate: learning rate
 #    conv: convolutional/pooling layers (see below)
 #    xShape: for 2D convolution, the number of rows and columns of (say) image
 #    classif: if TRUE, classification problem, otherwise regression
@@ -42,8 +43,8 @@
 # the only pooling offered is max pool; ReLU is used for the activation
 # function at each conv2d layer
 
-krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
-             xShape=NULL,classif=TRUE,nClass=NULL,nEpoch=30,
+krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),learnRate=0.001,
+             conv=NULL,xShape=NULL,classif=TRUE,nClass=NULL,nEpoch=30,
              scaleX=TRUE,scaleY=TRUE) 
 {
    if (!inherits(x,'matrix')) x <- as.matrix(x)
@@ -123,7 +124,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
    compile(model,
      loss = lossFtn, 
      # batch_size = batchSize,
-     optimizer = keras::optimizer_rmsprop(),
+     optimizer = keras::optimizer_rmsprop(lr=learnRate),
      metrics = metrics)
 
    fitOut <- keras::fit(model,

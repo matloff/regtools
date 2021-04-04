@@ -504,7 +504,7 @@ plot.qeGBoost <- function(object)
 #     acts,conv,xShape:  as in krsFit
 
 qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
-   acts=rep("relu",length(hidden)),conv=NULL,xShape=NULL,
+   acts=rep("relu",length(hidden)),learnRate=0.001,conv=NULL,xShape=NULL,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    # for use with qeRT(), hidden could be a string
@@ -529,7 +529,9 @@ qeNeural <- function(data,yName,hidden=c(100,100),nEpoch=30,
       classNames <- NULL
       yFactor <- NULL
    }
-   krsout <- krsFit(x,y,hidden,classif=classif,nClass=length(classNames),
+   krsout <- krsFit(x,y,hidden,acts=acts,learnRate=learnRate,
+      conv=conv,xShape=xShape,
+      classif=classif,nClass=length(classNames),
       nEpoch=nEpoch)
    krsout$classif <- classif
    krsout$classNames=classNames

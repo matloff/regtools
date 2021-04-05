@@ -10,8 +10,8 @@ a more "R-like" wrapper to fitting data with R's \pkg{keras} package.
 }
 
 \usage{
-krsFit(x, y, hidden, acts = rep("relu", length(hidden)), conv = NULL, 
-    xShape = NULL, classif = TRUE, nClass = NULL, nEpoch = 30, 
+krsFit(x, y, hidden, acts = rep("relu", length(hidden)),learnRate=0.001, 
+    conv = NULL,xShape = NULL, classif = TRUE, nClass = NULL, nEpoch = 30, 
     scaleX = TRUE, scaleY = TRUE) 
 predict.krsFit(krsFitOut,newx) 
 diagNeural(krsFitOut)
@@ -25,7 +25,10 @@ diagNeural(krsFitOut)
      \code{nClass}-1}.
   \item{hidden}{Vector of number of units per 
      hidden layer, or the rate for a dropout layer.} 
-  \item{acts}{Vector of names of the activation functions.}
+  \item{acts}{Vector of names of the activation functions, one per
+     hidden layer.  Choices inclde 'relu', 'sigmoid', 'tanh', 'softmax',
+     'elu', 'selu'.}
+  \item{learnRate}{Learning rate.} 
   \item{conv}{R list specifying the convolutional layers, if any.}
   \item{xShape}{Vector giving the number of rows and columns, and in the
      convolutional case with multiple channels, the number of channels.}

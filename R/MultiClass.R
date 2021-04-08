@@ -471,6 +471,8 @@ scoresToProbs <- knnCalib
    # scaleX (boolean): to determine whether we should standardize the data before using k-NN
    # smoothingFtn (function): a smoothing function whether it should be applied.
    # isProb (boolean): indicate whether the scores are probabilities
+   # fitAllX (boolean): to determine whether you want to use all scores 
+   #                    for fitting algorithms that are not knn-based.
 
 # value: matrix of estimated probabilities for the new cases
 
@@ -483,7 +485,8 @@ ovaCalib <- function(trnY,
    K= NULL,
    scaleX = NULL,
    smoothingFtn=NULL,
-   isProb = FALSE)
+   isProb = FALSE,
+   fitAllX = FALSE)
 {
    if (!is.factor(trnY)) stop('Y must be an R factor')
 
@@ -503,86 +506,128 @@ ovaCalib <- function(trnY,
    classes <- levels(trnY)
 
    # Compute posterior probabilities matrix probMat 
-
-   if (calibMethod == 'knnCalib'){
+   if(calibMethod == 'knnCalib'){
       if (is.null(K)) stop('k needs to be provided for k-NN')
 
-      probMat <- knnCalib(trnY, trnScores, tstScores, k=K, scaleX=scaleX) 
+         probMat <- knnCalib(trnY, trnScores, tstScores, k=K, scaleX=scaleX) 
 
    }else if(calibMethod == 'locLinknnCalib'){
-
-      probMat <- knnCalib(trnY, trnScores, tstScores, k=K, loclin=TRUE, 
-         scaleX=scaleX, smoothingFtn=smoothingFtn) 
-
+         probMat <- knnCalib(trnY, trnScores, tstScores, k=K, loclin=TRUE, 
+            scaleX=scaleX, smoothingFtn=smoothingFtn) 
+      
    }else{
-
-      # create a empty matrix
+      # create a empty matrix for storing probabilities
       probMat <- matrix(NA, nrow(tstScores), length(classes))
+
       if(se){
+         # create a empty matrix for storing standard errors
          seMat <-matrix(NA, ncol(tstScores), length(classes))
       }
-      for(i in 1:length(classes)){
-         # select the class1
-         class1 <- classes[i]
-         trnDV <- trnScores[,i]
-         tstDV <-  tstScores[,i]
 
-         # Compute posterior probabilities vector prob for class i
+      # Using all covariates
+      if(fitAllX){
+         for(i in 1:length(classes)){
+            # select the class1
+            class1 <- classes[i]
+            if(calibMethod == 'plattCalib') {
+               # create 1's and 0's for OVA 
+               y <- as.factor(ifelse(trnY == class1, 1, 0))
+               if(se){
+                  result <- plattCalib(y, trnScores, tstScores, deg, se=se)
+                  prob <- result$probs
+                  seMat[,i] <- result$SE
+               }else{
+                  prob <- plattCalib(y, trnScores, tstScores, deg, se=se)
+               }
 
-         if(calibMethod == 'plattCalib') {
+            } else if (calibMethod == 'isoCalib') {
+               # this package CORElearn uses y as 1 and 2
+               y <- as.factor(ifelse(trnY == class1, 1, 2))
+               prob <- isoCalib(y, trnScores, tstScores, isProb)
 
-            # create 1's and 0's for OVA 
-            y <- as.factor(ifelse(trnY == class1, 1, 0))
-            if(se){
+            } else if (calibMethod == 'BBQCalib') {
+               # create 1's and 0's for OVA 
+               y <- ifelse(trnY == class1, 1, 0)
+               # the paper suggests that However, model averaging 
+               # is typically superior to model selection (Hoeting et al. 1999)
+               # so we use option = 1 for predict_BBQ
+               prob <- bbqCalib(y, trnScores, tstScores, option = 1)
 
-               result <- plattCalib(y, trnDV, tstDV, deg, se=se)
-               prob <- result$probs
-               seMat[,i] <- result$SE
+            } else if (calibMethod == 'ELiTECalib') {
+               # create 1's and 0's for OVA 
+               y <- ifelse(trnY == class1, 1, 0)
 
-            }else{
-               prob <- plattCalib(y, trnDV, tstDV, deg, se=se)
+               prob <- eliteCalib(y, trnScores, tstScores)
 
+            } else stop('invalid calibration method')
+
+            probMat[,i] <- prob
+         }
+
+      # Use 1 class of scores at a time
+      }else{
+
+            for(i in 1:length(classes)){
+               # select the class1
+               class1 <- classes[i]
+               trnDV <- trnScores[,i]
+               tstDV <-  tstScores[,i]
+
+               # Compute posterior probabilities vector prob for class i
+               if(calibMethod == 'plattCalib') {
+
+                  # create 1's and 0's for OVA 
+                  y <- as.factor(ifelse(trnY == class1, 1, 0))
+                  if(se){
+
+                     result <- plattCalib(y, trnDV, tstDV, deg, se=se)
+                     prob <- result$probs
+                     seMat[,i] <- result$SE
+
+                  }else{
+                     prob <- plattCalib(y, trnDV, tstDV, deg, se=se)
+
+                  }
+
+               } else if (calibMethod == 'isoCalib') {
+
+                  # this package CORElearn uses y as 1 and 2
+                  y <- as.factor(ifelse(trnY == class1, 1, 2))
+
+                  prob <- isoCalib(y, trnDV, tstDV, isProb)
+
+               # GUESS can only take values within [0,1] as the scores
+               # } else if (calibMethod == 'guessCalib'){
+
+               #    y <- ifelse(trnY == class1, 1, 0)
+
+               #    prob <- guessCalib(y, trnDV, tstDV)
+
+               } else if (calibMethod == 'BBQCalib') {
+
+                  # create 1's and 0's for OVA 
+                  y <- ifelse(trnY == class1, 1, 0)
+                  # the paper suggests that However, model averaging 
+                  # is typically superior to model selection (Hoeting et al. 1999)
+                  # so we use option = 1 for predict_BBQ
+                  prob <- bbqCalib(y, trnDV, tstDV, option = 1)
+
+               } else if (calibMethod == 'ELiTECalib') {
+
+                  # create 1's and 0's for OVA 
+                  y <- ifelse(trnY == class1, 1, 0)
+
+                  prob <- eliteCalib(y, trnDV, tstDV)
+
+               } else stop('invalid calibration method')
+
+               probMat[,i] <- prob
             }
-
-         } else if (calibMethod == 'isoCalib') {
-
-            # this package CORElearn uses y as 1 and 2
-            y <- as.factor(ifelse(trnY == class1, 1, 2))
-
-            prob <- isoCalib(y, trnDV, tstDV, isProb)
-
-         # GUESS can only take values within [0,1] as the scores
-         # } else if (calibMethod == 'guessCalib'){
-
-         #    y <- ifelse(trnY == class1, 1, 0)
-
-         #    prob <- guessCalib(y, trnDV, tstDV)
-
-         } else if (calibMethod == 'BBQCalib') {
-
-            # create 1's and 0's for OVA 
-            y <- ifelse(trnY == class1, 1, 0)
-            # the paper suggests that However, model averaging 
-            # is typically superior to model selection (Hoeting et al. 1999)
-            # so we use option = 1 for predict_BBQ
-            prob <- bbqCalib(y, trnDV, tstDV, option = 1)
-
-         } else if (calibMethod == 'ELiTECalib') {
-
-            # create 1's and 0's for OVA 
-            y <- ifelse(trnY == class1, 1, 0)
-
-            prob <- eliteCalib(y, trnDV, tstDV)
-
-         } else stop('invalid calibration method')
-
-         probMat[,i] <- prob
-
       }
-
       # Simple normalization
       probMat <- t(apply(probMat, 1 ,function(x) x/sum(x, na.rm=TRUE)))
    }
+
    if(se){
       list(probMat= probMat, seMat= seMat)
    }else{
@@ -1191,13 +1236,13 @@ preCalibWrap <- function(dta,yName,qeFtn='qeSVM',qeArgs=NULL,holdout=500)
 
 calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
    opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE, OVA=TRUE, 
-   isProb = FALSE, smoothingFtn=NULL, style= NULL) 
+   isProb = FALSE, fitAllX = FALSE, smoothingFtn=NULL, style= NULL) 
 {
    classNames <- levels(trnY)
    nClass <- length(classNames)
    ym <- factorToDummies(tstY,fname='y')
    if(OVA){
-      
+
       prob <- ovaCalib(trnY,
          trnScores, 
          tstScores,
@@ -1207,7 +1252,8 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
          se=se,
          scaleX = opts$scaleX,
          smoothingFtn = smoothingFtn,
-         isProb = isProb)
+         isProb = isProb,
+         fitAllX=fitAllX)
 
    }else{
        prob <- avaCalib(trnY,
@@ -1259,10 +1305,6 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
       # Plot all in one plot
       # if it is not one at a time and plots per row are not specified
 
-      # Change the margin
-      # this probably needs to be fixed so that it can scale with num of classes 
-      par(mar=c(5,4,2,6)) 
-
       reliabDiagram(tstY,res$probs,nBins,TRUE,
          multiclass=TRUE, multiclassStyle= style)
          while (1) {
@@ -1281,8 +1323,6 @@ calibWrap <- function(trnY,tstY, trnScores,tstScores,calibMethod,
             }
       }
 
-      # Reset the margin back to default 
-      par(mar=c(5,4,4,2)+0.1) 
      
    }
    res
@@ -1343,6 +1383,9 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL,
    multiclass=FALSE, multiclassStyle= 1) 
 {
    if(multiclass){
+      # Change the margin
+      # this probably needs to be fixed so that it can scale with num of classes 
+      par(mar=c(5,4,2,6)) 
 
       ym <- factorToDummies(y,fname='y')
       nClass <- length(levels(y))
@@ -1455,7 +1498,8 @@ reliabDiagram <- function(y,probs,nBins,plotGraph=TRUE,zoom=NULL,classNum=NULL,
                inset=c(1,0), xpd=TRUE, bty="n", cex = fontsize)
          }
       }
-
+   # Reset the margin back to default 
+   par(mar=c(5,4,4,2)+0.1) 
    record
 
    }else{

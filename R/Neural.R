@@ -76,17 +76,20 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),learnRate=0.001,
       # first conv layer
       keras::layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
          activation='relu',input_shape=xShape)
+      lc <- length(conv)
+      if (lc > 1) {
       # remaining conv layers
-      for (i in seq(2,length(conv),1)) {
-         layer <- conv[[i]]
-         if (layer$type == 'pool') {
-            keras::layer_max_pooling_2d(model,pool_size = layer$kern)
-         } else if (layer$type == 'conv2d') {
-            keras::layer_conv_2d(model,filters=layer$filters,
-               kernel_size=layer$kern,activation='relu')
-         } else if (layer$type == 'drop') {
-            keras::layer_dropout(model,layer$drop)
-         } else stop('invalid layer type')
+         for (i in 2:lc) {
+            layer <- conv[[i]]
+            if (layer$type == 'pool') {
+               keras::layer_max_pooling_2d(model,pool_size = layer$kern)
+            } else if (layer$type == 'conv2d') {
+               keras::layer_conv_2d(model,filters=layer$filters,
+                  kernel_size=layer$kern,activation='relu')
+            } else if (layer$type == 'drop') {
+               keras::layer_dropout(model,layer$drop)
+            } else stop('invalid layer type')
+         }
       }
       keras::layer_flatten(model)
    }

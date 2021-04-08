@@ -846,7 +846,6 @@ qeLASSO <- function(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
    makeAllNumeric(x,data)
    
    classif <- is.factor(y)
-   if (!is.null(holdout)) splitData(holdout,data)
    fam <- if (classif) 'multinomial' else 'gaussian'
    ym <- as.matrix(y)
    qeout <- cv.glmnet(x=xm,y=ym,alpha=alpha,family=fam)

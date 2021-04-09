@@ -48,7 +48,8 @@ qeSVM(data,yName,gamma=1.0,cost=1.0,kernel='radial',degree=2,
 qeGBoost(data,yName,nTree=100,minNodeSize=10,learnRate=0.1,
    holdout=floor(min(1000,0.1*nrow(data))))
 qeNeural(data,yName,hidden=c(100,100),nEpoch=30,
-   acts=rep("relu",length(hidden)),conv=NULL,xShape=NULL,
+   acts=rep("relu",length(hidden)),learnRate=0.001,
+   conv=NULL,xShape=NULL,
    holdout=floor(min(1000,0.1*nrow(data))))
 qeLASSO(data,yName,alpha=1,holdout=floor(min(1000,0.1*nrow(data))))
 qePolyLin(data,yName,deg=2,maxInteractDeg = deg,
@@ -90,6 +91,9 @@ qeFT(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
      indicated dropout proportions.  Can be specified as a string, e.g.
      '100,50', for use with \code{qeFT}.} 
   \item{nEpoch}{Number of iterations in neural net.}
+  \item{acts}{Vector of names of the activation functions, one per
+     hidden layer.  Choices inclde 'relu', 'sigmoid', 'tanh', 'softmax',
+     'elu', 'selu'.}
   \item{alpha}{1 for LASSO, 2 for ridge.}
   \item{gamma}{Scale parameter in \code{e1071::svm}.}
   \item{cost}{Cost parameter in \code{e1071::svm}.}

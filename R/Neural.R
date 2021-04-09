@@ -19,6 +19,7 @@
 #    hidden: vector of number of units per hidden layer, or proportions
 #       for dropout
 #    acts: vector of activation functions
+#    learnRate: learning rate
 #    conv: convolutional/pooling layers (see below)
 #    xShape: for 2D convolution, the number of rows and columns of (say) image
 #    classif: if TRUE, classification problem, otherwise regression
@@ -42,8 +43,8 @@
 # the only pooling offered is max pool; ReLU is used for the activation
 # function at each conv2d layer
 
-krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
-             xShape=NULL,classif=TRUE,nClass=NULL,nEpoch=30,
+krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),learnRate=0.001,
+             conv=NULL,xShape=NULL,classif=TRUE,nClass=NULL,nEpoch=30,
              scaleX=TRUE,scaleY=TRUE) 
 {
    if (!inherits(x,'matrix')) x <- as.matrix(x)
@@ -75,17 +76,20 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
       # first conv layer
       keras::layer_conv_2d(model,filters=layer$filters,kernel_size=layer$kern,
          activation='relu',input_shape=xShape)
+      lc <- length(conv)
+      if (lc > 1) {
       # remaining conv layers
-      for (i in seq(2,length(conv),1)) {
-         layer <- conv[[i]]
-         if (layer$type == 'pool') {
-            keras::layer_max_pooling_2d(model,pool_size = layer$kern)
-         } else if (layer$type == 'conv2d') {
-            keras::layer_conv_2d(model,filters=layer$filters,
-               kernel_size=layer$kern,activation='relu')
-         } else if (layer$type == 'drop') {
-            keras::layer_dropout(model,layer$drop)
-         } else stop('invalid layer type')
+         for (i in 2:lc) {
+            layer <- conv[[i]]
+            if (layer$type == 'pool') {
+               keras::layer_max_pooling_2d(model,pool_size = layer$kern)
+            } else if (layer$type == 'conv2d') {
+               keras::layer_conv_2d(model,filters=layer$filters,
+                  kernel_size=layer$kern,activation='relu')
+            } else if (layer$type == 'drop') {
+               keras::layer_dropout(model,layer$drop)
+            } else stop('invalid layer type')
+         }
       }
       keras::layer_flatten(model)
    }
@@ -123,7 +127,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),conv=NULL,
    compile(model,
      loss = lossFtn, 
      # batch_size = batchSize,
-     optimizer = keras::optimizer_rmsprop(),
+     optimizer = keras::optimizer_rmsprop(lr=learnRate),
      metrics = metrics)
 
    fitOut <- keras::fit(model,

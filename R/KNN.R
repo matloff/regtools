@@ -73,7 +73,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    if (length(ccout) > 0) {
       warning('X data has constant columns:')
       print(ccout)
-      if (scaleX) stop('constant columns cannot work with scaling')
+      # if (scaleX) stop('constant columns cannot work with scaling')
    }
    # checks on y
    nYvals <- length(unique(y))
@@ -108,11 +108,14 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    kmax1 <- kmax + leave1out
 
    if (scaleX) {
-      x <- scale(x)
-      xcntr <- attr(x,'scaled:center')
-      xscl <- attr(x,'scaled:scale')
-      newx <- scale(newx,center=xcntr,scale=xscl)
-   }
+      # x <- scale(x)
+      # xcntr <- attr(x,'scaled:center')
+      # xscl <- attr(x,'scaled:scale')
+      # newx <- scale(newx,center=xcntr,scale=xscl)
+      x <- mmscale(x)
+      xminmax <- attr(x,'minmax')
+      newx <- mmscale(newx,scalePars=xminmax)
+   } else xminmax <- NULL
    # expand any specified variables
    eVars <- !is.null(expandVars)
    eVals <- !is.null(expandVals)
@@ -159,7 +162,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    # start building return value
 
    tmplist <- list(whichClosest=closestIdxs,regests=regests,scaleX=scaleX,
-      classif=classif)
+      classif=classif,xminmax=xminmax)
    tmplist$nhbrs <- if (saveNhbrs) tmp else NULL
 
    # MH dists for possible re-run using loclin()
@@ -186,10 +189,10 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       tmplist$ypreds <- ypreds
    }
 
-   if (scaleX) {
-      tmplist$xcntr <- xcntr
-      tmplist$xscl <- xscl
-   }
+   # if (scaleX) {
+   #    tmplist$xcntr <- xcntr
+   #    tmplist$xscl <- xscl
+   # }
    tmplist$x <- x
    tmplist$y <- y
    tmplist$noPreds <- noPreds
@@ -217,11 +220,19 @@ predict.kNN <- function(object,...)
    expandVars <- object$expandVars
    if (!is.null(expandVars)) 
       stop('separate prediction with expandVars is not yet implemented')
-   if (is.vector(newx)) newx <- matrix(newx,nrow=1)
-   if (is.data.frame(newx)) {
-      newx <- as.matrix(newx)
+
+   # if newx is a vector or a 1-row/1-col matrix/df, need to determine
+   # the value of p, the number of predictors/features; if not careful,
+   # get a 1-row vector when it should be 1-col or vice versa
+   p <- ncol(x)
+   if (is.vector(newx)) newx <- matrix(newx,ncol=p)
+   if (is.data.frame(newx) || is.matrix(newx)) {
+      newx <- matrix(newx,ncol=p)
    }
-   if (object$scaleX)  newx <- scale(newx,center=object$xcntr,scale=object$xscl)
+
+   if (object$scaleX)  
+      # newx <- scale(newx,center=object$xcntr,scale=object$xscl)
+      newx <- mmscale(newx,object$xminmax)
 
    # now start calculation of predictions
    if (is.vector(regests)) regests <- matrix(regests,ncol=1)

@@ -36,7 +36,10 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
 
 mmscale <- function (m,scalePars=NULL)
 {
-   if (is.vector(m)) m <- matrix(m,ncol=1)
+   if (!is.null(scalePars)) {
+      p <- ncol(scalePars)
+   } else p <- ncol(m)
+   if (is.vector(m)) m <- matrix(m,ncol=p)
    if (is.null(scalePars)) {
       rngs <- apply(m,2,range)
       mins <- rngs[1,]
@@ -49,6 +52,7 @@ mmscale <- function (m,scalePars=NULL)
    ranges <- maxs - mins
    tmm <- function(i) m[,] <- (m[,i] - mins[i]) / ranges[i]
    m <- sapply(1:ncol(m),tmm)
+   if (is.vector(m)) m <- matrix(m,ncol=p)
    attr(m,'minmax') <- rngs
    m
 }

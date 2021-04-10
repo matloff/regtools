@@ -1009,9 +1009,8 @@ predict.qePCA <- function(object,newx)
 # currently only numeric univariate time series are supported
 
 qeTS <- function(lag,data,qeName,opts=NULL,
-   holdout=floor(min(1000,0.1*length(data)/(lag+1))))
+   holdout=floor(min(1000,0.1*length(data))))
 {
-warning('experimental, under test')
    if (inherits(data,'data.frame')) {
       if (ncol(data) > 1)
          stop('multivariate time series not supported')
@@ -1037,7 +1036,13 @@ warning('experimental, under test')
 
 predict.qeTS <- function(object,newx)
 {
-   newx <- TStoX(newx,object$lag)
+   if (is.vector(newx)) {
+      newx <- matrix(newx,nrow=1)
+      newx <- as.data.frame(newx)
+   } 
+   lag <- object$lag
+   if (ncol(newx) != lag) 
+      stop('newx must have length "lag" or "lag" columns')
    predict(object$cmdout,newx)
 }
 

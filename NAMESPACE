@@ -40,6 +40,7 @@ S3method(predict,penroseLM)
 S3method(predict,penrosePoly)
 S3method(predict,qeIso)
 S3method(predict,qePCA)
+S3method(predict,qeTS)
 S3method(predict,ridgePoly)
 
 export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc,
@@ -78,4 +79,4 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    fineTuning,fineTuningPar,getNamedArgs,partTrnTst,makeOutdf,
    krsFit,krsFitImg,diagNeural,
    adjToUIR,
-   TStoX,TStoXmv,textToXY,textToXYpred)
+   TStoX,TStoXmv,textToXY,textToXYpred,qeTS)

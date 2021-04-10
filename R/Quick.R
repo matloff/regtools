@@ -1001,6 +1001,46 @@ predict.qePCA <- function(object,newx)
    predict(object$qeOut,newx=newx)
 }
 
+# time series wrappers for the qe*-series, including for prediction
+
+# the additional argument is lag, the number of recent values to use in
+# predicting the next
+
+# currently only numeric univariate time series are supported
+
+qeTS <- function(lag,data,qeName,opts=NULL,
+   holdout=floor(min(1000,0.1*length(data)/(lag+1))))
+{
+warning('experimental, under test')
+   if (inherits(data,'data.frame')) {
+      if (ncol(data) > 1)
+         stop('multivariate time series not supported')
+      # convert to vector
+      data <- data[,1]
+   }
+
+   # convert to "rectangular" form
+   tx <- TStoX(data,lag)
+   tx <- as.data.frame(tx)
+   yName <- names(tx)[ncol(tx)]
+
+   # now call the ML function, forming the call in string form first
+   cmd <- paste0(qeName,'(tx,','"',yName,'",')
+   if (!is.null(opts)) cmd <- paste0(cmd,opts,',')
+   cmd <- paste0(cmd,'holdout=holdout')
+   cmd <- paste0(cmd,')')
+   cmdout <- eval(parse(text=cmd))
+   res <- list(lag=lag,cmdout=cmdout,testAcc=cmdout$testAcc)
+   class(res) <- c('qeTS',class(cmdout))
+   res
+}
+
+predict.qeTS <- function(object,newx)
+{
+   newx <- TStoX(newx,object$lag)
+   predict(object$cmdout,newx)
+}
+
 ###################  utilities for qe*()  #########################
 
 # see note on factor features at top of this file

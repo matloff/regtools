@@ -40,9 +40,11 @@ mmscale <- function (m,scalePars=NULL,p=NULL)
 { 
     if (is.vector(m) && is.null(scalePars) && is.null(p))
        stop('specify argument p')
-    if (!is.null(scalePars))
-        p <- ncol(scalePars)
-    else p <- ncol(m)
+    if (is.null(p)) {
+       if (!is.null(scalePars))
+           p <- ncol(scalePars)
+       else p <- ncol(m)
+    }
     if (is.vector(m))
         m <- matrix(m, ncol = p)
     if (is.null(scalePars)) {

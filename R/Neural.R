@@ -58,7 +58,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),learnRate=0.001,
       mmScaleY <- NULL
    } else {
       if (scaleY) {
-         y <- mmscale(y)
+         y <- mmscale(y,p=1)
          mmScaleY <- attr(y,'minmax')
       } else mmScaleY <- NULL
    }

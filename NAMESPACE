@@ -72,7 +72,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    stdErrPred,checkNumericNames,prepend,getDFclasses,
    dimRed,dimRedNewX,reduceComps,
    toSuperFactor,toSubFactor,makeAllNumeric,
-   prToFile,pythonBlankSplit,
+   prToFile,pythonBlankSplit,replicMean,
    getMNIST,
    qeIso,
    knnRec,anovaRec,mfRec,predictMany,getXY,

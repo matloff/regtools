@@ -34,27 +34,32 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
 #    of column i of m, and attribute as in scalePars (either copied from
 #    the latter or if null, generated fresh
 
-mmscale <- function (m,scalePars=NULL)
-{
-   if (!is.null(scalePars)) {
-      p <- ncol(scalePars)
-   } else p <- ncol(m)
-   if (is.vector(m)) m <- matrix(m,ncol=p)
-   if (is.null(scalePars)) {
-      rngs <- apply(m,2,range)
-      mins <- rngs[1,]
-      maxs <- rngs[2,]
-   } else {
-      mins <- scalePars[1,]
-      maxs <- scalePars[2,]
-      rngs <- scalePars
-   }
-   ranges <- maxs - mins
-   tmm <- function(i) m[,] <- (m[,i] - mins[i]) / ranges[i]
-   m <- sapply(1:ncol(m),tmm)
-   if (is.vector(m)) m <- matrix(m,ncol=p)
-   attr(m,'minmax') <- rngs
-   m
+mmscale <- function (m, scalePars = NULL)
+{ 
+    if (is.vector(m) && is.null(scalePars) && is.null(p))
+       stop('specify argument p')
+    if (!is.null(scalePars))
+        p <- ncol(scalePars)
+    else p <- ncol(m)
+    if (is.vector(m))
+        m <- matrix(m, ncol = p)
+    if (is.null(scalePars)) {
+        rngs <- apply(m, 2, range)
+        mins <- rngs[1, ]
+        maxs <- rngs[2, ]
+    }
+    else {
+        mins <- scalePars[1, ]
+        maxs <- scalePars[2, ]
+        rngs <- scalePars
+    }
+    ranges <- maxs - mins
+    tmm <- function(i) m[, ] <- (m[, i] - mins[i])/ranges[i]
+    m <- sapply(1:ncol(m), tmm)
+    if (is.vector(m))
+        m <- matrix(m, ncol = p)
+    attr(m, "minmax") <- rngs
+    m
 }
 
 #######################################################################

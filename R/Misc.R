@@ -29,12 +29,14 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
 #    m: a vector or matrix
 #    scalePars: if not NULL, a 2-row matrix, with column storing
 #       the min and max values to be used in scaling column i of m
+#    p: if m is a vector, specify the number of columns it should 
+#       have as a matrix
 
 # value: a matrix, with column i consisting of the scaled version
 #    of column i of m, and attribute as in scalePars (either copied from
 #    the latter or if null, generated fresh
 
-mmscale <- function (m, scalePars = NULL)
+mmscale <- function (m,scalePars=NULL,p=NULL)
 { 
     if (is.vector(m) && is.null(scalePars) && is.null(p))
        stop('specify argument p')

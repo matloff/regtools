@@ -42,13 +42,11 @@
 #    lg:  lag, for fitting of a model in which observations at 
 #         time t will be predicted from observations at times 
 #         t-lg, t-lg+1,...,t-1
-#    y:  if non-NULL, a time series to be predicted, vector of length m; 
-#        if y is NULL, y will be taken to be x
 
 # value:
 # 
 #    matrix, suitable for fitting a prediction model; m-lg rows,
-#    lg+1 columns; y[lg+1], y[lg+2], ..., y[m] will be in the last column
+#    lg+1 columns; x[lg+1], x[lg+2], ..., x[m] will be in the last column
 
 #    the "X portion" will be 
 #    
@@ -57,26 +55,18 @@
 #    ...
 #    x[m-lg], x[m-lg+1], ..., x[m-1]
 
-TStoX <- function(x,lg,y=NULL) 
+TStoX <- function(x,lg) 
 {
-   lx <- length(x)
-   if (lg >= lx) stop('lg must be < length(x)')
-   origlg <- lg
-   nColX <- lg + 1  # number of columns in the output "X"
-   # the first lxl elements in x will be used in the output "X"
-   lxl <- lx - lg 
-   mt <- cbind(x[-((lxl+1):lx)],
-               1:lxl)
-   onerow <- function(mtrow) {
-      i <- mtrow[2]
-      s <- i
-      e <- i + lg - 1
+   # row k of the output
+   onerow <- function(k) {
+      s <- k
+      e <- k + lg 
       x[s:e]
    }
-   tmp <- t(apply(mt,1,onerow))
-   newCol <- if (is.null(y)) x else y
-   
-   cbind(tmp,newCol[-(1:lg)])
+   lx <- length(x)
+   outrows <- lapply(1:(lx-lg),onerow)
+   do.call(rbind,outrows)
+
 }
 
 # k-variate time series version of TStoX (but y is not optional)

@@ -260,7 +260,7 @@ predict.qeKNN <- function(object,newx,newxK=1)
       nr <- 1
    } else{
       nr <- nrow(newx)
-      newxK <- ncol(newx)
+      # newxK <- ncol(newx)  where did this come from?
    } 
    newx <- matrix(xyc$x,nrow=nr)
    preds <- predict(object,newx,newxK)
@@ -1044,6 +1044,15 @@ predict.qeTS <- function(object,newx)
    if (ncol(newx) != lag) 
       stop('newx must have length "lag" or "lag" columns')
    predict(object$cmdout,newx)
+}
+
+# text classification
+
+qeText <- function(data,yName,newDim,
+   kTop=50,stopWords=tm::stopwords('english'),
+   holdout=floor(min(1000,0.1*length(data))))
+{
+   stop('under construction')
 }
 
 ###################  utilities for qe*()  #########################

@@ -1029,6 +1029,7 @@ qeTS <- function(lag,data,qeName,opts=NULL,
    cmd <- paste0(cmd,'holdout=holdout')
    cmd <- paste0(cmd,')')
    cmdout <- eval(parse(text=cmd))
+
    res <- list(lag=lag,cmdout=cmdout,testAcc=cmdout$testAcc)
    class(res) <- c('qeTS',class(cmdout))
    res
@@ -1048,11 +1049,53 @@ predict.qeTS <- function(object,newx)
 
 # text classification
 
-qeText <- function(data,yName,newDim,
-   kTop=50,stopWords=tm::stopwords('english'),
+# mainly a wrapper for regtools::textToXY()
+
+# arguments:
+
+#    data: either a vector of character strings (one per training set
+#       document) or the output of textToXY(); let's call the former
+#       case docsInput
+#    y: R factor, one element per input doc if DocsInput
+#    kTop: if DocsInput, number of most-frequent words to use, otherwise
+#       ignored
+#    stopWords: if DocsInput, stop lists to use
+#    qeName: qe-series function to use
+#    holdout: as with the other qe-series functions
+
+qeText <- function(data,y=NULL,kTop=50,
+   stopWords=tm::stopwords('english'),qeName,
    holdout=floor(min(1000,0.1*length(data))))
 {
    stop('under construction')
+
+   # call textToXY() if not already called
+   docsInput <- is.character(data)
+   if (docsInput) {
+      if (is.null(y)) stop('classes must be specified')
+      textToXYout <- textToXY(data,y,kTop,stopWords)
+   } else textToXY <- data
+
+   if (is.character(textToXYout$y)) 
+      textToXYout$y <- as.factor(textToXYout$y)
+
+   res$textToXYout <- textToXYout
+
+   # form data for ML call
+   qeData <- textToXYout$x
+   qeData <- as.data.frame(qeData)
+   qeData <- cbind(qeData,textToXYout$y)
+   ncx <- ncol(qeData) - 1
+   names(qeData) <- paste0('keyword',1:ncx)
+   names(qeData)[ncx+1] <- 'label'
+
+   # now call the ML function, forming the call in string form first
+   cmd <- paste0(qeName,'(qeData,','"','label','",')
+   if (!is.null(opts)) cmd <- paste0(cmd,opts,',')
+   cmd <- paste0(cmd,'holdout=holdout')
+   cmd <- paste0(cmd,')')
+   cmdout <- eval(parse(text=cmd))
+
 }
 
 ###################  utilities for qe*()  #########################

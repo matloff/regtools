@@ -1053,32 +1053,24 @@ predict.qeTS <- function(object,newx)
 
 # arguments:
 
-#    data: either a vector of character strings (one per training set
-#       document) or the output of textToXY(); let's call the former
-#       case docsInput
+#    data: a vector of character strings, one per training set
+#       document
 #    y: R factor, one element per input doc if DocsInput
-#    kTop: if DocsInput, number of most-frequent words to use, otherwise
-#       ignored
-#    stopWords: if DocsInput, stop lists to use
+#    kTop: number of most-frequent words to use
+#    stopWords: stop lists to use
 #    qeName: qe-series function to use
 #    holdout: as with the other qe-series functions
 
-qeText <- function(data,y=NULL,kTop=50,
-   stopWords=tm::stopwords('english'),qeName,
+qeText <- function(data,y,kTop=50,
+   stopWords=tm::stopwords('english'),qeName,opts=NULL,
    holdout=floor(min(1000,0.1*length(data))))
 {
    stop('under construction')
 
-   # call textToXY() if not already called
-   docsInput <- is.character(data)
-   if (docsInput) {
-      if (is.null(y)) stop('classes must be specified')
-      textToXYout <- textToXY(data,y,kTop,stopWords)
-   } else textToXY <- data
+   res <- list()  # ultimately, the return value
 
-   if (is.character(textToXYout$y)) 
-      textToXYout$y <- as.factor(textToXYout$y)
-
+   textToXYout <- textToXY(data,y,kTop,stopWords)
+   textToXYout$y <- y  # convert back to factor
    res$textToXYout <- textToXYout
 
    # form data for ML call
@@ -1095,7 +1087,17 @@ qeText <- function(data,y=NULL,kTop=50,
    cmd <- paste0(cmd,'holdout=holdout')
    cmd <- paste0(cmd,')')
    cmdout <- eval(parse(text=cmd))
+   res$cmdout <- cmdout
+   class(res) <- 'qeText'
+   res
+}
 
+predict.qeText <- function(object,newDocs) 
+{
+   xyout <- object$textToXYout
+   newDocsOut <- textToXYpred(xyout,newDocs)
+   newDocsOut <- as.data.fraem(newDocsOut)
+   predict(object$cmdout,newDocsOut)
 }
 
 ###################  utilities for qe*()  #########################

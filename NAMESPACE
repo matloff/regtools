@@ -65,7 +65,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    confusion,factorTo012etc,allNumeric,
    penroseLM,predict.penroseLM,penrosePoly,predict.penrosePoly,ridgePoly, 
    ulist,predict.anovaRec,discretize,
-   toAllNumeric,
+   toAllNumeric,stopBrowser,
    factorsToDummies,factorToDummies,dummiesToFactor,hasFactors,dummiesToInt,
    xyDataframeToMatrix,dummiesToInt,charsToFactors,
    imgTo2D,imgFilesToMatrix,imgFileToVector,augMatrix,

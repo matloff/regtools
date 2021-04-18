@@ -1053,24 +1053,27 @@ predict.qeTS <- function(object,newx)
 
 # arguments:
 
-#    data: a vector of character strings, one per training set
-#       document
-#    y: R factor, one element per input doc if DocsInput
+#    data: 2-col data frame; col 1 is a vector of character strings,
+#       one per training set document; col 2 is R factor, doc categories
 #    kTop: number of most-frequent words to use
 #    stopWords: stop lists to use
 #    qeName: qe-series function to use
 #    holdout: as with the other qe-series functions
 
-qeText <- function(data,y,kTop=50,
+qeText <- function(data,kTop=50,
    stopWords=tm::stopwords('english'),qeName,opts=NULL,
-   holdout=floor(min(1000,0.1*length(data))))
+   holdout=floor(min(1000,0.1*nrow(data))))
 {
-   stop('under construction')
+   # stop('under construction')
+   
+   if (!is.null(holdout)) {
+      splitData(holdout,data)
+   }
 
    res <- list()  # ultimately, the return value
 
-   textToXYout <- textToXY(data,y,kTop,stopWords)
-   textToXYout$y <- y  # convert back to factor
+   textToXYout <- textToXY(data[,1],data[,2],kTop,stopWords)
+   textToXYout$y <- data[,2]  # convert back to factor
    res$textToXYout <- textToXYout
 
    # form data for ML call
@@ -1080,23 +1083,30 @@ qeText <- function(data,y,kTop=50,
    ncx <- ncol(qeData) - 1
    names(qeData) <- paste0('keyword',1:ncx)
    names(qeData)[ncx+1] <- 'label'
+   yName <- names(data)[2]
 
    # now call the ML function, forming the call in string form first
-   cmd <- paste0(qeName,'(qeData,','"','label','",')
+   cmd <- paste0(qeName,'(qeData,','"label"')
    if (!is.null(opts)) cmd <- paste0(cmd,opts,',')
-   cmd <- paste0(cmd,'holdout=holdout')
+   cmd <- paste0(cmd,',holdout=NULL')
    cmd <- paste0(cmd,')')
    cmdout <- eval(parse(text=cmd))
    res$cmdout <- cmdout
+   res$classif <- TRUE
    class(res) <- 'qeText'
+   if (!is.null(holdout)) {
+      predictHoldout(res)
+      res$holdIdxs <- holdIdxs
+   }
    res
 }
 
 predict.qeText <- function(object,newDocs) 
 {
    xyout <- object$textToXYout
+   if (!is.vector(newDocs)) newDocs <- as.vector(newDocs[,1])
    newDocsOut <- textToXYpred(xyout,newDocs)
-   newDocsOut <- as.data.fraem(newDocsOut)
+   newDocsOut <- as.data.frame(newDocsOut)
    predict(object$cmdout,newDocsOut)
 }
 
@@ -1188,11 +1198,11 @@ require(gtools)
 
 splitData <- defmacro(holdout,data, 
    expr={
-      nHold <- holdout
-      cat('holdout set has ',nHold, 'rows\n')
+      nHold <- holdout;
+      cat('holdout set has ',nHold, 'rows\n');
       idxs <- sample(1:nrow(data),nHold);
-      tst <- data[idxs,];
-      data <- data[-idxs,]
+      tst <- data[idxs,,drop=FALSE];
+      data <- data[-idxs,,drop=FALSE];
       holdIdxs <- idxs
    }
 )

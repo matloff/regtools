@@ -1065,6 +1065,8 @@ qeText <- function(data,kTop=50,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    # stop('under construction')
+
+   if (!is.factor(data[,2])) stop('y must be an R factor')
    
    if (!is.null(holdout)) {
       splitData(holdout,data)
@@ -1107,6 +1109,7 @@ predict.qeText <- function(object,newDocs)
    if (!is.vector(newDocs)) newDocs <- as.vector(newDocs[,1])
    newDocsOut <- textToXYpred(xyout,newDocs)
    newDocsOut <- as.data.frame(newDocsOut)
+   names(newDocsOut) <- paste0('keyword',1:ncol(newDocsOut))
    predict(object$cmdout,newDocsOut)
 }
 

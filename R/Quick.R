@@ -1088,7 +1088,7 @@ qeText <- function(data,kTop=50,
    yName <- names(data)[2]
 
    # now call the ML function, forming the call in string form first
-   cmd <- paste0(qeName,'(qeData,','"label"')
+   cmd <- paste0(qeName,'(qeData,','"label",')
    if (!is.null(opts)) cmd <- paste0(cmd,opts,',')
    cmd <- paste0(cmd,',holdout=NULL')
    cmd <- paste0(cmd,')')
@@ -1102,6 +1102,8 @@ qeText <- function(data,kTop=50,
    }
    res
 }
+
+qetext <- qeText
 
 predict.qeText <- function(object,newDocs) 
 {

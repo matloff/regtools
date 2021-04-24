@@ -886,6 +886,8 @@ plot.qeLASSO <- function(object)
    genericPlot(object)
 }
 
+#########################  qeIso()  #################################
+
 # isotonic regression
 
 qeIso <- function(data,yName,isoMethod='isoreg', 
@@ -929,9 +931,11 @@ predict.qeIso <- function(object,newx)
    object$y[idxs]
 }
 
-# pca*-series, PCA wrappers for the qe*-series, including for prediction
+#########################  qePCA()  #################################
 
-# could instead make PCA an argument in each qe*(), but this is cleaner
+# PCA wrapper for selected qe*-series functions, including for prediction
+
+# could have instead made PCA an argument in each qe*(), but this is cleaner
 
 # the additional argument is pcaProp, the proportion of variance desired
 # for the principal components

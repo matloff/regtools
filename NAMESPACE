@@ -25,6 +25,7 @@ S3method(predict,qeLin)
 S3method(predict,qeKNN)
 S3method(predict,qeRF)
 S3method(predict,qeSVM)
+S3method(predict,qeSVMliquid)
 S3method(predict,qeGBoost)
 S3method(predict,qeNeural)
 S3method(predict,qePolyLin)
@@ -52,7 +53,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    knnCalib,plattCalib,reliabDiagram,calibWrap,preCalibWrap,
    crossEntropy,KLDivergence,
    qeLogit,qeLin,qeKNN,qeRF,qeSVM,qeGBoost,qeNeural,qeLASSO,qeCompare,qeFT,
-   doPCA,qePolyLin,qePolyLog,ridgePoly,qePolyLASSO,
+   doPCA,qePolyLin,qePolyLog,ridgePoly,qePolyLASSO,qeSVMliquid,
    knntrn,ovaknntrn,predict.ovaknn,classadjust,
    scoresToProbs,logOddsToProbs,getDValsE1071,makeANDconjunction,
    knnFineTune,kNN,findOverallLoss,MAPE,probIncorrectClass,kNNxv,propMisclass,

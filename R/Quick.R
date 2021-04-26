@@ -412,42 +412,28 @@ qeSVMliquid <- function(data,yName,gamma=1.0,cost=1.0,
    if (!classif) {print('for classification problems only'); return(NA)}
    if (!is.null(holdout)) splitData(holdout,data)
    require(liquidSVM)
-   ycol <- which(names(data) == 'yName')
-   x <- data[,-ycol]
+   ycol <- which(names(data) == yName)
+   x <- data[,-ycol,drop=FALSE]
    y <- data[,ycol]
-   svmout <- mcSVM(x,y,c_values=cost,gammas=gamma)
-   svmout$yName <- yName
-   svmout$classNames <- levels(y)
-   svmout$classif <- classif
-   svmout$trainRow1 <- getRow1(data,yName)
-   class(svmout) <- c('qeSVMliquid',class(svmout))
+   svmout <- mcSVM(x,y,c_values=cost,gammas=gamma)  
+   # svmout is of S4 ref class, causing some issues, including the
+   # cross-val, where can't use our usual predictHoldout()
+   res <- list(classif=classif,yName=yName,svmout=svmout)
    if (!is.null(holdout)) {
-      predictHoldout(svmout)
-      svmout$holdIdxs <- holdIdxs
+      preds <- predict(svmout,tst[,-ycol,drop=FALSE])     
+      res$holdoutPreds <- preds
+      res$testAcc <- mean(preds != tst[,ycol])
+      res$baseAcc <- 1 - max(table(data[,ycol])) / nrow(data)
+      res$holdIdxs <- holdIdxs
    }
-   svmout
+   class(res) <- 'qeSVMliquid'
+   res
 }
 
-predict.qeSVMliquid <- function(object,newx,k=NULL,scaleX=TRUE)
+predict.qeSVMliquid <- function(object,newx)
 {
    require(liquidSVM)
-   class(object) <- class(object)[-1]
-   newx <- setTrainFactors(object,newx)
-   preds <- predict(object,newx,decision.values=TRUE)
-   dvals <- attr(preds,'decision.values')
-   colnames(dvals) <- colnames(object$decision.values)
-   res <- list(predClasses=preds,dvals=dvals)
-   classNames <- object$classNames
-   ycol <- object$ycol
-   x <- object$data[,-ycol]
-   y <- object$data[,ycol]
-   if (!is.null(k)) {
-      trnScores <- object$decision.values
-      newScores <- getDValsE1071(object,newx)
-      probs <- knnCalib(y,trnScores,newScores,k)
-      res$probs <- probs
-   }
-   res
+   predict(object$svmout,newx)
 }
 
 #########################  qeGBoost()  #################################

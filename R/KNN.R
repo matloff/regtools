@@ -73,8 +73,11 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    if (length(ccout) > 0) {
       warning('X data has constant columns:')
       print(ccout)
+      print('deleting')
+      x <- x[,-ccout]
       # if (scaleX) stop('constant columns cannot work with scaling')
-   }
+   } else ccout <- NULL
+
    # checks on y
    nYvals <- length(unique(y))
    if (is.vector(y)) {
@@ -166,7 +169,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    tmplist$nhbrs <- if (saveNhbrs) tmp else NULL
 
    # MH dists for possible re-run using loclin()
-   if (length(ccout) == 0) {
+   ## if (length(ccout) == 0) {
       meanx <- colMeans(x)
       covx <- cov(x)
       tried <- try(
@@ -177,7 +180,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
          # warning('Mahalanobis distances not calculated')
          tmplist$mhdists <- NULL
       } 
-   }
+   ## }
 
    if (classif && !noPreds) {
       if (ncol(y) > 1) {  # multiclass (> 2) case
@@ -195,6 +198,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    # }
    tmplist$x <- x
    tmplist$y <- y
+   tmplist$ccout <- ccout
    tmplist$noPreds <- noPreds
    tmplist$leave1out <- leave1out
    tmplist$startAt1adjust <- startA1adjust
@@ -214,6 +218,7 @@ predict.kNN <- function(object,...)
    classif <- object$classif
    arglist <- list(...)
    newx <- arglist[[1]]
+   if (!is.null(object$ccout)) newx <- newx[,-object$ccout]
    # set k for the prediction phase
    newxK <- if(length(arglist) > 1) arglist[[2]] else 1
 

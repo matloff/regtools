@@ -1424,6 +1424,25 @@ qeCompare <- function(data,yName,qeFtnList,nReps,opts=NULL,seed=9999)
    data.frame(qeFtn=qeFtnList,meanAcc=meanAcc)
 }
 
+# builds a string for a qe*() call, with options
+buildQEcall <- function(initString,opts) 
+{
+
+   qeCmd <- initString
+   if (is.null(opts)) qeCmd <- paste0(qeCmd,')')  # more args?
+   else {
+      nms <- names(opts)
+      for (i in 1:length(nms)) {
+         qeCmd <- paste0(qeCmd,',')
+         argval <- opts[[nms[i]]]
+         arg <- paste0(nms[i],'=',argval)
+         if (i == length(nms)) qeCmd <- paste0(qeCmd,arg,')')
+      }
+   }
+   qeCmd
+
+}
+
 #########################  misc.  ################################
 
 # lm() balks if a label begins with a digit; check to see if we have any

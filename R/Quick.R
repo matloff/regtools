@@ -1307,6 +1307,7 @@ predictHoldout <- defmacro(res,
       if (res$classif) {
          res$testAcc <- mean(preds$predClasses != tst[,ycol])
          res$baseAcc <- 1 - max(table(data[,ycol])) / nrow(data)
+         res$confusion <- confusion(tst[,ycol],preds$predClasses)
       } else {
          res$testAcc <- mean(abs(preds - tst[,ycol]))
          res$baseAcc <-  mean(abs(tst[,ycol] - mean(data[,ycol])))

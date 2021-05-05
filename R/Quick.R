@@ -1047,6 +1047,77 @@ predict.qePCA <- function(object,newx)
    predict(object$qeOut,newx=newx)
 }
 
+#########################  qeUMAP()  #################################
+
+# UMAP wrapper for selected qe*-series functions, including for prediction
+
+# the additional argument is nComps, the number of components in the
+# transformed X
+
+qeUMAP <- function(nComps,data,yName,qeName,opts=NULL,
+   holdout=floor(min(1000,0.1*nrow(data))),scaleX=FALSE)
+{
+stop('not ready for use yet')
+
+   require(uwot)
+
+   # eventual return value
+   res <- list()
+   res$scaleX <- scaleX  
+   ycol <- which(names(data) == yName)
+   y <- data[,ycol]
+   x <- data[,-ycol,drop=FALSE]
+   if (!allNumeric(x)) {
+      x <- toAllNumeric(x)
+      factorsInfo <- attr(x,'factorsInfo')
+   } else factorsInfo <- NULL
+   res$factorsInfo <- factorsInfo
+   res$classif <- is.factor(y)
+   
+   # add more flexibility later
+   tmp <- umap(x,n_neighbors=5,learning_rate=0.5,init='random',
+      n_epochs=20,n_components=nComps,ret_model=TRUE,scale=scaleX)
+   res$umapModel <- tmp
+   res$nComps <- nComps
+   newx <- tmp$embedding
+   newDFrame <- as.data.frame(newx)
+   res$xNames <- colnames(newDFrame)
+   newDFrame$y <- y
+
+   # now call the request
+   cmd <- paste0(qeName,'(newDFrame,"y",holdout=')
+   cmd <- if (is.null(holdout)) 
+      paste0(cmd,'NULL)') else paste0(cmd,holdout,')')
+   qeOut <- eval(parse(text=cmd))
+
+   res$qeOut <- qeOut
+   res$trainRow1 <- qeOut$trainRow1
+   res$nColX <- ncol(x)
+   class(res) <- 'qeUMAP'
+   res
+}
+
+predict.qeUMAP <- function(object,newx)
+{
+   class(object) <- class(object)[-1]
+   if (!allNumeric(newx)) {
+      newx <- charsToFactors(newx)
+      newx <- factorsToDummies(newx,omitLast=TRUE,
+         factorsInfo=object$factorsInfo)
+   }
+   if (is.vector(newx)) {
+      newx <- matrix(newx,ncol=object$nColX)
+   }
+   # colnames(newx) <- object$xNames
+
+   newx <- umap_transform(newx,object$umapModel)
+   newx <- as.data.frame(newx)
+   colnames(newx) <- object$xNames
+   predict(object$qeOut,newx=newx)
+}
+
+###########################  qeTS  #################################
+
 # time series wrappers for the qe*-series, including for prediction
 
 # the additional argument is lag, the number of recent values to use in

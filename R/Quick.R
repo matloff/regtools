@@ -1057,7 +1057,7 @@ predict.qePCA <- function(object,newx)
 qeUMAP <- function(nComps,data,yName,qeName,opts=NULL,
    holdout=floor(min(1000,0.1*nrow(data))),scaleX=FALSE)
 {
-stop('not ready for use yet')
+   warning('experimental at this point')
 
    require(uwot)
 
@@ -1091,6 +1091,9 @@ stop('not ready for use yet')
    qeOut <- eval(parse(text=cmd))
 
    res$qeOut <- qeOut
+   res$testAcc <- qeOut$testAcc
+   res$baseAcc <- qeOut$baseAcc
+   res$confusion <- qeOut$confusion
    res$trainRow1 <- qeOut$trainRow1
    res$nColX <- ncol(x)
    class(res) <- 'qeUMAP'

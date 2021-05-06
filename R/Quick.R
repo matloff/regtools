@@ -982,12 +982,13 @@ predict.qeIso <- function(object,newx)
 # the additional argument here is pcaProp, the proportion of variance desired
 # for the principal components
 
-qePCA <- function(pcaProp,data,yName,qeName,opts=NULL,
+qePCA <- function(pcaProp,dataName,yName,qeName,opts=NULL,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    # eventual return value
    res <- list()
    res$scaleX <- FALSE  # already scaled via prcomp()
+   data <- get(dataName)
    ycol <- which(names(data) == yName)
    y <- data[,ycol]
    x <- data[,-ycol]
@@ -1007,28 +1008,13 @@ qePCA <- function(pcaProp,data,yName,qeName,opts=NULL,
 
    # now call the request
    # we've already scaled during PCA, so don't now 
-   cmd <- buildQEcall(
-      paste0(qeFtn,
-             '(newData,',
-             yName,
-             ',holdout = ',holdout),
-      opts)
+   cmd <- buildQEcall(qeName,dataName,yName,opts=opts,holdout=holdout)
+   qeOut <- eval(parse(text=cmd))
 
-
-
-   elipArgs <- ulist(list(...))
-   # unpack the ...
-   ulist(elipArgs)
-   switch(qeName,
-      'qeKNN' = qeOut <-qeKNN(newData,yName,k=k,holdout=holdout,scaleX=FALSE),
-      'qeSVM' = qeOut <-qeSVM(newData,yName,gamma=gamma,cost=cost,
-         holdout=holdout),
-      stop('invalid qe function name')
-   )
-
-   ### qeKNNout <-qeKNN(newData,yName,k=k,holdout=holdout,scaleX=FALSE)
-  
    res$qeOut <- qeOut
+   res$testAcc <- qeOut$testAcc
+   res$baseAcc <- qeOut$baseAcc
+   res$confusion <- qeOut$confusion
    res$pcaout <- pcaout
    res$numPCs <- numPCs
    res$trainRow1 <- qeOut$trainRow1
@@ -1526,7 +1512,7 @@ buildQEcall <- function(qeFtnName,dataName,yName,opts=NULL,holdout=NULL)
          arg <- paste0(nms[i],'=',argval)
          if (i == length(nms)) qeCmd <- paste0(qeCmd,arg,')')
       }
-   }
+   } else qeCmd <- paste0(qeCmd,')')
    qeCmd
 
 }

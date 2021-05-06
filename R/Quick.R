@@ -975,14 +975,14 @@ predict.qeIso <- function(object,newx)
 
 #########################  qePCA()  #################################
 
-# PCA wrapper for selected qe*-series functions, including for prediction
+# PCA wrapper for qe*-series functions, including for prediction
 
 # could have instead made PCA an argument in each qe*(), but this is cleaner
 
-# the additional argument is pcaProp, the proportion of variance desired
+# the additional argument here is pcaProp, the proportion of variance desired
 # for the principal components
 
-qePCA <- function(pcaProp,data,yName,qeName,...,
+qePCA <- function(pcaProp,data,yName,qeName,opts=NULL,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
    # eventual return value
@@ -1007,6 +1007,15 @@ qePCA <- function(pcaProp,data,yName,qeName,...,
 
    # now call the request
    # we've already scaled during PCA, so don't now 
+   cmd <- buildQEcall(
+      paste0(qeFtn,
+             '(newData,',
+             yName,
+             ',holdout = ',holdout),
+      opts)
+
+
+
    elipArgs <- ulist(list(...))
    # unpack the ...
    ulist(elipArgs)
@@ -1500,12 +1509,16 @@ qeCompare <- function(data,yName,qeFtnList,nReps,opts=NULL,seed=9999)
 }
 
 # builds a string for a qe*() call, with options
-buildQEcall <- function(initString,opts) 
-{
 
-   qeCmd <- initString
-   if (is.null(opts)) qeCmd <- paste0(qeCmd,')')  # more args?
-   else {
+buildQEcall <- function(qeFtnName,dataName,yName,opts=NULL,holdout=NULL) 
+{
+   ho <- if (is.null(holdout)) 'NULL' else as.character(holdout)
+   qeCmd <- paste0(
+       qeFtnName,'(',
+       'data = ',dataName, 
+       ',yName = ','"',yName,'"',
+       ',holdout = ',ho)
+   if (!is.null(opts)) {  # more args?
       nms <- names(opts)
       for (i in 1:length(nms)) {
          qeCmd <- paste0(qeCmd,',')

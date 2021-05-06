@@ -1052,9 +1052,11 @@ predict.qePCA <- function(object,newx)
 qeUMAP <- function(nComps,data,yName,qeName,opts=NULL,
    holdout=floor(min(1000,0.1*nrow(data))),scaleX=FALSE)
 {
-   warning('experimental at this point')
+   # warning('experimental at this point')
+   stop('under construction')
 
-   require(uwot)
+   # require(uwot)
+   require(umap)
 
    # eventual return value
    res <- list()
@@ -1070,13 +1072,18 @@ qeUMAP <- function(nComps,data,yName,qeName,opts=NULL,
    res$classif <- is.factor(y)
    
    # add more flexibility later
-   tmp <- umap(x,n_neighbors=5,learning_rate=0.5,init='random',
-      n_epochs=20,n_components=nComps,ret_model=TRUE,scale=scaleX)
-   res$umapModel <- tmp
-   res$nComps <- nComps
-   newx <- tmp$embedding
-   newDFrame <- as.data.frame(newx)
-   res$xNames <- colnames(newDFrame)
+###     tmp <- umap(x,n_neighbors=5,learning_rate=0.5,init='random',
+###        n_epochs=20,n_components=nComps,ret_model=TRUE,scale=scaleX)
+###     res$umapModel <- tmp
+###     res$nComps <- nComps
+###     newx <- tmp$embedding
+###     newDFrame <- as.data.frame(newx)
+###     res$xNames <- colnames(newDFrame)
+###     newDFrame$y <- y
+   umdf <- umap.defaults
+   umdf.n_components <- nComps
+   tmp <- umap(x,config=umdf)
+   newDFrame <- as.data.frame(tmp$layout)
    newDFrame$y <- y
 
    # now call the request
@@ -1089,6 +1096,7 @@ qeUMAP <- function(nComps,data,yName,qeName,opts=NULL,
    res$testAcc <- qeOut$testAcc
    res$baseAcc <- qeOut$baseAcc
    res$confusion <- qeOut$confusion
+   res$UMAPout <- tmp
    res$trainRow1 <- qeOut$trainRow1
    res$nColX <- ncol(x)
    class(res) <- 'qeUMAP'
@@ -1106,9 +1114,9 @@ predict.qeUMAP <- function(object,newx)
    if (is.vector(newx)) {
       newx <- matrix(newx,ncol=object$nColX)
    }
-   # colnames(newx) <- object$xNames
 
-   newx <- umap_transform(newx,object$umapModel)
+###     newx <- umap_transform(newx,object$umapModel)
+   newx <- predict(object$UMAPout,newx)
    newx <- as.data.frame(newx)
    colnames(newx) <- object$xNames
    predict(object$qeOut,newx=newx)

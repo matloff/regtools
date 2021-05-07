@@ -4,6 +4,7 @@
 \alias{qeKNN}
 \alias{qeRF}
 \alias{qeSVM}
+\alias{qeSVMliquid}
 \alias{qeGBoost}
 \alias{qeNeural}
 \alias{qeLASSO}
@@ -11,31 +12,41 @@
 \alias{qePolyLog}
 \alias{qeIso}
 \alias{qeCompare}
+\alias{qePCA}
+\alias{qeUMAP}
 \alias{qeFT}
+\alias{qeText}
+\alias{qeTS}
 \alias{predict.qeLogit}
 \alias{predict.qeLin}
 \alias{predict.qeKNN}
 \alias{predict.qeRF}
 \alias{predict.qeSVM}
+\alias{predict.qeSVMliquid}
 \alias{predict.qeGBoost}
 \alias{predict.qeNeural}
 \alias{predict.qeLASSO}
 \alias{predict.qePolyLin}
 \alias{predict.qePolyLog}
 \alias{predict.qeIso}
+\alias{predict.qePCA}
+\alias{predict.qeUMAP}
+\alias{predict.qeText}
+\alias{predict.qeTS}
 \alias{plot.RF}
 \alias{plot.LASSO}
 
-\title{Quick-Explore Regression/Classification Wrappers}
+\title{Quick-Explore Regression/Machine Learning Wrappers}
 
 \description{
-Quick access to machine learning methods, with a very simple
-interface.  Intended for convenient initial exploration of a dataset,
-both to gauge the predictive effectiveness of a model and to do simple
-prediction of new cases.  Just one call needed to fit, no preliminary
-setup of model etc.  The simplicity also makes the series useful
-for teaching.  For advanced work, analysts may prefer to use 
-the methods directly, in order to utilize specialized options.  
+Quick access to machine learning methods, with a very simple,
+uniform interface.  Intended for convenient initial 
+exploration of a dataset, both to gauge the predictive effectiveness of a 
+model and to do simple prediction of new cases.  Just one call needed 
+to fit, no preliminary setup of model etc.  The simplicity also 
+makes the series useful for teaching.  For advanced work, 
+analysts may prefer to use the methods directly, in order to utilize 
+specialized options.  
 }
 
 \usage{
@@ -58,6 +69,10 @@ qePolyLog(data,yName,deg=2,maxInteractDeg = deg,
    holdout=floor(min(1000,0.1*nrow(data))))
 qeCompare(data,yName,qeFtnList,nReps,opts=NULL,seed=9999)
 qeFT(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
+qePCA(pcaProp,dataName,yName,qeName,opts=NULL,
+   holdout=floor(min(1000,0.1*nrow(data))))
+qeUMAP(nComps,dataName,yName,qeName,opts=NULL,
+   holdout=floor(min(1000,0.1*nrow(data))))
 \method{predict}{qeLogit}(object,newx)
 \method{predict}{qeLin}(object,newx)
 \method{predict}{qeKNN}(object,newx,newxK=1)
@@ -67,12 +82,17 @@ qeFT(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
 \method{predict}{qeNeural}(object,newx)
 \method{predict}{qeLASSO}(object,newx)
 \method{predict}{qePoly}(object,newx)
+\method{predict}{qePCA}(object,newx)
+\method{predict}{qeUMAP}(object,newx)
+\method{predict}{qeText}(object,newx)
+\method{predict}{qeTS}(object,newx)
 \method{plot}{qeLASSO}(object,newx)
 \method{plot}{qeSVM}(object,newx,k=25)
 \method{plot}{qeRF}(object,newx)
 }
 
 \arguments{
+  \item{pcaProp}{Desired proportion of overall variance for the PCs.`}
   \item{data}{Dataframe, training set. Classification case is signaled
      via labels column being an R factor.}
   \item{yName}{Name of the class labels column.}
@@ -119,10 +139,8 @@ qeFT(data,yName,qeftn,pars,nCombs,nTst,nXval,showProgress=TRUE)
 \details{
 
 As noted, these functions are intended for quick, first-level analysis
-of regression or multiclass classification problems.  Emphasis here is
-on convenience and simplicity.  Currently k-NN, SVM, random forests,
-gradient boosting, linear model, LASSO and polynomial regression are
-offered. 
+of regression/machine learning problems.  Emphasis here is
+on convenience and simplicity.  
 
 The idea is that, given a new dataset, the analyst can quickly and
 easily try fitting a number of models in succession, say first k-NN,
@@ -171,10 +189,11 @@ then random forests:
 
 }
 
-The optional \code{holdout} argument triggers formation of a holdout set
+The \code{holdout} argument triggers formation of a holdout set
 and the corresponding cross-validation evaluation of predictive power.
 Note that if a holdout is formed, the return value will consist of the
 fit on the training set, not on the full original dataset.
+Most of these functions are paired with a \code{predict} method.
 
 In most cases, the full basket of options in the wrapped function is not
 reflected, and second-level analysis should use the relevant packages
@@ -203,10 +222,16 @@ e.g. \code{Height * Age^2}.  Dummy variables are handled properly, e.g.
 no powers of a dummy are generatd.  The logistic polynomial regression version
 is \code{qePolyLog}.
 
+Low-dimensional manifold fitting is facilitated by \code{qePCA} and
+\code{qeUMAP}.
+
 The \code{qeCompare} function does quick-and-easy cross-validated
 comparisons among the \code{qe*} functions.  The same holdout sets are
 generated and used by all the functions.  Default values of
 hyperparameters of those functions can be set via \code{opts}.
+
+Similarly, the \code{qeFT} function serves as a convenient interface to
+\code{finetuning}.  See also \code{replicMean}.
 
 The \code{qeIso} function is intended mainly for use as a smoothing
 method in calibration actions.

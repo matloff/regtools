@@ -975,7 +975,7 @@ predict.qeIso <- function(object,newx)
 
 #########################  qePCA()  #################################
 
-# PCA wrapper for qe*-series functions, including for prediction
+# PCA preprocess for qe*-series functions, including for prediction
 
 # could have instead made PCA an argument in each qe*(), but this is cleaner
 
@@ -1044,7 +1044,7 @@ predict.qePCA <- function(object,newx)
 
 #########################  qeUMAP()  #################################
 
-# UMAP wrapper for selected qe*-series functions, including for prediction
+# UMAP preprocess for selected qe*-series functions, including for prediction
 
 # the additional argument is nComps, the number of components in the
 # transformed X
@@ -1052,8 +1052,7 @@ predict.qePCA <- function(object,newx)
 qeUMAP <- function(nComps,data,yName,qeName,opts=NULL,
    holdout=floor(min(1000,0.1*nrow(data))),scaleX=FALSE)
 {
-   # warning('experimental at this point')
-   stop('under construction')
+   # stop('under construction')
 
    # require(uwot)
    require(umap)
@@ -1072,17 +1071,11 @@ qeUMAP <- function(nComps,data,yName,qeName,opts=NULL,
    res$classif <- is.factor(y)
    
    # add more flexibility later
-###     tmp <- umap(x,n_neighbors=5,learning_rate=0.5,init='random',
-###        n_epochs=20,n_components=nComps,ret_model=TRUE,scale=scaleX)
-###     res$umapModel <- tmp
-###     res$nComps <- nComps
-###     newx <- tmp$embedding
-###     newDFrame <- as.data.frame(newx)
-###     res$xNames <- colnames(newDFrame)
-###     newDFrame$y <- y
    umdf <- umap.defaults
-   umdf.n_components <- nComps
+   umdf$n_components <- nComps
    tmp <- umap(x,config=umdf)
+   UMAPnames <- paste0('U',1:ncol(tmp$layout))  # need for later use in factors
+   colnames(tmp$layout) <- UMAPnames
    newDFrame <- as.data.frame(tmp$layout)
    newDFrame$y <- y
 
@@ -1097,6 +1090,8 @@ qeUMAP <- function(nComps,data,yName,qeName,opts=NULL,
    res$baseAcc <- qeOut$baseAcc
    res$confusion <- qeOut$confusion
    res$UMAPout <- tmp
+   res$UMAPnames <- UMAPnames
+   res$nComps <- nComps
    res$trainRow1 <- qeOut$trainRow1
    res$nColX <- ncol(x)
    class(res) <- 'qeUMAP'
@@ -1115,10 +1110,9 @@ predict.qeUMAP <- function(object,newx)
       newx <- matrix(newx,ncol=object$nColX)
    }
 
-###     newx <- umap_transform(newx,object$umapModel)
    newx <- predict(object$UMAPout,newx)
    newx <- as.data.frame(newx)
-   colnames(newx) <- object$xNames
+   # names(newx) <- object$UMAPnames
    predict(object$qeOut,newx=newx)
 }
 
@@ -1187,8 +1181,6 @@ qeText <- function(data,kTop=50,
    stopWords=tm::stopwords('english'),qeName,opts=NULL,
    holdout=floor(min(1000,0.1*nrow(data))))
 {
-   # stop('under construction')
-
    if (!is.factor(data[,2])) stop('y must be an R factor')
    
    if (!is.null(holdout)) {

@@ -101,6 +101,9 @@ We'll predict wage income.  One cannot get really good accuracy with the
 given features, but this dataset will serve as a good introduction to
 these particular features of the package.
 
+NOTE:  The qe-series functions have been spun off to a separate package,
+##qeML##.
+
 The **qe\*()** functions' output are ready for making prediction on new cases.
 We'll use this example:
 

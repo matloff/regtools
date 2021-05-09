@@ -36,17 +36,16 @@
 \alias{plot.RF}
 \alias{plot.LASSO}
 
-\title{Quick-Explore Regression/Machine Learning Wrappers}
+\title{Quick-and-Easy Machine Learning Wrappers}
 
 \description{
-Quick access to machine learning methods, with a very simple,
-uniform interface.  Intended for convenient initial 
-exploration of a dataset, both to gauge the predictive effectiveness of a 
-model and to do simple prediction of new cases.  Just one call needed 
-to fit, no preliminary setup of model etc.  The simplicity also 
-makes the series useful for teaching.  For advanced work, 
-analysts may prefer to use the methods directly, in order to utilize 
-specialized options.  
+Quick access to machine learning methods, with a very simple
+interface.  Useful for convenient exploration of a dataset,
+both to gauge the predictive effectiveness of a model and to do simple
+prediction of new cases.  Just one call needed to fit, no preliminary
+setup of model etc.  The simplicity also makes the series useful
+for teaching.  For advanced work, analysts may prefer to use 
+the methods directly, in order to utilize specialized options.  
 }
 
 \usage{
@@ -170,23 +169,6 @@ then random forests:
       11 
 199.1714
 
-# how about some other ML methods?
-> lassout <- qeLASSO(mlb,'Weight')
-> lassout$testAcc
-[1] 14.23122
-# poly reg, degree 3 
-> polyout <- qePolyLin(mlb,'Weight',3)
-> polyout$testAcc
-[1] 13.55613
-> nnout <- qeNeural(mlb,'Weight')
-# ...
-> nnout$testAcc
-[1] 12.2537
-# try some nondefault hyperparams
-> nnout <- qeNeural(mlb,'Weight',hidden=c(200,200),nEpoch=50)
-> nnout$testAcc
-[1] 15.17982
-
 }
 
 The \code{holdout} argument triggers formation of a holdout set
@@ -196,8 +178,8 @@ fit on the training set, not on the full original dataset.
 Most of these functions are paired with a \code{predict} method.
 
 In most cases, the full basket of options in the wrapped function is not
-reflected, and second-level analysis should use the relevant packages
-directly.
+reflected.  Use of arguments not presented in the qe function requires
+direct use the relevant packages.
 
 The \code{qe*} functions do model fit.  Each of them has a
 \code{predict} method, and some also have a \code{plot} method.
@@ -212,30 +194,46 @@ correctly on new cases with R factors.  The proper levels are assigned
 to the new cases.  (Of course, if a new case has a level not in the
 original data, nothing can be done.)
 
-The function \code{qeLin} handles classification problems as
-multivariate-outcome linea models. If one's goal is prediction, it can
-be much faster than \code{qeLogit}, often with comparable accuracy.
+Some notes on specific functions:
 
-The \code{qePolyLin} function does polynomial regression of the indicated
-degree. In the above example degree 3 means all terms through degree 3,
-e.g. \code{Height * Age^2}.  Dummy variables are handled properly, e.g.
-no powers of a dummy are generatd.  The logistic polynomial regression version
-is \code{qePolyLog}.
+\itemize{
 
-Low-dimensional manifold fitting is facilitated by \code{qePCA} and
-\code{qeUMAP}.
+   \item The function \code{qeLin} handles classification problems as
+   multivariate-outcome linea models. If one's goal is prediction, it
+   can be much faster than \code{qeLogit}, often with comparable
+   accuracy.
+   
+   \item Several functions fit polynomial models.
+   The \code{qePolyLin} function does polynomial regression of the
+   indicated degree. In the above example degree 3 means all terms
+   through degree 3, e.g. \code{Height * Age^2}.  Dummy variables are
+   handled properly, e.g.  no powers of a dummy are generatd.  The
+   logistic polynomial regression version is \code{qePolyLog}, and there
+   is a LASSO version, \code{qePolyLASSO}.
+   
+   \item The \code{qeCompare} function does quick-and-easy
+   cross-validated comparisons among the \code{qe*} functions.  The same
+   holdout sets are generated and used by all the functions.  Default
+   values of hyperparameters of those functions can be set via
+   \code{opts}.  Hyperparameter tuning for a given \code{qe*} function
+   can be done using \code{qeFT}, a wrapper to the package's
+   \code{fineTuning} function.  See also \code{replicMean}.
 
-The \code{qeCompare} function does quick-and-easy cross-validated
-comparisons among the \code{qe*} functions.  The same holdout sets are
-generated and used by all the functions.  Default values of
-hyperparameters of those functions can be set via \code{opts}.
+   \item Two different SVM implementations are offered:  \code{qeSVM}
+   wraps the SVM algorithm in the \pkg{e1071} package; \code{qeSVMliquid}
+   uses the \pkg{liquidSVM} package.
 
-Similarly, the \code{qeFT} function serves as a convenient interface to
-\code{finetuning}.  See also \code{replicMean}.
+   \item The functions \code{qeTS} and \code{qeText} handle time series
+   and text applications, respectively.
 
-The \code{qeIso} function is intended mainly for use as a smoothing
-method in calibration actions.
-
+   \item Pre-mapping to lower-dimensional manifolds can be done via
+   \code{qePCA} and \code{qeUMAP}.  For instance, the former will first
+   extract the specified number of principal components, then fit the
+   user's desired ML model, say k-NN (\code{qeKNN}) or gradient boosting
+   (\code{qeGBoost}).
+   
+   \item The \code{qeIso} function is intended mainly for use as a
+   smoothing method in calibration actions.  }
 }
 
 \value{

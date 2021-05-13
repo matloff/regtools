@@ -33,7 +33,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    ovalogtrn,avalogtrn,avalogpred,
    knnCalib,plattCalib,reliabDiagram,calibWrap,preCalibWrap,
    crossEntropy,KLDivergence,
-   doPCA,ridgePoly,
+   doPCA,ridgePoly,replicMean,
    knntrn,ovaknntrn,predict.ovaknn,classadjust,
    scoresToProbs,logOddsToProbs,getDValsE1071,makeANDconjunction,
    knnFineTune,kNN,findOverallLoss,MAPE,probIncorrectClass,kNNxv,propMisclass,

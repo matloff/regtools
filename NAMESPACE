@@ -49,7 +49,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    ulist,predict.anovaRec,discretize,
    toAllNumeric,stopBrowser,
    factorsToDummies,factorToDummies,dummiesToFactor,hasFactors,dummiesToInt,
-   xyDataframeToMatrix,dummiesToInt,charsToFactors,
+   xyDataframeToMatrix,dummiesToInt,charsToFactors,hasCharacters,
    imgTo2D,imgFilesToMatrix,imgFileToVector,augMatrix,
    stdErrPred,getDFclasses,
    dimRed,dimRedNewX,reduceComps,

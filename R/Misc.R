@@ -67,7 +67,7 @@ mmscale <- function (m,scalePars=NULL,p=NULL)
 }
 
 #######################################################################
-################### factors and dummy variables########################
+###################  factors and dummy variables  #####################
 #######################################################################
 
 # these routines are useful in that some regression packages insist that
@@ -148,6 +148,8 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
    res
 }
 
+####################  factorToDummies()  ######################
+
 # converts just a single factor 
 
 # def of omitLast is in comments above
@@ -186,6 +188,8 @@ factorToDummies <- function (f,fname,omitLast=FALSE,factorInfo=NULL)
     dms
 }
 
+####################  dummiesToFactor()  ######################
+
 # makes a factor from a single related set of dummies dms; if the
 # variable has k levels, inclLast = FALSE means there are only k-1
 # dummies provided, so the k-th must be generated
@@ -203,6 +207,8 @@ dummiesToFactor <- function(dms,inclLast=FALSE)
    f <- nms[where1s]
    as.factor(f)
 }
+
+####################  dummiesToInt()  ######################
 
 dummiesToInt <- function(dms,inclLast=FALSE) {
   as.numeric(dummiesToFactor(dms=dms,inclLast=inclLast))
@@ -223,6 +229,7 @@ factorTo012etc <- function(f,earlierLevels=NULL)  {
    tmp
 }
 
+####################  intToDummies()  ######################
 
 # inputs an integer vector x and creates dummies for the various values
 intToDummies <- function(x,fname,omitLast=TRUE) 
@@ -230,6 +237,8 @@ intToDummies <- function(x,fname,omitLast=TRUE)
    tmp <- as.factor(x)
    factorToDummies(tmp,fname,omitLast=omitLast)
 }
+
+####################  charsToFactors()  ######################
 
 # inputs a data frame and converts all character columns to factors
 charsToFactors <- function(dtaf) 
@@ -243,10 +252,14 @@ charsToFactors <- function(dtaf)
    dtaf
 }
 
+####################  xyDataframeToMatrix()  ######################
+
 # inputs a data frame intended for regression/classification, with X in
 # the first cols and Y in the last; converts all factors to dummies, and
 # outputs a matrix; in creating dummies, r-1 are retained for r levels,
 # except for Y
+
+# see also toAllNumeric() below
 
 xyDataframeToMatrix <- function(xy) {
    p <- ncol(xy)
@@ -257,6 +270,8 @@ xyDataframeToMatrix <- function(xy) {
    as.matrix(cbind(xd,yd))
 }
 
+####################  hasFactors()  ######################
+
 # x is a data frame; returns TRUE if at least one column is a factor
 hasFactors <- function(x) 
 {
@@ -265,6 +280,19 @@ hasFactors <- function(x)
    }
    FALSE
 }
+
+####################  hasCharacters()  ######################
+
+# x is a data frame; returns TRUE if at least one column is in character mode
+hasCharacters <- function(x) 
+{
+   for (i in 1:ncol(x)) {
+      if (is.character(x[,i])) return(TRUE)
+   }
+   FALSE
+}
+
+####################  toSuperFactor()  ######################
 
 # say we have a factor f1, then encounter f2, with levels a subset of
 # those of f1; we want to change f2 to have the same levels as f1; seems
@@ -285,6 +313,8 @@ toSuperFactor <- function(inFactor,superLevels)
    tmp[-(start:end)]
 }
 
+####################  toSubFactor()  ######################
+
 # here we have a factor f with various levels, but want to lump all
 # levelsl but the ones in saveLevels to a new level, lumpedLevel; the
 # default for the latter is 'zzzOther', chosen to ensure that the lumped
@@ -299,20 +329,27 @@ toSubFactor <- function(f,saveLevels,lumpedLevel='zzzOther')
    as.factor(fChar)
 }
 
-# w: 
-#    change character variables to factors, then all factors to dummies,
-#    recording factorInfo for later use in prediction; put result in wm
-# factorsInfo:
-#    will be set to the byproduct of factorsToDummies(), if any
-toAllNumeric <- function(w,r)
+####################  toAllNumeric()  ######################
+
+# change character variables to factors, then all factors to dummies,
+# recording factorInfo for later use in prediction; put result in wm
+
+# w: data frame
+# factorsInfo: value found in a previous call 
+
+toAllNumeric <- function(w,factorsInfo=NULL)
 {
-   w <- charsToFactors(w)
+   if (hasCharacters(w)) {
+      stop('character variables currently not supported')
+      ## w <- charsToFactors(w)
+   }
    if (hasFactors(w)) {
-      wm <- factorsToDummies(w,omitLast=TRUE)
+      wm <- factorsToDummies(w,omitLast=TRUE,factorsInfo=factorsInfo)
+      attr(wm,'factorsInfo')
    } else {
       wm <- w
    }
-   
+   wm
 } 
 
 #######################################################################

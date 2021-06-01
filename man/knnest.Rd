@@ -15,6 +15,12 @@
 \alias{l1}
 \alias{MAPE}
 \alias{bestKperPoint}
+\alias{kNNallK} 
+\alias{kNNxv} 
+\alias{knntrn} 
+\alias{loclogit} 
+\alias{mediany} 
+\alias{plotExpVars}
 
 \title{k-NN Nonparametric Regression and Classification}
 
@@ -44,6 +50,10 @@ l2(y,muhat)
 l1(y,muhat)
 MAPE(y,yhat)
 bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
+kNNallK(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
+   expandVars=NULL,expandVals=NULL,smoothingFtn=mean,
+   allK=FALSE,leave1out=FALSE,classif=FALSE,startAt1=TRUE)
+
 }
 
 \arguments{

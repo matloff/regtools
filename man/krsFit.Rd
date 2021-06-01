@@ -1,5 +1,6 @@
 \name{krsFit}
 \alias{krsFit}
+\alias{krsFitImg}
 \alias{diagNeural}
 
 \title{Tools for Neural Networks}
@@ -10,9 +11,11 @@ a more "R-like" wrapper to fitting data with R's \pkg{keras} package.
 }
 
 \usage{
-krsFit(x, y, hidden, acts = rep("relu", length(hidden)),learnRate=0.001, 
-    conv = NULL,xShape = NULL, classif = TRUE, nClass = NULL, nEpoch = 30, 
-    scaleX = TRUE, scaleY = TRUE) 
+krsFit(x,y,hidden,acts=rep("relu",length(hidden)),learnRate=0.001,
+   conv=NULL,xShape=NULL,classif=TRUE,nClass=NULL,nEpoch=30,
+   scaleX=TRUE,scaleY=TRUE)
+krsFitImg(x,y,hidden=c(100,100),acts=rep("relu",length(hidden)),
+    nClass,nEpoch=30) 
 predict.krsFit(krsFitOut,newx) 
 diagNeural(krsFitOut)
 }

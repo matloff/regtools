@@ -52,7 +52,6 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    xyDataframeToMatrix,dummiesToInt,charsToFactors,hasCharacters,
    imgTo2D,imgFilesToMatrix,imgFileToVector,augMatrix,
    stdErrPred,getDFclasses,
-   dimRed,dimRedNewX,reduceComps,
    toSuperFactor,toSubFactor,
    prToFile,pythonBlankSplit,replicMean,
    getMNIST,

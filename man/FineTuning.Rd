@@ -1,6 +1,7 @@
 \name{fineTuning,knnFineTune}
 \alias{fineTuning}
 \alias{knnFineTune}
+\alias{fineTuningPar}
 
 \title{Grid Search Plus More}
 
@@ -13,14 +14,17 @@ p-hacking.  An experimental smoothing facility is also included.
 }
 
 \usage{
-fineTuning(dataset, pars, regCall, nCombs = NULL, nTst = 500, 
-    nXval = 1, k = NULL, up = TRUE, dispOrderSmoothed = FALSE,
-    showProgress = TRUE) 
+fineTuning(dataset,pars,regCall,nCombs=NULL,nTst=500,
+   nXval=1,k=NULL,up=TRUE,dispOrderSmoothed=FALSE,
+   showProgress=TRUE)
 plot.tuner(tunerObject,col='meanAcc',disp=0,jit=0.5) 
 knnFineTune(data,yName,k,expandVars,ws,classif=FALSE,seed=9999)
+fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
+   nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE)
 }
 
 \arguments{
+   \item{cls}{A \code{parallel} cluster.}
    \item{dataset}{Data frame etc. containing the data to be analyzed.}
    \item{data}{The data to be analyzed.}
    \item{yName}{Quoted name of "Y" in the column names of \code{data}.}

@@ -53,10 +53,13 @@ bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
 kNNallK(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    expandVars=NULL,expandVals=NULL,smoothingFtn=mean,
    allK=FALSE,leave1out=FALSE,classif=FALSE,startAt1=TRUE)
+kNNxv(x,y,k,scaleX=TRUE,PCAcomps=0,smoothingFtn=mean,
+   nSubSam=500)
 
 }
 
 \arguments{
+  \item{nSubSam}{Number of folds.}
   \item{x}{"X" data, predictors, one row per data point, in the training
      set.}
   \item{y}{Response variable data in the training set. Vector or matrix,

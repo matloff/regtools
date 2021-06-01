@@ -1,5 +1,6 @@
 \name{Penrose Linear}
 \alias{penroseLM}
+\alias{ridgePoly}
 \alias{penrosePoly}
 \alias{predict.penroseLM}
 \alias{predict.penrosePoly}
@@ -17,6 +18,8 @@ case.
 \usage{
 penroseLM(d,yName)
 penrosePoly(d,yName,deg,maxInteractDeg=deg)
+ridgePoly(d,yName,deg,maxInteractDeg=deg)
+
 \method{predict}{penroseLM}(object,newx)
 \method{predict}{penrosePoly}(object,newx)
 

@@ -55,10 +55,24 @@ kNNallK(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    allK=FALSE,leave1out=FALSE,classif=FALSE,startAt1=TRUE)
 kNNxv(x,y,k,scaleX=TRUE,PCAcomps=0,smoothingFtn=mean,
    nSubSam=500)
-
+knnest(y,xdata,k,nearf=meany)
+loclogit(nearIdxs,x,y,predpt)
+mediany(nearIdxs,x,y,predpt) 
+plotExpVars(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
+   ylim,eValIncr=0.05,classif=FALSE,leave1out=FALSE)
 }
 
 \arguments{
+  \item{eValIncr}{Increment of expansion variable in plot.}
+  \item{ylim}{Range of Y values for plot.}
+  \item{lossFtn}{Loss function for plot.}
+  \item{eVars}{Variables to be expanded.}
+  \item{maxEVal}{Maximum expansion value.}
+  \item{xtrn}{Training set for X.}
+  \item{ytrn}{Training set for Y.}
+  \item{xtst}{Test set for X.}
+  \item{ytst}{Test set for Y.}
+  \item{nearIdxs}{Indices of the neighbors.}
   \item{nSubSam}{Number of folds.}
   \item{x}{"X" data, predictors, one row per data point, in the training
      set.}

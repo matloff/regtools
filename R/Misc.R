@@ -496,18 +496,19 @@ findOverallLoss <- function (regests, y, lossFtn = MAPE)
 #    toReplic:  expression to replicate; use braces and semicolons if
 #       more than one statement; must return either a number or a vector
 #       of numbers
+#    timing:  if TRUE, apply system.time() to each replication, and
+#       calculate the mean elapsed time
 
 # value:
 
 #   mean outcomes of the simulation, plus an attribute storing the 
 #   associated standard errors
 
-replicMean <- function(nrep,toReplic) {
+replicMeans <- function(nrep,toReplic,timing=FALSE) {
    cmd <- paste0('replicate(',nrep,',',toReplic,')')
    cmdout <- eval(parse(text=cmd))
    # if toReplic returns a vector, cmdout will be a matrix; to handle
    # this, make it a matrix anyway
-   browser()
    if (!is.matrix(cmdout)) cmdout <- matrix(cmdout,ncol=nrep)
    meancmdout <- rowMeans(cmdout)
    attr(meancmdout,'stderr') <- apply(cmdout,1,sd) / sqrt(nrep)

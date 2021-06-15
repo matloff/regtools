@@ -487,24 +487,30 @@ findOverallLoss <- function (regests, y, lossFtn = MAPE)
 
 #########################  other misc.  ################################
 
-# convenience wrapper for replicate; finds the mean and standard error
+# convenience wrapper for replicate; finds the means and standard errors
+# and the nrep replication; toReplic can be a vector 
 
 # arguments:
 
 #    nrep:  number of replications
 #    toReplic:  expression to replicate; use braces and semicolons if
-#       more than one statement
+#       more than one statement; must return either a number or a vector
+#       of numbers
 
 # value:
 
-#   mean outcome of the simulation, plus an attribute storing the 
-#   associated standard error
+#   mean outcomes of the simulation, plus an attribute storing the 
+#   associated standard errors
 
 replicMean <- function(nrep,toReplic) {
    cmd <- paste0('replicate(',nrep,',',toReplic,')')
    cmdout <- eval(parse(text=cmd))
-   meancmdout <- mean(cmdout)
-   attr(meancmdout,'stderr') <- sd(cmdout) / sqrt(nrep)
+   # if toReplic returns a vector, cmdout will be a matrix; to handle
+   # this, make it a matrix anyway
+   browser()
+   if (!is.matrix(cmdout)) cmdout <- matrix(cmdout,ncol=nrep)
+   meancmdout <- rowMeans(cmdout)
+   attr(meancmdout,'stderr') <- apply(cmdout,1,sd) / sqrt(nrep)
    meancmdout
 }
 

@@ -505,6 +505,11 @@ findOverallLoss <- function (regests, y, lossFtn = MAPE)
 #   associated standard errors
 
 replicMeans <- function(nrep,toReplic,timing=FALSE) {
+   if (timing) {
+      tmp <- paste0('{tm <- system.time(z <- ',toReplic,'); ')
+      tmp <- paste0(tmp,'c(tm[3],z)}')
+      toReplic <- tmp
+   }
    cmd <- paste0('replicate(',nrep,',',toReplic,')')
    cmdout <- eval(parse(text=cmd))
    # if toReplic returns a vector, cmdout will be a matrix; to handle

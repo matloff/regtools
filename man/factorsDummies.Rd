@@ -3,6 +3,15 @@
 \alias{factorsToDummies}
 \alias{dummiesToFactor}
 \alias{charsToFactors}
+\alias{factorTo012etc}
+\alias{getDFclasses}
+\alias{hasCharacters}
+\alias{hasFactors}
+\alias{toAllNumeric}
+\alias{toSubFactor}
+\alias{toSuperFactor}
+\alias{toAllNumeric}
+\alias{discretize}
 
 \title{Factor Conversion Utilities}
 
@@ -16,6 +25,36 @@ factorToDummies(f,fname,omitLast=FALSE,factorInfo=NULL)
 factorsToDummies(dfr,omitLast=FALSE,factorsInfo=NULL,dfOut=FALSE)
 dummiesToFactor(dms,inclLast=FALSE) 
 charsToFactors(dtaf)
+factorTo012etc(f,earlierLevels = NULL)
+discretize(x,endpts)
+getDFclasses(dframe)
+hasCharacters(dfr)
+hasFactors(dfr)
+toAllNumeric(w,factorInfo=NULL)
+toSubFactor(f,saveLevels,lumpedLevel="zzzOther")
+toSuperFactor(inFactor,superLevels)
+}
+
+\arguments{
+  \item{saveLevels}{In collapsing a factor, which levels to retain.}
+  \item{lumpedLevel}{Name of new level to be created from levels not retained.}
+  \item{x}{A numeric vector.}
+  \item{endpts}{Value to be used as \code{breaks} in call to \code{cut}.}
+  \item{f}{A factor.}
+  \item{inFactor}{Original factor, to be extended.}
+  \item{superLevels}{New levels to be added to the original factor.}
+  \item{earlierLevels}{Previous levels found for this factor.}
+  \item{fname}{A factor name.}
+  \item{dfr}{A data frame.}
+  \item{w}{A data frame.}
+  \item{dframe}{A data frame, for which we wish to find the column classes.}
+  \item{omitLast}{If TRUE, then generate only k-1 dummies from k factor
+     levels.}
+  \item{factorInfo}{Attribute from output of \code{factorToDummies}.}
+  \item{dms}{A data frame whose columns are dummy variables.}
+  \item{inclLast}{If FALSE, then only k-1 dummies for k factor
+     levels are provided.}
+  \item{dtaf}{A data frame.}
 }
 
 \details{
@@ -52,19 +91,6 @@ factor it finds in its input data frame
 
 }
 
-}
-
-\arguments{
-  \item{f}{A factor.}
-  \item{fname}{A factor name.}
-  \item{dfr}{A data frame.}
-  \item{omitLast}{If TRUE, then generate only k-1 dummies from k factor
-     levels.}
-  \item{factorInfo}{Attribute from output of \code{factorToDummies}.}
-  \item{dms}{A data frame whose columns are dummy variables.}
-  \item{inclLast}{If FALSE, then only k-1 dummies for k factor
-     levels are provided.}
-  \item{dtaf}{A data frame.}
 }
 
 \value{The function \code{factorToDummies} returns a matrix of dummy

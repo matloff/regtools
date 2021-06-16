@@ -283,11 +283,11 @@ hasFactors <- function(x)
 
 ####################  hasCharacters()  ######################
 
-# x is a data frame; returns TRUE if at least one column is in character mode
-hasCharacters <- function(x) 
+# dfr is a data frame; returns TRUE if at least one column is in character mode
+hasCharacters <- function(dfr) 
 {
-   for (i in 1:ncol(x)) {
-      if (is.character(x[,i])) return(TRUE)
+   for (i in 1:ncol(dfr)) {
+      if (is.character(dfr[,i])) return(TRUE)
    }
    FALSE
 }

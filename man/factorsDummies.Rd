@@ -12,6 +12,8 @@
 \alias{toSuperFactor}
 \alias{toAllNumeric}
 \alias{discretize}
+\alias{dummiestoInt}
+\alias{xyDataframeToMatrix}
 
 \title{Factor Conversion Utilities}
 
@@ -21,6 +23,8 @@ variables.
 }
 
 \usage{
+xyDataframeToMatrix(xy)
+dummiesToInt(dms,inclLast=FALSE)
 factorToDummies(f,fname,omitLast=FALSE,factorInfo=NULL)
 factorsToDummies(dfr,omitLast=FALSE,factorsInfo=NULL,dfOut=FALSE)
 dummiesToFactor(dms,inclLast=FALSE) 
@@ -36,6 +40,11 @@ toSuperFactor(inFactor,superLevels)
 }
 
 \arguments{
+  \item{xy}{A data frame mentioned for prediction, "Y" in last column.}
+  \item{dms}{Matrix of dummy variables corresponding to a categorical
+     variable.}
+  \item{inclLast}{If TRUE, \code{dms} is the complete set, k columns for
+     a k-level categorical variable.}
   \item{saveLevels}{In collapsing a factor, which levels to retain.}
   \item{lumpedLevel}{Name of new level to be created from levels not retained.}
   \item{x}{A numeric vector.}

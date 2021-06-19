@@ -4,6 +4,10 @@
 \alias{pythonBlankSplit}
 \alias{stopBrowser}
 \alias{doPCA}
+\alias{ulist}
+\alias{prToFile}
+\alias{partTrnTst}
+\alias{findOverallLoss}
 
 \title{Utilities}
 
@@ -17,14 +21,25 @@ stdErrPred(regObj,xnew)
 pythonBlankSplit(s)
 stopBrowser(msg = stop("msg not supplied"))
 doPCA(x,pcaProp)
+ulist(lst)
+prToFile(filename)
+partTrnTst(fullData,nTest=min(1000,round(0.2*nrow(fullData))))
+findOverallLoss(regests,y,lossFtn = MAPE) 
 }
 
 \arguments{
+  \item{regests}{Fitted regression estimates, training set.}
+  \item{y}{Y values, training set.}
+  \item{lossFtn}{Loss functin.}
+  \item{fullData}{A data frame or matrix.}
+  \item{nTest}{Number of rows for the test set.}
+  \item{filename}{Name of output file.}
+  \item{lst}{An R list.}
   \item{x}{Matrix or data frame.}
   \item{pcaProp}{Fraction in [0,1], specifying number of PCA components
      to compute, in terms of fraction of total variance.}
   \item{regObj}{An object of class \code{'lm'} or similar, for which 
-     there is a \code{vcov} generic function.
+     there is a \code{vcov} generic function.}
   \item{xnew}{New X value to be predicted.}
   \item{nrep}{Number of replications.}
   \item{s}{A character string.}

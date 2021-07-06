@@ -406,7 +406,9 @@ allNumeric <- function(lst)
    all(tmp) 
 }
 
+#######################################################################
 ######################  misc. lm() routines  #######################
+#######################################################################
 
 # computes the standard error of the predicted Y for X = xnew
 
@@ -415,6 +417,46 @@ stdErrPred <- function(regObj,xnew) {
    xx <- as.numeric(xx)  # in case xnew was a row in a data frame
    as.numeric(sqrt(xx %*% vcov(regObj) %*% xx))
 }
+
+#######################################################################
+######################  misc. graphics ################################
+#######################################################################
+
+# "3-D" graphs of (x,y,z), where (x,y) points are plotted in 2-D for
+# various values of z; pts connected by lines, with z values displayed
+# at the connection points
+
+line3d <- function(xyz,lineID,clrs=NULL,
+   xlim=NULL,ylim=NULL,xlab=NULL,ylab=NULL) 
+{
+   if (is.null(xlim)) xlim <- range(xyz[,1])
+   if (is.null(ylim)) ylim <- range(xyz[,2])
+   if (is.null(xlab)) xlab <- 'x'
+   if (is.null(ylab)) ylab <- 'y'
+   nr <- nrow(xyz)
+   if (is.null(clrs)) clrs <- rainbow(nr)  # random colors
+
+   lineGrps <- split(1:nr,lineID)
+   nGrps <- length(lineGrps)
+
+   plot(xyz[lineGrps[[1]],1:2],type='l',col=clrs[1],
+      xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab)
+   if (nGrps > 1)
+      for (i in 2:nGrps) {
+         lines(xyz[lineGrps[[i]],1:2],type='l',col=clrs[i])
+      }
+
+   for (i in 1:nGrps) {
+      lns <- xyz[lineGrps[[i]],]
+      text(lns[,1],lns[,2],lns[,3])
+   }
+}
+
+
+
+#######################################################################
+######################  misc. other #####################################
+#######################################################################
 
 ######################  misc. list ops ################################
 

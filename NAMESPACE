@@ -52,7 +52,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    xyDataframeToMatrix,dummiesToInt,charsToFactors,hasCharacters,
    stdErrPred,getDFclasses,
    toSuperFactor,toSubFactor,
-   prToFile,pythonBlankSplit,
+   prToFile,pythonBlankSplit,line3d,
    knnRec,anovaRec,mfRec,predictMany,
    fineTuning,fineTuningPar,partTrnTst,
    krsFit,krsFitImg,diagNeural,

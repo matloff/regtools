@@ -430,7 +430,7 @@ stdErrPred <- function(regObj,xnew) {
 
 #    xyz: 3-column matrix/df consisting of x, y and z above
 #    lineID: grouping variable, if any
-#    clrs: colors for the various lines; default uses rainbow()
+#    clrs: colors for the various lines; default uses heat.colors()
 #    xlim, ylim: as in R plot(); default uses largest ranges
 #    xlab,ylab: as in R plot()
 #    legendPos: first argument to legend(), e.g. 'topright'

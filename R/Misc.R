@@ -435,7 +435,7 @@ stdErrPred <- function(regObj,xnew) {
 #    xlab,ylab: as in R plot()
 #    legendPos: first argument to legend(), e.g. 'topright'
 
-line3d <- function(xyz,lineID=NULL,clrs=NULL,
+line3d <- function(xyz,lineID=NULL,clrs=NULL,cex=1.0,
    xlim=NULL,ylim=NULL,xlab=NULL,ylab=NULL,legendPos=NULL) 
 {
    if (is.null(xlim)) xlim <- range(xyz[,1])
@@ -463,7 +463,7 @@ line3d <- function(xyz,lineID=NULL,clrs=NULL,
 
    for (i in 1:nGrps) {
       lns <- xyz[lineGrps[[i]],]
-      text(lns[,1],lns[,2],lns[,3])
+      text(lns[,1],lns[,2],lns[,3],cex=cex)
    }
 
    # add legend

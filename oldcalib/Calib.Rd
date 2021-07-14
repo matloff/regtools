@@ -1,6 +1,18 @@
 \name{Classification Calibration}
 \alias{knnCalib}
 \alias{plattCalib}
+\alias{KLDivergence}
+\alias{avaCalib}
+\alias{bbqCalib}
+\alias{calibWrap}
+\alias{fitCalib}
+\alias{getCalibMeasures}
+\alias{eliteCalib}
+\alias{combineMeasures}
+\alias{crossEntropy}
+\alias{isoCalib}
+\alias{reliabDiagram}
+\alias{fitPlatt}
 
 \title{Probability Calibration for Classification Problems}
 
@@ -14,8 +26,20 @@ in classification models.
 \usage{
 knnCalib(y,trnScores,newScores,k)
 plattCalib(y,trnScores,newScores,k)
+avaCalib(trnY,trnScores,tstScores,calibMethod,deg=NULL,K=NULL,se=FALSE,isProb=NULL)
+bbqCalib(trnY,trnScores,tstScores,option=1)
+eliteCalib((y,trnScores,tstScores)
+isoCalib((trnY,trnScores,tstScores,isProb)
+combineMeasures(y_test,algorithm,probMat,prev_result=NULL)
 calibWrap(qeout,scores,calibMethod,k = NULL,plotsPerRow=2,nBins=0)
 reliabDiagram(y,probs,nBins,plotGraph=TRUE)
+KLDivergence(calibWrapOut)
+crossEntropy(calibWrapOut) 
+calibWrap(trnY,tstY,trnScores,tstScores,calibMethod,
+   opts=NULL,nBins=25,se=FALSE,plotsPerRow=0,oneAtATime=TRUE,OVA=TRUE,
+   isProb=FALSE,fitAllX=FALSE,smoothingFtn=NULL,style=NULL)
+fitPlatt(y,trnScores,deg)
+getCalibMeasures(y,scores)
 }
 
 \arguments{

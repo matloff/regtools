@@ -530,7 +530,7 @@ PCAwithFactors <- function(x,nComps=ncol(x))
    pcout <- prcomp(x)
    xpca <- predict(pcout,x)[,1:nComps]
    res <- list(pcout=pcout,xpca=xpca,factorsInfo=factorsInfo,
-      namesOrigX=namesOrigX,factorIdxs=factorIdxs)
+      namesOrigX=namesOrigX,factorIdxs=factorIdxs,nComps=nComps)
    class(res) <- 'PCAwithFactors'
    res
 }
@@ -540,10 +540,14 @@ predict.PCAwithFactors <- function(object,newx)
    if (!identical(names(newx),object$namesOrigX))
       stop('column names mismatch')
    factorIdxs <- object$factorIdxs
-   newxscale <- mmscale(newx[,-factorIdxs])
+   tmp <- as.matrix(newx[,-factorIdxs])
+   newxscale <- mmscale(tmp)
+   if (nrow(newx) == 1) newxscale <- newxscale[1,]
    newx[,-factorIdxs] <- newxscale
    newx <- factorsToDummies(newx,factorsInfo=object$factorsInfo)
-   predict(object$pcout,newx)
+   # unfortunately, cannot use predict.prcomp(), as it scales
+   preds <- as.matrix(newx) %*% object$pcout$rotation
+   preds[,1:object$nComps]
 }
 
 # call prcomp(x,pcaProp), transform x to PCs, with the number of the

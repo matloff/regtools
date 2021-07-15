@@ -494,7 +494,76 @@ prToFile <- function (filename)
     dev.set(origdev)
 }
 
+#######################################################################
+######################  PCA routines ##################################
+#######################################################################
 
+# allows use of prcomp() with data that may include R factors
+
+# arguments:
+
+#    x: a data frame
+#    nComps: number of PC components to use
+
+# value:  object of class 'PCAwithFactors', with components as follows
+
+#    pcout: output of calling prcomp() on toAllNumeric(x)
+#    factorsInfo: attr from call to toAllNumeric(), if any; needed for
+#       predict.PCAwithFactors()
+#    preds: PCA version of x
+
+# note: scaling will be applied, using mmscale()
+
+PCAwithFactors <- function(x,nComps=ncol(x)) 
+{
+   if (!is.data.frame(x)) stop('x must be a data frame')
+   namesOrigX <- names(x)
+   factorIdxs <- which(sapply(x,is.factor))
+   if (identical(factorIdxs,1:ncol(x)))
+      stop('case of all-factor data not supported yet')
+   xscale <- mmscale(x[,-factorIdxs])
+   x[,-factorIdxs] <- xscale
+   if (length(factorIdxs) > 0) {
+      x <- factorsToDummies(x)
+      factorsInfo <- attr(xdumms,'factorsInfo')
+   }
+   pcout <- prcomp(x)
+   xpca <- predict(pcout,x)[,1:nComps]
+   res <- list(pcout=pcout,xpca=xpca,factorsInfo=factorsInfo,
+      namesOrigX=namesOrigX,factorIdxs=factorIdxs)
+   class(res) <- 'PCAwithFactors'
+   res
+}
+
+predict.PCAwithFactors <- function(object,newx) 
+{
+   if (!identical(names(newx),object$namesOrigX))
+      stop('column names mismatch')
+   factorIdxs <- object$factorIdxs
+   newxscale <- mmscale(newx[,-factorIdxs])
+   newx[,-factorIdxs] <- newxscale
+   newx <- factorsToDummies(newx,factorsInfo=object$factorsInfo)
+   predict(object$pcout,newx)
+}
+
+# call prcomp(x,pcaProp), transform x to PCs, with the number of the
+# latter being set according to the top pcaProp proportion of variance
+
+doPCA <- function(x,pcaProp) 
+{
+   pcaout <- prcomp(x,scale.=TRUE)
+   xpca <- predict(pcaout,x)
+   xNames <- colnames(xpca)
+   pcVars <- pcaout$sdev^2
+   ncx <- ncol(xpca)
+   csums <- cumsum(pcVars)
+   csums <- csums/csums[ncx]
+   numPCs <- min(which(csums >= pcaProp))
+   xpca <- xpca[,1:numPCs]
+   newData <- as.data.frame(xpca)
+   names(newData) <- xNames[1:numPCs]
+   list(pcaout=pcaout,numPCs=numPCs,newData=newData)
+}
 
 #######################################################################
 ######################  misc. other #####################################
@@ -647,23 +716,4 @@ stopBrowser <- defmacro(msg,expr=
    browser()
    }
 )
-
-# call prcomp(x,pcaProp), transform x to the PCs for the top pcaProp
-# proportion of variance
-
-doPCA <- function(x,pcaProp) 
-{
-   pcaout <- prcomp(x,scale.=TRUE)
-   xpca <- predict(pcaout,x)
-   xNames <- colnames(xpca)
-   pcVars <- pcaout$sdev^2
-   ncx <- ncol(xpca)
-   csums <- cumsum(pcVars)
-   csums <- csums/csums[ncx]
-   numPCs <- min(which(csums >= pcaProp))
-   xpca <- xpca[,1:numPCs]
-   newData <- as.data.frame(xpca)
-   names(newData) <- xNames[1:numPCs]
-   list(pcaout=pcaout,numPCs=numPCs,newData=newData)
-}
 

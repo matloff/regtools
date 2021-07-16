@@ -27,17 +27,24 @@ unscale <- function(scaledx,ctrs=NULL,sds=NULL) {
 # arguments:
 
 #    m: a vector or matrix
-#    scalePars: if not NULL, a 2-row matrix, with column storing
-#       the min and max values to be used in scaling column i of m
+#    scalePars: if not NULL, a 2-row matrix, with column i storing
+#       the min and max values to be used in scaling column i of m;
+#       typically, one has previously called mmscale() on a dataset and
+#       saved the resulting scale parameters, and we want to use those
+#       same scale parameters on new data
 #    p: if m is a vector, specify the number of columns it should 
-#       have as a matrix
+#       have as a matrix; code will try to take care of this by itself
+#       if p is left at NULL
 
 # value: a matrix, with column i consisting of the scaled version
 #    of column i of m, and attribute as in scalePars (either copied from
 #    the latter or if null, generated fresh
 
 mmscale <- function (m,scalePars=NULL,p=NULL)
-{ 
+{
+    # much of this code involves cases in which we have a vector but it
+    # is to be treated as a matrix
+
     if (is.vector(m) && is.null(scalePars) && is.null(p))
        stop('specify argument p')
     if (is.null(p)) {
@@ -498,6 +505,8 @@ prToFile <- function (filename)
 ######################  PCA routines ##################################
 #######################################################################
 
+####################  PCAwithFactors()  ###############################
+
 # allows use of prcomp() with data that may include R factors
 
 # arguments:
@@ -518,10 +527,12 @@ PCAwithFactors <- function(x,nComps=ncol(x))
 {
    if (!is.data.frame(x)) stop('x must be a data frame')
    namesOrigX <- names(x)
+   nColsOrigX <- ncol(x)
    factorIdxs <- which(sapply(x,is.factor))
    if (identical(factorIdxs,1:ncol(x)))
       stop('case of all-factor data not supported yet')
    xscale <- mmscale(x[,-factorIdxs])
+   minmax <- attr(xscale,'minmax')
    x[,-factorIdxs] <- xscale
    if (length(factorIdxs) > 0) {
       x <- factorsToDummies(x)
@@ -530,10 +541,14 @@ PCAwithFactors <- function(x,nComps=ncol(x))
    pcout <- prcomp(x)
    xpca <- predict(pcout,x)[,1:nComps]
    res <- list(pcout=pcout,xpca=xpca,factorsInfo=factorsInfo,
-      namesOrigX=namesOrigX,factorIdxs=factorIdxs,nComps=nComps)
+      namesOrigX=namesOrigX,nColsOrigX=nColsOrigX,factorIdxs=factorIdxs,
+      minmax=minmax,nComps=nComps)
    class(res) <- 'PCAwithFactors'
    res
 }
+
+# find PCA rep of newx; newx in original scale, output in scale of 
+# mmscale() + PCA
 
 predict.PCAwithFactors <- function(object,newx) 
 {
@@ -541,7 +556,8 @@ predict.PCAwithFactors <- function(object,newx)
       stop('column names mismatch')
    factorIdxs <- object$factorIdxs
    tmp <- as.matrix(newx[,-factorIdxs])
-   newxscale <- mmscale(tmp)
+   p <- object$nColsOrigX - length(factorIdxs)
+   newxscale <- mmscale(tmp,object$minmax,p=p)
    if (nrow(newx) == 1) newxscale <- newxscale[1,]
    newx[,-factorIdxs] <- newxscale
    newx <- factorsToDummies(newx,factorsInfo=object$factorsInfo)
@@ -549,6 +565,8 @@ predict.PCAwithFactors <- function(object,newx)
    preds <- as.matrix(newx) %*% object$pcout$rotation
    preds[,1:object$nComps]
 }
+
+#########################  doPCA()  ##########################
 
 # call prcomp(x,pcaProp), transform x to PCs, with the number of the
 # latter being set according to the top pcaProp proportion of variance

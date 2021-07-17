@@ -443,8 +443,8 @@ stdErrPred <- function(regObj,xnew) {
 #    xlab,ylab: as in R plot()
 #    legendPos: first argument to legend(), e.g. 'topright'
 
-line3d <- function(xyz,clrs=NULL,cexPts=1.0,cexText=1.0,
-   xlim=NULL,ylim=NULL,xlab=NULL,ylab=NULL,legendPos=NULL,lty='l') 
+xyzPlot <- function(xyz,clrs=NULL,cexText=1.0,
+   xlim=NULL,ylim=NULL,xlab=NULL,ylab=NULL,legendPos=NULL,plotType='l') 
 {
    if (is.null(xlim)) xlim <- range(xyz[,1])
    if (is.null(ylim)) ylim <- range(xyz[,2])
@@ -462,14 +462,16 @@ line3d <- function(xyz,clrs=NULL,cexPts=1.0,cexText=1.0,
       else split(1:nr,xyz[,4])
    nGrps <- length(lineGrps)
 
-   plot(xyz[lineGrps[[1]],1:2],type=lty,col=clrs[1],
-      xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,cex=cexPts)
-   if (nGrps > 1)
-      for (i in 2:nGrps) {
-         if (lty == 'l') 
+   # plot(xyz[lineGrps[[1]],1:2],type=plotType,col=clrs[1],
+   plot(1,
+      xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,cex=0.1)
+   ### if (nGrps > 1)
+      for (i in 1:nGrps) {
+         if (plotType == 'l') {
             lines(xyz[lineGrps[[i]],1:2],type='l',col=clrs[i])
+         }
          else
-            points(xyz[lineGrps[[i]],1:2],col=clrs[i],cex=cexPts)
+            points(xyz[lineGrps[[i]],1:2],col=clrs[i],cex=0.1)
       }
 
    for (i in 1:nGrps) {

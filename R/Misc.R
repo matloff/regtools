@@ -431,51 +431,55 @@ stdErrPred <- function(regObj,xnew) {
 
 # "3-D" graphs of (x,y,z), where (x,y) points are plotted in 2-D for
 # various values of z; pts connected by lines, with z values displayed
-# at the connection points
+# at the connection points; grouping is allowed, specified via a 4th
+# column if desired
 
 # arguments:
 
-#    xyz: 3-column matrix/df consisting of x, y and z above
-#    lineID: grouping variable, if any
+#    xyz: matrix/df consisting of x, y and z above, possible a 4th; in
+#    latter case, xyz must be a data frame
 #    clrs: colors for the various lines; default uses heat.colors()
 #    xlim, ylim: as in R plot(); default uses largest ranges
 #    xlab,ylab: as in R plot()
 #    legendPos: first argument to legend(), e.g. 'topright'
 
-line3d <- function(xyz,lineID=NULL,clrs=NULL,cex=1.0,
-   xlim=NULL,ylim=NULL,xlab=NULL,ylab=NULL,legendPos=NULL) 
+line3d <- function(xyz,clrs=NULL,cexPts=1.0,cexText=1.0,
+   xlim=NULL,ylim=NULL,xlab=NULL,ylab=NULL,legendPos=NULL,lty='l') 
 {
    if (is.null(xlim)) xlim <- range(xyz[,1])
    if (is.null(ylim)) ylim <- range(xyz[,2])
    if (is.null(xlab)) xlab <- 'x'
    if (is.null(ylab)) ylab <- 'y'
-   oneLine <- is.null(lineID)
+   oneLine <- (ncol(xyz) == 3)
    if (is.null(clrs)) {
       if (oneLine) clrs <- 'black'
-      else clrs <- heat.colors(length(unique(lineID))) 
+      else clrs <- heat.colors(length(unique(xyz[,4]))) 
    }
 
    nr <- nrow(xyz)
    lineGrps <- 
       if (oneLine) list(1:nr)
-      else split(1:nr,lineID)
+      else split(1:nr,xyz[,4])
    nGrps <- length(lineGrps)
 
-   plot(xyz[lineGrps[[1]],1:2],type='l',col=clrs[1],
-      xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab)
+   plot(xyz[lineGrps[[1]],1:2],type=lty,col=clrs[1],
+      xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,cex=cexPts)
    if (nGrps > 1)
       for (i in 2:nGrps) {
-         lines(xyz[lineGrps[[i]],1:2],type='l',col=clrs[i])
+         if (lty == 'l') 
+            lines(xyz[lineGrps[[i]],1:2],type='l',col=clrs[i])
+         else
+            points(xyz[lineGrps[[i]],1:2],col=clrs[i],cex=cexPts)
       }
 
    for (i in 1:nGrps) {
       lns <- xyz[lineGrps[[i]],]
-      text(lns[,1],lns[,2],lns[,3],cex=cex)
+      text(lns[,1],lns[,2],lns[,3],cex=cexText,col=clrs[i])
    }
 
    # add legend
    if (!oneLine && !is.null(legendPos)) {
-      legend(legendPos,legend=unique(lineID),col=clrs,lty=1)
+      legend(legendPos,legend=unique(xyz[,4]),col=clrs,lty=1)
    }
 }
 

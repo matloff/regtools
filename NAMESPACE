@@ -18,7 +18,6 @@ S3method(plot,kmin)
 S3method(predict,ovaknn)
 S3method(predict,ovalog)
 S3method(plot,tuner)
-S3method(reorder,tuner)
 S3method(predict,krsFit)
 S3method(predict,knnRec)
 S3method(predict,anovaRec)
@@ -47,7 +46,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    xyDataframeToMatrix,dummiesToInt,charsToFactors,hasCharacters,
    stdErrPred,getDFclasses,
    toSuperFactor,toSubFactor,
-   prToFile,pythonBlankSplit,line3d,
+   prToFile,pythonBlankSplit,xyzPlot,
    knnRec,anovaRec,mfRec,predictMany,
    fineTuning,fineTuningPar,partTrnTst,
    krsFit,krsFitImg,diagNeural,

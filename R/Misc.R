@@ -456,7 +456,8 @@ xyzPlot <- function(xyz,clrs=NULL,cexText=1.0,
       else clrs <- heat.colors(length(unique(xyz[,4]))) 
    }
 
-   if (plotType == 'l')
+   if (plotType == 'l')  
+      # so that lines "move to the right," rather than a jumble
       xyz <- xyz[order(xyz[,1]),]
 
    nr <- nrow(xyz)

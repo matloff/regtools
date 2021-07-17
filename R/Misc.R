@@ -456,6 +456,9 @@ xyzPlot <- function(xyz,clrs=NULL,cexText=1.0,
       else clrs <- heat.colors(length(unique(xyz[,4]))) 
    }
 
+   if (plotType == 'l')
+      xyz <- xyz[order(xyz[,1]),]
+
    nr <- nrow(xyz)
    lineGrps <- 
       if (oneLine) list(1:nr)

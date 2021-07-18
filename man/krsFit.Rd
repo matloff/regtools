@@ -92,7 +92,8 @@ conv5 <- list(type='drop',drop=0.5)
 
 # call wrapper, 1 dense hidden layer of 128 units, then dropout layer
 # with proportion 0.5
-z <- krsFit(x,y,conv=list(conv1,conv2,conv3,conv4,conv5),c(128,0.5),                    classif=T,nClass=10,nEpoch=10,xShape=c(28,28),scaleX=F,scaleY=F)
+z <- krsFit(x,y,conv=list(conv1,conv2,conv3,conv4,conv5),c(128,0.5),
+   classif=TRUE,nClass=10,nEpoch=10,xShape=c(28,28),scaleX=FALSE,scaleY=FALSE)
 
 # try on test set
 preds <- predict(z,mntst[,-785]/255)

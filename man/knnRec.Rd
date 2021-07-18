@@ -113,7 +113,7 @@ the predicted value.  Similarly for the others.
 m <- rbind( c(5,2,1), c(5,4,1), c(2,2,2), c(2,4,4), c(5,3,6), c(2,1,1), c(2,5,2), c(3,4,3), c(2,3,5), c(3,2,1))
 m <- as.data.frame(m)
 set.seed(9999)
-m <- cbind(m,sample(5:10,10,replace=T))  # add a user covar
+m <- cbind(m,sample(5:10,10,replace=TRUE))  # add a user covar
 colnames(m) <- c('u','v','r','x')
 obj <- anovaRec(m,'x')
 # userCvrXEffects$x['3','8'] = 0.6

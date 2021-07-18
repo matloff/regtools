@@ -10,7 +10,7 @@ using \code{lm} etc.
 }
 
 \usage{
-TStoX(x,lg,y=NULL)
+TStoX(x,lg)
 TStoXmv(xmat,lg,y)
 }
 

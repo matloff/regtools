@@ -111,14 +111,8 @@ the predicted value.  Similarly for the others.
 \examples{
 
 m <- rbind( c(5,2,1), c(5,4,1), c(2,2,2), c(2,4,4), c(5,3,6), c(2,1,1), c(2,5,2), c(3,4,3), c(2,3,5), c(3,2,1))
-colnames(m) <- c('u','v','r')
-predict(z,3,1,1)  # 1
-predict(z,3,1,1)  # 1, with warning that k was reduced to 1
-predict(z,3,3,1)  # 5
-predict(z,3,3,2)  # 5.5
-
-m <- rbind( c(5,2,1), c(5,4,1), c(2,2,2), c(2,4,4), c(5,3,6), c(2,1,1), c(2,5,2), c(3,4,3), c(2,3,5), c(3,2,1))
-m <- as.data.frame(m)                                                               set.seed(9999)
+m <- as.data.frame(m)
+set.seed(9999)
 m <- cbind(m,sample(5:10,10,replace=T))  # add a user covar
 colnames(m) <- c('u','v','r','x')
 obj <- anovaRec(m,'x')

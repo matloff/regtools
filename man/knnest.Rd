@@ -226,21 +226,12 @@ kNN(x,y,newx,2,scaleX=FALSE)
 kNN(x,y,newx,3,scaleX=FALSE,smoothingFtn=loclin)$regests
 # 7.307692
 
-knnout <- kNN(x,y,NULL,scaleX=FALSE)
+knnout <- kNN(x,y,newx,2,scaleX=FALSE)
 knnout
-
 # $whichClosest
 #      [,1] [,2]
 # [1,]    1    4
-# [2,]    2    3
-# [3,]    3    2
-# [4,]    4    2
-# [5,]    5    4
-
-# $regests
-# [1] 9.5 6.5 6.5 7.0 7.5
-
-predict(knnout,c(5,2))  # 7.5
+# ...
 
 \dontrun{
 data(mlb) 
@@ -248,12 +239,12 @@ mlb <- mlb[,c(4,6,5)]  # height, age, weight
 # fit, then predict 75", age 21, and 72", age 32
 knnout <- kNN(mlb[,1:2],mlb[,3],rbind(c(75,21),c(72,32)),25) 
 knnout$regests
-# [1] 201.84 195.72
+# [1] 202.72 195.72
 
 # fit now, predict later
 knnout <- kNN(mlb[,1:2],mlb[,3],NULL,25) 
 predict(knnout,c(70,28)) 
-# [1] 185.24
+# [1] 186.48
 
 data(peDumms) 
 names(peDumms) 
@@ -263,13 +254,13 @@ names(ped)
 # fit, and predict income of a 35-year-old man, MS degree, occupation 101,
 # worked 50 weeks, using 25 nearest neighbors
 kNN(ped[,-10],ped[,10],c(35,1,0,0,1,0,0,0,1,50),25) $regests
-# [1] 66460
+# [1] 67540
 
 # fit, and predict occupation 101 for a 35-year-old man, MS degree, 
 # wage $55K, worked 50 weeks, using 25 nearest neighbors
 z <- kNN(ped[,-c(4:8)],ped[,4],c(35,1,0,1,55,50),25,classif=TRUE)
 z$regests
-# [1] 0.24  24% chance of occupation 101
+# [1] 0.16  16% chance of occupation 101
 z$ypreds
 # [1] 0  class 0, i.e. not occupation 101; round(0.24) = 0, 
 # computed by user request, classif = TRUE
@@ -297,7 +288,7 @@ z$ypreds
 # try weight age 0.5, wkswrked 1.5; use leave1out to avoid overfit
 knnout <- kNN(ped[,-10],ped[,10],ped[,-10],25,leave1out=TRUE)
 mean(abs(knnout$regests - ped[,10]))
-# [1] 25378.6
+# [1] 25341.6
 
 # use of the weighted distance feature; deweight age by a factor of 0.5,
 # put increased weight on weeks worked, factor of 1.5

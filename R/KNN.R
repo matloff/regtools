@@ -140,7 +140,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
       tmp <- savedNhbrs
    }
    closestIdxs <- tmp$nn.index[,1:(kmax+leave1out),drop=FALSE]
-   if (leave1out) closestIdxs <- closestIdxs[,-1,1:kmax,drop=FALSE]
+   if (leave1out) closestIdxs <- closestIdxs[,-1,drop=FALSE]
 
    # closestIdxs is a matrix; row i gives the indices of the kmax 
    # closest rows in x to newx[i,]

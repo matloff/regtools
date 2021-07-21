@@ -30,7 +30,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    kmin,lmac,coef.lmac,vcov.lmac,pcac,loglinac,tbltofakedf,
    makeNA,ZerosToNAs,NAsTo0s,
    ovalogtrn,avalogtrn,avalogpred,
-   doPCA,ridgePoly,replicMeans,
+   doPCA,ridgePoly,replicMeans,PCAwithFactors,
    knntrn,ovaknntrn,predict.ovaknn,classadjust,
    knnFineTune,kNN,findOverallLoss,MAPE,probIncorrectClass,kNNxv,propMisclass,
    plotExpVars,exploreExpVars,multCols,kNNallK, 

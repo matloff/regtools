@@ -546,7 +546,7 @@ PCAwithFactors <- function(x,nComps=ncol(x))
    x[,-factorIdxs] <- xscale
    if (length(factorIdxs) > 0) {
       x <- factorsToDummies(x)
-      factorsInfo <- attr(xdumms,'factorsInfo')
+      factorsInfo <- attr(x,'factorsInfo')
    }
    pcout <- prcomp(x)
    xpca <- predict(pcout,x)[,1:nComps]

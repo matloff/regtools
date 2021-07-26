@@ -84,7 +84,6 @@ plotExpVars(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
   \item{newx}{New data points to be predicted.  If NULL in \code{kNN},
      compute regression functions estimates on \code{x} and save for
      future prediction with \code{predict.kNN}}
-  \item{newxK}{Value of k to use during prediction in the second form.}
   \item{scaleX}{If TRUE, call \code{scale} on \code{x} and \code{newx}}
   \item{PCAcomps}{If positive, transform \code{x} and \code{newx} by
      PCA, using the top \code{PCAcomps} principal components.  Disabled.}

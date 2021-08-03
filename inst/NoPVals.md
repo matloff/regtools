@@ -1,9 +1,10 @@
 
 #  Clearing the Confusion: the Case Against Significance Tests
 
-In 2016, the august American Statistical Association (ASA) issued  the first 
-[position paper](https://www.amstat.org/asa/files/pdfs/p-valuestatement.pdf)
-in its 177-year history.  It called into question one of core concepts in 
+In March 2016, the august American Statistical Association (ASA) issued
+the first [position
+paper](https://www.amstat.org/asa/files/pdfs/p-valuestatement.pdf) in
+its 177-year history.  It called into question one of core concepts in
 statistical methodology, *significance testing* (ST):
 
 > “The p-value was never intended to be a substitute for scientific
@@ -13,7 +14,8 @@ statistical methodology, *significance testing* (ST):
 > threshold.  The ASA statement is intended to steer research into a
 > ‘post p<0.05 era.’”  
 
-To be sure, the position paper did not quite ban ST.  It was, in many
+To be sure, though "post p<0.05 era" sounds like a ban on ST,
+the position paper did not quite call for a ban.  It was, in many
 ways, the proverbial "camel created by a committee"; as some on the
 committee still believe in ST, the paper stopped short of a ban.  Yet,
 the paper offered no use case in which ST *should* be used; their
@@ -59,12 +61,13 @@ abuses of the English language in all of science.
 The p-value is the most stringent &alpha; at which we would still
 reject.  For researchers, typically the smaller the p-value, the more
 "significant" the finding, and the more elated the researchers are.
-"We not only rejected at &alpha; = 0.05 but even at &alpha; = 0.002."
+"We not only rejected at &alpha; = 0.05 but even at &alpha; = 0.002!"
 Journals -- and even R output -- then report the result as "significant"
 (&alpha; below 0.05), "highly significant" (below 0.01), or "very highly
 significant" (below 0.001).  Given that the word *significant*
 ordinarily means important, a very highly significant research finding
-is a cause for enormous joy.
+is a cause for enormous joy.  But it may be unwarranted joy, as we will
+discuss here.
 
 ## Confidence intervals as the preferred alternative to STs
 
@@ -72,9 +75,10 @@ The familiar confidence interval (CI) based on T is
 
 T &pm; q<sub>&alpha; / 2</sub> s.e.(T)
 
-There is a mathematical relation between STs and CIs.  For instance, we
-can create a CI by *inverting* the test. (See for example 
-[this presentation](https://www.stat.purdue.edu/~fmliang/STAT611/st611lect9.pdf).)
+Some defenders of ST point out, correctly, that there is a mathematical
+relation between STs and CIs.  For instance, we can create a CI by
+*inverting* a test. (See for example [this
+presentation](https://www.stat.purdue.edu/~fmliang/STAT611/st611lect9.pdf).)
 
 Conversely, if one has a CI for the above H<sub>0</sub>, we can perform
 an &alpha; level test by simply observing whether &theta;<sub>0</sub> is
@@ -110,6 +114,16 @@ give Candidate X cause for optimism, as opposed to simply telling X,
 "Your support is not significantly different from 50%."  At any rate,
 most important, X sees from the large width of the CI that a much larger
 poll is needed to get accurate results.
+
+### Another advantage of CIs over ST
+
+The opinion poll example illustrates the fact that, in addition to being
+more informative, another advantage of CIs is their Intuitive
+interpretability.  Every poll is reported with a *margin of error*.
+This is actually the radius of a 95% CI for the population proportion
+under discussiuon.  The general public is quite comfortable with margins
+of error, while by contrast it is exceedingly difficult to explain
+p-values to them.
 
 ## H<sub>0</sub> is always false/meaningless
 

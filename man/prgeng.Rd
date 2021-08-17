@@ -2,6 +2,7 @@
 \alias{prgeng}
 \alias{peDumms}
 \alias{peFactors}
+\alias{pef}
 
 \title{
 Silicon Valley programmers and engineers data
@@ -31,6 +32,11 @@ There are three versions:
 
     \item{\code{peFactors}, same but with categorical variables
     converted to factors}
+
+    \item{\code{pef}, same as \code{peFactors}, but having only columns
+    for age, education, occupation, gender, wage income and weeks
+    worked.  The education column has been collapsed to Master's degree,
+    PhD and other.}
 
     }
 

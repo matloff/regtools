@@ -67,8 +67,11 @@ penrosePoly <- function(d,yName,deg,maxInteractDeg=deg)
    res
 }
 
-predict.penrosePoly <- function(object,newx) 
+predict.penrosePoly <- function(object,...) 
 {
+   arglist <- list(...)
+   newx <- arglist[[1]]
+
    if (nrow(newx) == 1) {
       # problem in getPoly() for case of a 1-row newx, reported to PM;
       # have this workaround for now

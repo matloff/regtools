@@ -17,13 +17,12 @@
 
 penroseLM <- function(d,yName) 
 {
-   require(MASS)
    ycol <- which(names(d) == yName)
    x <- cbind(1,as.matrix(d[,-ycol]))
    xnms <- colnames(x)
    y <- d[,ycol]
    # MASS::ginv() does Penrose inverse
-   res <- list(bh=ginv(x) %*% y, xnms=xnms)
+   res <- list(bh=MASS::ginv(x) %*% y, xnms=xnms)
    class(res) <- 'penroseLM'
    res
 }
@@ -47,10 +46,9 @@ predict.penroseLM <- function(object,newx)
 
 penrosePoly <- function(d,yName,deg,maxInteractDeg=deg) 
 {
-   require(polyreg)
    ycol <- which(names(d) == yName)
    x <- as.matrix(d[,-ycol,drop=FALSE])
-   polyout <- getPoly(x,deg=deg,maxInteractDeg=maxInteractDeg)
+   polyout <- polyreg::getPoly(x,deg=deg,maxInteractDeg=maxInteractDeg)
    xPoly <- polyout$xdata  # polynomial version of x
    y <- d[,ycol]
    xy <- cbind(xPoly,y)
@@ -74,7 +72,7 @@ predict.penrosePoly <- function(object,newx)
       oneRow <- TRUE
       newx <- rbind(newx,newx)
    } else oneRow <- FALSE
-   polyout <- getPoly(newx,
+   polyout <- polyreg::getPoly(newx,
       deg=object$deg,
       maxInteractDeg = object$maxInteractDeg,
       modelFormula = object$modelFormula,
@@ -99,11 +97,10 @@ predpnr <- predict.penrosePoly
 
 ridgePoly <- function(d,yName,deg,maxInteractDeg=deg) 
 {
-   require(polyreg)
    if (!allNumeric(d)) stop('for now, X,Y must be numeric')
    ycol <- which(names(d) == yName)
    x <- as.matrix(d[,-ycol])
-   polyout <- getPoly(x,deg=deg,maxInteractDeg=maxInteractDeg)
+   polyout <- polyreg::getPoly(x,deg=deg,maxInteractDeg=maxInteractDeg)
    xPoly <- polyout$xdata  # polynomial version of x
    xPoly <- as.matrix(xPoly)
    y <- d[,ycol]

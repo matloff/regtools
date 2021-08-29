@@ -19,14 +19,13 @@
 
 polyGen <- function(x,deg,maxInteractDeg)
 {
-   require(rje)
    if (is.null(colnames(x))) stop('x needs column names')
 
    # vehicle for the recursion
    worker <- function(p,d)  # all polys of first p vars, degree d
    {
       if (d == 1) {
-         res <- powerSetMat(p)
+         res <- rje::powerSetMat(p)
       } else if (p == 1) {
          res <- rep(1,d+1)
          for (i in 1:d) res[i+1] <- x^i

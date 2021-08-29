@@ -19,9 +19,6 @@ S3method(predict,ovaknn)
 S3method(predict,ovalog)
 S3method(plot,tuner)
 S3method(predict,krsFit)
-S3method(predict,knnRec)
-S3method(predict,anovaRec)
-S3method(predict,mfRec)
 S3method(predict,penroseLM)
 S3method(predict,penrosePoly)
 S3method(predict,ridgePoly)
@@ -40,14 +37,13 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    mm,unscale,mmscale,constCols,catDFRow,
    confusion,factorTo012etc,allNumeric,
    penroseLM,predict.penroseLM,penrosePoly,predict.penrosePoly,ridgePoly, 
-   ulist,getNamedArgs,predict.anovaRec,discretize,
+   ulist,getNamedArgs,discretize,
    toAllNumeric,stopBrowser,
    factorsToDummies,factorToDummies,dummiesToFactor,hasFactors,dummiesToInt,
    xyDataframeToMatrix,dummiesToInt,charsToFactors,hasCharacters,
    stdErrPred,getDFclasses,
    toSuperFactor,toSubFactor,
    prToFile,pythonBlankSplit,xyzPlot,
-   knnRec,anovaRec,mfRec,predictMany,
    fineTuning,fineTuningPar,partTrnTst,
    krsFit,krsFitImg,diagNeural,
    TStoX,TStoXmv,textToXY,textToXYpred)

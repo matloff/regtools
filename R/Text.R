@@ -23,26 +23,26 @@ textToXY <- function(docs,labels,kTop=50,stopWords='a')
    if (is.null(labels)) labels <- rep(NA,length(docs))
    x <- data.frame(docs,labels,id=1:length(docs))
    if (!is.character(x$docs)) x$docs <- as.character(x$docs)
-   setDT(x)  # make data frame a by-reference data.table
-   setkey(x,id)  # sort the table by id
+   data.table::setDT(x)  # make data frame a by-reference data.table
+   data.table::setkey(x,id)  # sort the table by id
 
    # compute vocab, doc term mat
    prep_fun = tolower  # change letters to lower-case
    tok_fun = word_tokenizer  # break text into words
-   itx <- itoken(x$docs,
+   itx <- text2vec::itoken(x$docs,
         preprocessor = prep_fun,
         tokenizer = tok_fun,
         ids = x$id,
         progressbar = FALSE)
-   vocab <- create_vocabulary(itx)
-   vectorizer <- vocab_vectorizer(vocab)
-   dtm <- create_dtm(itx, vectorizer)  # document-term matrix, one row per doc
+   vocab <- text2vec::create_vocabulary(itx)
+   vectorizer <- text2vec::vocab_vectorizer(vocab)
+   dtm <- text2vec::create_dtm(itx, vectorizer)  # document-term matrix, one row per doc
    
    # remove stop words
-   vocab <- create_vocabulary(itx, stopwords = stopWords)
-   prunedVocab <- prune_vocabulary(vocab)
-   vectorizer <- vocab_vectorizer(prunedVocab)
-   dtm <- create_dtm(itx, vectorizer)  # new doc-term matrix
+   vocab <- text2vec::create_vocabulary(itx, stopwords = stopWords)
+   prunedVocab <- text2vec::prune_vocabulary(vocab)
+   vectorizer <- text2vec::vocab_vectorizer(prunedVocab)
+   dtm <- text2vec::create_dtm(itx, vectorizer)  # new doc-term matrix
 
    nw <- ncol(dtm)
    if (kTop > 0) dtm <- dtm[,(nw-kTop+1):nw]

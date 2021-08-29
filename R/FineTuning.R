@@ -172,7 +172,7 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    partools::clusterEvalQ(cls,library(regtools))
    partools::clusterEvalQ(cls,library(R.utils))
    partools::clusterEvalQ(cls,library(h2o))
-   partools::clusterEvalQ(cls,h2o.init())
+   partools::clusterEvalQ(cls,h2o::h2o.init())
 
    # export all args to the cluster nodes
    argNames <- partools::clusterExportArgs(cls)

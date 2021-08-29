@@ -139,8 +139,11 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),learnRate=0.001,
    res
 }
 
-predict.krsFit <- function(krsFitOut,newx) 
+predict.krsFit <- function(krsFitOut,...) 
 {
+   arglist <- list(...)
+   newx <- arglist[[1]]
+
    if (!inherits(newx,'matrix')) newx <- as.matrix(newx)
    model <- krsFitOut$model
    mm <- krsFitOut$mmScaleX

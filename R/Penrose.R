@@ -123,8 +123,11 @@ ridgePoly <- function(d,yName,deg,maxInteractDeg=deg)
    res
 }
 
-predict.ridgePoly <- function(object,newx) 
+predict.ridgePoly <- function(object,...) 
 {
+   arglist <- list(...)
+   newx <- arglist[[1]]
+
    # newx must be a matrix, with the original column names
    if (nrow(newx) == 1) {
       # problem in getPoly() for case of a 1-row newx, reported to PM;

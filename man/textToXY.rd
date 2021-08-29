@@ -68,26 +68,6 @@
 }
 
 \examples{
-
-   data(quizDocs)  # 143 quizzes from NM's courses, in LaTeX
-   # form: R list, one element per quiz; element names are course names
-   qd <- as.character(quizDocs)
-   names(qd) <- names(quizDocs)
-   z <- textToXY(qd,names(qd),stopWords=tm::stopwords('english'))
-   colnames(z$x)  
-   # oh, got the directions paragraph in there (common to all docs)!
-   z <- textToXY(qd,names(qd),
-      stopWords=c(tm::stopwords('english'),
-      'answer','use','name','work','directions','sheet',
-      'will','fill','sheet'))
-   colnames(z$x)  # good, those words are gone better
-   # as a quick example, let's "predict" quizDocs[[8]]
-   z1 <- textToXYpred(z,qd[28])
-   library(kernlab)
-   kout <- ksvm(z$x,z$y)
-   predict(kout,z1)  # ECS 158
-   names(qd)[28]  # correct!
-
 }
 
 \author{

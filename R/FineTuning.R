@@ -175,7 +175,7 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    parallel::clusterEvalQ(cls,h2o::h2o.init())
 
    # export all args to the cluster nodes
-   argNames <- parallel::clusterExportArgs(cls)
+   argNames <- clusterExportArgs(cls)
    argNames <- argNames[argNames != 'cls']
 
    # create the full grid data frame, and parcel it out to the cluster

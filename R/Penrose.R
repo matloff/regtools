@@ -32,8 +32,11 @@ penroseLM <- function(d,yName)
 #    object: return value of penroseLM()
 #    newx: data frame in the same format as x in penroseLM(); numeric
 
-predict.penroseLM <- function(object,newx) 
+predict.penroseLM <- function(object,...) 
 {
+   arglist <- list(...)
+   newx <- arglist[[1]]
+
    if(names(newx) != object$xnms) stop('name mismatch')
    newx <- cbind(1,as.matrix(newx))
    bh <- object$bh

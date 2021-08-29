@@ -20,8 +20,8 @@ penroseLM(d,yName)
 penrosePoly(d,yName,deg,maxInteractDeg=deg)
 ridgePoly(d,yName,deg,maxInteractDeg=deg)
 
-\method{predict}{penroseLM}(object,newx)
-\method{predict}{penrosePoly}(object,newx)
+\method{predict}{penroseLM}(object,...)
+\method{predict}{penrosePoly}(object,...)
 
 }
 

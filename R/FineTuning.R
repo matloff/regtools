@@ -196,8 +196,8 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    }
 
    # and now do the call, and combine the results
-   resp <- doclscmd(cls,ftCall)
-   adls <- function(ll1,ll2) addlists(ll1,ll2,rbind)
+   resp <- partools::doclscmd(cls,ftCall)
+   adls <- function(ll1,ll2) partools::addlists(ll1,ll2,rbind)
    combinedChunks <- Reduce(adls,resp)
    outdf <- combinedChunks$outdf
    zval <- -qnorm(0.025/nrow(outdf))

@@ -121,7 +121,7 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),learnRate=0.001,
    }
    # summary(model)
 
-   compile(model,
+   keras::compile(model,
      loss = lossFtn, 
      # batch_size = batchSize,
      optimizer = keras::optimizer_rmsprop(lr=learnRate),

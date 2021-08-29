@@ -156,11 +156,9 @@ doSmoothing <- function(outdf,k,pars,meanAcc,dispOrderSmoothed) {
 fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE)
 {
-   # require(partools)
-
    # set up cluster
    if (is.numeric(cls)) {
-      cls <- makeCluster(cls)
+      cls <- partools::makeCluster(cls)
       partools::setclsinfo(cls)
    } else if (inherits(cls,'cluster')) {
       resp <- try(

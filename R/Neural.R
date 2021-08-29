@@ -2,9 +2,6 @@
 
 # wrappers and other routines for Keras analysis of image data
 
-# require(keras)
-# require(car)
-
 ########################  krsFit()  ###################################
 
 # easy wrapper for R wrapper to Keras

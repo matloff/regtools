@@ -16,9 +16,6 @@
 
 textToXY <- function(docs,labels,kTop=50,stopWords='a') 
 {
-   require(text2vec)
-   require(data.table)
-
    # prep
    if (is.null(labels)) labels <- rep(NA,length(docs))
    x <- data.frame(docs,labels,id=1:length(docs))

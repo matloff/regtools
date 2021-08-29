@@ -2,11 +2,7 @@
 import(FNN,dummies,mvtnorm)
 
   importFrom("graphics", "abline", "matplot", "plot")
-  importFrom("stats", "binomial", "coef", "cor", "cov", "glm", "lm",
-             "loglin", "na.omit", "numericDeriv", "predict", "rbinom",
-             "var",'prcomp','points','runif','as.formula',
-             'loess','sd','qnorm','mahalanobis','read.csv',
-             'read.table')
+  import("stats")
   importFrom("utils", "combn")
   importFrom("sandwich","vcovHC")
   importFrom('gtools','defmacro')

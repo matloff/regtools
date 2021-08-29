@@ -296,7 +296,7 @@ partTrnTst <- function(fullData,nTest=min(1000,round(0.2*nrow(fullData)))) {
 clusterExportArgs <- function(cls) {
    argNames <- names(formals(sys.function(sys.parent(1))))
    argNames <- argNames[argNames != '...']
-   clusterExport(cls,argNames,envir=parent.frame())
+   parallel::clusterExport(cls,argNames,envir=parent.frame())
    argNames
 }
 

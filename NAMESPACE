@@ -4,7 +4,7 @@ import(FNN,dummies,mvtnorm)
   importFrom("graphics", "abline", "matplot", "plot")
   importFrom("stats", "binomial", "coef", "cor", "cov", "glm", "lm",
              "loglin", "na.omit", "numericDeriv", "predict", "rbinom",
-             "var")
+             "var",'prcomp',points,runif)
   importFrom("utils", "combn")
   importFrom("sandwich","vcovHC")
   importFrom('gtools','defmacro')

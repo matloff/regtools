@@ -7,7 +7,7 @@ Authors@R: c(person("Norm", "Matloff", email = "matloff@cs.ucdavis.edu", role = 
            person("Kenneth", "Lee", email = "honlee@ucdavis.edu", role = c("ctb")),
            person("Rongkui", "Han", email = "rkbhan@ucdavis.edu", role = c("ctb")))
 Maintainer: Norm Matloff <matloff@cs.ucdavis.edu>
-Depends: R (>= 3.5.0),FNN,dummies
+Depends: R (>= 3.5.0),FNN,dummies,gtools
 Imports: R.utils,mvtnorm,sandwich
 Suggests: knitr, rmarkdown, OpenImageR, cdparcoord, keras, magick, partools
 VignetteBuilder: knitr

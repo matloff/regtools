@@ -158,29 +158,29 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 {
    # set up cluster
    if (is.numeric(cls)) {
-      cls <- partools::makeCluster(cls)
+      cls <- parallel::makeCluster(cls)
       partools::setclsinfo(cls)
    } else if (inherits(cls,'cluster')) {
       resp <- try(
-         partools::clusterEvalQ(cls,partoolsenv$ncls)
+         parallel::clusterEvalQ(cls,partoolsenv$ncls)
       )
       if (inherits(resp,'try-error')) {
          stop('setclsinfo() not called')
       }
    } else stop('invalid cls')
-   partools::clusterEvalQ(cls,library(partools))
-   partools::clusterEvalQ(cls,library(regtools))
-   partools::clusterEvalQ(cls,library(R.utils))
-   partools::clusterEvalQ(cls,library(h2o))
-   partools::clusterEvalQ(cls,h2o::h2o.init())
+   parallel::clusterEvalQ(cls,library(partools))
+   parallel::clusterEvalQ(cls,library(regtools))
+   parallel::clusterEvalQ(cls,library(R.utils))
+   parallel::clusterEvalQ(cls,library(h2o))
+   parallel::clusterEvalQ(cls,h2o::h2o.init())
 
    # export all args to the cluster nodes
-   argNames <- partools::clusterExportArgs(cls)
+   argNames <- parallel::clusterExportArgs(cls)
    argNames <- argNames[argNames != 'cls']
 
    # create the full grid data frame, and parcel it out to the cluster
    # nodes
-   specCombs <- partools::makeOutdf(pars,specCombs)
+   specCombs <- makeOutdf(pars,specCombs)
    partools::distribsplit(cls,'specCombs')
 
    # now create the fineTuning() call (in character form)

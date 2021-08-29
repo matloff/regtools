@@ -415,7 +415,7 @@ diagNeural <- function(krsFitOut)
    vif10 <- rep(NA,nLayers)
    for (i in 1:nLayers) {
       layer <- modLayers[[i]]
-      layerOut <- keras_model(inputs = model$input, outputs = 
+      layerOut <- keras::keras_model(inputs = model$input, outputs = 
          layer$output)
       # compute "new features"
       output <- predict(layerOut,krsFitOut$x)
@@ -435,7 +435,7 @@ diagNeural <- function(krsFitOut)
       zz <- cbind(z,output)
       zz <- as.data.frame(zz)
       lmout <- lm(z ~ .,data=zz)
-      v <- try(vif(lmout))
+      v <- try(car::vif(lmout))
       if (!inherits(v, "try-error")) vif10[i] <- mean(v >= 10)
    }
    list(condNums=condNums,n0Cols=n0Cols,nConstCols=nConstCols,vif10=vif10)

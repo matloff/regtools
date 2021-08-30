@@ -139,25 +139,25 @@ krsFit <- function(x,y,hidden,acts=rep('relu',length(hidden)),learnRate=0.001,
    res
 }
 
-predict.krsFit <- function(krsFitOut,...) 
+predict.krsFit <- function(object,...) 
 {
    arglist <- list(...)
    newx <- arglist[[1]]
 
    if (!inherits(newx,'matrix')) newx <- as.matrix(newx)
-   model <- krsFitOut$model
-   mm <- krsFitOut$mmScaleX
+   model <- object$model
+   mm <- object$mmScaleX
    if (!is.null(mm)) newx <- mmscale(newx,mm)
-   if (!is.null(krsFitOut$xShape)) {
-      newx <- matrixToTensor(newx,krsFitOut$xShape) 
+   if (!is.null(object$xShape)) {
+      newx <- matrixToTensor(newx,object$xShape) 
    }
    preds <- predict(model,newx)
-   if (krsFitOut$classif) {
+   if (object$classif) {
       probs <- preds
       preds <- apply(preds,1,which.max) - 1
       attr(preds,'probs') <- probs
    } else {
-      mm <- krsFitOut$mmScaleY
+      mm <- object$mmScaleY
       if (!is.null(mm))
          preds <- mm[1] + preds * (mm[2] - mm[1])
    }

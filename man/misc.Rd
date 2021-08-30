@@ -78,7 +78,7 @@ variables with the names and values in \code{argVec}.
 
 \examples{
 
-list(a=3,b=8)
+w <- list(a=3,b=8)
 getNamedArgs(w)  
 a
 b

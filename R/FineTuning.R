@@ -218,7 +218,7 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 #  jit: avoids plotting coincident lines by adding jitter; amount is
 #     jit * range(x) * runif(n,-0.5,0.5)
 # plot.tuner <- function(tunerObject,col='meanAcc',disp=0,jit=0.05) {
-plot.tuner <- function(obj,...) 
+plot.tuner <- function(x,...) 
 {
    arglist <- list(...)
    tmp <- arglist['col']
@@ -228,7 +228,7 @@ plot.tuner <- function(obj,...)
    tmp <- arglist['jit']
    jit <- if (!is.null(tmp)) tmp else 0.05
 
-   outdf <- obj$outdf
+   outdf <- x$outdf
    macol <- which(names(outdf) == 'meanAcc')
    outdf <- outdf[,1:macol]
    if (jit > 0.0) {

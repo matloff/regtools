@@ -12,7 +12,7 @@
 \alias{toSuperFactor}
 \alias{toAllNumeric}
 \alias{discretize}
-\alias{dummiestoInt}
+\alias{dummiesToInt}
 \alias{xyDataframeToMatrix}
 
 \title{Factor Conversion Utilities}

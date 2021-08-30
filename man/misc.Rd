@@ -4,6 +4,7 @@
 \alias{pythonBlankSplit}
 \alias{stopBrowser}
 \alias{doPCA}
+\alias{PCAwithFactors}
 \alias{ulist}
 \alias{prToFile}
 \alias{partTrnTst}
@@ -21,6 +22,7 @@ stdErrPred(regObj,xnew)
 pythonBlankSplit(s)
 stopBrowser(msg = stop("msg not supplied"))
 doPCA(x,pcaProp)
+PCAwithFactors(x, nComps = ncol(x))
 ulist(lst)
 prToFile(filename)
 partTrnTst(fullData,nTest=min(1000,round(0.2*nrow(fullData))))
@@ -38,6 +40,7 @@ findOverallLoss(regests,y,lossFtn = MAPE)
   \item{x}{Matrix or data frame.}
   \item{pcaProp}{Fraction in [0,1], specifying number of PCA components
      to compute, in terms of fraction of total variance.}
+  \item{nComps}{Number of PCA components.}
   \item{regObj}{An object of class \code{'lm'} or similar, for which 
      there is a \code{vcov} generic function.}
   \item{xnew}{New X value to be predicted.}
@@ -50,6 +53,21 @@ findOverallLoss(regests,y,lossFtn = MAPE)
 }
 
 \details{
+
+The function \code{PCAwithFactors} is a wrapper for
+\code{stats::prcomp}, to be used on data frames that contain at least on
+R factor.
+
+}
+
+\value{
+
+The function \code{PCAwithFactors} returns an object of class
+'PCAwithFactors'. with components \code{pcout}, the object returned by
+the wrapped call to \code{prcomp; \code{factorsInfo}, factor conversion
+information to be used with \code{predict}}; and \code{preds}, the PCA
+version of \code{x}.
+
 }
 
 \examples{

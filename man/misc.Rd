@@ -9,6 +9,7 @@
 \alias{prToFile}
 \alias{partTrnTst}
 \alias{findOverallLoss}
+\alias{getNamedArgs}
 
 \title{Utilities}
 
@@ -27,6 +28,7 @@ ulist(lst)
 prToFile(filename)
 partTrnTst(fullData,nTest=min(1000,round(0.2*nrow(fullData))))
 findOverallLoss(regests,y,lossFtn = MAPE) 
+getNamedArgs(argVec)
 }
 
 \arguments{
@@ -50,6 +52,7 @@ findOverallLoss(regests,y,lossFtn = MAPE)
      semicolons if more than one call.}
   \item{timing}{If TRUE, find average elapsed time over the replicates.}
   \item{msg}{Character string, error message for existing debug browser.}
+  \item{argVec}{R list or vector with named elements.}
 }
 
 \details{
@@ -68,9 +71,23 @@ the wrapped call to \code{prcomp; \code{factorsInfo}, factor conversion
 information to be used with \code{predict}}; and \code{preds}, the PCA
 version of \code{x}.
 
+The function \code{getNamedArgs} will assign in the caller's space
+variables with the names and values in \code{argVec}.
+
 }
 
 \examples{
+
+list(a=3,b=8)
+getNamedArgs(w)  
+a
+b
+u <- c(5,12,13)
+names(u) <- c('x','y','z')
+getNamedArgs(u)
+x
+y
+z
 
 }
 

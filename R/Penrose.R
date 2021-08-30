@@ -135,7 +135,7 @@ predict.ridgePoly <- function(object,...)
       oneRow <- TRUE
       newx <- rbind(newx,newx)
    } else oneRow <- FALSE
-   polyout <- getPoly(newx,
+   polyout <- polyreg::getPoly(newx,
       deg=object$deg,
       maxInteractDeg = object$maxInteractDeg,
       modelFormula = object$modelFormula,

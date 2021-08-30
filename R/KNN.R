@@ -853,7 +853,7 @@ loclin <- function(nearIdxs,x,y,predpt) {
    xy <- data.frame(cbind(x,y))[nearIdxs,]
    
    cmd <- paste0('lmout <- lm(',yNames[1],' ~ .,data=xy)')
-   lmout <- eval(parse(text=cmd))
+   lmout <- eval(parse(text=cmd))  # assignment for CRAN
    predict(lmout,predpt)
 }
 
@@ -880,7 +880,7 @@ loclogit <- function(nearIdxs,x,y,predpt) {
    xy <- data.frame(cbind(x,y))[nearIdxs,]
    
    cmd <- paste0('glmout <- glm(',yNames[1],' ~ .,data=xy, family=binomial)')
-   eval(parse(text=cmd))
+   glmout <- eval(parse(text=cmd))  # assignment for CRAN
    predict(glmout,predpt, "response")
 }
 

@@ -1,5 +1,5 @@
-\name{courseRecords}
-\alias{courseRecords}
+\name{SwissRoll}
+\alias{SwissRoll}
 
 \title{
 Swiss Roll

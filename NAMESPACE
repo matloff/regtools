@@ -4,6 +4,7 @@ import(FNN,dummies,mvtnorm)
   import("graphics")
   import("stats")
   import("utils")
+  import("grDevices")
   importFrom("sandwich","vcovHC")
   importFrom('gtools','defmacro')
 

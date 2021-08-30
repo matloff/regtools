@@ -1,9 +1,9 @@
 
 import(FNN,dummies,mvtnorm)
 
-  importFrom("graphics", "abline", "matplot", "plot")
+  import("graphics")
   import("stats")
-  importFrom("utils", "combn")
+  import("utils")
   importFrom("sandwich","vcovHC")
   importFrom('gtools','defmacro')
 

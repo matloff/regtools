@@ -211,14 +211,14 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 # cases with the m smallest 'smoothed' value, all cases and the m
 # largest values of 'smoothed', respectively
 
-#  tunerObject: an object returned from fineTuning()
+#  obj: an object returned from fineTuning()
 #  col: column to be plotted
 #  disp: if non-0, number of lines to plot, largest or smallest values,
 #     depending on whether disp is positive or negative
 #  jit: avoids plotting coincident lines by adding jitter; amount is
 #     jit * range(x) * runif(n,-0.5,0.5)
 # plot.tuner <- function(tunerObject,col='meanAcc',disp=0,jit=0.05) {
-plot.tuner <- function(tunerObject,...) 
+plot.tuner <- function(obj,...) 
 {
    arglist <- list(...)
    tmp <- arglist['col']
@@ -228,7 +228,7 @@ plot.tuner <- function(tunerObject,...)
    tmp <- arglist['jit']
    jit <- if (!is.null(tmp)) tmp else 0.05
 
-   outdf <- tunerObject$outdf
+   outdf <- obj$outdf
    macol <- which(names(outdf) == 'meanAcc')
    outdf <- outdf[,1:macol]
    if (jit > 0.0) {

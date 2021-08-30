@@ -21,6 +21,7 @@
 \alias{loclogit} 
 \alias{mediany} 
 \alias{plotExpVars}
+\alias{exploreExpVars}
 
 \title{k-NN Nonparametric Regression and Classification}
 
@@ -58,6 +59,8 @@ kNNxv(x,y,k,scaleX=TRUE,PCAcomps=0,smoothingFtn=mean,
 knnest(y,xdata,k,nearf=meany)
 loclogit(nearIdxs,x,y,predpt)
 mediany(nearIdxs,x,y,predpt) 
+exploreExpVars(xtrn, ytrn, xtst, ytst, k, eVar, maxEVal, lossFtn, 
+    eValIncr = 0.05, classif = FALSE, leave1out = FALSE) 
 plotExpVars(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
    ylim,eValIncr=0.05,classif=FALSE,leave1out=FALSE)
 }
@@ -66,8 +69,10 @@ plotExpVars(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
   \item{eValIncr}{Increment of expansion variable in plot.}
   \item{ylim}{Range of Y values for plot.}
   \item{lossFtn}{Loss function for plot.}
+  \item{eVar}{Variable to be expanded.}
   \item{eVars}{Variables to be expanded.}
   \item{maxEVal}{Maximum expansion value.}
+  \item{eValIncr}{Increment in range of expansion value.}
   \item{xtrn}{Training set for X.}
   \item{ytrn}{Training set for Y.}
   \item{xtst}{Test set for X.}

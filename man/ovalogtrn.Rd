@@ -4,6 +4,7 @@
 \alias{scoresToProbs}
 \alias{getDValsE1071}
 \alias{ovalogtrn}
+\alias{ovaknntrn}
 \alias{ovalogpred}
 \alias{avalogtrn}
 \alias{avalogpred}
@@ -32,6 +33,7 @@ knnClass(data,yName,k)
 ovalogtrn(...)
 \method{predict}{ovalog}(object,...) 
 avalogtrn(m,trnxy)
+ovaknntrn(trnxy,yname,k,xval=FALSE)
 avalogpred(m,coefmat,predx,trueclassprobs=NULL)
 classadjust(econdprobs,wrongprob1,trueprob1) 
 boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
@@ -83,6 +85,7 @@ boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
 \item{trueprob1}{Correct unconditional P(Y = 1).}
 \item{trueclassprobs}{True unconditional class probabilities, typically
    obtained externally.}
+\item{}{}
 }
 
 \details{

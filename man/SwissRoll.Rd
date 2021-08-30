@@ -1,5 +1,6 @@
 \name{SwissRoll}
 \alias{SwissRoll}
+\alias{sw}
 
 \title{
 Swiss Roll

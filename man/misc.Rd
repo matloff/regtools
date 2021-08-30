@@ -10,6 +10,7 @@
 \alias{partTrnTst}
 \alias{findOverallLoss}
 \alias{getNamedArgs}
+\alias{multCols}
 
 \title{Utilities}
 
@@ -29,6 +30,7 @@ prToFile(filename)
 partTrnTst(fullData,nTest=min(1000,round(0.2*nrow(fullData))))
 findOverallLoss(regests,y,lossFtn = MAPE) 
 getNamedArgs(argVec)
+multCols(x,cols,vals)
 }
 
 \arguments{
@@ -53,6 +55,8 @@ getNamedArgs(argVec)
   \item{timing}{If TRUE, find average elapsed time over the replicates.}
   \item{msg}{Character string, error message for existing debug browser.}
   \item{argVec}{R list or vector with named elements.}
+  \item{cols}{A set of column numbers.}
+  \item{vals}{A set of positive expansion numbers.}
 }
 
 \details{
@@ -67,8 +71,8 @@ R factor.
 
 The function \code{PCAwithFactors} returns an object of class
 'PCAwithFactors'. with components \code{pcout}, the object returned by
-the wrapped call to \code{prcomp; \code{factorsInfo}, factor conversion
-information to be used with \code{predict}}; and \code{preds}, the PCA
+the wrapped call to \code{prcomp}; \code{factorsInfo}, factor conversion
+information to be used with \code{predict}; and \code{preds}, the PCA
 version of \code{x}.
 
 The function \code{getNamedArgs} will assign in the caller's space

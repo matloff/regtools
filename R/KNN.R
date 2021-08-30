@@ -853,7 +853,7 @@ loclin <- function(nearIdxs,x,y,predpt) {
    xy <- data.frame(cbind(x,y))[nearIdxs,]
    
    cmd <- paste0('lmout <- lm(',yNames[1],' ~ .,data=xy)')
-   eval(parse(text=cmd))
+   lmout <- eval(parse(text=cmd))
    predict(lmout,predpt)
 }
 

@@ -33,8 +33,8 @@ factorTo012etc(f,earlierLevels = NULL)
 discretize(x,endpts)
 getDFclasses(dframe)
 hasCharacters(dfr)
-hasFactors(dfr)
-toAllNumeric(w,factorInfo=NULL)
+hasFactors(x)
+toAllNumeric(w,factorsInfo=NULL)
 toSubFactor(f,saveLevels,lumpedLevel="zzzOther")
 toSuperFactor(inFactor,superLevels)
 }
@@ -47,7 +47,8 @@ toSuperFactor(inFactor,superLevels)
      a k-level categorical variable.}
   \item{saveLevels}{In collapsing a factor, which levels to retain.}
   \item{lumpedLevel}{Name of new level to be created from levels not retained.}
-  \item{x}{A numeric vector.}
+  \item{x}{A numeric vector, except in \code{hasFactors}, where it is a
+     data frame.}
   \item{endpts}{Value to be used as \code{breaks} in call to \code{cut}.}
   \item{f}{A factor.}
   \item{inFactor}{Original factor, to be extended.}
@@ -59,7 +60,7 @@ toSuperFactor(inFactor,superLevels)
   \item{dframe}{A data frame, for which we wish to find the column classes.}
   \item{omitLast}{If TRUE, then generate only k-1 dummies from k factor
      levels.}
-  \item{factorInfo}{Attribute from output of \code{factorToDummies}.}
+  \item{factorsInfo}{Attribute from output of \code{factorToDummies}.}
   \item{dms}{A data frame whose columns are dummy variables.}
   \item{inclLast}{If FALSE, then only k-1 dummies for k factor
      levels are provided.}
@@ -72,7 +73,7 @@ that is of this type to begin with.  On the other hand, many regression
 packages, e.g. \pkg{lars}, disallow factors.  These utilities facilitate
 conversion from one form to another.
 
-The optional argument \code{factorInfo} is intended for use in prediction
+The optional argument \code{factorsInfo} is intended for use in prediction
 contexts.  Typically a set of new cases will not have all levels of the
 factor in the training set.  Without this argument, only an incomplete
 set of dummies would be generated for the set of new cases.
@@ -94,7 +95,7 @@ used as input:  The relations are as follows:
 \item \code{factorsToDummies} calls \code{factorToDummies} on each
 factor it finds in its input data frame
 
-\item \code{factorToDummies} outputs and later inputs \code{factorInfo}
+\item \code{factorToDummies} outputs and later inputs \code{factorsInfo}
 
 \item \code{factorsToDummies} outputs and later inputs \code{factorsInfo}
 

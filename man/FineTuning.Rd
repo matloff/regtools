@@ -14,10 +14,10 @@ p-hacking.  An experimental smoothing facility is also included.
 }
 
 \usage{
-fineTuning(dataset,pars,regCall,nCombs=NULL,nTst=500,
+fineTuning(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,nTst=500,
    nXval=1,k=NULL,up=TRUE,dispOrderSmoothed=FALSE,
    showProgress=TRUE)
-plot.tuner(tunerObject,col='meanAcc',disp=0,jit=0.5) 
+plot.tuner(x,...)
 knnFineTune(data,yName,k,expandVars,ws,classif=FALSE,seed=9999)
 fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE)
@@ -50,6 +50,8 @@ fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    \item{disp}{Number of lines to be plotted, sign indicating max or min.}
    \item{showProgress}{If TRUE, print each output line as it becomes ready.}
    \item{ji}{Amount of jitter to add to plot.}
+   \item{specCombs}{A data frame in which the user specifies 
+#      hyperparameter parameter combinations to evaluate.}
 }
 
 \details{
@@ -75,6 +77,19 @@ search that hopes it might eliminate poor combinations early in the process.
 
 The function \code{knnFineTune} is a wrapper for \code{fineTuning} for
 k-NN problems.
+
+The function \code{plot.tuner}} draws a parallel coordinates plot to
+visualize the grid. The argument \code{x} is the output of
+\code{fineTuning}.  Arguments to specify in the ellipsis are:
+\code{col} is the column to be plotted;
+\code{disp} is the number to display, with \code{0}, \code{-m} and
+\code{+m} meaning cases with the \code{m} smallest 'smoothed' value, all
+cases and the \code{m} largest values of 'smoothed', respectively;
+\code{jit} avoids plotting coincident lines by adding jitter in the
+amount \code{jit * range(x) * runif(n,-0.5,0.5)}.
+
+
+
 
 }
 

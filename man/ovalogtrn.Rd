@@ -1,8 +1,5 @@
 \name{multiclass routines}
 \alias{boundaryplot}
-\alias{knnCalib}
-\alias{scoresToProbs}
-\alias{getDValsE1071}
 \alias{ovalogtrn}
 \alias{ovaknntrn}
 \alias{ovalogpred}
@@ -21,14 +18,6 @@ Tools for multiclass classification, parametric and nonparametric.
 }
 
 \usage{
-knnCalib(y,trnScores,newScores,k) 
-scoresToProbs(y,trnScores,newScores,k) 
-getDValsE1071(object,newx)
-logitClass(data,yName)
-\method{predict}{logitClass}(object,newx)
-knnClass(data,yName,k)
-\method{predict}{knnClass}(object,newx)
-ovalogtrn(...)
 \method{predict}{ovalog}(object,...) 
 avalogtrn(m,trnxy)
 ovaknntrn(trnxy,yname,k,xval=FALSE)
@@ -39,8 +28,7 @@ boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
 
 \arguments{
 \item{y}{Vector or factor of response variable data in the training set, with
-   codes 0,1,...\code{m}-1, except with \code{knnCalib}, where it
-   must be an R factor.}
+   codes 0,1,...\code{m}-1.} 
 \item{trnScores}{Vector/matrix of scores in training set.  In the
    multiclass case, there will be as many columns as classes.}
 \item{newScores}{Vector/matrix of scores for the cases to be predicted. 
@@ -48,7 +36,6 @@ boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
 \item{data}{A data frame, containing "X" and "Y" data.}
 \item{yName}{Name of the column in \code{data} corresponding to "Y", the
    class labels.  Must be an R factor.}
-\item{logitClass}{Object returned by \code{logitClass}.}
 \item{newx}{Data frame of one or more new cases to predict.}
 \item{classNames}{Names of the classes, in "levels" order.}
 \item{fittedY}{Predicted classes in the trained model.}
@@ -89,25 +76,6 @@ boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
 
 These functions aid classification in the multiclass setting.  
 
-The \code{knnCalib} function computes conditional probabilities for
-new cases, using  the training scores, e.g. \code{decision.values} for
-SVM in the \pkg{e1071} package or the outputted conditional
-probabilities from \bold{glm} in a logistic model.  This is useful for
-classification algorithms that lack inherent estimation of these
-probabilities, or for which the inherent probability estimates are not
-very accurate, say on the edges of the feature space.  This is a new
-approach.  (The function \code{scoresToProbs} is identical, and is
-deprecated.)
-
-One needs to have to scores for the new cases to be predicted.  This is
-application/package-specific.  The function \code{getDValsE1071} does
-this in the case of SVM in the \pkg{e1071} package. 
-
-How it works, say for one new case: The score(s) (more than 1 if
-multiclass case) are compared to the training set scores, taking the
-\code{k} nearest neighbors. Among the corresponding Y values, we find the
-proportion for each class.
-
 The function \code{boundaryplot} serves as a visualization technique,
 for the two-class setting.  It draws the boundary between predicted Y =
 1 and predicted Y = 0 data points in 2-dimensional feature space, as
@@ -123,9 +91,6 @@ The functions not listed above are largely deprecated, e.g. in favor of
 }
 
 \value{
-
-The function \code{knnCalib} returns the matrix of conditional
-probabilities for the new cases to be predicted, one column per class.
 
 }
 

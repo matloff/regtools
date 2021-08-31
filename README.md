@@ -409,8 +409,7 @@ The **regtools** grid search function **fineTuning()** is an advanced
 grid search tool, in two ways:
 
 1.  It aims to counter p-hacking, by forming 
-[Bonferoni-Dunn confidence intervals]([https://en.wikipedia.org/wiki/Bonferroni_correction)
-for the mean losses.
+Bonferoni-Dunn confidence intervals for the mean losses.
 
 2.  It provides a plotting capability, so that the user can see at a
     glance which *several* combinations of parameters look promising,

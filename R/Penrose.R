@@ -110,7 +110,7 @@ ridgePoly <- function(d,yName,deg,maxInteractDeg=deg)
    xPoly <- polyout$xdata  # polynomial version of x
    xPoly <- as.matrix(xPoly)
    y <- d[,ycol]
-   cvgout <- cv.glmnet(x=xPoly,y=y,alpha=0,family='gaussian')
+   cvgout <- glmnet::cv.glmnet(x=xPoly,y=y,alpha=0,family='gaussian')
    res <- list(cvgout=cvgout,
       deg=deg,
       maxInteractDeg=maxInteractDeg,

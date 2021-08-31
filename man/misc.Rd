@@ -11,6 +11,7 @@
 \alias{findOverallLoss}
 \alias{getNamedArgs}
 \alias{multCols}
+\alias{NAsTo0s}
 
 \title{Utilities}
 
@@ -31,6 +32,8 @@ partTrnTst(fullData,nTest=min(1000,round(0.2*nrow(fullData))))
 findOverallLoss(regests,y,lossFtn = MAPE) 
 getNamedArgs(argVec)
 multCols(x,cols,vals)
+NAsTo0s(x)
+ZerosToNAs(x,replaceVal=0)
 }
 
 \arguments{
@@ -57,6 +60,7 @@ multCols(x,cols,vals)
   \item{argVec}{R list or vector with named elements.}
   \item{cols}{A set of column numbers.}
   \item{vals}{A set of positive expansion numbers.}
+  \item{replaceVal}{A number to be taken as NA.}
 }
 
 \details{

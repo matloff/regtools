@@ -24,8 +24,8 @@ textToXY <- function(docs,labels,kTop=50,stopWords='a')
    data.table::setkey(x,id)  # sort the table by id
 
    # compute vocab, doc term mat
-   prep_fun = tolower  # change letters to lower-case
-   tok_fun = word_tokenizer  # break text into words
+   prep_fun <- tolower  # change letters to lower-case
+   tok_fun <- text2vec::word_tokenizer  # break text into words
    itx <- text2vec::itoken(x$docs,
         preprocessor = prep_fun,
         tokenizer = tok_fun,

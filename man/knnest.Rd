@@ -49,7 +49,7 @@ nonparvsxplot(knnout,lmout=NULL)
 nonparvarplot(knnout,returnPts=FALSE)
 l2(y,muhat)
 l1(y,muhat)
-MAPE(y,yhat)
+MAPE(yhat,y)
 bestKperPoint(x,y,maxK,lossFtn="MAPE",classif=FALSE)
 kNNallK(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    expandVars=NULL,expandVals=NULL,smoothingFtn=mean,

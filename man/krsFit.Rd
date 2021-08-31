@@ -16,7 +16,7 @@ krsFit(x,y,hidden,acts=rep("relu",length(hidden)),learnRate=0.001,
    scaleX=TRUE,scaleY=TRUE)
 krsFitImg(x,y,hidden=c(100,100),acts=rep("relu",length(hidden)),
     nClass,nEpoch=30) 
-predict.krsFit(krsFitOut,newx) 
+predict.krsFit(object,...) 
 diagNeural(krsFitOut)
 }
 
@@ -43,11 +43,15 @@ diagNeural(krsFitOut)
 }
 
 \details{
+
 The \code{krstFit} function is a wrapper for the entire pipeline
 in fitting the R \pkg{keras} package to a dataset:  Defining the model,
 compiling, stating the inputs and so on.  As a result, the wrapper
 allows the user to skip those details (or not need to even know them),
 and define the model in a manner more familiar to R users.
+
+The paired \code{predict.krsFit} takes as its first argument the output
+of \code{krstFit}, and \code{newx}, the points to be predicted.
 }
 
 \examples{

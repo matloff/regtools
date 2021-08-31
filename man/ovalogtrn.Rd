@@ -26,8 +26,6 @@ scoresToProbs(y,trnScores,newScores,k)
 getDValsE1071(object,newx)
 logitClass(data,yName)
 \method{predict}{logitClass}(object,newx)
-linClass(data,yName)
-\method{predict}{linClass}(object,newx)
 knnClass(data,yName,k)
 \method{predict}{knnClass}(object,newx)
 ovalogtrn(...)
@@ -51,7 +49,6 @@ boundaryplot(y,x,regests,pairs=combn(ncol(x),2),pchvals=2+y,cex=0.5,band=0.10)
 \item{yName}{Name of the column in \code{data} corresponding to "Y", the
    class labels.  Must be an R factor.}
 \item{logitClass}{Object returned by \code{logitClass}.}
-\item{linClass}{Object returned by \code{linClass}.}
 \item{newx}{Data frame of one or more new cases to predict.}
 \item{classNames}{Names of the classes, in "levels" order.}
 \item{fittedY}{Predicted classes in the trained model.}
@@ -139,9 +136,6 @@ probabilities for the new cases to be predicted, one column per class.
 
 data(oliveoils) 
 oo <- oliveoils[,-1] 
-lncout <- linClass(oo,'Region') 
-predict(lncout,oo[222,-1]) 
-# predicts class South
 
 # toy example
 set.seed(9999)

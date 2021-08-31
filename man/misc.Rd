@@ -12,6 +12,8 @@
 \alias{getNamedArgs}
 \alias{multCols}
 \alias{NAsTo0s}
+\alias{probIncorrectClass}
+\alias{propMisclass}
 
 \title{Utilities}
 
@@ -34,11 +36,15 @@ getNamedArgs(argVec)
 multCols(x,cols,vals)
 NAsTo0s(x)
 ZerosToNAs(x,replaceVal=0)
+probIncorrectClass(yhat, y, startAt1 = TRUE)
+propMisclass(y,yhat)
 }
 
 \arguments{
   \item{regests}{Fitted regression estimates, training set.}
   \item{y}{Y values, training set.}
+  \item{yhat}{Predicted Y values}
+  \item{startAt1}{TRUE if indexing starts at 1, FALSE if starting at 0.}
   \item{lossFtn}{Loss functin.}
   \item{fullData}{A data frame or matrix.}
   \item{nTest}{Number of rows for the test set.}

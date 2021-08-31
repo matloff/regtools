@@ -78,17 +78,15 @@ search that hopes it might eliminate poor combinations early in the process.
 The function \code{knnFineTune} is a wrapper for \code{fineTuning} for
 k-NN problems.
 
-The function \code{plot.tuner}} draws a parallel coordinates plot to
+The function \code{plot.tuner} draws a parallel coordinates plot to
 visualize the grid. The argument \code{x} is the output of
 \code{fineTuning}.  Arguments to specify in the ellipsis are:
 \code{col} is the column to be plotted;
 \code{disp} is the number to display, with \code{0}, \code{-m} and
-\code{+m} meaning cases with the \code{m} smallest 'smoothed' value, all
+\code{+m} meaning cases with the \code{m} smallest 'smoothed' values, all
 cases and the \code{m} largest values of 'smoothed', respectively;
 \code{jit} avoids plotting coincident lines by adding jitter in the
 amount \code{jit * range(x) * runif(n,-0.5,0.5)}.
-
-
 
 
 }

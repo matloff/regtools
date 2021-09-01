@@ -45,9 +45,7 @@ predict.ovalog(...)
 \item{newx}{Data frame of one or more new cases to predict.}
 \item{classNames}{Names of the classes, in "levels" order.}
 \item{fittedY}{Predicted classes in the trained model.}
-\item{newx}{Data frame of one or more new cases to predict.}
 \item{newX}{Data frame of one or more new cases to predict.}
-\item{k}{Number of nearest neighbors.}
 \item{scaleX}{Scale the features.}
 \item{x}{X data frame or matrix.}
 \item{pairs}{Two-row matrix, column i of which is a pair of predictor

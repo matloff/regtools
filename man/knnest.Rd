@@ -114,8 +114,6 @@ plotExpVars(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
      \code{preprocessx}.} 
   \item{object}{Output of \code{knnest}.}
   \item{predpt}{One point on which to predict, as a vector.}
-  \item{nearxy}{A set of X neighbors of a point.}
-  \item{nearf}{Function to apply to the nearest neighbors of a point.}
   \item{kmax}{Maximal number of nearest neighbors to find.}
   \item{maxK}{Maximal number of nearest neighbors to find.}
   \item{xval}{Cross-validation flag. If TRUE, then the set of nearest 
@@ -129,7 +127,6 @@ plotExpVars(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
   \item{muhat}{Vector of estimated regression function values.}
   \item{yhat}{Vector of estimated regression function values.}
   \item{returnPts}{If TRUE, return matrix of plotted points.}
-  \item{kNNout}{Object returned by \code{kNN}.}
   \item{lossftn}{Loss function.}
   
 }

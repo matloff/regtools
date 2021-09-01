@@ -28,6 +28,11 @@ predict.ovalog(...)
 }
 
 \arguments{
+\item{pchvals}{Point size in base-R graphics.}
+\item{trnxy}{Data matrix, Y last.}
+\item{xval}{If TRUE, use leaving-one-out method.}
+\item{y01}{Y vector (1s and 0s).}
+\item{regests}{Estimated regression function values.}
 \item{y}{Vector or factor of response variable data in the training set, with
    codes 0,1,...\code{m}-1.} 
 \item{trnScores}{Vector/matrix of scores in training set.  In the

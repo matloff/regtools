@@ -19,13 +19,13 @@ case.
 penroseLM(d,yName)
 penrosePoly(d,yName,deg,maxInteractDeg=deg)
 ridgePoly(d,yName,deg,maxInteractDeg=deg)
-
 \method{predict}{penroseLM}(object,...)
 \method{predict}{penrosePoly}(object,...)
 
 }
 
 \arguments{
+  \item{...}{Arguments for the \code{predict} functions.}
   \item{d}{Dataframe, training set.} 
   \item{yName}{Name of the class labels column.}
   \item{deg}{Polynomial degree.}

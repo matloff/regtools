@@ -11,7 +11,6 @@
 \alias{findOverallLoss}
 \alias{getNamedArgs}
 \alias{multCols}
-\alias{NAsTo0s}
 \alias{probIncorrectClass}
 \alias{propMisclass}
 
@@ -34,8 +33,6 @@ partTrnTst(fullData,nTest=min(1000,round(0.2*nrow(fullData))))
 findOverallLoss(regests,y,lossFtn = MAPE) 
 getNamedArgs(argVec)
 multCols(x,cols,vals)
-NAsTo0s(x)
-ZerosToNAs(x,replaceVal=0)
 probIncorrectClass(yhat, y, startAt1 = TRUE)
 propMisclass(y,yhat)
 }

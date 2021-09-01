@@ -2,6 +2,7 @@
 \alias{fineTuning}
 \alias{knnFineTune}
 \alias{fineTuningPar}
+\alias{plot.tuner}
 
 \title{Grid Search Plus More}
 
@@ -24,6 +25,7 @@ fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 }
 
 \arguments{
+   \item{x}{Output object from \code{fineTuning}.}
    \item{cls}{A \code{parallel} cluster.}
    \item{dataset}{Data frame etc. containing the data to be analyzed.}
    \item{data}{The data to be analyzed.}
@@ -46,10 +48,7 @@ fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
       value.}
    \item{dispOrderSmoothed}{Display in order of smoothed results.}
    \item{tunerObject}{An object output from \code{fineTuning}.}
-   \item{col}{Column to be plotted.}
-   \item{disp}{Number of lines to be plotted, sign indicating max or min.}
    \item{showProgress}{If TRUE, print each output line as it becomes ready.}
-   \item{ji}{Amount of jitter to add to plot.}
    \item{specCombs}{A data frame in which the user specifies 
 #      hyperparameter parameter combinations to evaluate.}
 }

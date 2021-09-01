@@ -40,6 +40,10 @@ toSuperFactor(inFactor,superLevels)
 }
 
 \arguments{
+  \item{dfOut}{If TRUE, return a data frame, otherwise a matrix.}
+  \item{dms}{Matrix or data frame of dummy columns.}
+  \item{inclLast}{When forming a factor from dummies, include the last
+     dummy as a level if this is TRUE.}
   \item{xy}{A data frame mentioned for prediction, "Y" in last column.}
   \item{dms}{Matrix of dummy variables corresponding to a categorical
      variable.}

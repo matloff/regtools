@@ -25,6 +25,8 @@ fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 }
 
 \arguments{
+   \item{...}{Arguments to be passed on by \code{fineTuning} or
+      \code{plot.tuner}.}
    \item{x}{Output object from \code{fineTuning}.}
    \item{cls}{A \code{parallel} cluster.}
    \item{dataset}{Data frame etc. containing the data to be analyzed.}

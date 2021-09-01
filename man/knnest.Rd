@@ -66,7 +66,6 @@ plotExpVars(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
 }
 
 \arguments{
-  \item{eValIncr}{Increment of expansion variable in plot.}
   \item{ylim}{Range of Y values for plot.}
   \item{lossFtn}{Loss function for plot.}
   \item{eVar}{Variable to be expanded.}

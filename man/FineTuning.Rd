@@ -17,7 +17,7 @@ p-hacking.  An experimental smoothing facility is also included.
 \usage{
 fineTuning(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,nTst=500,
    nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
-   showProgress=TRUE)
+   showProgress=TRUE,...)
 plot.tuner(x,...)
 knnFineTune(data,yName,k,expandVars,ws,classif=FALSE,seed=9999)
 fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,

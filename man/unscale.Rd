@@ -22,9 +22,6 @@ allNumeric(lst)
 \arguments{
   \item{scaledx}{A matrix.}
   \item{m}{A matrix.}
-  \item{scalePars}{If not NULL, a 2-row matrix, with column storing
-     the min and max values to be used in scaling column \code{i}
-     \code{m}.}
   \item{ctrs}{Take the original means to be \code{ctrs}}
   \item{lst}{An R list.}
   \item{sds}{Take the original standard deviations to be \code{sds}}

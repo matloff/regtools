@@ -47,7 +47,6 @@ fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    \item{up}{If TRUE, display results in ascending order of performance
       value.}
    \item{dispOrderSmoothed}{Display in order of smoothed results.}
-   \item{tunerObject}{An object output from \code{fineTuning}.}
    \item{showProgress}{If TRUE, print each output line as it becomes ready.}
    \item{specCombs}{A data frame in which the user specifies 
 #      hyperparameter parameter combinations to evaluate.}

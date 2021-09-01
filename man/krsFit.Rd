@@ -2,6 +2,7 @@
 \alias{krsFit}
 \alias{krsFitImg}
 \alias{diagNeural}
+\alias{predict.krsFit}
 
 \title{Tools for Neural Networks}
 
@@ -39,7 +40,8 @@ diagNeural(krsFitOut)
   \item{nClass}{Number of classes.}
   \item{nEpoch}{Number of epochs.}
   \item{krsFitOut}{An object returned by \code{krstFit}.}
-  \item{newx}{New data points to be predicted.}  
+  \item{scaleX}{If TRUE, scale X columns.}
+  \item{scaleY}{If TRUE, scale Y columns.}
 }
 
 \details{

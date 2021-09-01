@@ -18,13 +18,11 @@ Tools for multiclass classification, parametric and nonparametric.
 }
 
 \usage{
-\method{predict}{ovalog}(object,...) 
 avalogtrn(trnxy,yname)
 ovaknntrn(trnxy,yname,k,xval=FALSE)
 avalogpred()
 classadjust(econdprobs,wrongprob1,trueprob1) 
 boundaryplot(y01,x,regests,pairs=combn(ncol(x),2),pchvals=2+y01,cex=0.5,band=0.10)
-predict.ovalog(...)
 }
 
 \arguments{

@@ -60,7 +60,8 @@ toSuperFactor(inFactor,superLevels)
   \item{dframe}{A data frame, for which we wish to find the column classes.}
   \item{omitLast}{If TRUE, then generate only k-1 dummies from k factor
      levels.}
-  \item{factorsInfo}{Attribute from output of \code{factorToDummies}.}
+  \item{factorsInfo}{Attribute from output of \code{factorsToDummies}.}
+  \item{factorInfo}{Attribute from output of \code{factorToDummies}.}
   \item{dms}{A data frame whose columns are dummy variables.}
   \item{inclLast}{If FALSE, then only k-1 dummies for k factor
      levels are provided.}

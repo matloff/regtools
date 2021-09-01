@@ -17,11 +17,12 @@ krsFit(x,y,hidden,acts=rep("relu",length(hidden)),learnRate=0.001,
    scaleX=TRUE,scaleY=TRUE)
 krsFitImg(x,y,hidden=c(100,100),acts=rep("relu",length(hidden)),
     nClass,nEpoch=30) 
-predict.krsFit(object,...) 
+\method{predict}{krsFit}(object,...)
 diagNeural(krsFitOut)
 }
 
 \arguments{
+  \item{...}{Data points to be predicted, 'newx'.}
   \item{x}{X data, predictors, one row per data point, in the training
      set.  Must be a matrix.}
   \item{y}{Numeric vector of Y values.  In classification case

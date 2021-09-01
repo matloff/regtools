@@ -66,6 +66,7 @@ plotExpVars(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
 }
 
 \arguments{
+  \item{nearf}{Function to be applied to a neighborhood.}
   \item{ylim}{Range of Y values for plot.}
   \item{lossFtn}{Loss function for plot.}
   \item{eVar}{Variable to be expanded.}
@@ -127,7 +128,6 @@ plotExpVars(xtrn,ytrn,xtst,ytst,k,eVars,maxEVal,lossFtn,
   \item{muhat}{Vector of estimated regression function values.}
   \item{yhat}{Vector of estimated regression function values.}
   \item{returnPts}{If TRUE, return matrix of plotted points.}
-  \item{lossftn}{Loss function.}
   
 }
 

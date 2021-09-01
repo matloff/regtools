@@ -18,7 +18,8 @@ textToXY <- function(docs,labels,kTop=50,stopWords='a')
 {
    # prep
    if (is.null(labels)) labels <- rep(NA,length(docs))
-   x <- data.frame(docs,labels,id=1:length(docs))
+   id <- 1:length(docs)
+   x <- data.frame(docs,labels,id=id)
    if (!is.character(x$docs)) x$docs <- as.character(x$docs)
    data.table::setDT(x)  # make data frame a by-reference data.table
    data.table::setkey(x,id)  # sort the table by id

@@ -161,6 +161,7 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
       cls <- parallel::makeCluster(cls)
       partools::setclsinfo(cls)
    } else if (inherits(cls,'cluster')) {
+      partoolsenv <- NULL  # for CRAN
       resp <- try(
          parallel::clusterEvalQ(cls,partoolsenv$ncls)
       )

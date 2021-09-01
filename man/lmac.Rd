@@ -18,7 +18,7 @@ Various estimators that handle missing data via the Available Cases Method
 \usage{
 lmac(xy,nboot=0) 
 makeNA(m,probna)
-NAsTo0s(xvec)
+NAsTo0s(x)
 ZerosToNAs(xvec,replaceVal=0)
 \method{coef}{lmac}(object,...)
 \method{vcov}{lmac}(object,...)

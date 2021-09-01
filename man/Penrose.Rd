@@ -29,6 +29,9 @@ ridgePoly(d,yName,deg,maxInteractDeg=deg)
   \item{d}{Dataframe, training set.} 
   \item{yName}{Name of the class labels column.}
   \item{deg}{Polynomial degree.}
+  \item{maxInteractDeg}{Maximum degree of interaction terms.}
+  \item{object}{A value returned by \code{penroseLM} or
+     \code{penrosePoly}.}
 }
 
 \details{

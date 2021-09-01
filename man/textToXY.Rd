@@ -16,7 +16,7 @@
 
 \arguments{
   \item{docs}{Character vector, one element per document.}
-  \item{preDocs}{Character vector, one element per document.}
+  \item{predDocs}{Character vector, one element per document.}
   \item{labels}{Class labels, as numeric, character or factor.  NULL is
      used at the prediction stage.}
   \item{kTop}{The number of most-frequent words to retain; 0 means 

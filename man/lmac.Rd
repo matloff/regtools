@@ -19,7 +19,7 @@ Various estimators that handle missing data via the Available Cases Method
 lmac(xy,nboot=0) 
 makeNA(m,probna)
 NAsTo0s(x)
-ZerosToNAs(xvec,replaceVal=0)
+ZerosToNAs(x,replaceVal=0)
 \method{coef}{lmac}(object,...)
 \method{vcov}{lmac}(object,...)
 pcac(indata,scale=FALSE) 
@@ -32,7 +32,6 @@ tbltofakedf(tbl)
   \item{xy}{Matrix or data frame, X values in the first columns, Y
      in the last column.}
   \item{indata}{Matrix or data frame.}
-  \item{xvec}{Vector.}
   \item{x}{Matrix or data frame, one column per variable.}
   \item{nboot}{If positive, number of bootstrap samples to take.}
   \item{probna}{Probability that an element will be NA.}

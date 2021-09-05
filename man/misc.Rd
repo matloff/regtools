@@ -63,7 +63,6 @@ propMisclass(y,yhat)
   \item{argVec}{R list or vector with named elements.}
   \item{cols}{A set of column numbers.}
   \item{vals}{A set of positive expansion numbers.}
-  \item{replaceVal}{A number to be taken as NA.}
 }
 
 \details{

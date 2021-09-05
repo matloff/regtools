@@ -22,6 +22,7 @@ diagNeural(krsFitOut)
 }
 
 \arguments{
+  \item{object}{An object of class 'krsFit'.}
   \item{...}{Data points to be predicted, 'newx'.}
   \item{x}{X data, predictors, one row per data point, in the training
      set.  Must be a matrix.}

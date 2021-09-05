@@ -62,9 +62,6 @@ toSuperFactor(inFactor,superLevels)
      levels.}
   \item{factorsInfo}{Attribute from output of \code{factorsToDummies}.}
   \item{factorInfo}{Attribute from output of \code{factorToDummies}.}
-  \item{dms}{A data frame whose columns are dummy variables.}
-  \item{inclLast}{If FALSE, then only k-1 dummies for k factor
-     levels are provided.}
   \item{dtaf}{A data frame.}
 }
 

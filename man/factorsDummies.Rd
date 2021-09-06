@@ -49,7 +49,9 @@ toSuperFactor(inFactor,superLevels)
   \item{lumpedLevel}{Name of new level to be created from levels not retained.}
   \item{x}{A numeric vector, except in \code{hasFactors}, where it is a
      data frame.}
-  \item{endpts}{Value to be used as \code{breaks} in call to \code{cut}.}
+  \item{endpts}{Vector to be used as \code{breaks} in call to
+     \code{cut}. To avoid NAs, range of the vector must cover the 
+     range of the input vector.}
   \item{f}{A factor.}
   \item{inFactor}{Original factor, to be extended.}
   \item{superLevels}{New levels to be added to the original factor.}
@@ -66,10 +68,52 @@ toSuperFactor(inFactor,superLevels)
 }
 
 \details{
-Many R users prefer to use R factors in their coding, or work with data
-that is of this type to begin with.  On the other hand, many regression
-packages, e.g. \pkg{lars}, disallow factors.  These utilities facilitate
-conversion from one form to another.
+
+Many R users prefer to express categorical data as R factors, or often
+work with data that is of this type to begin with.  On the other hand,
+many regression packages, e.g. \pkg{lars}, disallow factors.  These
+utilities facilitate conversion from one form to another.
+
+Here is an overview of the roles of the various functions:
+
+\itemize{
+
+\item \code{factorToDummies}: Convert one factor to dummies, yielding a
+matrix of dummies corresponding to that factor.
+
+\item \code{factorsToDummies}: Convert all factors to dummies, yielding
+a matrix of dummies, corresponding to all factors in the input data
+frame.
+
+\item \code{dummiesToFactor}: Convert a set of related dummies to a
+factor.
+
+\item \code{factorTo012etc}: Convert a factor to a numeric code,
+starting at 0.
+
+\item \code{dummiesToInt}: Convert a related set of dummies to a numeric code,
+starting at 0.
+
+\item \code{charsToFactors}:  Convert all character columns in a data
+frame to factors.
+
+\item \code{toAllNumeric}: Convert all factors in a data frame to
+dummies, yielding a new version of the data frame, including its
+original nonfactor columns.
+
+\item \code{toSubFactor}: Coalesce some levels of a factor, yielding a
+new factor.
+
+\item \code{toSuperFactor}: Add levels to a factor. Typically used in
+prediction contexts, in which a factor in a data point to be predicted
+does not have all the levels of the same factor in the training set.
+
+\\item \code{xyDataframeToMatrix}: Given a data frame to be used in
+a training set, with "Y" a factor in the last column, change to all
+numeric, with dummies in place of all "X" factors and in place of the
+"Y" factor.
+
+}
 
 The optional argument \code{factorsInfo} is intended for use in prediction
 contexts.  Typically a set of new cases will not have all levels of the
@@ -98,6 +142,23 @@ factor it finds in its input data frame
 \item \code{factorsToDummies} outputs and later inputs \code{factorsInfo}
 
 }
+
+Other functions:
+
+\itemize{
+
+\item \code{getDFclasses}: Return a vector of the classes of the columns
+of a data frame.
+
+\item \code{discretize}: Partition range of a vector into (not
+necessarily equal-length) intervals, and construct a factor from the
+labels of the intervals that the input elements fall into.
+
+\item \code{hasCharacters, hasFactors}: Logical scalars, TRUE if the
+input data frame has any character or factor columns.
+
+}
+
 
 }
 

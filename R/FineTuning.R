@@ -44,13 +44,13 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 {
    # parameter checks
    if (!interactive()) showProgress <- FALSE
-   if (!is.null(specCombs)) nCombs <- nrow(specCombs)
+   ### if (!is.null(specCombs)) nCombs <- nrow(specCombs)
    # holding off for now on general smoothing
    if (!is.null(k) && length(pars) > 1) 
       stop('smoothing is currently recommended only for 1 parameter')
 
    # generate the basic output data frame 
-   outdf <- makeOutdf(pars,specCombs)
+   outdf <- makeOutdf(pars,nCombs,specCombs)
    nCombs <- nrow(outdf)
 
    meanAcc <- rep(NA,nCombs)
@@ -112,11 +112,11 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 # if specCombs is given, it will be returned, with no further processing
 # wrt nCombs
 
-makeOutdf <- function(pars,specCombs=NULL) {
+makeOutdf <- function(pars,nCombs=NULL,specCombs=NULL) {
    if (!is.null(specCombs)) return(specCombs)
    outdf <- expand.grid(pars,stringsAsFactors=FALSE) 
-   if (!is.null(pars$nCombs)) {
-      idxsToKeep <- sample(1:nrow(outdf),pars$nCombs)
+   if (!is.null(nCombs)) {
+      idxsToKeep <- sample(1:nrow(outdf),nCombs)
       outdf <- outdf[idxsToKeep,]
    }
    outdf

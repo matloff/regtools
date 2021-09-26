@@ -91,14 +91,6 @@ amount \code{jit * range(x) * runif(n,-0.5,0.5)}.
 
 }
 
-\examples{
-data(pef)
-# investigate values of k, 1 through 25, in predicting occupation using
-# k-NN; holdout set size is 1000, with 5 sets run for each k
-ftout <- qeFT(data=pef,yName='wageinc',qeftn='qeKNN',
-   pars=list(k=1:25),nTst=1000,nXval=5)
-}
-
 \value{
 Object of class **''tuner'**.  Contains the grid results, including
 upper bounds of approximate one-sided 95% confidence intervals, both

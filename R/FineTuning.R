@@ -238,11 +238,11 @@ fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 plot.tuner <- function(x,...) 
 {
    arglist <- list(...)
-   tmp <- arglist['col']
+   tmp <- arglist['col'][[1]]
    col <- if (!is.null(tmp)) tmp else 'meanAcc'
-   tmp <- arglist['disp']
+   tmp <- arglist['disp'][[1]]
    disp <- if (!is.null(tmp)) tmp else 0
-   tmp <- arglist['jit']
+   tmp <- arglist['jit'][[1]]
    jit <- if (!is.null(tmp)) tmp else 0.05
 
    outdf <- x$outdf
@@ -269,6 +269,8 @@ plot.tuner <- function(x,...)
    nr <- nrow(outdf)
    cdparcoord::discparcoord(outdf,k=nr,differentiate=TRUE)
 }
+
+pltt <- plot.tuner
 
 # change the display order, between meanAcc and smoothed; ftout is
 # output of fineTuning(); returns the full 'tuner' object, updated

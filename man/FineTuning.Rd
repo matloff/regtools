@@ -98,6 +98,24 @@ univariate and Bonferroni-Dunn (adjusted for the
 number of parameter combinations).
 }
 
+\examples{
+
+# mlb data set, predict weight using k-NN, try various values of k
+
+tc <- function(dtrn,dtst,cmbi,...)
+{
+   knnout <- kNN(dtrn[,-3],dtrn[,3],dtst[,-3],as.integer(cmbi[1]))
+   preds <- knnout$regests
+   mean(abs(preds - dtst[,3]))
+}
+
+data(mlb)
+mlb <- mlb[,3:6]
+mlb.d <- factorsToDummies(mlb)
+fineTuning(mlb.d,list(k=c(5,25)),tc,nTst=100,nXval=2)
+
+}
+
 
 \author{
 Norm Matloff

@@ -38,6 +38,22 @@
 #   Bonferroni CIs,and (if k is non-NULL) smoothed versions of
 #   meanAcc
 
+# example
+# 
+# tc <- function(dtrn,dtst,cmbi,...)
+# {
+#    knnout <- kNN(dtrn[,-3],dtrn[,3],dtst[,-3],as.integer(cmbi[1]))
+#    preds <- knnout$regests
+#    mean(abs(preds - dtst[,3]))
+# }
+# 
+# data(mlb)
+# mlb <- mlb[,3:6]
+# mlb.d <- factorsToDummies(mlb) 
+# fineTuning(mlb.d,list(k=c(5,25)),tc,nTst=100,nXval=2) 
+
+
+
 fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
    showProgress=TRUE,...) 

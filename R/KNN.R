@@ -123,12 +123,8 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    eVars <- !is.null(expandVars)
    eVals <- !is.null(expandVals)
    if (eVars || eVals) {
-      if(xor(eVars,eVals)) {
-        stop('expandVars and expandVals must be used together')
-      }
-      if (length(expandVars) != length(expandVals)) {
-          stop('expandVars and expandVals should have the same length')
-      }
+      if (length(expandVars) != length(expandVals)) 
+          stop('expandVars and expandVals must have the same length')
       x <- multCols(x,expandVars,expandVals)
       newx <- multCols(newx,expandVars,expandVals)  
    }
@@ -203,6 +199,7 @@ kNN <- function(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,
    tmplist$leave1out <- leave1out
    tmplist$startAt1adjust <- startA1adjust
    tmplist$expandVars <- expandVars
+   tmplist$expandVals <- expandVals
    class(tmplist) <- 'kNN'
    tmplist
 }
@@ -222,10 +219,6 @@ predict.kNN <- function(object,...)
    # set k for the prediction phase
    newxK <- if(length(arglist) > 1) arglist[[2]] else 1
 
-   expandVars <- object$expandVars
-   if (!is.null(expandVars)) 
-      stop('separate prediction with expandVars is not yet implemented')
-
    # if newx is a vector or a 1-row/1-col matrix/df, need to determine
    # the value of p, the number of predictors/features; if not careful,
    # get a 1-row vector when it should be 1-col or vice versa
@@ -241,6 +234,10 @@ predict.kNN <- function(object,...)
 
    # now start calculation of predictions
    if (is.vector(regests)) regests <- matrix(regests,ncol=1)
+   expandVars <- object$expandVars
+   if (!is.null(expandVars)) {
+      newx <- multCols(newx,expandVars,object$expandVals)  
+   }
    tmp <- FNN::get.knnx(data=x, query=newx, k=newxK)
    # row i of closestPts will be the newxK nearest neighbors of data point 
    # i in the training set

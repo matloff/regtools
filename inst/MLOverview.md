@@ -22,7 +22,9 @@ We'll also discuss the overfitting issue.
 
 For convenience, we'll let Y denote the variable to be predicted, i.e.
 the response variable, and let X denote the set of predictor
-variables/features.
+variables/features.  (ML people tend to use the term *features*,
+while In stat, the term *predictors* is common.  In applied fields, e.g.
+economics or psychology, some use the term *independent variables*.)
 
 We develop our prediction rule from available 
 *training data*, consisting of n data points, denoted by
@@ -288,8 +290,12 @@ weight<sub>i</sub> -
 ]
 <sup>2</sup>
 
-This is a simple calculus problem, though it is typically expressed in a
-matrix form.  There are no hyperparameters here.
+This is a simple calculus problem.  We find the partial derivatives of
+the sum of squares with respect to the b<sub>i</sub>, and set them to 0.
+This gives us 3 equations in 3 unknowns, and since these equations are
+linear, it is easy to solve them for the b<sub>i</sub>.
+
+There are no hyperparameters here.
 
 This model is mainly for regression settings, though some analysts use
 it in classification.  If used in conjunction with polynomials (see
@@ -301,8 +307,8 @@ just calls the latter, but does some little fixess.
 
 ### Logistic model
 
-This is a generalization of the linear model, developed by
-statisticians.
+This is a generalization of the linear model, developed by statisticians
+and economists.
 
 This model is only for classification settings.  Since m(t) is now a
 probability, we need it to have values in the interval [0,1].  This is
@@ -347,9 +353,10 @@ Polynomials of degree 3 and so on could also be considered.  The choice
 of degree is a hyperparameter.
 
 This would seem nonlinear, but that would be true only in the sense of
-being nonlinear in age.  But it is still linear in the
-&beta;<sub>i</sub>, so **qeLin()** can be used, or **qeLogit()**
-for classification settings.
+being nonlinear in age.  It is still linear in the &beta;<sub>i</sub> --
+e.g. if we double each &beta;<sub>i</sub> in the above expression, the
+value of the expression is doubled -- so **qeLin()** can be used, or
+**qeLogit()** for classification settings.
 
 Forming the polynomial terms by hand would be tedious, especially since
 we would also have to do this for predicting new cases.  Instead, we use
@@ -413,23 +420,35 @@ The **qeSVM()** function wraps **svm()** in the **e1071** package.
 
 These were developed almost exclusively in the AI community.
 
-An NN consists of *layers*, each of which consists of a
-number of *neurons*.  Say for concreteness we have 10 neurons per layer.
-The output of the first layer will be 10 linear combinations of the
-predictor variables/features, essentially 10 linear regression models.
-Those will be fed into the second layer, yielding 10 "linear
-combinations of linear combinations," and so on.
+An NN consists of *layers*, each of which consists of a number of
+*neurons* (also called *units* or *nodes*).  Say for concreteness we
+have 10 neurons per layer.  The output of the first layer will be 10
+linear combinations of the predictor variables/features, essentially 10
+linear regression models.  Those will be fed into the second layer,
+yielding 10 "linear combinations of linear combinations," and so on.
 
 In regression settings, the outputs of the last layer will be averaged
 together to produce our estimated m(t).  In the classification case with
 c classes, our final layer will have c outputs; whichever is largest
 will be our predicted class.
 
-NNs are arguably the most complex of all the methods described here, and
-tend to have many -- even millions -- of hyperparameters, stemming in
-large part because the numbers of layers and neurons per layer may be
-quite large.  The coefficients in all those linear combinations
-(*weights*) are computed iteratively.
+"Yes," you say, "but linear combinations of linear combinations are
+still linear combinations.  We might as well just use linear regression
+in the first place."  True, which is why there is more to the story:
+*activation functions*.  Each output of a layer is fed into a function
+A(t) for the purpose of allowing nonlinear effects in our model of m(t).
+
+For instance, say we take A(t) = t^2 (not a common choice in practice,
+but a simple one to explain the issues).  The output of the first layer
+will be quadratic functions of our features.  Since we square again at
+the outputs of the second layer, the result will be 4th-degree
+polynomials in the features.  Then 8th-degree polynomials come out of
+the third layer, and so on.
+
+One common choice for A(t) is the logistic function l(u) we saw earlier.
+Another popular choice is ReLU, r(t) = max(0,t).  No matter what we
+choose for A(t), the point is that we have set up a nonlinear model for
+m(t).
 
 Here's an example, again with the Vertebrae data:  The predictor
 variables V1, V2 etc. for a new case to be predicted enter on the left,
@@ -441,9 +460,53 @@ is largest, that will be our predicted class.
 The first layer consists of V1 through V6.  The second layer, our
 only *hidden* layer here, has three neurons.  Entering on
 the left of each neuron is a linear combination of V1 through V6.  The
-outputs are fed into the third layer; each node there will form a linear
-combination of its inputs, outputting the value of that linear
-combination.
+outputs are fed into A(t) and then to the third layer. 
+
+Hyperparameters for NNs include the number of layers, the number of
+units per layer (which need not be the same in each layer), and the
+activation function.
+
+The linear combination coefficients, shown as numeric labels in the
+picture, are known as *weights*.  (They are also called *parameters*,
+not to be confused with hyperparameters.) How are they calculated?
+Again least squares is used, minimizing 
+
+&Sigma;<sub>i</sub> 
+(Y<sub>i</sub> - finaloutput<sub>i</sub>)
+<sup>2</sup>
+
+Let n<sub>w</sub> denote the number of weights.  This can be quite
+large, even in the millions.  Moreover, the n<sub>w</sub>
+equations we get by setting the partial derivatives to 0 are not linear.
+
+Thus this is no longer a "simple" calculus problem.  Iterative methods
+must be used, and it can be extremely tricky to get them to converge.
+Here's why:
+
+Though far more complex than in the linear case, we are still in the
+calculus realm.  We compute the partial derivatives of the sum of
+squares with respect to the n<sub>w</sub> weights, and set the results
+to 0s.  So, we are finding roots of a very complicated function in
+n<sub>w</sub> dimensions. 
+
+The famous *Newton-Raphson* method for root finding works in one
+dimension as follows:  Denote our current guess for the root of a
+function f(), in our i<sup>th</sup> iteration, by g<sub>i</sub>.
+We find the tangent line to the curve f() at g<sub>i</sub>,
+and pretend f() is linear.  Then we can solve for the "root" by simply
+finding where the tangent line intersects the X-axis; this will be
+g<sub>i+1</sub>.
+
+One can picture situations in which this process gives us a
+g<sub>i+1</sub> that is actually further from the true root of f() than
+g<sub>i</sub> was.  In n<sub>w</sub> dimensions, this is common.  One
+remedy is to not follow the tangent line all the way to the X-axis, and
+instead go, say, only halfway in that direction.  Or 0.2 of the way,
+say.  This number, 0.5, 0.2 or whatever, is called the *learning rate*
+-- and is yet another hyperparameter.
+
+So, NNs are arguably the most complex of all the methods described here,
+and tend to use huge amounts of computing time, even weeks!
 
 The **qeNeural()** function allows specifying the numbers of layers and
 neurons per layer, and the number of iterations.  It wraps **krsFit()**
@@ -456,10 +519,36 @@ Up to a point, the more complex a model is, the greater its predictive
 power.  "More complex" can mean adding more predictor variables, using a
 higher-degree polynomial, adding more layers etc.
 
-But "the Law of Diminishing Returns" takes hold eventually, and
-accuracy will decline.  At the latter point we say we've overfit.
-Though there is currently some controversy on this, it is a key point to
-consider.
+As we add more and more complexity, the *model bias* will decrease,
+meaning that our models become closer to the actual m(t), in principle.
+But the problem is that at the same time, the *variance* of a
+predicted Y<sub>new</sub> is increasing.  
+
+Say again we are predicting human weight from height, with 
+polynomial models.  With a linear model, we use our training data to
+estimate two coefficients, b<sub>0</sub> and b<sub>1</sub>.  With a
+quadratic model, we estimate three, and estimate four in the case of a
+cubic model and so on.  But it's same training data in each case, and
+intuitively we are "spreading the data thinner" with each more complex
+model.  As a result, the standard error of our predicted Y<sub>new</sub>
+(estimated standard deviation) increases.
+
+Hence the famous Bias-Variance Tradeoff.  If we use too complex a model,
+the increased variance overwhelms the reduction in bias, and our
+predictive ability suffers.  We say we have *overfit*.
+
+So there is indeed a "Goldilocks" level of complexity, an optimal
+polynomial degree, optimal number of nearest neighbors, optimal *network
+architecture* (configuration of layers and neurons), and so on.  How do
+we find it?
+
+Alas, there are no magic answers here.  The general approach is
+*cross-validation*.  Here is a simple version:  We set aside part of our
+training data as a *holdout set*; the remainder becomes our new training
+data.  For each of our candidate models, e.g. each polynomial degree, we
+fit the model to the training set and then use it to predict the holdout
+data.  We then choose the model that does best on the holdout data.
+
 
 All the **qe** functions allow one to randomly partition the data,
 treating one part as the training set, and using the rest, the *holdout*

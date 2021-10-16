@@ -487,23 +487,36 @@ Though far more complex than in the linear case, we are still in the
 calculus realm.  We compute the partial derivatives of the sum of
 squares with respect to the n<sub>w</sub> weights, and set the results
 to 0s.  So, we are finding roots of a very complicated function in
-n<sub>w</sub> dimensions. 
+n<sub>w</sub> dimensions, and we need to do so iteratively. 
 
-The famous *Newton-Raphson* method for root finding works in one
-dimension as follows:  Denote our current guess for the root of a
-function f(), in our i<sup>th</sup> iteration, by g<sub>i</sub>.
-We find the tangent line to the curve f() at g<sub>i</sub>,
-and pretend f() is linear.  Then we can solve for the "root" by simply
-finding where the tangent line intersects the X-axis; this will be
-g<sub>i+1</sub>.
+A simplified version of the iteration process is as follows.  Consider
+the function f() graphed below:
 
-One can picture situations in which this process gives us a
-g<sub>i+1</sub> that is actually further from the true root of f() than
-g<sub>i</sub> was.  In n<sub>w</sub> dimensions, this is common.  One
-remedy is to not follow the tangent line all the way to the X-axis, and
-instead go, say, only halfway in that direction.  Or 0.2 of the way,
-say.  This number, 0.5, 0.2 or whatever, is called the *learning rate*
--- and is yet another hyperparameter.
+![alt text](ObjFtnPlusTangent.png)
+
+There is an overall minimum at approximately x = 2.2.  This is termed
+the *global minimum*.  But there is also a *local
+minimum*, at about x = 0.4; that term means that this is the minimum
+value of the function only for points near---"local to"--- 0.4.  Let's
+give the name x<sub>0</sub> to the value of x at the global minimum.
+
+Denote our guess for x<sub>0</sub> at iteration i by g<sub>i</sub>.
+Say our initial guess g<sub>0</sub> = 1.1.
+
+The tangent line is pointing upward to the right, i.e. has positive
+slope, so it tells us that by going to the left we will go to smaller
+values of the function.  We do want smaller values, but in this case,
+the tangent is misleading us.  We should be going to the right, towards
+2.2, where the global minimum is.
+
+You can see that if our current guess were near 2.2, the tangent line
+would guide us in the right direction.  But we see above that it can
+send us in the wrong direction.  One remedy (among several typically
+used in concert) is to not move very far in the direction the tangent
+line sends us.  The idea behind this is, if we are going to move in the
+wrong direction, let's limit our loss.  The amount we move is called the 
+*step size* in general math, but the preferred ML term is
+the *learning rate*.  And, this is yet another hyperparameter.
 
 So, NNs are arguably the most complex of all the methods described here,
 and tend to use huge amounts of computing time, even weeks!

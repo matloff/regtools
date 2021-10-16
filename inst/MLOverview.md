@@ -6,15 +6,17 @@
 forthcoming book, *The Art of Machine Learning: Algorithms+Data+R*.)
 
 Here we give an overview of the most widely used predictive methods in
-statistical/machine learning.  For each one, we present
+statistical/machine learning (ML).  For each one, we present
 
 * background
 
 * overview of how it works
 
-* **qe***-series function
+* function in the R package, **qeML** (readers without R background or
+  who simply wish to acquire an overview of ML may skip the R code
+without loss of comprehehnsion of the text).
 
-We'll also briefly discuss the overfitting issue.
+We'll also discuss the overfitting issue.
 
 ## Notation
 
@@ -22,14 +24,42 @@ For convenience, we'll let Y denote the variable to be predicted, i.e.
 the response variable, and let X denote the set of predictor
 variables/features.
 
-Our training data are (X<sub>1</sub>, Y<sub>1</sub>),.., (X<sub>n</sub>,
-Y<sub>n</sub>).  We wish to predict new cases in the future, in which X
-is known but Y needs to be predicted.
+We develop our prediction rule from available 
+*training data*, consisting of n data points, denoted by
+(X<sub>1</sub>, Y<sub>1</sub>),.., (X<sub>n</sub>,
+Y<sub>n</sub>).  We wish to predict new cases
+(X<sub>new</sub>,Y<sub>new</sub>) in the future, in which X<sub>new</sub>
+is known but Y<sub>new</sub> needs to be predicted.
+
+So, we may wish to predict human weight Y from height X, or from height
+and weight in the 2-component vector X.  
+Say we have the latter situation, and data on n = 100 people.  Then for
+instance X<sub>23</sub> would be the vector of height and age for the
+23rd person in our training data, and Y<sub>23</sub> would be that
+person's weight.
+
+The vector X may include *indicator* variables, which have values only 1
+or 0.  We may for instance predict weight from height, age and gender,
+the latter being 1 for female, 0 for male.
+
+If Y represents a binary variable, we represent it as an indicator
+variable.  In the famous Pima Diabetes dataset in the
+[UCI Machine Learning
+Repository](https://archive.ics.uci.edu/ml/index.php), 1 means diabetic,
+0 means not.
+
+If Y is categorical, we represent it by several indicator variables, one for
+each category.  In another disease-related UCI dataset (to be discussed
+below), Y is status of a person's vertebrae condition; there are 2
+disease types, and normal, for a total of 3 categories.  Y = (0,0,1)
+for a normal person, for instance.  Thus Y can be a vector too.
 
 ## Running example
 
 The package's built-in dataset **mlb** consists of data on major league
-baseball players.  
+baseball players (courtesy of the UCLA Dept. of Statistics).
+
+Here is a glimpse of the data:
 
 ``` r
 > data(mlb)
@@ -70,7 +100,6 @@ rfout <- qeRF(mlb,'Weight')  # fit random forests model
 ```
 
 Default values of hyperparameters are used but can be overridden.
-
 Prediction of new cases is equally easy, in the form
 
 ``` r
@@ -94,11 +123,6 @@ discussed later in this document):
 ```
 
 (The formation of a holdout set can be suppressed.)
-
-Each **qe** function sets default values for the *tuning parameters
-method*
-or *hyperparameters* for the given ML method.  Nondefault values,
-specific to the given ML method, can optionally be specified.
 
 ## Regression and classification problems, regression functions
 
@@ -152,7 +176,12 @@ training data to (72,25), and average their weights.  This is our
 estimate of m(72,25), and we use it as our prediction.
 
 The **qeKNN()** function wraps **kNN()** in **regtools**.  The main
-hyperparameter is the number of neighbors.
+hyperparameter is the number of neighbors k.  As with any
+hyperparameter, the user aims to set a "Goldilocks" level, not too big,
+not too small.  Setting k too small will result in our taking the
+average of just a few Y values, too small a sample.  On the other hand,
+too large a value for k will some distant data points may be used that
+are not representative.
 
 ### Random forests
 
@@ -163,24 +192,30 @@ This is a natural extension of k-NN, in that it too creates a
 neighborhood and averages Y values within the neighborhood.  However, it
 does so in a different way, creating tree structures.
 
-Say we are predicting player position in the **mlb** data, from height,
-weight and age.  (E.g. catchers tend to be heavier and older.)  We first
-ask whether the height is above or below a certain threshold.  After
-that, we ask whether weight is above or below a certain (different)
-threshold.  This creates a "box" in height-weight space.  We then might
-subdivide the box according to whether age is above or below a
-threshold.
+Say we are predicting blood pressure from height, weight and age.  We
+first ask whether the height is above or below a certain threshold.
+After that, we ask whether weight is above or below a certain
+(different) threshold.  This partitions height-weight space into 4
+sectors.  We then might subdivide each sector according to whether age
+is above or below a threshold, now creating 8 sectors of
+height-weight-age space.  Each sector is now a "neighborhood."  To
+predict a new case, we see which neighborhood it belongs to, then take
+our prediction to be the average Y value among training set points in
+that neighborhood.
 
-The word *might* in the last sentence alludes to the fact that the
+The word *might* in the above paragraph alludes to the fact that the
 process may stop early, if the current subdivision is judged fine enough
 to produce good accuracy.  And one generally wants to avoid having
 neighborhoods (*nodes* in the tree) that don't have many data points;
-this is controlled by a hyperparameter.
+this is controlled by a hyperparameter, say setting a minimum number of
+data points per node; if a split would violate that rule, then don't
+split.  Of course, if we set out threshold too high, we won't do enough
+splits, so again we need to try to find a "Goldilocks" level.
 
 Here is an example using the UCI Vertebrae dataset.  There are 6
 predictor variables, named V1 through V6 consisting of various bone
-measurements.  There are 3 classes, DH, SL and NO.  A single tree is
-shown.
+measurements.  There are 3 classes, DH (Disk Hernia), Spondylolisthesis
+(SL), Normal (NO).  A single tree is shown.
 
 ![alt text](RpartVert.png)
 
@@ -242,7 +277,19 @@ m(height,age) =
 &beta;<sub>2</sub> age
 
 for unknown population constants &beta;<sub>i</sub>, which are estimated
-from our training data.
+from our training data, using the classic *least-squares* approach.  Our
+estimates of the &beta;<sub>i</sub>, denoted b<sub>i</sub>, are
+calculated by minimizing
+
+&Sigma;<sub>i</sub> 
+[
+weight<sub>i</sub> - 
+(b<sub>0</sub>+b<sub>1</sub>height<sub>i</sub>+b<sub>2</sub>age<sub>i</sub>)
+]
+<sup>2</sup>
+
+This is a simple calculus problem, though it is typically expressed in a
+matrix form.  There are no hyperparameters here.
 
 This model is mainly for regression settings, though some analysts use
 it in classification.  If used in conjunction with polynomials (see
@@ -261,7 +308,8 @@ This model is only for classification settings.  Since m(t) is now a
 probability, we need it to have values in the interval [0,1].  This is
 achieved by feeding a linear model into the *logistic function*,
 l(u) = (1 + exp(-u))<sup>-1</sup>.  So for instance, to predict whether a
-player is a catcher (Y = 1 if yes, Y = 0 if no),
+player is a catcher (Y = 1 if yes, Y = 0 if no),  Again, there are no
+hyperparameters here.
 
 P(catcher | height, weight, age) = m(height,weight,age) = 
 1 / [1 + exp{-(&beta;<sub>0</sub> +
@@ -269,7 +317,8 @@ P(catcher | height, weight, age) = m(height,weight,age) =
 &beta;<sub>2</sub> weight +
 &beta;<sub>3</sub> age)}]
 
-The &beta;<sub>i</sub> are estimated from the sample data.
+The &beta;<sub>i</sub> are estimated from the sample data, using a
+technique called *iteratively reweighted least squares*.
 
 The function **qeLogit()** wraps the ordinary R function **glm()**, but
 adds an important feature:  **glm()** only handles the 2-class setting,
@@ -294,7 +343,8 @@ m(height,age) =
 where presumably &beta;<sub>3</sub> < 0.
 
 We may even include a height X age product term, allowing for interactions.
-Polynomials of degree 3 and so on could also be considered.
+Polynomials of degree 3 and so on could also be considered.  The choice
+of degree is a hyperparameter.
 
 This would seem nonlinear, but that would be true only in the sense of
 being nonlinear in age.  But it is still linear in the
@@ -308,12 +358,12 @@ we would also have to do this for predicting new cases.  Instead, we use
 
 Polynomial models can in many applications hold their own with the fancy
 ML methods.  One must be careful, though, about overfitting, just as
-with any ML method.
+with any ML method.  
 
 ### The LASSO
 
 Some deep mathematical theory implies that in linear models it may be
-advantageous to shrink the estimated &beta;<sub>i</sub>.  The LASSO
+advantageous to shrink the estimated b<sub>i</sub>.  The LASSO
 method does this in a mathematically rigorous manner.  The LASSO is
 especially popular as a tool for predictor variable selection (see
 below).
@@ -327,21 +377,21 @@ These were developed originally in the AI community, and later attracted
 interest among statisticians.  They are used mainly in classification
 settings.
 
-Say we are predicting catcher vs. non-catcher, based on height and
-weight.  We might plot a scatter diagram, with height on the horizontal
-axis and weight on the vertical, using red dots for the catchers and
-blue dots for the non-catchers.  We might draw a line that best separates
-the red and blue dots, then predict new cases by observing which side of
-the line they fall on.  This is what SVM does (with more
-predictors, the line become a plane or hyperplane).
+Say in the baseball data we are predicting catcher vs. non-catcher,
+based on height and weight.  We might plot a scatter diagram, with
+height on the horizontal axis and weight on the vertical, using red dots
+for the catchers and blue dots for the non-catchers.  We might draw a
+line that best separates the red and blue dots, then predict new cases
+by observing which side of the line they fall on.  This is what SVM does
+(with more predictors, the line become a plane or hyperplane).
 
 Here is an example, using the Iris dataset built in to R:
 
 ![alt text](SVM.png)
 
-There are 3 classes, but we are just predicting setosa species vs.
-non-setosa here.  Below the solid line, we predict setosa, otherwise
-non-setosa.  
+There are 3 classes, but we are just predicting setosa species (shown by + 
+symbols) vs. non-setosa (shown by boxes) here.  Below the solid line,
+we predict setosa, otherwise non-setosa.  
 
 SVM philosophy is that we'd like a wide buffer separating the classes,
 called the *margin*, denoted by the dashed lines.  Data points lying on

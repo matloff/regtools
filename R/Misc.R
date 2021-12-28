@@ -195,6 +195,43 @@ factorToDummies <- function (f,fname,omitLast=FALSE,factorInfo=NULL)
     dms
 }
 
+# in predicting after fitting a regression model, a factor that was fit
+# may now encounter new levels, preventing prediction; this function
+# reports which factors/levels, if any, are new; it should be called
+# before calling predict()
+
+# arguments:
+
+#    data1ORlevels1: either "old" data frame, used in fit, or the R
+#       list of levels for each factor in the frame; the latter case
+#       could come from, e.g. the output of factorstodummies()
+#    data2: "new" data frame, used in prediction
+
+# value:
+
+#    vector of row numbers in which a new factor level was found
+
+checkNewLevels <- function(data1ORlevels1,data2) 
+{ stop('under construction')
+   if (is.data.frame(data1ORlevels1)) {
+     tmp <- sapply(data1ORlevels1,is.factor)
+     tmp <- names(data1ORlevels1)[tmp]
+     levelsPresent1 <- lapply(data1ORlevels1[tmp],function(t) unique(t))
+   } else levelsPresent1 <- data1ORlevels1
+   tmp <- sapply(data2,is.factor)
+   factorNames <- names(data2)[tmp]
+   res <- NULL
+   for (nm in factorNames) {
+      tmp <- setdiff(levels(data2[[nm]]),levelsPresent1[[nm]]) 
+      if (length(tmp) > 0) {
+         matches <- which(data2[[nm]] %in% tmp)
+         res <- union(res,matches)
+      }
+   }
+   res
+}
+
+
 ####################  dummiesToFactor()  ######################
 
 # makes a factor from a single related set of dummies dms; if the

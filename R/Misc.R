@@ -202,24 +202,34 @@ factorToDummies <- function (f,fname,omitLast=FALSE,factorInfo=NULL)
 
 # arguments:
 
-#    data1ORlevels1: either "old" data frame, used in fit, or the R
-#       list of levels for each factor in the frame; the latter case
-#       could come from, e.g. the output of factorstodummies()
+#    info1: one of
+#       the "old" data frame, used in fit (case A); 
+#       an R list of levels for each factor in that frame
+#          (case B); or
+#       output of a qe*() call on that frame that
+#          has a 'factorLevelsPresent' component
+#          (future enhancement) (case C)
 #    data2: "new" data frame, used in prediction
 
 # value:
 
 #    vector of row numbers in which a new factor level was found
 
-checkNewLevels <- function(data1ORlevels1,data2) 
-{ stop('under construction')
-   if (is.data.frame(data1ORlevels1)) {
-     tmp <- sapply(data1ORlevels1,is.factor)
-     tmp <- names(data1ORlevels1)[tmp]
-     levelsPresent1 <- lapply(data1ORlevels1[tmp],function(t) unique(t))
-   } else levelsPresent1 <- data1ORlevels1
+checkNewLevels <- function(info1,data2) 
+{ 
    tmp <- sapply(data2,is.factor)
    factorNames <- names(data2)[tmp]
+
+   if (is.data.frame(info1)) {  # case A
+     tmp <- sapply(info1,is.factor)
+     tmp <- names(info1)[tmp]
+     levelsPresent1 <- lapply(info1[tmp],function(t) unique(t))
+   } else if (setequal(names(info1),names(data2))) {  # case B 
+        levelsPresent1 <- info1  # case C
+     } else {  # case C
+        levelsPresent1 <- info1$factorLevelsPresent
+     }
+
    res <- NULL
    for (nm in factorNames) {
       tmp <- setdiff(levels(data2[[nm]]),levelsPresent1[[nm]]) 

@@ -726,6 +726,8 @@ discretize <- function(x,endpts)
    xc
 }
 
+require(gtools)
+
 # the problem with strsplit('a  b') is that it yields (in [[1]]
 # component) 'a','','b'; the version below doesn't give any empty
 # strings

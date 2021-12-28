@@ -195,96 +195,60 @@ factorToDummies <- function (f,fname,omitLast=FALSE,factorInfo=NULL)
     dms
 }
 
-# in predicting after fitting a regression model, a factor that was fit
-# may now encounter new levels, preventing prediction; this function
-# reports which factors/levels, if any, are new; it should be called
-# before calling predict()
-
-# arguments:
-
-#    data1ORlevels1: either "old" data frame, used in fit, or the R
-#       list of levels for each factor in the frame; the latter case
-#       could come from, e.g. the output of factorstodummies()
-#    data2: "new" data frame, used in prediction
-
-# value:
-
-#    vector of row numbers in which a new factor level was found
-
-checkNewLevels <- function(data1ORlevels1,data2) 
-{ stop('under construction')
-   if (is.data.frame(data1ORlevels1)) {
-     tmp <- sapply(data1ORlevels1,is.factor)
-     tmp <- names(data1ORlevels1)[tmp]
-     levelsPresent1 <- lapply(data1ORlevels1[tmp],function(t) unique(t))
-   } else levelsPresent1 <- data1ORlevels1
-   tmp <- sapply(data2,is.factor)
-   factorNames <- names(data2)[tmp]
-   res <- NULL
-   for (nm in factorNames) {
-      tmp <- setdiff(levels(data2[[nm]]),levelsPresent1[[nm]]) 
-      if (length(tmp) > 0) {
-         matches <- which(data2[[nm]] %in% tmp)
-         res <- union(res,matches)
-      }
-   }
-   res
-}
-
-####################  dummiestofactor()  ######################
+####################  dummiesToFactor()  ######################
 
 # makes a factor from a single related set of dummies dms; if the
-# variable has k levels, incllast = false means there are only k-1
+# variable has k levels, inclLast = FALSE means there are only k-1
 # dummies provided, so the k-th must be generated
 
-dummiestofactor <- function(dms,incllast=false) 
+dummiesToFactor <- function(dms,inclLast=FALSE) 
 {
    dms <- as.matrix(dms)
-   if (!incllast) {
-      lastcol <- 1 - apply(dms,1,sum)
-      dms <- cbind(dms,lastcol)
+   if (!inclLast) {
+      lastCol <- 1 - apply(dms,1,sum)
+      dms <- cbind(dms,lastCol)
    }
    where1s <- apply(dms,1,function(rw) which(rw == 1))
-   colnames(dms) <- paste0('v',1:ncol(dms),sep='')
+   colnames(dms) <- paste0('V',1:ncol(dms),sep='')
    nms <- colnames(dms)
    f <- nms[where1s]
    as.factor(f)
 }
 
-####################  dummiestoint()  ######################
+####################  dummiesToInt()  ######################
 
-dummiestoint <- function(dms,incllast=false) {
-  as.numeric(dummiestofactor(dms=dms,incllast=incllast))
+dummiesToInt <- function(dms,inclLast=FALSE) {
+  as.numeric(dummiesToFactor(dms=dms,inclLast=inclLast))
 }
 
 # maps a factor to 0,1,2,...,m-1 where m is the number of levels of f;
 # saves the levels in an attribute, e.g. for use in a later predict()
-# setting; if using earlierlevels, then f will be a character vector
-# with values in earlierlevels
+# setting; if using earlierLevels, then f will be a character vector
+# with values in earlierLevels
 
-factorto012etc <- function(f,earlierlevels=null)  {
-   if (!is.null(earlierlevels)) {
-      checkonevalue <- function(val) which(val == earlierlevels) - 1
-      return(sapply(f,checkonevalue))
+factorTo012etc <- function(f,earlierLevels=NULL)  {
+   if (!is.null(earlierLevels)) {
+      checkOneValue <- function(val) which(val == earlierLevels) - 1
+      return(sapply(f,checkOneValue))
    }
    tmp <- as.numeric(f)-1
-   attr(tmp,'earlierlevels') <- levels(f)
+   attr(tmp,'earlierLevels') <- levels(f)
    tmp
 }
 
-####################  inttodummies()  ######################
+####################  intToDummies()  ######################
 
 # inputs an integer vector x and creates dummies for the various values
-inttodummies <- function(x,fname,omitlast=true) 
+intToDummies <- function(x,fname,omitLast=TRUE) 
 {
    tmp <- as.factor(x)
-   factortodummies(tmp,fname,omitlast=omitlast)
+   factorToDummies(tmp,fname,omitLast=omitLast)
 }
 
-####################  charstofactors()  ######################
+####################  charsToFactors()  ######################
 
 # inputs a data frame and converts all character columns to factors
-charstofactors <- function(dtaf) 
+charsToFactors <- function(dtaf) 
 {
    for (i in 1:ncol(dtaf)) {
       cli <- dtaf[,i]
@@ -295,100 +259,100 @@ charstofactors <- function(dtaf)
    dtaf
 }
 
-####################  xydataframetomatrix()  ######################
+####################  xyDataframeToMatrix()  ######################
 
-# inputs a data frame intended for regression/classification, with x in
-# the first cols and y in the last; converts all factors to dummies, and
+# inputs a data frame intended for regression/classification, with X in
+# the first cols and Y in the last; converts all factors to dummies, and
 # outputs a matrix; in creating dummies, r-1 are retained for r levels,
-# except for y
+# except for Y
 
-# see also toallnumeric() below
+# see also toAllNumeric() below
 
-xydataframetomatrix <- function(xy) {
+xyDataframeToMatrix <- function(xy) {
    p <- ncol(xy)
    x <- xy[,1:(p-1)]
    y <- xy[,p]
-   xd <- factorstodummies(x,omitlast=true)
-   yd <- factortodummies(y,'y',omitlast=false)
+   xd <- factorsToDummies(x,omitLast=TRUE)
+   yd <- factorToDummies(y,'y',omitLast=FALSE)
    as.matrix(cbind(xd,yd))
 }
 
-####################  hasfactors()  ######################
+####################  hasFactors()  ######################
 
-# x is a data frame; returns true if at least one column is a factor
-hasfactors <- function(x) 
+# x is a data frame; returns TRUE if at least one column is a factor
+hasFactors <- function(x) 
 {
    for (i in 1:ncol(x)) {
-      if (is.factor(x[,i])) return(true)
+      if (is.factor(x[,i])) return(TRUE)
    }
-   false
+   FALSE
 }
 
-####################  hascharacters()  ######################
+####################  hasCharacters()  ######################
 
-# dfr is a data frame; returns true if at least one column is in character mode
-hascharacters <- function(dfr) 
+# dfr is a data frame; returns TRUE if at least one column is in character mode
+hasCharacters <- function(dfr) 
 {
    for (i in 1:ncol(dfr)) {
-      if (is.character(dfr[,i])) return(true)
+      if (is.character(dfr[,i])) return(TRUE)
    }
-   false
+   FALSE
 }
 
-####################  tosuperfactor()  ######################
+####################  toSuperFactor()  ######################
 
 # say we have a factor f1, then encounter f2, with levels a subset of
 # those of f1; we want to change f2 to have the same levels as f1; seems
-# that this can not be done via levels(f2) <- levels(f1); typically used
+# that this can NOT be done via levels(f2) <- levels(f1); typically used
 # in predict() functions
-tosuperfactor <- function(infactor,superlevels) 
+toSuperFactor <- function(inFactor,superLevels) 
 {
-   infactorchars <- as.character(infactor)
-   extrachars <- setdiff(superlevels,infactorchars)
-   nextra <- length(extrachars)
-   if (nextra == 0) return(infactor)
-   newinfactorchars <- c(infactorchars,extrachars)
-   nextra <- length(extrachars)
-   tmp <- as.factor(newinfactorchars)
-   ntmp <- length(tmp)
-   start <- ntmp - nextra + 1
-   end <- ntmp
+   inFactorChars <- as.character(inFactor)
+   extraChars <- setdiff(superLevels,inFactorChars)
+   nExtra <- length(extraChars)
+   if (nExtra == 0) return(inFactor)
+   newInFactorChars <- c(inFactorChars,extraChars)
+   nExtra <- length(extraChars)
+   tmp <- as.factor(newInFactorChars)
+   nTmp <- length(tmp)
+   start <- nTmp - nExtra + 1
+   end <- nTmp
    tmp[-(start:end)]
 }
 
-####################  tosubfactor()  ######################
+####################  toSubFactor()  ######################
 
 # here we have a factor f with various levels, but want to lump all
-# levelsl but the ones in savelevels to a new level, lumpedlevel; the
-# default for the latter is 'zzzother', chosen to ensure that the lumped
+# levelsl but the ones in saveLevels to a new level, lumpedLevel; the
+# default for the latter is 'zzzOther', chosen to ensure that the lumped
 # level is last
-tosubfactor <- function(f,savelevels,lumpedlevel='zzzother') 
+toSubFactor <- function(f,saveLevels,lumpedLevel='zzzOther') 
 {
    lvls <- levels(f)
-   fchar <- as.character(f)
-   other <- setdiff(lvls,savelevels)
-   whichother <- which(fchar %in% other)
-   fchar[whichother] <- lumpedlevel
-   as.factor(fchar)
+   fChar <- as.character(f)
+   other <- setdiff(lvls,saveLevels)
+   whichOther <- which(fChar %in% other)
+   fChar[whichOther] <- lumpedLevel
+   as.factor(fChar)
 }
 
-####################  toallnumeric()  ######################
+####################  toAllNumeric()  ######################
 
 # change character variables to factors, then all factors to dummies,
-# recording factorinfo for later use in prediction; put result in wm
+# recording factorInfo for later use in prediction; put result in wm
 
 # w: data frame
-# factorsinfo: value found in a previous call 
+# factorsInfo: value found in a previous call 
 
-toallnumeric <- function(w,factorsinfo=null)
+toAllNumeric <- function(w,factorsInfo=NULL)
 {
-   if (hascharacters(w)) {
+   if (hasCharacters(w)) {
       stop('character variables currently not supported')
-      ## w <- charstofactors(w)
+      ## w <- charsToFactors(w)
    }
-   if (hasfactors(w)) {
-      wm <- factorstodummies(w,omitlast=true,factorsinfo=factorsinfo)
-      attr(wm,'factorsinfo')
+   if (hasFactors(w)) {
+      wm <- factorsToDummies(w,omitLast=TRUE,factorsInfo=factorsInfo)
+      attr(wm,'factorsInfo')
    } else {
       wm <- w
    }
@@ -400,8 +364,8 @@ toallnumeric <- function(w,factorsinfo=null)
 #######################################################################
 
 # multiply x[,cols] by vals, e.g. x[,cols[1]] * vals[1]
-# code by bochao xin
-multcols <- function(x,cols,vals) {
+# code by Bochao Xin
+multCols <- function(x,cols,vals) {
 #     tx <- t(x[,cols])
 #     x[,cols] <- t(tx*vals)
 #    for (i in 1:length(cols)) {
@@ -418,23 +382,23 @@ multcols <- function(x,cols,vals) {
 # d is a matrix or data frame; returns empty vector (i.e. length == 0)
 # if no cols are constant, otherwise indices of those that are constant
 
-constcols <- function(d) {
+constCols <- function(d) {
    if (is.matrix(d)) d <- as.data.frame(d)
-   ndistinct <- sapply(lapply(d, unique), length)
-   return(which(ndistinct == 1))
+   nDistinct <- sapply(lapply(d, unique), length)
+   return(which(nDistinct == 1))
 }
 
 # print a data frame row
 
-catdfrow <- function(dfrow) {
-  for (i in 1:ncol(dfrow)) {
-     cat(as.character(dfrow[1,i]),' ')
+catDFRow <- function(dfRow) {
+  for (i in 1:ncol(dfRow)) {
+     cat(as.character(dfRow[1,i]),' ')
   }
 }
 
 # print the classes of a data frame
 
-getdfclasses <- function(dframe) {
+getDFclasses <- function(dframe) {
    tmp <- sapply(1:ncol(dframe),function(i) class(dframe[,i]))
    names(tmp) <- names(dframe)
    tmp
@@ -443,7 +407,7 @@ getdfclasses <- function(dframe) {
 # check whether all elements of a list, including a data frame, are
 # numeric
 
-allnumeric <- function(lst) 
+allNumeric <- function(lst) 
 {
    tmp <- sapply(lst,is.numeric)
    all(tmp) 
@@ -453,19 +417,19 @@ allnumeric <- function(lst)
 ######################  misc. lm() routines  #######################
 #######################################################################
 
-# computes the standard error of the predicted y for x = xnew
+# computes the standard error of the predicted Y for X = xnew
 
-stderrpred <- function(regobj,xnew) {
+stdErrPred <- function(regObj,xnew) {
    xx <- c(1,xnew)  # the 1 accounts for the intercept term
    xx <- as.numeric(xx)  # in case xnew was a row in a data frame
-   as.numeric(sqrt(xx %*% vcov(regobj) %*% xx))
+   as.numeric(sqrt(xx %*% vcov(regObj) %*% xx))
 }
 
 #######################################################################
 ######################  misc. graphics ################################
 #######################################################################
 
-# "3-d" graphs of (x,y,z), where (x,y) points are plotted in 2-d for
+# "3-D" graphs of (x,y,z), where (x,y) points are plotted in 2-D for
 # various values of z; pts connected by lines, with z values displayed
 # at the connection points; grouping is allowed, specified via a 4th
 # column if desired
@@ -475,61 +439,61 @@ stderrpred <- function(regobj,xnew) {
 #    xyz: matrix/df consisting of x, y and z above, possible a 4th; in
 #    latter case, xyz must be a data frame
 #    clrs: colors for the various lines; default uses heat.colors()
-#    xlim, ylim: as in r plot(); default uses largest ranges
-#    xlab,ylab: as in r plot()
-#    legendpos: first argument to legend(), e.g. 'topright'
+#    xlim, ylim: as in R plot(); default uses largest ranges
+#    xlab,ylab: as in R plot()
+#    legendPos: first argument to legend(), e.g. 'topright'
 
-xyzplot <- function(xyz,clrs=null,cextext=1.0,
-   xlim=null,ylim=null,xlab=null,ylab=null,legendpos=null,plottype='l') 
+xyzPlot <- function(xyz,clrs=NULL,cexText=1.0,
+   xlim=NULL,ylim=NULL,xlab=NULL,ylab=NULL,legendPos=NULL,plotType='l') 
 {
    if (is.null(xlim)) xlim <- range(xyz[,1])
    if (is.null(ylim)) ylim <- range(xyz[,2])
    if (is.null(xlab)) xlab <- 'x'
    if (is.null(ylab)) ylab <- 'y'
-   oneline <- (ncol(xyz) == 3)
+   oneLine <- (ncol(xyz) == 3)
    if (is.null(clrs)) {
-      if (oneline) clrs <- 'black'
+      if (oneLine) clrs <- 'black'
       else clrs <- heat.colors(length(unique(xyz[,4]))) 
    }
 
-   if (plottype == 'l')  
+   if (plotType == 'l')  
       # so that lines "move to the right," rather than a jumble
       xyz <- xyz[order(xyz[,1]),]
 
    nr <- nrow(xyz)
-   linegrps <- 
-      if (oneline) list(1:nr)
+   lineGrps <- 
+      if (oneLine) list(1:nr)
       else split(1:nr,xyz[,4])
-   ngrps <- length(linegrps)
+   nGrps <- length(lineGrps)
 
-   # plot(xyz[linegrps[[1]],1:2],type=plottype,col=clrs[1],
+   # plot(xyz[lineGrps[[1]],1:2],type=plotType,col=clrs[1],
    plot(1,
       xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,cex=0.1)
-   ### if (ngrps > 1)
-      for (i in 1:ngrps) {
-         if (plottype == 'l') {
-            lines(xyz[linegrps[[i]],1:2],type='l',col=clrs[i])
+   ### if (nGrps > 1)
+      for (i in 1:nGrps) {
+         if (plotType == 'l') {
+            lines(xyz[lineGrps[[i]],1:2],type='l',col=clrs[i])
          }
          else
-            points(xyz[linegrps[[i]],1:2],col=clrs[i],cex=0.1)
+            points(xyz[lineGrps[[i]],1:2],col=clrs[i],cex=0.1)
       }
 
-   for (i in 1:ngrps) {
-      lns <- xyz[linegrps[[i]],]
-      text(lns[,1],lns[,2],lns[,3],cex=cextext,col=clrs[i])
+   for (i in 1:nGrps) {
+      lns <- xyz[lineGrps[[i]],]
+      text(lns[,1],lns[,2],lns[,3],cex=cexText,col=clrs[i])
    }
 
    # add legend
-   if (!oneline && !is.null(legendpos)) {
-      legend(legendpos,legend=unique(xyz[,4]),col=clrs,lty=1)
+   if (!oneLine && !is.null(legendPos)) {
+      legend(legendPos,legend=unique(xyz[,4]),col=clrs,lty=1)
    }
 }
 
 # print current image to file
-prtofile <- function (filename)
+prToFile <- function (filename)
 {
     origdev <- dev.cur()
-    parts <- strsplit(filename,".",fixed=true)
+    parts <- strsplit(filename,".",fixed=TRUE)
     nparts <- length(parts[[1]])
     suff <- parts[[1]][nparts]
     if (suff == "pdf") {
@@ -548,89 +512,89 @@ prtofile <- function (filename)
 }
 
 #######################################################################
-######################  pca routines ##################################
+######################  PCA routines ##################################
 #######################################################################
 
-####################  pcawithfactors()  ###############################
+####################  PCAwithFactors()  ###############################
 
-# allows use of prcomp() with data that may include r factors
+# allows use of prcomp() with data that may include R factors
 
 # arguments:
 
 #    x: a data frame
-#    ncomps: number of pc components to use
+#    nComps: number of PC components to use
 
-# value:  object of class 'pcawithfactors', with components as follows
+# value:  object of class 'PCAwithFactors', with components as follows
 
-#    pcout: output of calling prcomp() on toallnumeric(x)
-#    factorsinfo: attr from call to toallnumeric(), if any; needed for
-#       predict.pcawithfactors()
-#    preds: pca version of x
+#    pcout: output of calling prcomp() on toAllNumeric(x)
+#    factorsInfo: attr from call to toAllNumeric(), if any; needed for
+#       predict.PCAwithFactors()
+#    preds: PCA version of x
 
 # note: scaling will be applied, using mmscale()
 
-pcawithfactors <- function(x,ncomps=ncol(x)) 
+PCAwithFactors <- function(x,nComps=ncol(x)) 
 {
    if (!is.data.frame(x)) stop('x must be a data frame')
-   namesorigx <- names(x)
-   ncolsorigx <- ncol(x)
-   factoridxs <- which(sapply(x,is.factor))
-   if (identical(factoridxs,1:ncol(x)))
+   namesOrigX <- names(x)
+   nColsOrigX <- ncol(x)
+   factorIdxs <- which(sapply(x,is.factor))
+   if (identical(factorIdxs,1:ncol(x)))
       stop('case of all-factor data not supported yet')
-   xscale <- mmscale(x[,-factoridxs])
+   xscale <- mmscale(x[,-factorIdxs])
    minmax <- attr(xscale,'minmax')
-   x[,-factoridxs] <- xscale
-   if (length(factoridxs) > 0) {
-      x <- factorstodummies(x)
-      factorsinfo <- attr(x,'factorsinfo')
+   x[,-factorIdxs] <- xscale
+   if (length(factorIdxs) > 0) {
+      x <- factorsToDummies(x)
+      factorsInfo <- attr(x,'factorsInfo')
    }
    pcout <- prcomp(x)
-   xpca <- predict(pcout,x)[,1:ncomps]
-   res <- list(pcout=pcout,xpca=xpca,factorsinfo=factorsinfo,
-      namesorigx=namesorigx,ncolsorigx=ncolsorigx,factoridxs=factoridxs,
-      minmax=minmax,ncomps=ncomps)
-   class(res) <- 'pcawithfactors'
+   xpca <- predict(pcout,x)[,1:nComps]
+   res <- list(pcout=pcout,xpca=xpca,factorsInfo=factorsInfo,
+      namesOrigX=namesOrigX,nColsOrigX=nColsOrigX,factorIdxs=factorIdxs,
+      minmax=minmax,nComps=nComps)
+   class(res) <- 'PCAwithFactors'
    res
 }
 
-# find pca rep of newx; newx in original scale, output in scale of 
-# mmscale() + pca
+# find PCA rep of newx; newx in original scale, output in scale of 
+# mmscale() + PCA
 
-predict.pcawithfactors <- function(object,newx) 
+predict.PCAwithFactors <- function(object,newx) 
 {
-   if (!identical(names(newx),object$namesorigx))
+   if (!identical(names(newx),object$namesOrigX))
       stop('column names mismatch')
-   factoridxs <- object$factoridxs
-   tmp <- as.matrix(newx[,-factoridxs])
-   p <- object$ncolsorigx - length(factoridxs)
+   factorIdxs <- object$factorIdxs
+   tmp <- as.matrix(newx[,-factorIdxs])
+   p <- object$nColsOrigX - length(factorIdxs)
    newxscale <- mmscale(tmp,object$minmax,p=p)
    if (nrow(newx) == 1) newxscale <- newxscale[1,]
-   newx[,-factoridxs] <- newxscale
-   newx <- factorstodummies(newx,factorsinfo=object$factorsinfo)
+   newx[,-factorIdxs] <- newxscale
+   newx <- factorsToDummies(newx,factorsInfo=object$factorsInfo)
    # unfortunately, cannot use predict.prcomp(), as it scales
    preds <- as.matrix(newx) %*% object$pcout$rotation
-   preds[,1:object$ncomps]
+   preds[,1:object$nComps]
 }
 
-#########################  dopca()  ##########################
+#########################  doPCA()  ##########################
 
-# call prcomp(x,pcaprop), transform x to pcs, with the number of the
-# latter being set according to the top pcaprop proportion of variance
+# call prcomp(x,pcaProp), transform x to PCs, with the number of the
+# latter being set according to the top pcaProp proportion of variance
 
-dopca <- function(x,pcaprop) 
+doPCA <- function(x,pcaProp) 
 {
-   pcaout <- prcomp(x,scale.=true)
+   pcaout <- prcomp(x,scale.=TRUE)
    xpca <- predict(pcaout,x)
-   xnames <- colnames(xpca)
-   pcvars <- pcaout$sdev^2
+   xNames <- colnames(xpca)
+   pcVars <- pcaout$sdev^2
    ncx <- ncol(xpca)
-   csums <- cumsum(pcvars)
+   csums <- cumsum(pcVars)
    csums <- csums/csums[ncx]
-   numpcs <- min(which(csums >= pcaprop))
-   xpca <- xpca[,1:numpcs]
-   newdata <- as.data.frame(xpca)
-   names(newdata) <- xnames[1:numpcs]
-   list(pcaout=pcaout,numpcs=numpcs,newdata=newdata)
+   numPCs <- min(which(csums >= pcaProp))
+   xpca <- xpca[,1:numPCs]
+   newData <- as.data.frame(xpca)
+   names(newData) <- xNames[1:numPCs]
+   list(pcaout=pcaout,numPCs=numPCs,newData=newData)
 }
 
 #######################################################################
@@ -655,7 +619,7 @@ ulist <- function(lst)
 #######################  loss functions  ###############################
 
 # mean absolute prediction error
-mape <- function(yhat,y) 
+MAPE <- function(yhat,y) 
 {
    if (!is.vector(y) || !is.vector(yhat)) 
       stop('inputs must be vectors')
@@ -674,9 +638,9 @@ mape <- function(yhat,y)
 # or
 
 #    y is a vector of numeric class labels, starting at 1 or 0
-#    yhat is a matrix, with y[i,j] = prob of y = j+startat1-1
+#    yhat is a matrix, with y[i,j] = prob of Y = j+startAt1-1
 
-probincorrectclass <- function(yhat,y,startat1=true
+probIncorrectClass <- function(yhat,y,startAt1=TRUE
 ) 
 {
    if (is.factor(y) || is.factor(yhat)) 
@@ -685,39 +649,39 @@ probincorrectclass <- function(yhat,y,startat1=true
       yhat <- round(yhat)
       return(mean(yhat != y))
    }
-   classpred <- apply(yhat,1,which.max) 
-   classactual <- y - startat1 + 1
-   mean(classpred != classactual)
+   classPred <- apply(yhat,1,which.max) 
+   classActual <- y - startAt1 + 1
+   mean(classPred != classActual)
 }
 
-# proportion misclassified; deprecated in favor of probincorrectclass
-propmisclass <- function(y,yhat) 
+# proportion misclassified; deprecated in favor of probIncorrectClass
+propMisclass <- function(y,yhat) 
 {
    if (!is.vector(y) && !is.factor(y)) 
       stop('predicted classes must be a vector or factor')
    mean(y != yhat)
 }
 
-# included lossftn choices are mape and probincorrectclass; user may
+# included lossFtn choices are MAPE and probIncorrectClass; user may
 # supply others
-findoverallloss <- function (regests, y, lossftn = mape) 
+findOverallLoss <- function (regests, y, lossFtn = MAPE) 
 {
-   loss1row <- function(regestsrow) lossftn(y, regestsrow)
+   loss1row <- function(regestsRow) lossFtn(y, regestsRow)
    apply(regests, 1, loss1row)
 }
 
 #########################  other misc.  ################################
 
 # convenience wrapper for replicate; finds the means and standard errors
-# and the nrep replication; toreplic can be a vector 
+# and the nrep replication; toReplic can be a vector 
 
 # arguments:
 
 #    nrep:  number of replications
-#    toreplic:  expression to replicate; use braces and semicolons if
+#    toReplic:  expression to replicate; use braces and semicolons if
 #       more than one statement; must return either a number or a vector
 #       of numbers
-#    timing:  if true, apply system.time() to each replication, and
+#    timing:  if TRUE, apply system.time() to each replication, and
 #       calculate the mean elapsed time
 
 # value:
@@ -725,18 +689,18 @@ findoverallloss <- function (regests, y, lossftn = mape)
 #   mean outcomes of the simulation, plus an attribute storing the 
 #   associated standard errors
 
-replicmeans <- function(nrep,toreplic,timing=false) {
+replicMeans <- function(nrep,toReplic,timing=FALSE) {
    if (timing) {
-      tmp <- paste0('{tm <- system.time(z <- ',toreplic,'); ')
+      tmp <- paste0('{tm <- system.time(z <- ',toReplic,'); ')
       tmp <- paste0(tmp,'c(tm[3],z)}')
-      toreplic <- tmp
+      toReplic <- tmp
    }
-   cmd <- paste0('replicate(',nrep,',',toreplic,')')
+   cmd <- paste0('replicate(',nrep,',',toReplic,')')
    cmdout <- eval(parse(text=cmd))
-   # if toreplic returns a vector, cmdout will be a matrix; to handle
+   # if toReplic returns a vector, cmdout will be a matrix; to handle
    # this, make it a matrix anyway
    if (!is.matrix(cmdout)) cmdout <- matrix(cmdout,ncol=nrep)
-   meancmdout <- rowmeans(cmdout)
+   meancmdout <- rowMeans(cmdout)
    attr(meancmdout,'stderr') <- apply(cmdout,1,sd) / sqrt(nrep)
    meancmdout
 }
@@ -747,12 +711,12 @@ replicmeans <- function(nrep,toreplic,timing=false) {
 
 #    x: numeric vector
 #    endpts: endpoints for the desired intervals, treated as open on the
-#       left and closed on the right; to avoid na values, make sure all
+#       left and closed on the right; to avoid NA values, make sure all
 #       of x is accommodated
 
 # value:
 
-#    discrete version of x, with values 1,2,3,...; will have an r
+#    discrete version of x, with values 1,2,3,...; will have an R
 #    attribute, 'endpts', so as to remember which ones we used
 
 discretize <- function(x,endpts)
@@ -762,10 +726,12 @@ discretize <- function(x,endpts)
    xc
 }
 
+require(gtools)
+
 # the problem with strsplit('a  b') is that it yields (in [[1]]
 # component) 'a','','b'; the version below doesn't give any empty
 # strings
-pythonblanksplit <- function(s)
+pythonBlankSplit <- function(s)
 {
    tmp <- strsplit(s,' ')[[1]]
    tmp[tmp != '']
@@ -774,10 +740,10 @@ pythonblanksplit <- function(s)
 
 # use this after doing error checking, giving the user the choice of
 # leaving, or continuing in the debugger
-stopbrowser <- defmacro(msg,expr=
+stopBrowser <- defmacro(msg,expr=
    {
    cat(msg,'\n')
-   d <- readline('hit enter to leave, or d to enter debugger: ')
+   d <- readline('hit Enter to leave, or d to enter debugger: ')
    if (d == '') stop('')
    browser()
    }

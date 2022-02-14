@@ -743,7 +743,8 @@ replicMeans <- function(nrep,toReplic,timing=FALSE) {
       toReplic <- tmp
    }
    cmd <- paste0('replicate(',nrep,',',toReplic,')')
-   cmdout <- eval(parse(text=cmd))
+   cmdout <- eval.parent(parse(text=cmd))
+   # cmdout <- eval(parse(text=cmd))
    # if toReplic returns a vector, cmdout will be a matrix; to handle
    # this, make it a matrix anyway
    if (!is.matrix(cmdout)) cmdout <- matrix(cmdout,ncol=nrep)

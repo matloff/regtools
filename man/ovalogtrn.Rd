@@ -31,47 +31,18 @@ boundaryplot(y01,x,regests,pairs=combn(ncol(x),2),pchvals=2+y01,cex=0.5,band=0.1
 \item{xval}{If TRUE, use leaving-one-out method.}
 \item{y01}{Y vector (1s and 0s).}
 \item{regests}{Estimated regression function values.}
-\item{y}{Vector or factor of response variable data in the training set, with
-   codes 0,1,...\code{m}-1.} 
-\item{trnScores}{Vector/matrix of scores in training set.  In the
-   multiclass case, there will be as many columns as classes.}
-\item{newScores}{Vector/matrix of scores for the cases to be predicted. 
-   In the multiclass case, there will be as many columns as classes.}
-\item{data}{A data frame, containing "X" and "Y" data.}
-\item{yName}{Name of the column in \code{data} corresponding to "Y", the
-   class labels.  Must be an R factor.}
-\item{newx}{Data frame of one or more new cases to predict.}
-\item{classNames}{Names of the classes, in "levels" order.}
-\item{fittedY}{Predicted classes in the trained model.}
-\item{newX}{Data frame of one or more new cases to predict.}
-\item{scaleX}{Scale the features.}
 \item{x}{X data frame or matrix.}
 \item{pairs}{Two-row matrix, column i of which is a pair of predictor
    variables to graph.}
 \item{cex}{Symbol size for plotting.}
 \item{band}{If \code{band} is non-NULL, only points within \code{band}, 
    say 0.1, of est. P(Y = 1) are displayed, for a contour-like effect.}
-\item{otrnxy}{Data frame, one data point 
-   per row, Y in some column as a factor. Must have column
-   names.}
 \item{yname}{Name of the Y column.}
-\item{object}{Needed for consistency with generic.}
-\item{...}{Needed for consistency with generic.}
-\item{xdata}{X and associated neighbor indices. Output of
-  \code{preprocessx}.} 
-\item{coefmat}{Output from \code{ovalogtrn} or \code{avalogtrn}.}
 \item{k}{Number of nearest neighbors.} 
-\item{predx}{Data points to be predicted.} 
-\item{predpts}{Data points to be predicted. Must be specified by
-   argument name, i.e. 'predpts = '.} 
-\item{m}{Number of classes in multiclass setting.}
 \item{econdprobs}{Estimated conditional class probabilities, given the
    predictors.}
 \item{wrongprob1}{Incorrect, data-provenanced, unconditional P(Y = 1).}
 \item{trueprob1}{Correct unconditional P(Y = 1).}
-\item{trueclassprobs}{True unconditional class probabilities, typically
-   obtained externally.}
-\item{}{}
 }
 
 \details{
@@ -89,10 +60,6 @@ terms.
 
 The functions not listed above are largely deprecated, e.g. in favor of
 \code{qeLogit} and the other \code{qe}-series functions.
-
-}
-
-\value{
 
 }
 

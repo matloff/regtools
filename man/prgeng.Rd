@@ -40,9 +40,8 @@ There are three versions:
 
     }
 
-The variable codes, e.g. occupational codes, are available from the Census
-Bureau, at
-\url{http://www.census.gov/prod/cen2000/doc/pums.pdf}.
+The variable codes, e.g. occupational codes, are available from 
+\url{https://usa.ipums.org/usa/volii/occ2000.shtml}.
 (Short code lists are given in the record layout, but longer ones are in
 the appendix Code Lists.)
 

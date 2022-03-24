@@ -49,6 +49,8 @@ predict.penroseLM <- function(object,...)
 
 penrosePoly <- function(d,yName,deg,maxInteractDeg=deg) 
 {
+   requireNamespace('polyreg')
+   # require(polyreg)
    ycol <- which(names(d) == yName)
    x <- as.matrix(d[,-ycol,drop=FALSE])
    polyout <- polyreg::getPoly(x,deg=deg,maxInteractDeg=maxInteractDeg)
@@ -69,6 +71,8 @@ penrosePoly <- function(d,yName,deg,maxInteractDeg=deg)
 
 predict.penrosePoly <- function(object,...) 
 {
+   # requireNamespace('polyreg')
+   require(polyreg)
    arglist <- list(...)
    newx <- arglist[[1]]
 
@@ -103,6 +107,8 @@ predpnr <- predict.penrosePoly
 
 ridgePoly <- function(d,yName,deg,maxInteractDeg=deg) 
 {
+   # requireNamespace('polyreg')
+   require(polyreg)
    if (!allNumeric(d)) stop('for now, X,Y must be numeric')
    ycol <- which(names(d) == yName)
    x <- as.matrix(d[,-ycol])
@@ -125,6 +131,8 @@ ridgePoly <- function(d,yName,deg,maxInteractDeg=deg)
 
 predict.ridgePoly <- function(object,...) 
 {
+   # requireNamespace('polyreg')
+   require(polyreg)
    arglist <- list(...)
    newx <- arglist[[1]]
 

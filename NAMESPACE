@@ -47,7 +47,7 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    factorsToDummies,factorToDummies,dummiesToFactor,hasFactors,dummiesToInt,
    xyDataframeToMatrix,dummiesToInt,charsToFactors,hasCharacters,
    stdErrPred,getDFclasses,
-   toSuperFactor,toSubFactor,checkNewLevels,
+   toSuperFactor,toSubFactor,
    prToFile,pythonBlankSplit,xyzPlot,
    fineTuning,fineTuningPar,partTrnTst,
    krsFit,krsFitImg,diagNeural,

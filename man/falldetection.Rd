@@ -7,7 +7,6 @@ Fall Detection Data
 
 \description{
 Detection falls in the elderly via physiological measurements.
-See the Kaggle entry, \url{https://www.kaggle.com/pitasr/falldata}, for
-details on the variables, and usage permission.
+Obtained from Kaggle, but is no longer there.
 }
 

@@ -34,9 +34,7 @@ regression and classification analysis, and machine learning.
    \item regression diagnostics:  parvsnonparplot, nonparvsxplot,
    nonparvarplot
 
-   \item other: boundaryplot, pwplot, nonparvsxplot
-
-   \item linear multiclass prediction: linClass
+   \item other: boundaryplot, nonparvsxplot
 
    }
 
@@ -48,18 +46,11 @@ regression and classification analysis, and machine learning.
    
    \item All vs. All: avalogtrn, avalogpred
 
-   \item One vs. All wrappers: knnClass, linClass, logitClass
-
    \item k-NN reweighting: exploreExpVars, plotExpVars, knnFineTune
-
-   \item quick convenience classification functions: logitClass,
-   knnClass, linClass, rfClass, boostClass
-
-   \item probability calibration: knnCalib, plattCalib, calibWrap
 
    }
 
-\bold{Machine learning:}
+\bold{Machine learning (also see qeML package):}
 
    \itemize{
 
@@ -71,22 +62,12 @@ regression and classification analysis, and machine learning.
    \item advanced grid search: fineTuning, fineTuningPar, plot.tuner,
       knnFineTune
 
-   \item probability calibration: scoresToProbs
-
-   \item loss: l1, l2, MAPE
+   \item loss: l1, l2, MAPE, ROC
 
    }
 
-\bold{Quick-explore machine learning:}
 
-   \itemize{
-
-   \item qeLogit, qeKNN, qeLin, qeRF, qeGBoost, qeSVM, qeNeural,
-      qeLASSO, qePoly (and associated predict, plot methods)
-
-   }
-
-\bold{Dummies and R factors:}
+\bold{Dummies and R factors Utilities:}
 
    \itemize{
 
@@ -119,21 +100,7 @@ regression and classification analysis, and machine learning.
 
    \itemize{
 
-   \item convert rectangular to TS: TStoMat, TStoX
-
-   }
-
-\bold{Image processing:} 
-
-   \itemize{
-
-   \item imgTo2D
-
-   \item imgFilesToMatrix,imgFileToVector
-
-   \item image data augmentation: augMatrix
-
-   \item download data: getMNIST
+   \item convert rectangular to TS: TStoX
 
    }
 
@@ -142,18 +109,6 @@ regression and classification analysis, and machine learning.
    \itemize{
 
    \item textToXY
-
-   }
-
-\bold{Recommender systems:}
-
-   \itemize{
-
-   \item knnRec, anovaRec, mfRec
-
-   \item predictMany
-
-   \item adjToUIR
 
    }
 

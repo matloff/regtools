@@ -25,10 +25,14 @@ TStoXmv(xmat,lg,y)
 }
 
 \details{
-    \code{TStoX} is for transforming vectors, while \code{TStoXmv}
-    handles the multivariate time series case.  Intended for use with
-    \code{lm} or other regression/machine learning  model, predicting 
-    \code{y[i]} from observations \code{i-lg, i-lg+1,...,i-1}.
+
+Similar to \code{stats::embed}, but in lagged form, with applications
+such as \code{lm} in mind.
+
+\code{TStoX} is for transforming vectors, while \code{TStoXmv}
+handles the multivariate time series case.  Intended for use with
+\code{lm} or other regression/machine learning  model, predicting 
+\code{y[i]} from observations \code{i-lg, i-lg+1,...,i-1}.
 }
 
 \value{

@@ -42,7 +42,7 @@ tbltofakedf(tbl)
   \item{object}{Output from \code{lmac}.}
   \item{...}{Needed for consistency with generic function.  Not used.}
   \item{margin}{A list of vectors specifying the model, as in
-  \code{loglin}.}
+     \code{loglin}.}
 
 }
 
@@ -64,7 +64,7 @@ tbltofakedf(tbl)
    The \code{pcac} function is an AC substitute for \code{prcomp}. The
    data is centered, corresponding to a fixed value of \code{center =
    TRUE} in \code{prcomp}.  It is also scaled if \code{scale} is TRUE,
-   corresponding \code{scale. = TRUE} in \code{prcomp;.} Due to AC,
+   corresponding \code{scale = TRUE} in \code{prcomp}. Due to AC,
    there is a small chance of negative eigenvalues, in which case
    \code{stop} will be called.
 
@@ -80,7 +80,7 @@ tbltofakedf(tbl)
 
 \value{
 
-   For \code{lmac}, an object of class \code{'lmac'}, with components
+   For \code{lmac}, an object of class \code{lmac}, with components
    
    \itemize{
    
@@ -93,7 +93,7 @@ tbltofakedf(tbl)
    
       \item{r2}, (unadjusted) R-squared
    
-      \item{cov}, for \code{nboot >0} the estimated covariance matrix
+      \item{cov}, for \code{nboot > 0} the estimated covariance matrix
       of the vector of estimated regression coefficients; accessible
       directly or by calling \code{vcov}, as with \code{lm} 
    

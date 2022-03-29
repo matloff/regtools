@@ -67,9 +67,6 @@
 
 }
 
-\examples{
-}
-
 \author{
 Norm Matloff
 }

@@ -34,7 +34,7 @@ models.
 \usage{
 kNN(x,y,newx=x,kmax,scaleX=TRUE,PCAcomps=0,expandVars=NULL,expandVals=NULL,
    smoothingFtn=mean,allK=FALSE,leave1out=FALSE, classif=FALSE,
-   startAt1=TRUE,saveNhbrs=FALSE,savedNhbrs=NULL))
+   startAt1=TRUE,saveNhbrs=FALSE,savedNhbrs=NULL)
 knnest(y,xdata,k,nearf=meany)
 preprocessx(x,kmax,xval=FALSE)
 meany(nearIdxs,x,y,predpt) 

@@ -48,7 +48,7 @@ technique to handle heteroscedasticity.
 
 * Linear regression, PCA and log-linear model estimation in missing-data
 setting, via the Available Cases method.  (For Prediction contexts, see
-[our toweranNA package](http://github.com/matloff/toweranNA).)
+[our toweranNA package](https://github.com/matloff/toweranNA).)
 
 * Utilities for conversion between factor and dummy variable forms,
   useful since among various regression packages, some use factors while
@@ -300,9 +300,9 @@ is merely a standard term for the class probabilities.)
 In addition to use in linear regression graphical diagnostics, k-NN can
 be very effective as a nonparametric regression/machine learning tool.
 I would recommend it in cases in which the number of predictors is
-moderate and there are nonmonotonic relations.  (See also 
-[our polyreg package](http://github.com/matloff/polyreg).)
-Let's continue the above example on predicting occupation, using k-NN.
+moderate and there are nonmonotonic relations.  (See also our polyreg
+package.) Let's continue the above example on predicting occupation,
+using k-NN.
 
 The three components of k-NN analysis in **regtools** are:
 

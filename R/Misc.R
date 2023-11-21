@@ -115,6 +115,7 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
    dfOut=FALSE)
 {
    if (is.factor(dfr)) dfr <- as.data.frame(dfr)
+   else if (class(dfr)[1L]!="data.frame") dfr <- as.data.frame(dfr)
 
    # for now, no input cols other than numeric, factor allowed
    ## nnf <- function(i)  (!is.numeric(dfr[,i]) && !is.factor(dfr[,i]))

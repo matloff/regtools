@@ -1,6 +1,6 @@
 
 ### WORK IN PROGRESS; LIKE funeTuning BUT WITH MULTIDIM OUTPUT AND FEWER
-### OTHER FEATURS
+### OTHER FEATURES
 
 # grid search for good values of tuning parameters
 
@@ -37,10 +37,7 @@
 
 # value:
 
-#   data frame, one column for each element of 'pars', followed by a
-#   meanAcc ("mean accuracy") column; then columns for CIs,
-#   Bonferroni CIs,and (if k is non-NULL) smoothed versions of
-#   meanAcc
+#   vector of length outDim
 
 # example
 # 
@@ -54,9 +51,9 @@
 # data(mlb)
 # mlb <- mlb[,3:6]
 # mlb.d <- factorsToDummies(mlb) 
-# fineTuning(mlb.d,list(k=c(5,25)),tc,nTst=100,nXval=2) 
+# finetuning(mlb.d,list(k=c(5,25)),tc,nTst=100,nXval=2) 
 
-fineTuning <- function(dataset,pars,regCall,nCombs=NULL,
+finetuning <- function(dataset,pars,regCall,nCombs=NULL,
    nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
    showProgress=TRUE,outDim=1,...) 
 {
@@ -68,10 +65,10 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,
       stop('smoothing is currently recommended only for 1 parameter')
 
    # generate the basic output data frame 
-   outdf <- makeOutdf(pars,nCombs,specCombs,outDim)
+   outdf <- makeOutdf(pars,nCombs)
    nCombs <- nrow(outdf)
 
-   meanAcc <- matrix(rep(NA,outDim*nCombs,nrow=nCombs,ncol=outDim)
+   meanAccs <- matrix(rep(NA,outDim*nCombs),nrow=nCombs,ncol=outDim)
    losses <- matrix(nrow=nXval,ncol=outDim)
    done <- FALSE
 
@@ -89,29 +86,19 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,
          #       regCall(dtrn,dtst,cmbi,...),
          #       timeout = 300.0)  # later, make it an arg
          # )
-         regCall(dtrn,dtst,cmbi,...),
+         loss <- regCall(dtrn,dtst,cmbi,...)
          losses[xv,] <- loss
       }
-      meanAcc[combI] <- mean(losses)
+      meanAccs[combI,] <- colMeans(losses)
       if (showProgress) {
          catDFRow(cmbi)
-         cat(' ',meanAcc[combI],'\n')
+         cat(' ',meanAccs[combI,],'\n')
       }
-      seAcc[combI] <- sd(losses) / sqrt(nXval)
       if (done) break
    }
-   outdf$meanAcc <- meanAcc
-   outdf$CI <- meanAcc + 1.65*seAcc 
-   zval <- -qnorm(0.05/nrow(outdf))
-   outdf$bonfCI <- meanAcc + zval * seAcc
-   outdf <- outdf[order(meanAcc,decreasing=!up),]
-   if (!is.null(k)) 
-      outdf <- doSmoothing(outdf,k,pars,meanAcc,dispOrderSmoothed) 
-   row.names(outdf) <- NULL
-   output <- list(outdf=outdf,nTst=nTst,nXval=nXval,k=k,
-      up=up,dispOrderSmoothed=dispOrderSmoothed)
-   class(output) <- 'tuner'
-   output
+   
+   outdf$meanAccs <- meanAccs
+   outdf
 }
 
 # creates the basic parameter grid; called by both fineTuning() and
@@ -120,8 +107,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,
 # if specCombs is given, it will be returned, with no further processing
 # wrt nCombs
 
-makeOutdf <- function(pars,nCombs=NULL,specCombs=NULL) {
-   if (!is.null(specCombs)) return(specCombs)
+makeOutdf <- function(pars,nCombs=NULL) {
    outdf <- expand.grid(pars,stringsAsFactors=FALSE) 
    if (!is.null(nCombs)) {
       idxsToKeep <- sample(1:nrow(outdf),nCombs)

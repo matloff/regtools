@@ -1,5 +1,6 @@
-\name{fineTuning,knnFineTune}
+\name{fineTuning,knnFineTune,fineTuningMult}
 \alias{fineTuning}
+\alias{fineTuningMult}
 \alias{knnFineTune}
 \alias{fineTuningPar}
 \alias{plot.tuner}
@@ -18,6 +19,9 @@ p-hacking.  An experimental smoothing facility is also included.
 fineTuning(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,nTst=500,
    nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
    showProgress=TRUE,...)
+fineTuningMult(dataset,pars,regCall,nCombs=NULL,
+   nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
+   showProgress=TRUE,outDim=1,...)
 \method{plot}{tuner}(x,...)
 knnFineTune(data,yName,k,expandVars,ws,classif=FALSE,seed=9999)
 fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
@@ -51,7 +55,9 @@ fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
    \item{dispOrderSmoothed}{Display in order of smoothed results.}
    \item{showProgress}{If TRUE, print each output line as it becomes ready.}
    \item{specCombs}{A data frame in which the user specifies 
-#      hyperparameter parameter combinations to evaluate.}
+       hyperparameter parameter combinations to evaluate.}
+   \item{outDim}{Number of components in the value returned by \code{theCall}.}
+
 }
 
 \details{
@@ -113,6 +119,31 @@ data(mlb)
 mlb <- mlb[,3:6]
 mlb.d <- factorsToDummies(mlb)
 fineTuning(mlb.d,list(k=c(5,25)),tc,nTst=100,nXval=2)
+
+tc <- function(dtrn,dtst,cmbi,...)
+{
+   knnout <- kNN(dtrn[,-3],dtrn[,3],dtst[,-3],as.integer(cmbi[1]))
+   preds <- knnout$regests
+   mean(abs(preds - dtst[,3]))
+}
+
+fineTuningMult(mlb.d,list(k=c(5,25)),tc,nTst=100,nXval=2) 
+
+\dontrun{
+library(qeML)
+data(svcensus)
+tc1 <- function(dtrn,dtst,cmbi,...)
+{
+   knnout <- qeKNN(dtrn,'wageinc',as.integer(cmbi[1]),holdout=NULL)
+   preds <- predict(knnout,dtst[,-4])
+   mape <- mean(abs(preds - dtst[,4]))
+   bigprobs75 <- mean(preds > 75000)
+   c(mape,bigprobs75)
+}
+
+fineTuningMult(svcensus,list(k = c(10,25)),tc1,outDim=2)
+}
+
 
 }
 

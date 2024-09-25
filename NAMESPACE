@@ -49,6 +49,6 @@ export(knnest,preprocessx,meany,mediany,vary,loclin, loclogit, predict.knn,nlshc
    stdErrPred,getDFclasses,
    toSuperFactor,toSubFactor,
    prToFile,pythonBlankSplit,xyzPlot,
-   fineTuning,fineTuningPar,partTrnTst,
+   fineTuning,fineTuningPar,partTrnTst,fineTuningMult,
    krsFit,krsFitImg,diagNeural,
    TStoX,TStoXmv,textToXY,textToXYpred)

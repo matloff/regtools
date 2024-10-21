@@ -110,9 +110,9 @@ number of parameter combinations).
 
 tc <- function(dtrn,dtst,cmbi,...)
 {
-   knnout <- kNN(dtrn[,-3],dtrn[,3],dtst[,-3],as.integer(cmbi[1]))
+   knnout <- kNN(dtrn[,-10],dtrn[,10],dtst[,-10],as.integer(cmbi[1]))
    preds <- knnout$regests
-   mean(abs(preds - dtst[,3]))
+   mean(abs(preds - dtst[,10]))
 }
 
 data(mlb)
@@ -143,10 +143,6 @@ tc1 <- function(dtrn,dtst,cmbi,...)
 
 fineTuningMult(svcensus,list(k = c(10,25)),tc1,outDim=2)
 }
-
-
-}
-
 
 \author{
 Norm Matloff

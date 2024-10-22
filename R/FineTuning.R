@@ -27,7 +27,7 @@
 #   specCombs: a data frame in which the user specifies which
 #      hyperparameter parameter combinations to evaluate; there both for
 #      completeness but also for use in fineTuningPar(); one labeled
-#      column for each hyperparameter
+#      column for each hyperparameter (REMOVED, 10/22/2024)
 #   ...: application-specific values needed by regCall() but constant
 #      across combinations
 
@@ -54,19 +54,18 @@
 
 
 
-fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
+fineTuning <- function(dataset,pars,regCall,nCombs=NULL,
    nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
    showProgress=TRUE,...) 
 {
    # parameter checks
    if (!interactive()) showProgress <- FALSE
-   ### if (!is.null(specCombs)) nCombs <- nrow(specCombs)
    # holding off for now on general smoothing
    if (!is.null(k) && length(pars) > 1) 
       stop('smoothing is currently recommended only for 1 parameter')
 
    # generate the basic output data frame 
-   outdf <- makeOutdf(pars,nCombs,specCombs)
+   outdf <- makeOutdf(pars,nCombs)
    nCombs <- nrow(outdf)
 
    meanAcc <- rep(NA,nCombs)
@@ -125,11 +124,7 @@ fineTuning <- function(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
 # creates the basic parameter grid; called by both fineTuning() and
 # fineTuningPar() 
 
-# if specCombs is given, it will be returned, with no further processing
-# wrt nCombs
-
-makeOutdf <- function(pars,nCombs=NULL,specCombs=NULL) {
-   if (!is.null(specCombs)) return(specCombs)
+makeOutdf <- function(pars,nCombs=NULL) {
    outdf <- expand.grid(pars,stringsAsFactors=FALSE) 
    if (!is.null(nCombs)) {
       idxsToKeep <- sample(1:nrow(outdf),nCombs)
@@ -169,7 +164,7 @@ doSmoothing <- function(outdf,k,pars,meanAcc,dispOrderSmoothed) {
 
 #   'tuner' object that combines the ones produced by the worker nodes
 
-fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
+fineTuningPar <- function(cls,dataset,pars,regCall,nCombs=NULL,
    nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE)
 {
    # set up cluster

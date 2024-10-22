@@ -46,9 +46,9 @@ fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
       performing the model fit etc.}
    \item{nCombs}{Number of parameter combinations to run.  If Null, all
       will be run}.
-   \item{nTst}{Number of data points to be in the test set.}
-   \item{nXval}{Number of folds to be run for a given data partition and
-      parameter combination.}
+   \item{nTst}{Number of data points to be in each holdout set.}
+   \item{nXval}{Number of holdout sets/folds to be run for a 
+      given data partition and parameter combination.}
    \item{k}{Nearest-neighbor smoothing parameter.}
    \item{up}{If TRUE, display results in ascending order of performance
       value.}
@@ -142,6 +142,8 @@ tc1 <- function(dtrn,dtst,cmbi,...)
 }
 
 fineTuningMult(svcensus,list(k = c(10,25)),tc1,outDim=2)
+}
+
 }
 
 \author{

@@ -124,7 +124,7 @@ tc <- function(dtrn,dtst,cmbi,...)
 {
    knnout <- kNN(dtrn[,-10],dtrn[,10],dtst[,-10],as.integer(cmbi[1]))
    preds <- knnout$regests
-   mean(abs(preds - dtst[,3]))
+   mean(abs(preds - dtst[,10]))
 }
 
 fineTuningMult(mlb.d,list(k=c(5,25)),tc,nTst=100,nXval=2) 

@@ -147,7 +147,7 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
          outDF <- cbind(outDF,dumms)
       }
    }
-   res <- if (!dfOut) as.matrix(outDF) else outDF
+   res <- if (!dfOut) as.matrix(outDF) else as.data.frame(outDF)
    if (nullFI) {
       attr(res,'factorsInfo') <- factorsInfoOut
    }  else

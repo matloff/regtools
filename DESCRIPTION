@@ -1,5 +1,5 @@
 Package: regtools
-Version: 1.7.3
+Version: 1.7.4
 Title: Regression and Classification Tools
 Authors@R: c(person("Norm", "Matloff", email = "matloff@cs.ucdavis.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9179-6785")),
            person("Robin", "Yancey", email = "reyancey@ucdavis.edu", role = c("aut")),
@@ -8,7 +8,7 @@ Authors@R: c(person("Norm", "Matloff", email = "matloff@cs.ucdavis.edu", role = 
            person("Rongkui", "Han", email = "rkbhan@ucdavis.edu", role = c("ctb")))
 Maintainer: Norm Matloff <matloff@cs.ucdavis.edu>
 Depends: R (>= 3.5.0),FNN,gtools
-Imports: R.utils,mvtnorm,sandwich,MASS,car,data.table,glmnet,rje,text2vec,
+Imports: R.utils,mvtnorm,sandwich,MASS,car,data.table,glmnet,rje,
              polyreg
 Suggests: knitr, rmarkdown, OpenImageR, cdparcoord, keras, magick, partools
 VignetteBuilder: knitr

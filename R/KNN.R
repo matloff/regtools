@@ -21,7 +21,7 @@
 #      compute regests values at each "X", saving for later
 #      prediction using predict.kNN()
 #   kmax: value of k requested
-#   scaleX: x and newx will be scaled
+#   scaleX: if TRUE, x and newx will be scaled
 #   PCAcomps: apply PCA (after scaling, if any) to x, newx, using this
 #      many components; 0 means no PCA
 #   smoothingFtn: op applied to the "Y"s of nearest neighbors; could be,
@@ -33,7 +33,8 @@
 #   classif: if TRUE, consider this a classification problem. 
 #      Then 'ypreds' will be included in the return value.  See also the
 #      entry for 'y' above.
-#   startAt1: if classification case, labels 1,2,...; else 0,1,2,...
+#   startAt1: in the classification case, if startAt1 is TRUE, class
+#     labels will be 1,2,...; else 0,1,2,...
 #   saveNhbrs: if TRUE, place output of FNN::get.knnx() into nhbrs of
 #      component in return value
 #   savedNhbrs: if non-NULL, this is the nhbrs component of a previous call

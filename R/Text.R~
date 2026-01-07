@@ -1,8 +1,7 @@
 
 ### 1/1/2026: Removing these routines, due to discontinuation of the
 ### text2vec package. Several similar packages exist, but none with
-### drop-in equivalence. Conversion will be a major project, to be
-### undertaken later.
+### drop-in equivalence. Conversion would be a major project.
 
 ###
 ###

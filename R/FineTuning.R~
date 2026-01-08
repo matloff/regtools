@@ -1,34 +1,3 @@
-\name{fineTuning,knnFineTune,fineTuningMult}
-\alias{fineTuning}
-\alias{fineTuningMult}
-\alias{knnFineTune}
-\alias{fineTuningPar}
-\alias{plot.tuner}
-
-\title{Grid Search Plus More}
-
-\description{
-Adds various extra features to grid search for specified tuning
-parameter/hyperparameter combinations:  There is a plot() function, using
-parallel coordinates graphs to show trends among the different
-combinations; and Bonferroni confidence intervals are computed to avoid
-p-hacking.  An experimental smoothing facility is also included.
-}
-
-
-\usage{
-fineTuning(dataset,pars,regCall,nCombs=NULL,specCombs=NULL,nTst=500,
-   nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
-   showProgress=TRUE,...)
-fineTuningMult(dataset,pars,regCall,nCombs=NULL,
-   nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE,
-   showProgress=TRUE,outDim=1,...)
-\method{plot}{tuner}(x,...)
-knnFineTune(data,yName,k,expandVars,ws,classif=FALSE,seed=9999)
-fineTuningPar(cls,dataset,pars,regCall,nCombs=NULL,specCombs=NULL,
-   nTst=500,nXval=1,up=TRUE,k=NULL,dispOrderSmoothed=FALSE)
-}
-
 
 # grid search for good values of tuning parameters
 

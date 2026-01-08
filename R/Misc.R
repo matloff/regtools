@@ -607,7 +607,7 @@ PCAwithFactors <- function(x,nComps=ncol(x))
 # find PCA rep of newx; newx in original scale, output in scale of 
 # mmscale() + PCA
 
-predict.PCAwithFactors <- function(object,newx) 
+predict.PCAwithFactors <- function(object,...) 
 {
    if (!identical(names(newx),object$namesOrigX))
       stop('column names mismatch')

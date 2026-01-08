@@ -147,7 +147,7 @@ factorsToDummies <- function(dfr,omitLast=FALSE,factorsInfo=NULL,
          outDF <- cbind(outDF,dumms)
       }
    }
-   res <- if (!dfOut) as.matrix(outDF) else outDF
+   res <- if (!dfOut) as.matrix(outDF) else as.data.frame(outDF)
    if (nullFI) {
       attr(res,'factorsInfo') <- factorsInfoOut
    }  else
@@ -207,7 +207,8 @@ factorToDummies <- function (f,fname,omitLast=FALSE,factorInfo=NULL)
 #       an R list of levels for each factor in that frame
 #          (case B); or
 #       output of a qe*() call on that frame that
-#          has a 'factorLevelsPresent' component(case C)
+#          has a 'factorLevelsPresent' component
+#          (future enhancement) (case C)
 #    data2: "new" data frame, used in prediction
 
 # value:
@@ -742,7 +743,8 @@ replicMeans <- function(nrep,toReplic,timing=FALSE) {
       toReplic <- tmp
    }
    cmd <- paste0('replicate(',nrep,',',toReplic,')')
-   cmdout <- eval(parse(text=cmd))
+   cmdout <- eval.parent(parse(text=cmd))
+   # cmdout <- eval(parse(text=cmd))
    # if toReplic returns a vector, cmdout will be a matrix; to handle
    # this, make it a matrix anyway
    if (!is.matrix(cmdout)) cmdout <- matrix(cmdout,ncol=nrep)

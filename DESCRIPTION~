@@ -1,0 +1,30 @@
+Package: regtools
+Version: 1.7.4
+Title: Regression and Classification Tools
+Authors@R: c(person("Norm", "Matloff", email = "matloff@cs.ucdavis.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9179-6785")),
+           person("Robin", "Yancey", email = "reyancey@ucdavis.edu", role = c("aut")),
+           person("Bochao", "Xin", email = "xinbochao97@outlook.com",role = c("ctb")),
+           person("Kenneth", "Lee", email = "honlee@ucdavis.edu", role = c("ctb")),
+           person("Rongkui", "Han", email = "rkbhan@ucdavis.edu", role = c("ctb")))
+Maintainer: Norm Matloff <matloff@cs.ucdavis.edu>
+Depends: R (>= 3.5.0),FNN,gtools
+Imports: R.utils,mvtnorm,sandwich,MASS,car,data.table,glmnet,rje,
+             polyreg
+Suggests: knitr, rmarkdown, OpenImageR, cdparcoord, keras, magick, partools
+VignetteBuilder: knitr
+License: GPL (>= 2)
+Description: Tools for linear, nonlinear and nonparametric regression
+             and classification.  Novel graphical methods for assessment 
+             of parametric models using nonparametric methods. One 
+             vs. All and All vs. All multiclass classification, optional
+             class probabilities adjustment.  Nonparametric regression 
+             (k-NN) for general dimension, local-linear option.  Nonlinear 
+             regression with Eickert-White method for dealing with 
+             heteroscedasticity.  Utilities for converting time series
+             to rectangular form.  Utilities for conversion between
+             factors and indicator variables.  Some code related to
+             "Statistical Regression and Classification: from Linear
+             Models to Machine Learning", N. Matloff, 2017, CRC,
+             ISBN 9781498710916.
+URL: https://github.com/matloff/regtools
+BugReports: https://github.com/matloff/regtools/issues
